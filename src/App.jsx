@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthProvider";
 import Login from "./auth/Login";
 import Signup from "./auth/Signup";
+import BookList from "./pages/BookList";
+import BookAdd from "./pages/BookAdd";
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -16,8 +18,23 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          {/* <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} /> */}
-          <Route path="*" element={<Navigate to="/login" />} />
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <BookList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/add"
+            element={
+              <PrivateRoute>
+                <BookAdd />
+              </PrivateRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
