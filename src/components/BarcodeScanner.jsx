@@ -42,7 +42,12 @@ const BarcodeScanner = ({ onDetected, onError }) => {
     const startScan = async () => {
       if (videoElement) {
         try {
-          stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: 'environment',
+              aspectRatio: 0.5
+            }
+          });
           videoElement.srcObject = stream;
           
           videoElement.addEventListener('loadedmetadata', handleLoadedMetadata);
