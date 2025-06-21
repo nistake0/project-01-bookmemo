@@ -3,8 +3,23 @@ import { useNavigate } from "react-router-dom";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../auth/AuthProvider";
-import { TextField, Button, Box, Typography, Grid } from "@mui/material";
+import { TextField, Button, Box, Typography, Grid, Modal, IconButton } from "@mui/material";
 import axios from "axios";
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import BarcodeScanner from "../components/BarcodeScanner";
+
+const modalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: '90%',
+  maxWidth: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
 
 export default function BookAdd() {
   const { user } = useAuth();
@@ -13,7 +28,18 @@ export default function BookAdd() {
   const [author, setAuthor] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isScannerOpen, setScannerOpen] = useState(false);
   const navigate = useNavigate();
+
+  const handleScanDetected = (code) => {
+    setIsbn(code);
+    setScannerOpen(false);
+  };
+  
+  const handleScanError = (errorMessage) => {
+    setError(`スキャナーエラー: ${errorMessage}`);
+    setScannerOpen(false);
+  };
 
   const handleFetchBookInfo = async () => {
     if (!isbn) {
@@ -65,8 +91,8 @@ export default function BookAdd() {
     <Box component="form" onSubmit={handleAdd} sx={{ maxWidth: 500, mx: "auto", mt: 8 }}>
       <Typography variant="h5" align="center" gutterBottom>本を追加</Typography>
 
-      <Grid container spacing={2} alignItems="flex-end">
-        <Grid item xs={8}>
+      <Grid container spacing={1} alignItems="center">
+        <Grid item xs>
           <TextField
             label="ISBN"
             value={isbn}
@@ -75,12 +101,16 @@ export default function BookAdd() {
             margin="normal"
           />
         </Grid>
-        <Grid item xs={4}>
-          <Button onClick={handleFetchBookInfo} variant="outlined" disabled={loading} fullWidth sx={{ mb: '8px' }}>
-            {loading ? '検索中...' : '情報取得'}
-          </Button>
+        <Grid item>
+          <IconButton color="primary" onClick={() => setScannerOpen(true)}>
+            <CameraAltIcon />
+          </IconButton>
         </Grid>
       </Grid>
+
+      <Button onClick={handleFetchBookInfo} variant="outlined" disabled={loading} fullWidth sx={{ my: 1 }}>
+        {loading ? '検索中...' : 'ISBNで書籍情報取得'}
+      </Button>
       
       <TextField
         label="タイトル"
@@ -97,8 +127,25 @@ export default function BookAdd() {
         fullWidth
         margin="normal"
       />
-      {error && <Typography color="error">{error}</Typography>}
+      {error && <Typography color="error" align="center">{error}</Typography>}
       <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>追加</Button>
+
+      <Modal
+        open={isScannerOpen}
+        onClose={() => setScannerOpen(false)}
+        aria-labelledby="barcode-scanner-modal"
+      >
+        <Box sx={modalStyle}>
+          <Typography id="barcode-scanner-modal" variant="h6" component="h2">
+            バーコードをスキャン
+          </Typography>
+          <BarcodeScanner 
+            onDetected={handleScanDetected}
+            onError={handleScanError}
+          />
+          <Button onClick={() => setScannerOpen(false)} sx={{ mt: 2 }}>キャンセル</Button>
+        </Box>
+      </Modal>
     </Box>
   );
 } 
