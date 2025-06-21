@@ -45,6 +45,11 @@ const BookDetail = () => {
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4 }}>
       <Paper sx={{ p: 3 }}>
+        {book.coverImageUrl && (
+          <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <img src={book.coverImageUrl} alt={`${book.title}の表紙`} style={{ maxHeight: '250px', width: 'auto' }} />
+          </Box>
+        )}
         <Typography variant="h4" gutterBottom>
           {book.title}
         </Typography>
