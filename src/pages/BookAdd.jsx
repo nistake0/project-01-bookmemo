@@ -3,14 +3,41 @@ import { useNavigate } from "react-router-dom";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../auth/AuthProvider";
-import { TextField, Button, Box, Typography } from "@mui/material";
+import { TextField, Button, Box, Typography, Grid } from "@mui/material";
+import axios from "axios";
 
 export default function BookAdd() {
   const { user } = useAuth();
+  const [isbn, setIsbn] =useState("");
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleFetchBookInfo = async () => {
+    if (!isbn) {
+      setError("ISBNを入力してください");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      const response = await axios.get(`https://api.openbd.jp/v1/get?isbn=${isbn}`);
+      const bookData = response.data[0];
+      if (bookData) {
+        setTitle(bookData.summary.title);
+        setAuthor(bookData.summary.author);
+      } else {
+        setError("書籍情報が見つかりませんでした");
+      }
+    } catch (err) {
+      setError("書籍情報の取得に失敗しました");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -22,6 +49,7 @@ export default function BookAdd() {
     try {
       await addDoc(collection(db, "books"), {
         userId: user.uid,
+        isbn,
         title,
         author,
         createdAt: serverTimestamp(),
@@ -34,8 +62,26 @@ export default function BookAdd() {
   };
 
   return (
-    <Box component="form" onSubmit={handleAdd} sx={{ maxWidth: 400, mx: "auto", mt: 8 }}>
+    <Box component="form" onSubmit={handleAdd} sx={{ maxWidth: 500, mx: "auto", mt: 8 }}>
       <Typography variant="h5" align="center" gutterBottom>本を追加</Typography>
+
+      <Grid container spacing={2} alignItems="flex-end">
+        <Grid item xs={8}>
+          <TextField
+            label="ISBN"
+            value={isbn}
+            onChange={e => setIsbn(e.target.value)}
+            fullWidth
+            margin="normal"
+          />
+        </Grid>
+        <Grid item xs={4}>
+          <Button onClick={handleFetchBookInfo} variant="outlined" disabled={loading} fullWidth sx={{ mb: '8px' }}>
+            {loading ? '検索中...' : '情報取得'}
+          </Button>
+        </Grid>
+      </Grid>
+      
       <TextField
         label="タイトル"
         value={title}
