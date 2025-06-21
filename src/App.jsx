@@ -4,6 +4,7 @@ import Login from "./auth/Login";
 import Signup from "./auth/Signup";
 import BookList from "./pages/BookList";
 import BookAdd from "./pages/BookAdd";
+import BookDetail from "./pages/BookDetail";
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -31,6 +32,14 @@ function App() {
             element={
               <PrivateRoute>
                 <BookAdd />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/book/:id"
+            element={
+              <PrivateRoute>
+                <BookDetail />
               </PrivateRoute>
             }
           />

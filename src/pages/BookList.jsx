@@ -3,7 +3,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../auth/AuthProvider";
 import { Typography, List, ListItem, ListItemText, Box, Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function BookList() {
   const { user } = useAuth();
@@ -36,7 +36,7 @@ export default function BookList() {
       <List>
         {books.length === 0 && <ListItem><ListItemText primary="本がありません" /></ListItem>}
         {books.map(book => (
-          <ListItem key={book.id}>
+          <ListItem key={book.id} button component={Link} to={`/book/${book.id}`}>
             <ListItemText
               primary={book.title || "タイトル未設定"}
               secondary={book.author || ""}
