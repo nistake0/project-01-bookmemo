@@ -26,6 +26,7 @@ export default function BookAdd() {
   const [isbn, setIsbn] =useState("");
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
+  const [coverImageUrl, setCoverImageUrl] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isScannerOpen, setScannerOpen] = useState(false);
@@ -51,11 +52,16 @@ export default function BookAdd() {
     try {
       const response = await axios.get(`https://api.openbd.jp/v1/get?isbn=${isbn}`);
       const bookData = response.data[0];
-      if (bookData) {
-        setTitle(bookData.summary.title);
-        setAuthor(bookData.summary.author);
+      
+      if (bookData && bookData.summary) {
+        setTitle(bookData.summary.title || "");
+        setAuthor(bookData.summary.author || "");
+        setCoverImageUrl(bookData.summary.cover || "");
       } else {
         setError("書籍情報が見つかりませんでした");
+        setTitle("");
+        setAuthor("");
+        setCoverImageUrl("");
       }
     } catch (err) {
       setError("書籍情報の取得に失敗しました");
@@ -78,6 +84,7 @@ export default function BookAdd() {
         isbn,
         title,
         author,
+        coverImageUrl,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
@@ -92,7 +99,7 @@ export default function BookAdd() {
       <Typography variant="h5" align="center" gutterBottom>本を追加</Typography>
 
       <Grid container spacing={1} alignItems="center">
-        <Grid item xs>
+        <Grid xs>
           <TextField
             label="ISBN"
             value={isbn}
@@ -101,7 +108,7 @@ export default function BookAdd() {
             margin="normal"
           />
         </Grid>
-        <Grid item>
+        <Grid>
           <IconButton color="primary" onClick={() => setScannerOpen(true)}>
             <CameraAltIcon />
           </IconButton>
@@ -112,6 +119,12 @@ export default function BookAdd() {
         {loading ? '検索中...' : 'ISBNで書籍情報取得'}
       </Button>
       
+      {coverImageUrl && (
+        <Box sx={{ mt: 2, textAlign: 'center' }}>
+          <img src={coverImageUrl} alt="表紙" style={{ maxWidth: '150px', height: 'auto' }} />
+        </Box>
+      )}
+
       <TextField
         label="タイトル"
         value={title}
