@@ -56,6 +56,16 @@ const BookDetail = () => {
         <Typography variant="h6" color="text.secondary">
           {book.author}
         </Typography>
+        {book.publisher && (
+          <Typography variant="body1" color="text.secondary">
+            出版社: {book.publisher}
+          </Typography>
+        )}
+        {book.publishedDate && (
+          <Typography variant="body1" color="text.secondary">
+            出版日: {book.publishedDate}
+          </Typography>
+        )}
         <Divider sx={{ my: 2 }} />
         <Typography variant="h5" gutterBottom>メモ一覧</Typography>
         <MemoList bookId={book.id} />

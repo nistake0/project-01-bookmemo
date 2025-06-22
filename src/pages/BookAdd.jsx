@@ -26,6 +26,8 @@ export default function BookAdd() {
   const [isbn, setIsbn] =useState("");
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
+  const [publisher, setPublisher] = useState("");
+  const [publishedDate, setPublishedDate] = useState("");
   const [coverImageUrl, setCoverImageUrl] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -53,14 +55,20 @@ export default function BookAdd() {
       const response = await axios.get(`https://api.openbd.jp/v1/get?isbn=${isbn}`);
       const bookData = response.data[0];
       
+      console.log("openBD response:", bookData);
+
       if (bookData && bookData.summary) {
         setTitle(bookData.summary.title || "");
         setAuthor(bookData.summary.author || "");
+        setPublisher(bookData.summary.publisher || "");
+        setPublishedDate(bookData.summary.pubdate || "");
         setCoverImageUrl(bookData.summary.cover || "");
       } else {
         setError("書籍情報が見つかりませんでした");
         setTitle("");
         setAuthor("");
+        setPublisher("");
+        setPublishedDate("");
         setCoverImageUrl("");
       }
     } catch (err) {
@@ -84,6 +92,8 @@ export default function BookAdd() {
         isbn,
         title,
         author,
+        publisher,
+        publishedDate,
         coverImageUrl,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -137,6 +147,20 @@ export default function BookAdd() {
         label="著者"
         value={author}
         onChange={e => setAuthor(e.target.value)}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        label="出版社"
+        value={publisher}
+        onChange={e => setPublisher(e.target.value)}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        label="出版日"
+        value={publishedDate}
+        onChange={e => setPublishedDate(e.target.value)}
         fullWidth
         margin="normal"
       />
