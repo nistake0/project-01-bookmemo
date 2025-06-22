@@ -54,17 +54,35 @@ export default function BookAdd() {
     setLoading(true);
     setSearchPerformed(true);
     try {
-      const response = await axios.get(`https://api.openbd.jp/v1/get?isbn=${isbn}`);
-      const bookData = response.data[0];
+      const openbdResponse = await axios.get(`https://api.openbd.jp/v1/get?isbn=${isbn}`);
+      const bookData = openbdResponse.data[0];
       
-      console.log("openBD response:", bookData);
-
       if (bookData && bookData.summary) {
         setTitle(bookData.summary.title || "");
         setAuthor(bookData.summary.author || "");
         setPublisher(bookData.summary.publisher || "");
         setPublishedDate(bookData.summary.pubdate || "");
-        setCoverImageUrl(bookData.summary.cover || "");
+
+        let coverUrl = bookData.summary.cover || "";
+
+        if (!coverUrl) {
+          console.log("No cover from openBD, trying Google Books API...");
+          try {
+            const googleResponse = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
+            const googleBookData = googleResponse.data;
+            if (googleBookData.items && googleBookData.items.length > 0) {
+              const imageLinks = googleBookData.items[0].volumeInfo.imageLinks;
+              if (imageLinks) {
+                coverUrl = imageLinks.thumbnail || imageLinks.smallThumbnail || "";
+                console.log("Found cover from Google Books API:", coverUrl);
+              }
+            }
+          } catch (googleErr) {
+            console.error("Failed to fetch from Google Books API", googleErr);
+          }
+        }
+        setCoverImageUrl(coverUrl);
+
       } else {
         setError("書籍情報が見つかりませんでした");
         setTitle("");
