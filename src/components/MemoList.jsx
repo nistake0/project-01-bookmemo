@@ -41,6 +41,7 @@ const MemoList = ({ bookId }) => {
       await updateDoc(memoRef, {
         text: editingMemo.text,
         comment: editingMemo.comment,
+        page: Number(editingMemo.page) || null,
         updatedAt: serverTimestamp(),
       });
       handleClose();
@@ -97,7 +98,15 @@ const MemoList = ({ bookId }) => {
             </>
           }
         >
-          <ListItemText primary={memo.text} secondary={memo.comment || ''} />
+          <ListItemText 
+            primary={memo.text} 
+            secondary={
+              <>
+                {memo.comment}
+                {memo.page && <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>p. {memo.page}</Typography>}
+              </>
+            } 
+          />
         </ListItem>
       ))}
     </List>
@@ -127,6 +136,13 @@ const MemoList = ({ bookId }) => {
           rows={2}
           value={editingMemo?.comment || ''}
           onChange={(e) => setEditingMemo({ ...editingMemo, comment: e.target.value })}
+          margin="normal"
+        />
+        <TextField
+          label="ページ番号"
+          type="number"
+          value={editingMemo?.page || ''}
+          onChange={(e) => setEditingMemo({ ...editingMemo, page: e.target.value })}
           margin="normal"
         />
         <Button type="submit" variant="contained">更新</Button>

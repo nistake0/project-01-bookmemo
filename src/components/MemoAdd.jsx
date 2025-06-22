@@ -6,6 +6,7 @@ import { Button, TextField, Box } from '@mui/material';
 const MemoAdd = ({ bookId }) => {
   const [text, setText] = useState('');
   const [comment, setComment] = useState('');
+  const [page, setPage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,10 +17,13 @@ const MemoAdd = ({ bookId }) => {
       await addDoc(memosRef, {
         text,
         comment,
+        page: Number(page) || null, // 数値に変換。空の場合はnull
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
       setText('');
       setComment('');
+      setPage('');
     } catch (error) {
       console.error("Error adding memo: ", error);
     }
@@ -45,6 +49,14 @@ const MemoAdd = ({ bookId }) => {
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         margin="normal"
+      />
+      <TextField
+        label="ページ番号"
+        type="number"
+        value={page}
+        onChange={(e) => setPage(e.target.value)}
+        margin="normal"
+        sx={{ mr: 2 }}
       />
       <Button type="submit" variant="contained">メモを追加</Button>
     </Box>
