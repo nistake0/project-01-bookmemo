@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../auth/AuthProvider';
-import { Typography, Box, Paper, Divider } from '@mui/material';
+import { Typography, Box, Paper, Divider, Button, Chip } from '@mui/material';
 import MemoList from '../components/MemoList';
 import MemoAdd from '../components/MemoAdd';
 
@@ -12,6 +12,7 @@ const BookDetail = () => {
   const { user } = useAuth();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -38,13 +39,42 @@ const BookDetail = () => {
     fetchBook();
   }, [id, user]);
 
+  const handleStatusChange = async () => {
+    if (!book) return;
+    setUpdating(true);
+    const newStatus = book.status === 'reading' ? 'finished' : 'reading';
+    const docRef = doc(db, 'books', id);
+    try {
+      await updateDoc(docRef, {
+        status: newStatus,
+        updatedAt: serverTimestamp(),
+      });
+      setBook({ ...book, status: newStatus });
+    } catch (error) {
+      console.error("Error updating status:", error);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
   if (!book) return <div>本が見つかりません。</div>;
 
+  const currentStatus = book.status || 'reading'; // statusがない場合は 'reading' をデフォルトに
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4 }}>
       <Paper sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Chip 
+            label={currentStatus === 'reading' ? '読書中' : '読了'} 
+            color={currentStatus === 'reading' ? 'primary' : 'success'} 
+          />
+          <Button onClick={handleStatusChange} variant="outlined" disabled={updating}>
+            {updating ? '更新中...' : (currentStatus === 'reading' ? '読了にする' : '読書中にする')}
+          </Button>
+        </Box>
+
         <Box sx={{ textAlign: 'center', mb: 2 }}>
           {book.coverImageUrl ? (
             <img src={book.coverImageUrl} alt={`${book.title}の表紙`} style={{ maxHeight: '250px', width: 'auto' }} />
