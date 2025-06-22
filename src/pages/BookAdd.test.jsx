@@ -15,43 +15,98 @@ jest.mock('../auth/AuthProvider', () => ({
 }));
 jest.mock('../firebase', () => ({
   db: jest.fn(),
+  collection: jest.fn(),
+  addDoc: jest.fn(),
+  serverTimestamp: jest.fn(),
 }));
 
 describe('BookAdd', () => {
-  test('fetches book info from openBD and fills the form', async () => {
-    // userEventのセットアップ
-    const user = userEvent.setup();
+  beforeEach(() => {
+    // 各テストの前にモックをリセット
+    axios.get.mockClear();
+  });
 
-    // モックするAPIのレスポンスデータ
+  test('fetches all book info from openBD and fills the form', async () => {
+    const user = userEvent.setup();
     const mockBookData = [{
       summary: {
         title: 'テスト駆動開発',
         author: 'Kent Beck／著 和田卓人／訳',
+        publisher: 'オーム社',
+        pubdate: '2017-08-25',
+        cover: 'https://cover.openbd.jp/9784873119485.jpg',
       },
     }];
     axios.get.mockResolvedValue({ data: mockBookData });
 
     render(<BookAdd />);
 
-    // ISBN入力欄を取得
     const isbnInput = screen.getByLabelText(/ISBN/);
-    // 「情報取得」ボタンを取得
-    const fetchButton = screen.getByRole('button', { name: '情報取得' });
+    const fetchButton = screen.getByRole('button', { name: /ISBNで書籍情報取得/ });
 
-    // ユーザーがISBNを入力する
     await user.type(isbnInput, '9784873119485');
-    // ユーザーがボタンをクリックする
     await user.click(fetchButton);
 
-    // APIが呼ばれ、フォームが更新されるのを待つ
     await waitFor(() => {
-      // タイトル欄の値が更新されたことを確認
       expect(screen.getByLabelText(/タイトル/)).toHaveValue('テスト駆動開発');
-      // 著者欄の値が更新されたことを確認
       expect(screen.getByLabelText(/著者/)).toHaveValue('Kent Beck／著 和田卓人／訳');
+      expect(screen.getByLabelText(/出版社/)).toHaveValue('オーム社');
+      expect(screen.getByLabelText(/出版日/)).toHaveValue('2017-08-25');
+      expect(screen.getByAltText('表紙')).toHaveAttribute('src', 'https://cover.openbd.jp/9784873119485.jpg');
     });
 
-    // axios.getが正しいURLで呼ばれたことを確認
     expect(axios.get).toHaveBeenCalledWith('https://api.openbd.jp/v1/get?isbn=9784873119485');
+    expect(axios.get).toHaveBeenCalledTimes(1);
+  });
+
+  test('falls back to Google Books API if openBD has no cover', async () => {
+    const user = userEvent.setup();
+    const openBdMockData = [{
+      summary: {
+        title: 'Clean Architecture',
+        author: 'Robert C. Martin',
+        publisher: 'Prentice Hall',
+        pubdate: '2017-09-20',
+        cover: '', // openBDには書影がない
+      },
+    }];
+    const googleBooksMockData = {
+      items: [{
+        volumeInfo: {
+          imageLinks: {
+            thumbnail: 'https://books.google.com/images/cleancode.jpg',
+          },
+        },
+      }],
+    };
+
+    // URLに応じて異なるレスポンスを返すように設定
+    axios.get.mockImplementation((url) => {
+      if (url.includes('openbd')) {
+        return Promise.resolve({ data: openBdMockData });
+      }
+      if (url.includes('google')) {
+        return Promise.resolve({ data: googleBooksMockData });
+      }
+      return Promise.reject(new Error('not found'));
+    });
+
+    render(<BookAdd />);
+
+    const isbnInput = screen.getByLabelText(/ISBN/);
+    const fetchButton = screen.getByRole('button', { name: /ISBNで書籍情報取得/ });
+
+    await user.type(isbnInput, '9780132350884');
+    await user.click(fetchButton);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/タイトル/)).toHaveValue('Clean Architecture');
+      expect(screen.getByAltText('表紙')).toHaveAttribute('src', 'https://books.google.com/images/cleancode.jpg');
+    });
+
+    // openBDとGoogle Books APIの両方が呼ばれたことを確認
+    expect(axios.get).toHaveBeenCalledWith('https://api.openbd.jp/v1/get?isbn=9780132350884');
+    expect(axios.get).toHaveBeenCalledWith('https://www.googleapis.com/books/v1/volumes?q=isbn:9780132350884');
+    expect(axios.get).toHaveBeenCalledTimes(2);
   });
 }); 
