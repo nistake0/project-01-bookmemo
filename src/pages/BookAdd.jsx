@@ -32,6 +32,7 @@ export default function BookAdd() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isScannerOpen, setScannerOpen] = useState(false);
+  const [searchPerformed, setSearchPerformed] = useState(false);
   const navigate = useNavigate();
 
   const handleScanDetected = (code) => {
@@ -51,6 +52,7 @@ export default function BookAdd() {
     }
     setError("");
     setLoading(true);
+    setSearchPerformed(true);
     try {
       const response = await axios.get(`https://api.openbd.jp/v1/get?isbn=${isbn}`);
       const bookData = response.data[0];
@@ -129,9 +131,23 @@ export default function BookAdd() {
         {loading ? '検索中...' : 'ISBNで書籍情報取得'}
       </Button>
       
-      {coverImageUrl && (
+      {searchPerformed && (
         <Box sx={{ mt: 2, textAlign: 'center' }}>
-          <img src={coverImageUrl} alt="表紙" style={{ maxWidth: '150px', height: 'auto' }} />
+          {coverImageUrl ? (
+            <img src={coverImageUrl} alt="表紙" style={{ maxWidth: '150px', height: 'auto' }} />
+          ) : (
+            <Box sx={{ 
+              border: '1px dashed grey', 
+              width: 150, 
+              height: 225, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              mx: 'auto' 
+            }}>
+              <Typography variant="caption" color="text.secondary">書影なし</Typography>
+            </Box>
+          )}
         </Box>
       )}
 
