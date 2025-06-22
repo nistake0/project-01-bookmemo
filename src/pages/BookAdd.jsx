@@ -115,6 +115,7 @@ export default function BookAdd() {
         publisher,
         publishedDate,
         coverImageUrl,
+        status: 'reading',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
