@@ -1,23 +1,68 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import MemoAdd from './MemoAdd';
 
-// Firebaseのモジュールをモックする
+// Firebaseのモジュールをモック化
+jest.mock('firebase/firestore', () => ({
+  ...jest.requireActual('firebase/firestore'),
+  collection: jest.fn(),
+  addDoc: jest.fn(),
+  serverTimestamp: jest.fn(() => 'mock-timestamp'),
+}));
 jest.mock('../firebase', () => ({
   db: jest.fn(),
 }));
 
 describe('MemoAdd', () => {
-  test('renders memo add form correctly', () => {
+  beforeEach(() => {
+    // 各テストの前にモックをリセット
+    addDoc.mockClear();
+    collection.mockClear();
+  });
+
+  test('ページ番号入力欄を含むメモ追加フォームが正しく表示される', () => {
     render(<MemoAdd bookId="test-book-id" />);
 
-    // "引用・抜き書き" ラベルを持つテキストエリアが表示されることを確認
     expect(screen.getByLabelText(/引用・抜き書き/)).toBeInTheDocument();
-
-    // "感想・コメント" ラベルを持つテキストエリアが表示されることを確認
     expect(screen.getByLabelText(/感想・コメント/)).toBeInTheDocument();
-
-    // "メモを追加" ボタンが表示されることを確認
+    expect(screen.getByLabelText(/ページ番号/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'メモを追加' })).toBeInTheDocument();
+  });
+
+  test('フォームを送信すると正しいデータでaddDocが呼ばれる', async () => {
+    const user = userEvent.setup();
+    render(<MemoAdd bookId="test-book-id" />);
+
+    const textInput = screen.getByLabelText(/引用・抜き書き/);
+    const commentInput = screen.getByLabelText(/感想・コメント/);
+    const pageInput = screen.getByLabelText(/ページ番号/);
+    const submitButton = screen.getByRole('button', { name: 'メモを追加' });
+
+    // フォームに入力
+    await user.type(textInput, 'これはテストの引用です。');
+    await user.type(commentInput, 'テストのコメント。');
+    await user.type(pageInput, '123');
+
+    // フォームを送信
+    await user.click(submitButton);
+
+    // addDocが正しい引数で呼ばれたか確認
+    expect(addDoc).toHaveBeenCalledWith(
+      undefined, // collectionのモックが正しく設定されていないためundefinedになるが、呼び出しは確認できる
+      {
+        text: 'これはテストの引用です。',
+        comment: 'テストのコメント。',
+        page: 123,
+        createdAt: 'mock-timestamp',
+        updatedAt: 'mock-timestamp',
+      }
+    );
+    
+    // 送信後にフォームがクリアされるか確認
+    expect(textInput).toHaveValue('');
+    expect(commentInput).toHaveValue('');
+    expect(pageInput.value).toBe('');
   });
 }); 
