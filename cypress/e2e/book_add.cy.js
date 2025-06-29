@@ -5,14 +5,14 @@ describe('ログイン画面のE2Eテスト', () => {
 
     // ログイン画面の要素確認
     cy.contains('ログイン').should('be.visible');
-    cy.get('input[type="text"]').should('exist'); // email欄
-    cy.get('input[type="password"]').should('exist'); // パスワード欄
-    cy.get('button[type="submit"]').contains('ログイン').should('exist');
+    cy.get('[data-testid="login-email-input"]').should('exist');
+    cy.get('[data-testid="login-password-input"]').should('exist');
+    cy.get('[data-testid="login-submit"]').should('exist');
 
     // テスト用ユーザーでログイン
-    cy.get('input[type="text"]').type('testuser@example.com');
-    cy.get('input[type="password"]').type('testpassword');
-    cy.get('button[type="submit"]').contains('ログイン').click();
+    cy.get('[data-testid="login-email-input"]').type('testuser@example.com');
+    cy.get('[data-testid="login-password-input"]').type('testpassword');
+    cy.get('[data-testid="login-submit"]').click();
 
     // 本一覧画面に遷移したことを確認
     cy.url().should('include', '/'); // 必要に応じてパスを修正
