@@ -29,6 +29,7 @@ export default function BookAdd() {
   const [publisher, setPublisher] = useState("");
   const [publishedDate, setPublishedDate] = useState("");
   const [coverImageUrl, setCoverImageUrl] = useState("");
+  const [tagsText, setTagsText] = useState('');
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isScannerOpen, setScannerOpen] = useState(false);
@@ -106,6 +107,10 @@ export default function BookAdd() {
       setError("タイトルは必須です");
       return;
     }
+    const tags = tagsText
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
     try {
       await addDoc(collection(db, "books"), {
         userId: user.uid,
@@ -115,6 +120,7 @@ export default function BookAdd() {
         publisher,
         publishedDate,
         coverImageUrl,
+        tags,
         status: 'reading',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -126,7 +132,7 @@ export default function BookAdd() {
   };
 
   return (
-    <Box component="form" onSubmit={handleAdd} sx={{ maxWidth: 500, mx: "auto", mt: 8 }}>
+    <Box component="form" onSubmit={handleAdd} sx={{ maxWidth: 500, mx: "auto", mt: 8, pb: 8 }}>
       <Typography variant="h5" align="center" gutterBottom>本を追加</Typography>
 
       <Grid container spacing={1} alignItems="center">
@@ -203,6 +209,13 @@ export default function BookAdd() {
         fullWidth
         margin="normal"
         inputProps={{ 'data-testid': 'book-publishdate-input' }}
+      />
+      <TextField
+        label="タグ（カンマ区切り）"
+        value={tagsText}
+        onChange={e => setTagsText(e.target.value)}
+        fullWidth
+        margin="normal"
       />
       {error && <Typography color="error" align="center">{error}</Typography>}
       <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} data-testid="book-add-submit">追加</Button>
