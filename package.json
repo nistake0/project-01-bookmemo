@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "test": "jest"
+    "test": "jest",
+    "setup-test-user": "node scripts/setupTestUser.cjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -34,9 +35,11 @@
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-basic-ssl": "^2.0.0",
     "@vitejs/plugin-react": "^4.4.1",
+    "cypress": "^14.5.0",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
+    "firebase-admin": "^13.4.0",
     "globals": "^16.0.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^30.0.2",

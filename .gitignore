@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Firebaseサービスアカウント鍵（絶対にGit管理しない）
+serviceAccountKey.json

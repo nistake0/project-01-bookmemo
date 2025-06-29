@@ -2,18 +2,20 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { TextField, Button, Box, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // ログイン成功時の処理（画面遷移など）
+      navigate("/"); // ログイン成功時に本一覧ページへ遷移
     } catch (err) {
       setError(err.message);
     }
