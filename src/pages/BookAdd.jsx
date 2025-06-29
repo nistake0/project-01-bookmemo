@@ -137,6 +137,7 @@ export default function BookAdd() {
             onChange={e => setIsbn(e.target.value)}
             fullWidth
             margin="normal"
+            inputProps={{ 'data-testid': 'book-isbn-input' }}
           />
         </Grid>
         <Grid>
@@ -177,6 +178,7 @@ export default function BookAdd() {
         fullWidth
         margin="normal"
         required
+        inputProps={{ 'data-testid': 'book-title-input' }}
       />
       <TextField
         label="著者"
@@ -184,6 +186,7 @@ export default function BookAdd() {
         onChange={e => setAuthor(e.target.value)}
         fullWidth
         margin="normal"
+        inputProps={{ 'data-testid': 'book-author-input' }}
       />
       <TextField
         label="出版社"
@@ -191,6 +194,7 @@ export default function BookAdd() {
         onChange={e => setPublisher(e.target.value)}
         fullWidth
         margin="normal"
+        inputProps={{ 'data-testid': 'book-publisher-input' }}
       />
       <TextField
         label="出版日"
@@ -198,9 +202,10 @@ export default function BookAdd() {
         onChange={e => setPublishedDate(e.target.value)}
         fullWidth
         margin="normal"
+        inputProps={{ 'data-testid': 'book-publishdate-input' }}
       />
       {error && <Typography color="error" align="center">{error}</Typography>}
-      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>追加</Button>
+      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} data-testid="book-add-submit">追加</Button>
 
       <Modal
         open={isScannerOpen}

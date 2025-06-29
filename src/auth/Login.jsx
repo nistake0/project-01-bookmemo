@@ -31,6 +31,7 @@ export default function Login() {
         fullWidth
         margin="normal"
         required
+        inputProps={{ 'data-testid': 'login-email-input' }}
       />
       <TextField
         label="パスワード"
@@ -40,9 +41,10 @@ export default function Login() {
         fullWidth
         margin="normal"
         required
+        inputProps={{ 'data-testid': 'login-password-input' }}
       />
       {error && <Typography color="error">{error}</Typography>}
-      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>ログイン</Button>
+      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} data-testid="login-submit">ログイン</Button>
     </Box>
   );
 } 
