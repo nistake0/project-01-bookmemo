@@ -64,3 +64,56 @@ npm run dev
 ```bash
 npm test
 ```
+
+## E2Eテスト（Cypress）について
+
+### 仕組み・概要
+- 本プロジェクトでは、Cypressを用いてE2E（エンドツーエンド）テストを自動化しています。
+- 主に「ログイン」「本の追加」など、実際のユーザー操作をブラウザ上で再現し、アプリ全体の動作確認を行います。
+- テスト用Firebaseユーザーは、テスト前に自動で作成・削除される仕組みです。
+
+### ディレクトリ構成
+- `cypress/e2e/` ... E2Eテストコード（例: `book_add.cy.js`）
+- `scripts/setupTestUser.cjs` ... テスト用Firebaseユーザー自動作成スクリプト
+
+### 実行方法
+1. **サービスアカウント鍵の配置**
+   - Firebaseコンソールから `serviceAccountKey.json` を取得し、プロジェクト直下に配置してください。
+   - `.gitignore` でGit管理対象外になっています。
+2. **依存パッケージのインストール**
+   ```bash
+   npm install
+   ```
+3. **テスト用ユーザーの自動作成**
+   ```bash
+   npm run setup-test-user
+   ```
+   - これにより、`testuser@example.com` / `testpassword` のユーザーが毎回クリーンな状態で作成されます。
+4. **Cypressテストの実行**
+   - 特定のテストファイルのみ実行:
+     ```bash
+     npx cypress run --spec cypress/e2e/book_add.cy.js
+     ```
+   - すべてのE2Eテストを実行:
+     ```bash
+     npx cypress run
+     ```
+   - もしくは、npm scriptで一括実行:
+     ```bash
+     npm run e2e
+     ```
+     （`package.json`に`"e2e": "npm run setup-test-user && npx cypress run"` を追加）
+
+### 修正・工夫した点
+- ログイン画面のinput要素のtypeやセレクタに合わせてテストコードを修正。
+- テスト用ユーザーの自動作成・削除をNode.jsスクリプトで実現し、手動管理の手間やミスを防止。
+- テストは小さく分割し、まず「ログイン画面→本一覧遷移」だけを確実に通す形から段階的に拡張。
+- `.gitignore`に`serviceAccountKey.json`を追加し、セキュリティにも配慮。
+
+### 注意事項
+- `serviceAccountKey.json`は**絶対にGit管理しないでください**。
+- テスト用ユーザーのメール・パスワードは必要に応じてスクリプト内で変更可能です。
+
+---
+
+E2Eテストや自動化の運用について不明点があれば、`doc/`配下のメモやこのREADMEを参照してください。
