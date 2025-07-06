@@ -24,7 +24,6 @@ const modalStyle = {
 
 export default function BookAdd() {
   const { user } = useAuth();
-  console.log('BookAdd user:', user);
   const [isbn, setIsbn] =useState("");
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -96,7 +95,6 @@ export default function BookAdd() {
             const imageLinks = googleBookData.items[0].volumeInfo.imageLinks;
             if (!coverUrl && imageLinks) {
               coverUrl = imageLinks.thumbnail || imageLinks.smallThumbnail || "";
-              console.log("Found cover from Google Books API:", coverUrl);
             }
           }
         } catch (googleErr) {
@@ -108,7 +106,6 @@ export default function BookAdd() {
         let nextTags = [];
         if (googleBookData && googleBookData.items && googleBookData.items.length > 0) {
           const categories = googleBookData.items[0].volumeInfo.categories;
-          console.log('Google Books API categories:', categories);
           if (categories && categories.length > 0) {
             nextTags = categories;
           }
@@ -117,8 +114,6 @@ export default function BookAdd() {
         const openbdTags = [];
         if (bookData.summary.subject) openbdTags.push(bookData.summary.subject);
         if (bookData.summary.ndc) openbdTags.push(bookData.summary.ndc);
-        console.log('openBD subject:', bookData.summary.subject);
-        console.log('openBD ndc:', bookData.summary.ndc);
         // マージ（重複除去）
         nextTags = Array.from(new Set([...nextTags, ...openbdTags]));
         setTags(nextTags);
@@ -133,7 +128,6 @@ export default function BookAdd() {
       }
     } catch (err) {
       setError("書籍情報の取得に失敗しました");
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -152,7 +146,6 @@ export default function BookAdd() {
       tagsToSave = [...tagsToSave, inputTagValue.trim()];
     }
     tagsToSave = tagsToSave.filter(tag => tag && tag.trim() !== "");
-    console.log('保存前tags:', tagsToSave, Array.isArray(tagsToSave) ? tagsToSave.map(t => typeof t) : typeof tagsToSave);
     try {
       await addDoc(collection(db, "books"), {
         userId: user.uid,
@@ -176,7 +169,6 @@ export default function BookAdd() {
 
   // タグ履歴に新規タグを保存
   const saveNewTagsToHistory = async (newTags) => {
-    console.log('bookTagHistory保存直前:', user?.uid, newTags);
     if (!user?.uid) return;
     const batch = [];
     for (const tag of newTags) {
@@ -287,7 +279,6 @@ export default function BookAdd() {
         value={tags}
         getOptionLabel={option => typeof option === 'string' ? option : (option.inputValue || option.tag || '')}
         onChange={async (event, newValue) => {
-          console.log('Autocomplete onChange', newValue);
           const normalized = (newValue || []).map(v => {
             if (typeof v === 'string') return v;
             if (v && typeof v === 'object') {
@@ -301,7 +292,6 @@ export default function BookAdd() {
         }}
         inputValue={inputTagValue}
         onInputChange={(event, newInputValue) => {
-          console.log('Autocomplete onInputChange', newInputValue);
           // カンマで区切られた場合、自動的にtagsに追加
           if (newInputValue.endsWith(',')) {
             const newTag = newInputValue.slice(0, -1).trim();
@@ -314,7 +304,6 @@ export default function BookAdd() {
           }
         }}
         renderInput={(params) => {
-          console.log('Autocomplete render', tags, inputTagValue);
           return (
             <TextField {...params} label="タグ" margin="normal" fullWidth inputProps={{ ...params.inputProps, 'data-testid': 'book-tags-input' }} />
           );

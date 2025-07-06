@@ -7,7 +7,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 
 const MemoAdd = ({ bookId }) => {
   const { user } = useAuth();
-  console.log('MemoAdd user:', user);
   const [text, setText] = useState('');
   const [comment, setComment] = useState('');
   const [page, setPage] = useState('');
@@ -26,7 +25,6 @@ const MemoAdd = ({ bookId }) => {
         );
         const snap = await getDocs(q);
         const tags = snap.docs.map(doc => doc.data().tag).filter(Boolean);
-        console.log('memoTagHistory取得:', tags);
         setTagOptions(tags);
       } catch (e) {
         console.error("メモ用タグ履歴の取得に失敗", e);
@@ -37,7 +35,6 @@ const MemoAdd = ({ bookId }) => {
 
   // タグ履歴に新規タグを保存
   const saveNewTagsToHistory = async (newTags) => {
-    console.log('saveNewTagsToHistory呼び出し:', newTags);
     if (!user?.uid) return;
     const batch = [];
     for (const tag of newTags) {
