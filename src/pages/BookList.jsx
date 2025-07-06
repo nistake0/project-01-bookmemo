@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../auth/AuthProvider";
-import { Typography, List, ListItem, ListItemText, Box, Button, Tabs, Tab } from "@mui/material";
+import { Typography, List, ListItem, ListItemText, Box, Button, Tabs, Tab, Chip, Stack } from "@mui/material";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function BookList() {
@@ -70,7 +70,18 @@ export default function BookList() {
           <ListItem key={book.id} component={Link} to={`/book/${book.id}`}>
             <ListItemText
               primary={book.title || "タイトル未設定"}
-              secondary={book.author || ""}
+              secondary={
+                <>
+                  {book.author || ""}
+                  {Array.isArray(book.tags) && book.tags.length > 0 && (
+                    <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }}>
+                      {book.tags.map((tag, idx) => (
+                        <Chip key={idx} label={tag} size="small" color="primary" />
+                      ))}
+                    </Stack>
+                  )}
+                </>
+              }
             />
           </ListItem>
         ))}
