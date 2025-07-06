@@ -5,6 +5,16 @@ import { useAuth } from "../auth/AuthProvider";
 import { Typography, List, ListItem, ListItemText, Box, Button, Tabs, Tab, Chip, Stack, TextField } from "@mui/material";
 import { useNavigate, Link } from "react-router-dom";
 
+// タグ正規化関数（小文字化＋全角英数字→半角）
+function normalizeTag(tag) {
+  if (!tag) return '';
+  // 全角英数字→半角
+  const zenkakuToHankaku = s => s.replace(/[Ａ-Ｚａ-ｚ０-９]/g, ch =>
+    String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)
+  );
+  return zenkakuToHankaku(tag).toLowerCase();
+}
+
 export default function BookList() {
   const { user } = useAuth();
   const [allBooks, setAllBooks] = useState([]);
@@ -48,12 +58,12 @@ export default function BookList() {
       if (status !== filter) return false;
     }
     if (!searchText.trim()) return true;
-    const lower = searchText.toLowerCase();
-    // タイトル・著者・タグで部分一致
+    const normalizedQuery = normalizeTag(searchText);
+    // タイトル・著者・タグで部分一致（正規化）
     return (
-      (book.title && book.title.toLowerCase().includes(lower)) ||
-      (book.author && book.author.toLowerCase().includes(lower)) ||
-      (Array.isArray(book.tags) && book.tags.some(tag => tag.toLowerCase().includes(lower)))
+      (book.title && normalizeTag(book.title).includes(normalizedQuery)) ||
+      (book.author && normalizeTag(book.author).includes(normalizedQuery)) ||
+      (Array.isArray(book.tags) && book.tags.some(tag => normalizeTag(tag).includes(normalizedQuery)))
     );
   });
 

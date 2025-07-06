@@ -40,7 +40,8 @@
 ### 3.5 PWA対応
 - スマホのホーム画面に追加、オフライン動作、カメラ・ストレージ利用もOK
 
-## 4. データ構造（例）
+## 4. データ構造（現状・方針反映）
+
 ### 書籍（booksコレクション）
 ```json
 {
@@ -51,24 +52,45 @@
   "author": "著者",
   "publisher": "出版社",
   "publishedDate": "2024-01-01",
-  "coverUrl": "https://...",
+  "coverImageUrl": "https://...", // 書影URL
+  "tags": ["小説", "名作"], // タグ配列（Google Books API, openBD, ユーザー入力の合成）
   "status": "reading" or "finished",
-  "url": "https://...", // Webページの場合
   "createdAt": "...",
   "updatedAt": "..."
 }
 ```
 
-### メモ（各書籍のサブコレクションmemos）
+### メモ（books/{bookId}/memosサブコレクション）
 ```json
 {
   "id": "自動生成ID",
   "text": "OCRや引用テキスト",
   "comment": "感想",
   "page": 123,
-  "createdAt": "..."
+  "tags": ["名言", "感想"], // タグ配列（ユーザー入力）
+  "createdAt": "...",
+  "updatedAt": "..."
 }
 ```
+
+### タグ履歴（用途ごとに分離）
+- 書籍用タグ履歴: `users/{userId}/bookTagHistory`
+- メモ用タグ履歴: `users/{userId}/memoTagHistory`
+
+```json
+// bookTagHistory, memoTagHistory 共通
+{
+  "id": "自動生成ID",
+  "tag": "技術書", // タグ名
+  "createdAt": "...", // 初回登録日時
+  "updatedAt": "..."  // 最終利用日時（将来的に利用頻度や人気タグ集計にも活用）
+}
+```
+
+### 今後の拡張方針
+- タグ履歴は用途ごとにFirestoreコレクションを分離し、サジェスト・補完候補として利用。
+- タグ配列はAPI自動セット＋履歴サジェスト＋ユーザー編集可を基本とする。
+- 書籍・メモともにtagsフィールドは配列型で保存し、UIでChip表示・フィルタ・検索に活用。
 
 ## 5. 画面・UI構成
 - ログイン画面（新規登録・パスワードリセット）
@@ -176,3 +198,11 @@ graph TD
   - 新規タグも手入力で追加可能。
 - これにより「API由来の標準化されたタグ」と「ユーザー独自のタグ」の両立を実現し、入力の手間と表記ゆれを大幅に削減する。
 - タグ履歴の保存・取得、APIからの自動取得、UI上の扱い（自動付与/候補表示/手動編集のバランス）などは今後も運用しながら最適化していく。 
+
+#### 【タグ履歴の用途分離・Firestore設計方針】
+
+- タグ履歴は用途ごとにFirestoreコレクションを分離し、**「書籍用（bookTagHistory）」と「メモ用（memoTagHistory）」を明確に区別して管理**する。
+  - 例：`users/{userId}/bookTagHistory`、`users/{userId}/memoTagHistory`
+- BookAdd画面ではbookTagHistoryのみ、MemoAdd画面ではmemoTagHistoryのみを参照・更新する。
+- これにより、書籍とメモで異なるタグ履歴が混在せず、サジェストや補完の精度・UXが向上する。
+- タグ履歴の保存・取得ロジックも用途ごとに分離実装する。 
