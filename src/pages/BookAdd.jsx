@@ -88,17 +88,20 @@ export default function BookAdd() {
 
         let coverUrl = bookData.summary.cover || "";
         let googleBookData = null;
-        try {
-          const googleResponse = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
-          googleBookData = googleResponse.data;
-          if (googleBookData.items && googleBookData.items.length > 0) {
-            const imageLinks = googleBookData.items[0].volumeInfo.imageLinks;
-            if (!coverUrl && imageLinks) {
-              coverUrl = imageLinks.thumbnail || imageLinks.smallThumbnail || "";
+        // カバー画像が無い場合のみGoogle Books APIを呼ぶ
+        if (!coverUrl) {
+          try {
+            const googleResponse = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
+            googleBookData = googleResponse.data;
+            if (googleBookData.items && googleBookData.items.length > 0) {
+              const imageLinks = googleBookData.items[0].volumeInfo.imageLinks;
+              if (imageLinks) {
+                coverUrl = imageLinks.thumbnail || imageLinks.smallThumbnail || "";
+              }
             }
+          } catch (googleErr) {
+            console.error("Failed to fetch from Google Books API", googleErr);
           }
-        } catch (googleErr) {
-          console.error("Failed to fetch from Google Books API", googleErr);
         }
         setCoverImageUrl(coverUrl);
 

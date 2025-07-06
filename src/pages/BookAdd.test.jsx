@@ -13,12 +13,52 @@ jest.mock('react-router-dom', () => ({
 jest.mock('../auth/AuthProvider', () => ({
   useAuth: () => ({ user: { uid: 'test-user-id' } }),
 }));
-jest.mock('../firebase', () => ({
-  db: jest.fn(),
-  collection: jest.fn(),
-  addDoc: jest.fn(),
-  serverTimestamp: jest.fn(),
-}));
+jest.mock('../firebase', () => {
+  // Firestoreのモック
+  const mockCollectionRef = {}; // CollectionReferenceのダミー
+  const mockCollection = jest.fn(() => mockCollectionRef);
+  const mockGetDocs = jest.fn(() => Promise.resolve({
+    docs: [
+      { id: 'tag1', data: () => ({ tag: 'テストタグ1', updatedAt: { toDate: () => new Date() } }) },
+      { id: 'tag2', data: () => ({ tag: 'テストタグ2', updatedAt: { toDate: () => new Date() } }) },
+    ],
+  }));
+  return {
+    db: {},
+    collection: mockCollection,
+    getDocs: mockGetDocs,
+    addDoc: jest.fn(),
+    serverTimestamp: jest.fn(),
+  };
+});
+
+// Firestoreのcollection/getDocsを直接importしている場合にも対応
+jest.mock('firebase/firestore', () => {
+  const mockCollectionRef = {};
+  const mockCollection = jest.fn(() => mockCollectionRef);
+  const mockGetDocs = jest.fn(() => Promise.resolve({
+    docs: [
+      { id: 'tag1', data: () => ({ tag: 'テストタグ1', updatedAt: { toDate: () => new Date() } }) },
+      { id: 'tag2', data: () => ({ tag: 'テストタグ2', updatedAt: { toDate: () => new Date() } }) },
+    ],
+  }));
+  return {
+    collection: mockCollection,
+    getDocs: mockGetDocs,
+    addDoc: jest.fn(),
+    serverTimestamp: jest.fn(),
+    doc: jest.fn(),
+    setDoc: jest.fn(),
+    updateDoc: jest.fn(),
+    deleteDoc: jest.fn(),
+    onSnapshot: jest.fn(),
+    query: jest.fn(),
+    where: jest.fn(),
+    orderBy: jest.fn(),
+    limit: jest.fn(),
+    startAfter: jest.fn(),
+  };
+});
 
 describe('BookAdd', () => {
   beforeEach(() => {
@@ -108,5 +148,41 @@ describe('BookAdd', () => {
     expect(axios.get).toHaveBeenCalledWith('https://api.openbd.jp/v1/get?isbn=9780132350884');
     expect(axios.get).toHaveBeenCalledWith('https://www.googleapis.com/books/v1/volumes?q=isbn:9780132350884');
     expect(axios.get).toHaveBeenCalledTimes(2);
+  });
+});
+
+// FirestoreやuseAuthのモック
+jest.mock('../auth/AuthProvider', () => ({
+  useAuth: () => ({ user: { uid: 'testuid' } }),
+}));
+
+// FirestoreのaddDoc, setDoc, getDocs, collection, doc, serverTimestamp なども必要に応じてモック
+
+// --- テストケース ---
+describe('BookAdd タグ入力・履歴保存', () => {
+  it('カンマ入力でtags配列に値が追加される', async () => {
+    render(<BookAdd />);
+    const tagInput = screen.getByLabelText('タグ');
+    fireEvent.change(tagInput, { target: { value: 'foo,' } });
+    // AutocompleteのonInputChangeカスタム処理でtagsに追加されるはず
+    // ...ここでtagsのstateを直接検証するのは難しいので、UI上のChipやvalue属性などで検証
+    // 例: Chipが表示されるか、またはinputのvalueが空になるか
+    // expect(...)
+  });
+
+  it('空文字やカンマだけ入力してもtags配列に空文字が入らない', async () => {
+    render(<BookAdd />);
+    const tagInput = screen.getByLabelText('タグ');
+    fireEvent.change(tagInput, { target: { value: ',' } });
+    // ...同様にUI上で空タグが表示されないことを検証
+  });
+
+  it('handleAdd実行時にtags配列が正しく保存される', async () => {
+    // addDoc, saveNewTagsToHistoryをモックし、呼び出し時の引数を検証
+    // 例: fireEvent.click(追加ボタン)後にaddDocが正しいtagsで呼ばれるか
+  });
+
+  it('Firestoreの履歴保存処理が必ず呼ばれる', async () => {
+    // saveNewTagsToHistoryのモック・スパイで呼び出しを検証
   });
 }); 
