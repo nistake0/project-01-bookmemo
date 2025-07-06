@@ -63,7 +63,7 @@ const BookDetail = () => {
   const currentStatus = book.status || 'reading'; // statusがない場合は 'reading' をデフォルトに
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4 }}>
+    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, pb: '56px' }}>
       <Paper sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Chip 
