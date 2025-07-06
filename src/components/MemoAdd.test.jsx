@@ -3,16 +3,45 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import MemoAdd from './MemoAdd';
+// Node.js環境用 fetch モック
+import fetch from 'node-fetch';
+global.fetch = fetch;
 
 // Firebaseのモジュールをモック化
-jest.mock('firebase/firestore', () => ({
-  ...jest.requireActual('firebase/firestore'),
-  collection: jest.fn(),
-  addDoc: jest.fn(),
-  serverTimestamp: jest.fn(() => 'mock-timestamp'),
-}));
+jest.mock('firebase/firestore', () => {
+  const mockCollectionRef = {};
+  const mockCollection = jest.fn(() => undefined);
+  const mockGetDocs = jest.fn(() => Promise.resolve({
+    docs: [
+      { id: 'tag1', data: () => ({ tag: 'テストタグ1', updatedAt: { toDate: () => new Date() } }) },
+      { id: 'tag2', data: () => ({ tag: 'テストタグ2', updatedAt: { toDate: () => new Date() } }) },
+    ],
+  }));
+  const mockOrderBy = jest.fn();
+  const mockQuery = jest.fn(() => mockCollectionRef);
+  return {
+    collection: mockCollection,
+    getDocs: mockGetDocs,
+    addDoc: jest.fn(),
+    serverTimestamp: jest.fn(() => 'mock-timestamp'),
+    orderBy: mockOrderBy,
+    query: mockQuery,
+    doc: jest.fn(),
+    setDoc: jest.fn(),
+    updateDoc: jest.fn(),
+    deleteDoc: jest.fn(),
+    onSnapshot: jest.fn(),
+    where: jest.fn(),
+    limit: jest.fn(),
+    startAfter: jest.fn(),
+  };
+});
 jest.mock('../firebase', () => ({
   db: jest.fn(),
+}));
+
+jest.mock('../auth/AuthProvider', () => ({
+  useAuth: () => ({ user: { uid: 'test-user-id' } }),
 }));
 
 describe('MemoAdd', () => {
