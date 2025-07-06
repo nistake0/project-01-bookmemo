@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, query, where, setDoc, doc, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../auth/AuthProvider";
 import { TextField, Button, Box, Typography, Grid, Modal, IconButton } from "@mui/material";
 import axios from "axios";
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import BarcodeScanner from "../components/BarcodeScanner";
+import Autocomplete from '@mui/material/Autocomplete';
 
 const modalStyle = {
   position: 'absolute',
@@ -23,18 +24,40 @@ const modalStyle = {
 
 export default function BookAdd() {
   const { user } = useAuth();
+  console.log('BookAdd user:', user);
   const [isbn, setIsbn] =useState("");
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [publisher, setPublisher] = useState("");
   const [publishedDate, setPublishedDate] = useState("");
   const [coverImageUrl, setCoverImageUrl] = useState("");
-  const [tagsText, setTagsText] = useState('');
+  const [tags, setTags] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isScannerOpen, setScannerOpen] = useState(false);
   const [searchPerformed, setSearchPerformed] = useState(false);
+  const [tagOptions, setTagOptions] = useState([]);
+  const [inputTagValue, setInputTagValue] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Firestoreからタグ履歴（bookTagHistory）を取得（updatedAt降順）
+    const fetchTagHistory = async () => {
+      if (!user?.uid) return;
+      try {
+        const q = query(
+          collection(db, "users", user.uid, "bookTagHistory"),
+          orderBy("updatedAt", "desc")
+        );
+        const snap = await getDocs(q);
+        const tags = snap.docs.map(doc => doc.data().tag).filter(Boolean);
+        setTagOptions(tags);
+      } catch (e) {
+        console.error("タグ履歴の取得に失敗", e);
+      }
+    };
+    fetchTagHistory();
+  }, [user]);
 
   const handleScanDetected = (code) => {
     setIsbn(code);
@@ -65,24 +88,40 @@ export default function BookAdd() {
         setPublishedDate(bookData.summary.pubdate || "");
 
         let coverUrl = bookData.summary.cover || "";
-
-        if (!coverUrl) {
-          console.log("No cover from openBD, trying Google Books API...");
-          try {
-            const googleResponse = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
-            const googleBookData = googleResponse.data;
-            if (googleBookData.items && googleBookData.items.length > 0) {
-              const imageLinks = googleBookData.items[0].volumeInfo.imageLinks;
-              if (imageLinks) {
-                coverUrl = imageLinks.thumbnail || imageLinks.smallThumbnail || "";
-                console.log("Found cover from Google Books API:", coverUrl);
-              }
+        let googleBookData = null;
+        try {
+          const googleResponse = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
+          googleBookData = googleResponse.data;
+          if (googleBookData.items && googleBookData.items.length > 0) {
+            const imageLinks = googleBookData.items[0].volumeInfo.imageLinks;
+            if (!coverUrl && imageLinks) {
+              coverUrl = imageLinks.thumbnail || imageLinks.smallThumbnail || "";
+              console.log("Found cover from Google Books API:", coverUrl);
             }
-          } catch (googleErr) {
-            console.error("Failed to fetch from Google Books API", googleErr);
           }
+        } catch (googleErr) {
+          console.error("Failed to fetch from Google Books API", googleErr);
         }
         setCoverImageUrl(coverUrl);
+
+        // Google Books API categoriesとopenBD subject/ndcをマージしてタグ候補に
+        let nextTags = [];
+        if (googleBookData && googleBookData.items && googleBookData.items.length > 0) {
+          const categories = googleBookData.items[0].volumeInfo.categories;
+          console.log('Google Books API categories:', categories);
+          if (categories && categories.length > 0) {
+            nextTags = categories;
+          }
+        }
+        // openBD
+        const openbdTags = [];
+        if (bookData.summary.subject) openbdTags.push(bookData.summary.subject);
+        if (bookData.summary.ndc) openbdTags.push(bookData.summary.ndc);
+        console.log('openBD subject:', bookData.summary.subject);
+        console.log('openBD ndc:', bookData.summary.ndc);
+        // マージ（重複除去）
+        nextTags = Array.from(new Set([...nextTags, ...openbdTags]));
+        setTags(nextTags);
 
       } else {
         setError("書籍情報が見つかりませんでした");
@@ -107,10 +146,13 @@ export default function BookAdd() {
       setError("タイトルは必須です");
       return;
     }
-    const tags = tagsText
-      .split(',')
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0);
+    // 空文字・空白タグを除去し、未確定inputValueも考慮
+    let tagsToSave = tags.filter(tag => tag && tag.trim() !== "");
+    if (inputTagValue && !tagsToSave.includes(inputTagValue.trim())) {
+      tagsToSave = [...tagsToSave, inputTagValue.trim()];
+    }
+    tagsToSave = tagsToSave.filter(tag => tag && tag.trim() !== "");
+    console.log('保存前tags:', tagsToSave, Array.isArray(tagsToSave) ? tagsToSave.map(t => typeof t) : typeof tagsToSave);
     try {
       await addDoc(collection(db, "books"), {
         userId: user.uid,
@@ -120,14 +162,42 @@ export default function BookAdd() {
         publisher,
         publishedDate,
         coverImageUrl,
-        tags,
+        tags: tagsToSave,
         status: 'reading',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+      await saveNewTagsToHistory(tagsToSave);
       navigate("/");
     } catch (err) {
       setError("追加に失敗しました: " + err.message);
+    }
+  };
+
+  // タグ履歴に新規タグを保存
+  const saveNewTagsToHistory = async (newTags) => {
+    console.log('bookTagHistory保存直前:', user?.uid, newTags);
+    if (!user?.uid) return;
+    const batch = [];
+    for (const tag of newTags) {
+      if (!tagOptions.includes(tag)) {
+        const ref = doc(db, "users", user.uid, "bookTagHistory", tag);
+        batch.push(setDoc(ref, {
+          tag,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }, { merge: true }));
+      } else {
+        const ref = doc(db, "users", user.uid, "bookTagHistory", tag);
+        batch.push(setDoc(ref, {
+          updatedAt: serverTimestamp(),
+        }, { merge: true }));
+      }
+    }
+    try {
+      await Promise.all(batch);
+    } catch (e) {
+      console.error('bookTagHistory保存エラー:', e);
     }
   };
 
@@ -210,12 +280,45 @@ export default function BookAdd() {
         margin="normal"
         inputProps={{ 'data-testid': 'book-publishdate-input' }}
       />
-      <TextField
-        label="タグ（カンマ区切り）"
-        value={tagsText}
-        onChange={e => setTagsText(e.target.value)}
-        fullWidth
-        margin="normal"
+      <Autocomplete
+        multiple
+        freeSolo
+        options={tagOptions}
+        value={tags}
+        getOptionLabel={option => typeof option === 'string' ? option : (option.inputValue || option.tag || '')}
+        onChange={async (event, newValue) => {
+          console.log('Autocomplete onChange', newValue);
+          const normalized = (newValue || []).map(v => {
+            if (typeof v === 'string') return v;
+            if (v && typeof v === 'object') {
+              if ('inputValue' in v && v.inputValue) return v.inputValue;
+              if ('tag' in v && v.tag) return v.tag;
+            }
+            return '';
+          }).filter(Boolean);
+          setTags(normalized);
+          await saveNewTagsToHistory(normalized);
+        }}
+        inputValue={inputTagValue}
+        onInputChange={(event, newInputValue) => {
+          console.log('Autocomplete onInputChange', newInputValue);
+          // カンマで区切られた場合、自動的にtagsに追加
+          if (newInputValue.endsWith(',')) {
+            const newTag = newInputValue.slice(0, -1).trim();
+            if (newTag && !tags.includes(newTag)) {
+              setTags([...tags, newTag]);
+            }
+            setInputTagValue('');
+          } else {
+            setInputTagValue(newInputValue);
+          }
+        }}
+        renderInput={(params) => {
+          console.log('Autocomplete render', tags, inputTagValue);
+          return (
+            <TextField {...params} label="タグ" margin="normal" fullWidth inputProps={{ ...params.inputProps, 'data-testid': 'book-tags-input' }} />
+          );
+        }}
       />
       {error && <Typography color="error" align="center">{error}</Typography>}
       <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} data-testid="book-add-submit">追加</Button>
