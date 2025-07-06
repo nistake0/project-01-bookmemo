@@ -55,6 +55,7 @@ describe('MemoAdd', () => {
         text: 'これはテストの引用です。',
         comment: 'テストのコメント。',
         page: 123,
+        tags: [],
         createdAt: 'mock-timestamp',
         updatedAt: 'mock-timestamp',
       }

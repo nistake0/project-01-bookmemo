@@ -22,6 +22,11 @@ const mockMemos = [
   { id: 'memo2', text: 'メモ2', comment: 'コメント2', page: 20 },
 ];
 
+const mockMemosWithTags = [
+  { id: 'memo1', text: 'メモ1', comment: 'コメント1', page: 10, tags: ['名言', '感想'] },
+  { id: 'memo2', text: 'メモ2', comment: 'コメント2', page: 20, tags: ['引用'] },
+];
+
 describe('MemoList', () => {
   beforeEach(() => {
     // onSnapshotのモック実装
@@ -94,5 +99,23 @@ describe('MemoList', () => {
 
     expect(window.confirm).toHaveBeenCalledWith('本当にこのメモを削除しますか？');
     expect(deleteDoc).toHaveBeenCalledTimes(1);
+  });
+
+  test('tagsが存在する場合にChipでタグが表示される', () => {
+    // onSnapshotのモックをtags付きデータで上書き
+    onSnapshot.mockImplementation((query, callback) => {
+      callback({
+        docs: mockMemosWithTags.map(memo => ({
+          id: memo.id,
+          data: () => memo,
+        })),
+      });
+      return jest.fn();
+    });
+    render(<MemoList bookId="test-book-id" />);
+    // タグがChipとして表示されているか確認
+    expect(screen.getByText('名言')).toBeInTheDocument();
+    expect(screen.getByText('感想')).toBeInTheDocument();
+    expect(screen.getByText('引用')).toBeInTheDocument();
   });
 }); 
