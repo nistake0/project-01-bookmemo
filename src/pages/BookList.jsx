@@ -60,7 +60,7 @@ export default function BookList() {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <Box sx={{ maxWidth: 600, mx: "auto", mt: 4 }}>
+    <Box sx={{ maxWidth: 600, mx: "auto", mt: 4, pb: "56px" }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4" gutterBottom>本一覧</Typography>
         <Button variant="contained" onClick={() => navigate("/add")}>本を追加</Button>
