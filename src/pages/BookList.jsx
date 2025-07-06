@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../auth/AuthProvider";
-import { Typography, List, ListItem, ListItemText, Box, Button, Tabs, Tab, Chip, Stack } from "@mui/material";
+import { Typography, List, ListItem, ListItemText, Box, Button, Tabs, Tab, Chip, Stack, TextField } from "@mui/material";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function BookList() {
@@ -10,6 +10,7 @@ export default function BookList() {
   const [allBooks, setAllBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // 'all', 'reading', 'finished'
+  const [searchText, setSearchText] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,9 +43,18 @@ export default function BookList() {
   };
 
   const filteredBooks = allBooks.filter(book => {
-    if (filter === 'all') return true;
-    const status = book.status || 'reading';
-    return status === filter;
+    if (filter !== 'all') {
+      const status = book.status || 'reading';
+      if (status !== filter) return false;
+    }
+    if (!searchText.trim()) return true;
+    const lower = searchText.toLowerCase();
+    // タイトル・著者・タグで部分一致
+    return (
+      (book.title && book.title.toLowerCase().includes(lower)) ||
+      (book.author && book.author.toLowerCase().includes(lower)) ||
+      (Array.isArray(book.tags) && book.tags.some(tag => tag.toLowerCase().includes(lower)))
+    );
   });
 
   if (loading) return <div>Loading...</div>;
@@ -55,6 +65,15 @@ export default function BookList() {
         <Typography variant="h4" gutterBottom>本一覧</Typography>
         <Button variant="contained" onClick={() => navigate("/add")}>本を追加</Button>
       </Box>
+
+      <TextField
+        label="検索（タイトル・著者・タグ）"
+        value={searchText}
+        onChange={e => setSearchText(e.target.value)}
+        fullWidth
+        margin="normal"
+        sx={{ mb: 2 }}
+      />
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
         <Tabs value={filter} onChange={handleFilterChange} centered>
