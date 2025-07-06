@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
-import { List, ListItem, ListItemText, Typography, IconButton, Box, Modal, TextField, Button } from '@mui/material';
+import { List, ListItem, ListItemText, Typography, IconButton, Box, Modal, TextField, Button, Chip, Stack } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
@@ -104,6 +104,13 @@ const MemoList = ({ bookId }) => {
               <>
                 {memo.comment}
                 {memo.page && <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>p. {memo.page}</Typography>}
+                {Array.isArray(memo.tags) && memo.tags.length > 0 && (
+                  <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }}>
+                    {memo.tags.map((tag, idx) => (
+                      <Chip key={idx} label={tag} size="small" color="secondary" />
+                    ))}
+                  </Stack>
+                )}
               </>
             } 
           />
