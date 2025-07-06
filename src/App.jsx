@@ -14,6 +14,9 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import TagSearch from "./pages/TagSearch";
+import Stats from "./pages/Stats";
+import MyPage from "./pages/MyPage";
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -76,6 +79,9 @@ function AppRoutes() {
         <Route path="/" element={<PrivateRoute><BookList /></PrivateRoute>} />
         <Route path="/add" element={<PrivateRoute><BookAdd /></PrivateRoute>} />
         <Route path="/book/:id" element={<PrivateRoute><BookDetail /></PrivateRoute>} />
+        <Route path="/tags" element={<PrivateRoute><TagSearch /></PrivateRoute>} />
+        <Route path="/stats" element={<PrivateRoute><Stats /></PrivateRoute>} />
+        <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       {!hideBottomNav && <AppBottomNav />}
