@@ -71,16 +71,16 @@ export default function BookList() {
             <ListItemText
               primary={book.title || "タイトル未設定"}
               secondary={
-                <>
+                <Box component="span">
                   {book.author || ""}
                   {Array.isArray(book.tags) && book.tags.length > 0 && (
-                    <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }}>
+                    <Box component="span" sx={{ mt: 1, display: 'inline-flex', flexWrap: 'wrap', gap: 1 }}>
                       {book.tags.map((tag, idx) => (
-                        <Chip key={idx} label={tag} size="small" color="primary" />
+                        <Chip key={idx} label={tag} size="small" color="primary" component="span" />
                       ))}
-                    </Stack>
+                    </Box>
                   )}
-                </>
+                </Box>
               }
             />
           </ListItem>

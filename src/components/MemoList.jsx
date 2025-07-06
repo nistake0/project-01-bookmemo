@@ -101,17 +101,17 @@ const MemoList = ({ bookId }) => {
           <ListItemText 
             primary={memo.text} 
             secondary={
-              <>
+              <Box component="span">
                 {memo.comment}
                 {memo.page && <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>p. {memo.page}</Typography>}
                 {Array.isArray(memo.tags) && memo.tags.length > 0 && (
-                  <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }}>
+                  <Box component="span" sx={{ mt: 1, display: 'inline-flex', flexWrap: 'wrap', gap: 1 }}>
                     {memo.tags.map((tag, idx) => (
-                      <Chip key={idx} label={tag} size="small" color="secondary" />
+                      <Chip key={idx} label={tag} size="small" color="secondary" component="span" />
                     ))}
-                  </Stack>
+                  </Box>
                 )}
-              </>
+              </Box>
             } 
           />
         </ListItem>
