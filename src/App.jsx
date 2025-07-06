@@ -86,7 +86,7 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/project-01-bookmemo">
         <AppRoutes />
       </BrowserRouter>
     </AuthProvider>
