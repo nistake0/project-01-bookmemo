@@ -1,37 +1,87 @@
-import React, { useState } from 'react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, setDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Button, TextField, Box } from '@mui/material';
+import { useAuth } from '../auth/AuthProvider';
+import Autocomplete from '@mui/material/Autocomplete';
 
 const MemoAdd = ({ bookId }) => {
+  const { user } = useAuth();
+  console.log('MemoAdd user:', user);
   const [text, setText] = useState('');
   const [comment, setComment] = useState('');
   const [page, setPage] = useState('');
-  const [tagsText, setTagsText] = useState(''); // タグ入力用
+  const [tags, setTags] = useState([]); // タグ配列
+  const [tagOptions, setTagOptions] = useState([]); // サジェスト候補
+  const [inputTagValue, setInputTagValue] = useState("");
+
+  // タグ履歴取得（updatedAt降順）
+  useEffect(() => {
+    const fetchTagHistory = async () => {
+      if (!user?.uid) return;
+      try {
+        const q = query(
+          collection(db, "users", user.uid, "memoTagHistory"),
+          orderBy("updatedAt", "desc")
+        );
+        const snap = await getDocs(q);
+        const tags = snap.docs.map(doc => doc.data().tag).filter(Boolean);
+        console.log('memoTagHistory取得:', tags);
+        setTagOptions(tags);
+      } catch (e) {
+        console.error("メモ用タグ履歴の取得に失敗", e);
+      }
+    };
+    fetchTagHistory();
+  }, [user]);
+
+  // タグ履歴に新規タグを保存
+  const saveNewTagsToHistory = async (newTags) => {
+    console.log('saveNewTagsToHistory呼び出し:', newTags);
+    if (!user?.uid) return;
+    const batch = [];
+    for (const tag of newTags) {
+      if (!tagOptions.includes(tag)) {
+        const ref = doc(db, "users", user.uid, "memoTagHistory", tag);
+        batch.push(setDoc(ref, {
+          tag,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }, { merge: true }));
+      } else {
+        const ref = doc(db, "users", user.uid, "memoTagHistory", tag);
+        batch.push(setDoc(ref, {
+          updatedAt: serverTimestamp(),
+        }, { merge: true }));
+      }
+    }
+    await Promise.all(batch);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
-
-    const tags = tagsText
-      .split(',')
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0);
-
+    // 未確定のタグ入力があればtagsに追加
+    let tagsToSave = tags;
+    if (inputTagValue && !tags.includes(inputTagValue)) {
+      tagsToSave = [...tags, inputTagValue];
+    }
     try {
       const memosRef = collection(db, 'books', bookId, 'memos');
       await addDoc(memosRef, {
         text,
         comment,
-        page: Number(page) || null, // 数値に変換。空の場合はnull
-        tags, // 追加
+        page: Number(page) || null,
+        tags: tagsToSave,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+      await saveNewTagsToHistory(tagsToSave);
       setText('');
       setComment('');
       setPage('');
-      setTagsText('');
+      setTags([]);
+      setInputTagValue('');
     } catch (error) {
       console.error("Error adding memo: ", error);
     }
@@ -66,13 +116,29 @@ const MemoAdd = ({ bookId }) => {
         margin="normal"
         sx={{ mr: 2 }}
       />
-      <TextField
-        label="タグ（カンマ区切り）"
-        value={tagsText}
-        onChange={e => setTagsText(e.target.value)}
-        fullWidth
-        margin="normal"
-        placeholder="例: 名言,感想,引用"
+      <Autocomplete
+        multiple
+        freeSolo
+        options={tagOptions}
+        value={tags}
+        getOptionLabel={option => typeof option === 'string' ? option : (option.inputValue || option.tag || '')}
+        onChange={async (event, newValue) => {
+          const normalized = (newValue || []).map(v => {
+            if (typeof v === 'string') return v;
+            if (v && typeof v === 'object') {
+              if ('inputValue' in v && v.inputValue) return v.inputValue;
+              if ('tag' in v && v.tag) return v.tag;
+            }
+            return '';
+          }).filter(Boolean);
+          setTags(normalized);
+          await saveNewTagsToHistory(normalized);
+        }}
+        inputValue={inputTagValue}
+        onInputChange={(event, newInputValue) => setInputTagValue(newInputValue)}
+        renderInput={(params) => (
+          <TextField {...params} label="タグ" margin="normal" fullWidth placeholder="例: 名言,感想,引用" />
+        )}
       />
       <Button type="submit" variant="contained">メモを追加</Button>
     </Box>
