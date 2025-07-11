@@ -131,3 +131,23 @@ E2Eテストや自動化の運用について不明点があれば、`doc/`配�
 #### 既知の制約・今後の課題
 - 画像添付は現状未対応（Firebase Storage無料枠の制約）
 - スマホのカメラ・バーコード読み取りに一部バグあり（バグメモ参照）
+
+---
+
+## 運用・セキュリティ対応履歴（2024年6月26日）
+
+- **Firebase Firestoreのセキュリティルールを本番用に設定**
+  1. プロジェクトルートに `firestore.rules` を新規作成し、認証ユーザーのみ自分のデータにアクセスできるようにルールを記述
+  2. `firebase.json` と `firestore.indexes.json` も作成し、ルール・インデックスを管理
+  3. Node.jsをv22にアップデート（公式インストーラー利用）
+  4. Firebase CLIの認証・プロジェクト指定をやり直し
+  5. 下記コマンドでルールをデプロイ
+     ```powershell
+     firebase deploy --only firestore:rules --project <プロジェクトID>
+     ```
+  6. ルール反映後、`npm test` で自動テストがすべてパスすることを確認
+
+- **注意点**
+  - PowerShellではコマンドの区切りに `;` を使う
+  - Firebase CLIの認証エラー時は `firebase logout` → `firebase login` で再認証
+  - テストや本番でFirestoreの権限エラーが出た場合は、ルール・認証状態・プロジェクトIDを再確認
