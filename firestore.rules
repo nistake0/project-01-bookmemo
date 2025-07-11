@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ユーザーが認証されているかチェック
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // ユーザーが自分のデータにアクセスしているかチェック
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // booksコレクションのルール
+    match /books/{bookId} {
+      // 読み取り: 自分の書籍のみ
+      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+      
+      // 作成: 認証済みユーザーのみ、自分のuserIdで作成
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      
+      // 更新: 自分の書籍のみ
+      allow update: if isAuthenticated() && isOwner(resource.data.userId);
+      
+      // 削除: 自分の書籍のみ
+      allow delete: if isAuthenticated() && isOwner(resource.data.userId);
+      
+      // メモのサブコレクション
+      match /memos/{memoId} {
+        // 読み取り: 親の書籍にアクセス権限がある場合
+        allow read: if isAuthenticated() && isOwner(get(/databases/$(database)/documents/books/$(bookId)).data.userId);
+        
+        // 作成: 親の書籍にアクセス権限がある場合
+        allow create: if isAuthenticated() && isOwner(get(/databases/$(database)/documents/books/$(bookId)).data.userId);
+        
+        // 更新: 親の書籍にアクセス権限がある場合
+        allow update: if isAuthenticated() && isOwner(get(/databases/$(database)/documents/books/$(bookId)).data.userId);
+        
+        // 削除: 親の書籍にアクセス権限がある場合
+        allow delete: if isAuthenticated() && isOwner(get(/databases/$(database)/documents/books/$(bookId)).data.userId);
+      }
+    }
+    
+    // ユーザー固有のデータ
+    match /users/{userId} {
+      // ユーザーが自分のデータにアクセスしているかチェック
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      // タグ履歴のサブコレクション
+      match /bookTagHistory/{tagId} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+      
+      match /memoTagHistory/{tagId} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+    }
+  }
+} 
