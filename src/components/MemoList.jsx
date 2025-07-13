@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { List, ListItem, ListItemText, Typography, IconButton, Box, Modal, TextField, Button, Chip, Stack } from '@mui/material';
+import { Card, CardContent, CardActions } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Alert from '@mui/material/Alert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
@@ -22,14 +28,19 @@ const MemoList = ({ bookId }) => {
   const [loading, setLoading] = useState(true);
   const [editingMemo, setEditingMemo] = useState(null);
   const [open, setOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState('view'); // 'view' or 'edit'
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleOpen = (memo) => {
     setEditingMemo(memo);
     setOpen(true);
+    setDialogMode('view');
   };
   const handleClose = () => {
     setEditingMemo(null);
     setOpen(false);
+    setDialogMode('view');
+    setShowDeleteConfirm(false);
   };
 
   const handleUpdate = async (e) => {
@@ -51,12 +62,11 @@ const MemoList = ({ bookId }) => {
   };
 
   const handleDelete = async (memoId) => {
-    if (window.confirm('本当にこのメモを削除しますか？')) {
-      try {
-        await deleteDoc(doc(db, 'books', bookId, 'memos', memoId));
-      } catch (error) {
-        console.error("Error deleting memo: ", error);
-      }
+    try {
+      await deleteDoc(doc(db, 'books', bookId, 'memos', memoId));
+      handleClose();
+    } catch (error) {
+      console.error("Error deleting memo: ", error);
     }
   };
 
@@ -83,78 +93,147 @@ const MemoList = ({ bookId }) => {
 
   return (
     <>
-    <List>
-      {memos.map((memo) => (
-        <ListItem 
-          key={memo.id}
-          secondaryAction={
-            <>
-              <IconButton edge="end" aria-label="edit" onClick={() => handleOpen(memo)}>
-                <EditIcon />
-              </IconButton>
-              <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(memo.id)}>
-                <DeleteIcon />
-              </IconButton>
-            </>
-          }
-        >
-          <ListItemText 
-            primary={memo.text} 
-            secondary={
-              <Box component="span">
-                {memo.comment}
-                {memo.page && <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>p. {memo.page}</Typography>}
-                {Array.isArray(memo.tags) && memo.tags.length > 0 && (
-                  <Box component="span" sx={{ mt: 1, display: 'inline-flex', flexWrap: 'wrap', gap: 1 }}>
-                    {memo.tags.map((tag, idx) => (
-                      <Chip key={idx} label={tag} size="small" color="secondary" component="span" />
-                    ))}
-                  </Box>
-                )}
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {memos.map((memo) => {
+        // カードの高さを制限し、本文・コメントは2行まで省略表示
+        // メタ情報は1行にまとめて横並び
+        const maxLines = 2;
+        const lines = memo.text ? memo.text.split('\n') : [];
+        const shortText = lines.slice(0, maxLines).join('\n');
+        const isLong = lines.length > maxLines;
+        const createdAt = memo.createdAt && memo.createdAt.toDate ? memo.createdAt.toDate() : null;
+        return (
+          <Card key={memo.id} data-testid="memo-card" sx={{ position: 'relative', maxWidth: '100%', mx: 'auto' }}>
+            <CardContent sx={{ pb: 1, minHeight: 48, maxHeight: 56, overflow: 'hidden' }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  wordBreak: 'break-all',
+                  overflowWrap: 'break-word',
+                }}
+              >
+                {shortText}
+              </Typography>
+              {memo.comment && (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    wordBreak: 'break-all',
+                    overflowWrap: 'break-word',
+                  }}
+                >
+                  {memo.comment}
+                </Typography>
+              )}
+            </CardContent>
+            <CardActions sx={{ justifyContent: 'space-between', alignItems: 'center', py: 0 }}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                {memo.page && <Typography variant="caption">p.{memo.page}</Typography>}
+                {createdAt && <Typography variant="caption" color="text.secondary">{createdAt.toLocaleDateString()}</Typography>}
+                {Array.isArray(memo.tags) && memo.tags.map((tag, idx) => (
+                  <Chip key={idx} label={tag} size="small" color="secondary" />
+                ))}
+              </Stack>
+              <Box>
+                <IconButton aria-label="edit" onClick={() => handleOpen(memo)} size="small">
+                  <EditIcon fontSize="small" />
+                </IconButton>
+                <IconButton aria-label="delete" onClick={() => handleDelete(memo.id)} size="small">
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
               </Box>
-            } 
-          />
-        </ListItem>
-      ))}
-    </List>
+            </CardActions>
+          </Card>
+        );
+      })}
+    </Box>
     <Modal
       open={open}
       onClose={handleClose}
       aria-labelledby="edit-memo-modal-title"
     >
-      <Box sx={style} component="form" onSubmit={handleUpdate}>
-        <Typography id="edit-memo-modal-title" variant="h6" component="h2">
-          メモを編集
-        </Typography>
-        <TextField
-          label="引用・抜き書き"
-          fullWidth
-          multiline
-          rows={4}
-          value={editingMemo?.text || ''}
-          onChange={(e) => setEditingMemo({ ...editingMemo, text: e.target.value })}
-          margin="normal"
-          required
-        />
-        <TextField
-          label="感想・コメント"
-          fullWidth
-          multiline
-          rows={2}
-          value={editingMemo?.comment || ''}
-          onChange={(e) => setEditingMemo({ ...editingMemo, comment: e.target.value })}
-          margin="normal"
-        />
-        <TextField
-          label="ページ番号"
-          type="number"
-          value={editingMemo?.page || ''}
-          onChange={(e) => setEditingMemo({ ...editingMemo, page: e.target.value })}
-          margin="normal"
-        />
-        <Button type="submit" variant="contained">更新</Button>
-        <Button onClick={handleClose} sx={{ ml: 1 }}>キャンセル</Button>
-      </Box>
+      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+        <DialogTitle>メモ詳細</DialogTitle>
+        <DialogContent>
+          {dialogMode === 'view' ? (
+            <>
+              <Typography variant="body1" sx={{ whiteSpace: 'pre-line', mb: 2 }}>{editingMemo?.text}</Typography>
+              {editingMemo?.comment && <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{editingMemo.comment}</Typography>}
+              <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
+                {Array.isArray(editingMemo?.tags) && editingMemo.tags.map((tag, idx) => (
+                  <Chip key={idx} label={tag} size="small" color="secondary" />
+                ))}
+              </Stack>
+              {editingMemo?.page && <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>p. {editingMemo.page}</Typography>}
+              {editingMemo?.createdAt && editingMemo.createdAt.toDate && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                  {editingMemo.createdAt.toDate().toLocaleString()}
+                </Typography>
+              )}
+            </>
+          ) : (
+            <Box component="form" onSubmit={handleUpdate} sx={{ mt: 1 }}>
+              <TextField
+                label="引用・抜き書き"
+                fullWidth
+                multiline
+                rows={4}
+                value={editingMemo?.text || ''}
+                onChange={(e) => setEditingMemo({ ...editingMemo, text: e.target.value })}
+                margin="normal"
+                required
+              />
+              <TextField
+                label="感想・コメント"
+                fullWidth
+                multiline
+                rows={2}
+                value={editingMemo?.comment || ''}
+                onChange={(e) => setEditingMemo({ ...editingMemo, comment: e.target.value })}
+                margin="normal"
+              />
+              <TextField
+                label="ページ番号"
+                type="number"
+                value={editingMemo?.page || ''}
+                onChange={(e) => setEditingMemo({ ...editingMemo, page: e.target.value })}
+                margin="normal"
+              />
+              <DialogActions sx={{ mt: 2 }}>
+                <Button type="submit" variant="contained">更新</Button>
+                <Button onClick={() => setDialogMode('view')}>キャンセル</Button>
+              </DialogActions>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'space-between', px: 3, pb: 2 }}>
+          {dialogMode === 'view' ? (
+            <>
+              <Button onClick={() => setDialogMode('edit')} variant="outlined">編集</Button>
+              <Button onClick={() => setShowDeleteConfirm(true)} color="error" variant="outlined">削除</Button>
+              <Button onClick={handleClose}>閉じる</Button>
+            </>
+          ) : null}
+        </DialogActions>
+        {/* 削除確認ダイアログ */}
+        <Dialog open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)}>
+          <DialogTitle>本当に削除しますか？</DialogTitle>
+          <DialogContent>
+            <Alert severity="error">このメモは完全に削除されます。元に戻せません。</Alert>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowDeleteConfirm(false)}>キャンセル</Button>
+            <Button onClick={() => { handleDelete(editingMemo.id); setShowDeleteConfirm(false); }} color="error" variant="contained">削除</Button>
+          </DialogActions>
+        </Dialog>
+      </Dialog>
     </Modal>
     </>
   );

@@ -48,23 +48,34 @@ describe('MemoList', () => {
     render(<MemoList bookId="test-book-id" />);
     
     expect(screen.getByText('メモ1')).toBeInTheDocument();
-    expect(screen.getByText(/p. 10/)).toBeInTheDocument();
+    const page10s = screen.getAllByText((content, element) => {
+      return element?.textContent?.replace(/\s/g, '') === 'p.10';
+    });
+    expect(page10s.length).toBeGreaterThan(0);
     expect(screen.getByText('メモ2')).toBeInTheDocument();
-    expect(screen.getByText(/p. 20/)).toBeInTheDocument();
+    const page20s = screen.getAllByText((content, element) => {
+      return element?.textContent?.replace(/\s/g, '') === 'p.20';
+    });
+    expect(page20s.length).toBeGreaterThan(0);
   });
 
   test('編集モーダルを開いてメモを更新する', async () => {
     const user = userEvent.setup();
     render(<MemoList bookId="test-book-id" />);
 
-    // メモ1の編集ボタンをクリック
+    // メモ1の編集ボタンをクリック（詳細ダイアログを開く）
     const editButtons = screen.getAllByRole('button', { name: /edit/i });
     await user.click(editButtons[0]);
 
-    // モーダルが表示され、値が正しいことを確認
+    // 詳細ダイアログが表示されていることを確認
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /メモを編集/ })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /メモ詳細/ })).toBeInTheDocument();
     });
+    // 「編集」ボタンをクリックして編集フォームを開く
+    const editDialogButton = screen.getByRole('button', { name: '編集' });
+    await user.click(editDialogButton);
+
+    // 編集フォームのラベル名を「引用・抜き書き」に修正
     const textInput = screen.getByLabelText(/引用・抜き書き/);
     const pageInput = screen.getByLabelText(/ページ番号/);
     expect(textInput).toHaveValue('メモ1');
@@ -89,15 +100,29 @@ describe('MemoList', () => {
   });
 
   test('メモを削除する', async () => {
-    window.confirm = jest.fn(() => true); // 確認ダイアログをモック
     const user = userEvent.setup();
     render(<MemoList bookId="test-book-id" />);
 
-    // メモ2の削除ボタンをクリック
-    const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
-    await user.click(deleteButtons[1]);
+    // メモ2の編集ボタンをクリック（詳細ダイアログを開く）
+    const editButtons = screen.getAllByRole('button', { name: /edit/i });
+    await user.click(editButtons[1]);
 
-    expect(window.confirm).toHaveBeenCalledWith('本当にこのメモを削除しますか？');
+    // 詳細ダイアログが表示されていることを確認
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /メモ詳細/ })).toBeInTheDocument();
+    });
+    // 「削除」ボタンをクリックして削除確認ダイアログを開く
+    const deleteDialogButton = screen.getByRole('button', { name: '削除' });
+    await user.click(deleteDialogButton);
+
+    // 削除確認ダイアログが表示されることを確認（タイトルで判定）
+    await waitFor(() => {
+      expect(screen.getByText('本当に削除しますか？')).toBeInTheDocument();
+    });
+    // 「削除」ボタンをクリック
+    const confirmDeleteButton = screen.getAllByRole('button', { name: '削除' }).pop(); // 最後の「削除」ボタン
+    await user.click(confirmDeleteButton);
+
     expect(deleteDoc).toHaveBeenCalledTimes(1);
   });
 
@@ -117,5 +142,54 @@ describe('MemoList', () => {
     expect(screen.getByText('名言')).toBeInTheDocument();
     expect(screen.getByText('感想')).toBeInTheDocument();
     expect(screen.getByText('引用')).toBeInTheDocument();
+  });
+
+  test('長文メモは2行で省略表示される', () => {
+    const longText = '1行目\n2行目\n3行目\n4行目';
+    const longMemo = [{ id: 'memo-long', text: longText, comment: '', page: 5 }];
+    onSnapshot.mockImplementation((query, callback) => {
+      callback({
+        docs: longMemo.map(memo => ({ id: memo.id, data: () => memo })),
+      });
+      return jest.fn();
+    });
+    render(<MemoList bookId="test-book-id" />);
+    // 条件に合う要素が1つ以上あることを検証
+    const candidates = screen.getAllByText((content, element) => {
+      const text = element?.textContent || '';
+      return text.includes('1行目') && text.includes('2行目') && !text.includes('3行目');
+    });
+    expect(candidates.length).toBeGreaterThan(0);
+  });
+
+  test('各カードに編集・削除ボタンが存在する', () => {
+    render(<MemoList bookId="test-book-id" />);
+    const editButtons = screen.getAllByRole('button', { name: /edit/i });
+    const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
+    expect(editButtons.length).toBeGreaterThan(0);
+    expect(deleteButtons.length).toBeGreaterThan(0);
+  });
+
+  test('メタ情報（ページ番号・日付・タグ）が表示される', () => {
+    const now = new Date();
+    const memoWithMeta = [{
+      id: 'memo-meta',
+      text: 'メモ',
+      comment: 'コメント',
+      page: 123,
+      tags: ['名言', '感想'],
+      createdAt: { toDate: () => now },
+    }];
+    onSnapshot.mockImplementation((query, callback) => {
+      callback({
+        docs: memoWithMeta.map(memo => ({ id: memo.id, data: () => memo })),
+      });
+      return jest.fn();
+    });
+    render(<MemoList bookId="test-book-id" />);
+    expect(screen.getByText('p.123')).toBeInTheDocument();
+    expect(screen.getByText(now.toLocaleDateString())).toBeInTheDocument();
+    expect(screen.getByText('名言')).toBeInTheDocument();
+    expect(screen.getByText('感想')).toBeInTheDocument();
   });
 }); 

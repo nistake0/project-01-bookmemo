@@ -95,6 +95,7 @@ const MemoAdd = ({ bookId }) => {
         onChange={(e) => setText(e.target.value)}
         margin="normal"
         required
+        inputProps={{ 'data-testid': 'memo-text-input' }}
       />
       <TextField
         label="感想・コメント"
@@ -137,7 +138,7 @@ const MemoAdd = ({ bookId }) => {
           <TextField {...params} label="タグ" margin="normal" fullWidth placeholder="例: 名言,感想,引用" />
         )}
       />
-      <Button type="submit" variant="contained">メモを追加</Button>
+      <Button type="submit" variant="contained" data-testid="memo-add-submit">メモを追加</Button>
     </Box>
   );
 };
