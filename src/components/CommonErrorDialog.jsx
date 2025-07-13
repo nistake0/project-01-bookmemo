@@ -1,16 +1,18 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Alert } from '@mui/material';
 
 export const ErrorDialogContext = React.createContext({ setGlobalError: () => {} });
 
 const CommonErrorDialog = ({ open, message, onClose }) => (
-  <Dialog open={open} onClose={onClose}>
-    <DialogTitle>エラー</DialogTitle>
+  <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+    <DialogTitle sx={{ color: 'error.main', fontWeight: 'bold' }}>エラーが発生しました</DialogTitle>
     <DialogContent>
-      {message}
+      <Alert severity="error" sx={{ mb: 2 }}>
+        {message}
+      </Alert>
     </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose} color="primary" autoFocus>
+    <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
+      <Button onClick={onClose} color="error" variant="contained" autoFocus>
         閉じる
       </Button>
     </DialogActions>
