@@ -126,7 +126,7 @@ export default function BookAdd() {
         setTags(nextTags);
 
       } else {
-        setError("書籍情報が見つかりませんでした");
+        setGlobalError("書籍情報が見つかりませんでした");
         setTitle("");
         setAuthor("");
         setPublisher("");
@@ -134,7 +134,7 @@ export default function BookAdd() {
         setCoverImageUrl("");
       }
     } catch (err) {
-      setError("書籍情報の取得に失敗しました");
+      setGlobalError("書籍情報の取得に失敗しました");
     } finally {
       setLoading(false);
     }
@@ -316,7 +316,7 @@ export default function BookAdd() {
           );
         }}
       />
-      {error && <Typography color="error" align="center">{error}</Typography>}
+      {/* エラーはグローバルダイアログで表示するため、ここでは非表示 */}
       <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} data-testid="book-add-submit">追加</Button>
 
       <Modal
