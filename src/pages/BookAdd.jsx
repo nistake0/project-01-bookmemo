@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc, serverTimestamp, getDocs, query, where, setDoc, doc, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
@@ -8,6 +8,7 @@ import axios from "axios";
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import BarcodeScanner from "../components/BarcodeScanner";
 import Autocomplete from '@mui/material/Autocomplete';
+import { ErrorDialogContext } from '../components/CommonErrorDialog';
 
 const modalStyle = {
   position: 'absolute',
@@ -38,6 +39,7 @@ export default function BookAdd() {
   const [tagOptions, setTagOptions] = useState([]);
   const [inputTagValue, setInputTagValue] = useState("");
   const navigate = useNavigate();
+  const { setGlobalError } = useContext(ErrorDialogContext);
 
   useEffect(() => {
     // Firestoreからタグ履歴（bookTagHistory）を取得（updatedAt降順）
@@ -66,6 +68,8 @@ export default function BookAdd() {
   const handleScanError = (errorMessage) => {
     setError(`スキャナーエラー: ${errorMessage}`);
     setScannerOpen(false);
+    console.log('[BookAdd] setGlobalError呼び出し', errorMessage);
+    setGlobalError(errorMessage);
   };
 
   const handleFetchBookInfo = async () => {

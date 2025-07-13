@@ -11,6 +11,10 @@ const BarcodeScanner = ({ onDetected, onError }) => {
     const videoElement = videoRef.current;
     let stream; 
 
+    const handleLoadedMetadata = () => {
+      videoElement.play().catch(err => console.error('play() failed:', err));
+    };
+
     const handlePlaying = () => {
       // ガード条件: 解像度が0、または既にスキャン処理が開始されている場合は何もしない
       if (videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
@@ -19,7 +23,6 @@ const BarcodeScanner = ({ onDetected, onError }) => {
       if (isScanning.current) {
         return;
       }
-      
       isScanning.current = true;
       readerRef.current.decodeFromStream(stream, videoElement, (result, err) => {
         if (result) {
@@ -27,16 +30,10 @@ const BarcodeScanner = ({ onDetected, onError }) => {
           onDetected(result.getText());
         }
         if (err && !(err instanceof NotFoundException)) {
-          // エラーが継続的に発生するのを防ぐため、一度報告したらループを止める
-          console.error('BarcodeScanner Error:', err);
           readerRef.current.reset();
           onError(err.message || 'スキャナーでエラーが発生しました。');
         }
       });
-    };
-
-    const handleLoadedMetadata = () => {
-      videoElement.play().catch(err => console.error('play() failed:', err));
     };
 
     const startScan = async () => {
@@ -49,13 +46,15 @@ const BarcodeScanner = ({ onDetected, onError }) => {
             }
           });
           videoElement.srcObject = stream;
+          videoElement.muted = true; // 追加: モバイル自動再生対策
           
           videoElement.addEventListener('loadedmetadata', handleLoadedMetadata);
           videoElement.addEventListener('playing', handlePlaying);
 
         } catch (error) {
-          console.error("Camera failed to start:", error);
-          onError("カメラの起動に失敗しました。");
+          const msg = `カメラの起動に失敗しました。ブラウザや端末のカメラ権限設定を確認し、許可されているかご確認ください。\n詳細: ${error && error.message ? error.message : ''}`;
+          console.log('[BarcodeScanner] onError呼び出し', msg);
+          onError(msg);
         }
       }
     };
@@ -82,7 +81,7 @@ const BarcodeScanner = ({ onDetected, onError }) => {
 
   return (
     <Box>
-      <video ref={videoRef} style={{ width: '100%', height: 'auto', border: '1px solid gray' }} playsInline />
+      <video ref={videoRef} style={{ width: '100%', height: 'auto', border: '1px solid gray' }} autoPlay muted playsInline />
     </Box>
   );
 };
