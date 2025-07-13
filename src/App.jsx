@@ -17,6 +17,7 @@ import { useState, useEffect } from 'react';
 import TagSearch from "./pages/TagSearch";
 import Stats from "./pages/Stats";
 import MyPage from "./pages/MyPage";
+import CommonErrorDialog, { ErrorDialogContext } from "./components/CommonErrorDialog";
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -90,11 +91,19 @@ function AppRoutes() {
 }
 
 function App() {
+  const [globalError, setGlobalError] = useState("");
   return (
     <AuthProvider>
-      <BrowserRouter basename="/project-01-bookmemo">
-        <AppRoutes />
-      </BrowserRouter>
+      <ErrorDialogContext.Provider value={{ setGlobalError }}>
+        <BrowserRouter basename="/project-01-bookmemo">
+          <AppRoutes />
+          <CommonErrorDialog
+            open={!!globalError}
+            message={globalError}
+            onClose={() => setGlobalError("")}
+          />
+        </BrowserRouter>
+      </ErrorDialogContext.Provider>
     </AuthProvider>
   );
 }
