@@ -1,107 +1,124 @@
-# 読書メモアプリ
+# BookMemo App（読書メモアプリ）— 100% Cursor自動生成プロジェクト
 
-スマホ・PC両対応のレスポンシブWebアプリで、書籍管理とメモ機能を提供するReactアプリケーションです。
+> **このリポジトリは、AIペアプログラミングツール [Cursor](https://cursor.sh) によって、
+> コード・設定ファイル・ドキュメントのすべてが自動生成されたことを実証・公開するためのプロジェクトです。**
+>
+> - 開発者（人間）は「次に何をすべきか」を日本語で指示したのみで、ソースコードやドキュメントの記述は一切行っていません。
+> - すべての設計・実装・テスト・運用・README/ARCHITECTURE.md/日報等のドキュメントもCursorが自動生成しています。
+> - 本アプリ（読書メモ管理）は、そのAI自動生成プロセスのデモ・検証用の題材です。
 
-## 機能
+---
 
-- 書籍管理（ISBNバーコードスキャン・手入力）
-- メモ・感想記録（OCR、画像添付対応予定）
-- 全文検索・タグ管理
-- ユーザー認証（Firebase Authentication）
+## プロジェクトの目的
 
-## 技術スタック
+- **Cursorによる100%自動生成開発の実証・公開**
+- AIによる設計・実装・ドキュメント生成の品質・再現性・運用性の検証
+- その過程・成果をGitHubで公開し、AI開発の可能性を広く共有
 
-- **フロントエンド**: React（Vite）、Material-UI
-- **バックエンド**: Firebase Firestore、Authentication
-- **テスト**: Jest、React Testing Library、Cypress
-- **デプロイ**: GitHub Pages
+---
 
-## 開発環境セットアップ
+# アプリ概要・特徴
+
+シンプルな読書メモを管理するWebアプリケーションです。書籍のISBNを元に書誌情報を取得し、メモと一緒に保存・管理することができます。
+
+*   **フロントエンド**: React (Vite)
+*   **データベース**: Firebase Firestore
+*   **認証**: Firebase Authentication
+
+より詳細な技術スタックや設計思想については、[**ARCHITECTURE.md**](./ARCHITECTURE.md) をご覧ください。
+
+## このリポジトリの特徴：AIによる100%のコード生成
+
+**このプロジェクトの最も特筆すべき点は、`cursor-chats` ディレクトリ内のチャットログを除き、すべてのコード、設定ファイル、ドキュメントがCursorとの対話を通じて自動生成されたものである、という点です。**
+
+開発者（ユーザー）は、日本語で「次に何をすべきか」を指示したのみで、ソースコードの記述は一切行っていません。
+
+### 開発の記録
+
+Cursorとの具体的なやり取りや、日々の開発の進捗は以下のドキュメントで確認できます。
+
+*   `cursor-chats/`: Cursorとの対話ログ（プロンプトとAIの応答）が格納されています。
+*   `doc/`: 日々の開発内容をまとめた日報が格納されています。
+
+## セットアップ手順
 
 ### 前提条件
-- Node.js v22以上
-- npm
+- Node.js
+- Firebase プロジェクトの作成
 
 ### インストール
 ```bash
 npm install
 ```
 
-### 開発サーバー起動
+### 環境変数の設定
+プロジェクトルートに `.env.local` ファイルを作成し、Firebaseプロジェクトの情報を記述してください。
+
+```
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+```
+
+### 開発サーバーの起動
 ```bash
 npm run dev
 ```
 
-### テスト実行
+## テスト
 
-#### ユニットテスト
+### ユニットテスト
 ```bash
 npm test
 ```
 
-#### E2Eテスト（ローカル実行）
-```bash
-# 開発サーバーを起動（別ターミナルで）
-npm run dev
+### E2Eテスト（Cypress）
+- CypressでE2Eテストを自動化
+- テスト用Firebaseユーザーは自動で作成・削除
+- テストは1ファイル1シナリオで分割・独立性重視
 
-# E2Eテスト実行
-npm run e2e
-
-# E2Eテスト（ブラウザで開く）
-npm run e2e:open
-
-# テストデータリセット
-npm run e2e:reset
-```
-
-## テスト実行手順
-
-### E2Eテストの実行手順
-
-1. **開発サーバー起動**
+#### 実行方法
+1. Firebaseサービスアカウント鍵（`serviceAccountKey.json`）をプロジェクト直下に配置（`.gitignore`済み）
+2. 依存パッケージのインストール
    ```bash
-   npm run dev
+   npm install
    ```
-
-2. **テストデータリセット**（必要に応じて）
+3. テスト用ユーザーの自動作成
    ```bash
-   npm run e2e:reset
+   npm run setup-test-user
    ```
+4. Cypressテストの実行
+   - 特定ファイルのみ: `npx cypress run --spec cypress/e2e/book_add.cy.js`
+   - すべて実行: `npx cypress run` または `npm run e2e`
 
-3. **E2Eテスト実行**
-   ```bash
-   # ヘッドレスモード
-   npm run e2e
-   
-   # ブラウザで開く
-   npm run e2e:open
-   ```
+#### 注意事項
+- `serviceAccountKey.json`は**絶対にGit管理しないでください**
+- テスト用ユーザーのメール・パスワードはスクリプトで変更可能
+- 詳細な運用・工夫は[ARCHITECTURE.md](./ARCHITECTURE.md)や`doc/`参照
 
-### テストファイル構成
+## 主な機能・設計の特徴
+- 書籍・メモにタグ付与（API自動セット＋履歴サジェスト＋編集可）
+- タグ履歴はFirestoreで用途別に管理し、Autocompleteで補完候補を表示
+- タグ検索・フィルタは大文字小文字・全角半角を区別せず快適に利用可能
+- UIはスマホ・PC両対応、タグ入力はカンマ区切りもOK
+- 書影・出版社・出版日などの書誌情報も管理
+- バグ・改善案・TODOは`doc/bug-feature-memo.md`で管理
+- 設計・運用方針は`ARCHITECTURE.md`や日報に詳細記載
 
-#### E2Eテスト
-- `cypress/e2e/book_login.cy.js` - ログイン画面
-- `cypress/e2e/book_add.cy.js` - 本追加
-- `cypress/e2e/memo_list_display.cy.js` - メモ一覧表示
-- `cypress/e2e/memo_list_buttons.cy.js` - メモボタン操作
-- `cypress/e2e/memo_list_edit.cy.js` - メモ編集
-- `cypress/e2e/memo_list_delete.cy.js` - メモ削除
-- `cypress/e2e/memo_list_ellipsis.cy.js` - メモ省略表示
+## 既知の制約・今後の課題
+- 画像添付は現状未対応（Firebase Storage無料枠の制約）
+- スマホのカメラ・バーコード読み取りに一部バグあり（バグメモ参照）
+- Algolia等の全文検索サービス、PWA化、タグ分析機能なども今後の拡張候補
 
-#### ユニットテスト
-- `src/pages/BookAdd.test.jsx`
-- `src/pages/BookDetail.test.jsx`
-- `src/pages/BookList.test.jsx`
-- `src/components/MemoAdd.test.jsx`
-- `src/components/MemoList.test.jsx`
-- `src/components/BarcodeScanner.test.jsx`（スキップ中）
+## 運用・セキュリティ履歴
+- Firestoreのセキュリティルールを本番用に設定し、認証ユーザーのみ自分のデータにアクセス可能に
+- ルール・インデックス・CLI認証・デプロイ手順は`firestore.rules`や`firebase.json`等で管理
+- 詳細は日報や`doc/`参照
 
-## 注意事項
-
-- **E2Eテスト**: ローカル環境でのみ実行（GitHub Actions課金回避のため）
-- **Firebase**: テスト用のFirebaseプロジェクト設定が必要
-- **HTTPS**: ローカル開発ではHTTPSが必要（カメラ機能のため）
-
-## ライセンス
-
-MIT License
+## 参考ドキュメント
+- [ARCHITECTURE.md](./ARCHITECTURE.md): 設計・運用方針の詳細
+- `doc/`: 日報・バグメモ・開発メモ
+- `cursor-chats/`: Cursorとの対話ログ
