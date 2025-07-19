@@ -180,27 +180,25 @@ graph TD
 
 ## 11. 今後の開発課題・TODO（2024-06-27追記）
 
-### E2EテストのCI/CD自動化
-- **目的**: GitHub ActionsでのE2Eテスト自動実行による品質保証の向上
-- **技術的実現可能性**: ✅ 技術的には可能（Cypress、Firebase、Node.js v22環境が整備済み）
-- **必要な作業**:
-  1. GitHub SecretsでFirebaseサービスアカウント鍵の設定
-  2. `.github/workflows/e2e-tests.yml`の作成・設定
-  3. CI/CD環境用のVite設定調整（HTTPS対応）
-  4. Cypress設定のCI/CD環境対応
-  5. テストデータ管理の自動化（resetTestBooks.cjs活用）
+### ローカルテスト実行の方針
+- **目的**: すべてのテストをローカル環境で実行し、課金リスクを排除
+- **実行方法**:
+  - ユニットテスト: `npm run test:unit` または `npm test`
+  - E2Eテスト: `npm run test:e2e` または `npm run e2e`
+  - 全テスト実行: `npm run test:all`
+  - E2Eテスト（GUI）: `npm run test:e2e:open`
+  - テスト用ユーザー設定: `npm run test:setup`
 
-- **期待される効果**:
-  - プルリクエスト時の自動テスト実行
-  - デグレードの早期発見
-  - 手動テスト工数の削減
-  - テスト結果の可視化・通知
+- **ローカル実行の利点**:
+  - 課金リスクの完全排除
+  - 開発環境での直接的なデバッグ
+  - テスト実行時間の短縮
+  - ネットワーク依存の排除
 
 - **注意事項**:
-  - Firebaseサービスアカウント鍵の適切な管理
-  - CI/CD環境専用のFirebaseプロジェクト推奨
-  - テスト実行時間の最適化（並列実行検討）
-  - 失敗時のスクリーンショット・動画保存
+  - ローカル環境でのFirebase設定が必要
+  - `serviceAccountKey.json`の適切な管理
+  - テスト実行前の環境確認
 
 ### その他の技術的課題
 - **BarcodeScannerテストの安定化**: 現在スキップ中のテストを有効化
