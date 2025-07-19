@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, serverTimestamp, collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../auth/AuthProvider';
 import { Typography, Box, Paper, Divider, Button, Chip, IconButton } from '@mui/material';
@@ -53,7 +53,6 @@ const BookDetail = () => {
     const fetchTagHistory = async () => {
       if (!user?.uid) return;
       try {
-        const { collection, query, orderBy, getDocs } = await import('firebase/firestore');
         const q = query(
           collection(db, "users", user.uid, "bookTagHistory"),
           orderBy("updatedAt", "desc")
