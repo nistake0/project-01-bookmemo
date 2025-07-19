@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, setDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Button, TextField, Box } from '@mui/material';
+import { Button, TextField, Box, Typography, Chip } from '@mui/material';
 import { useAuth } from '../auth/AuthProvider';
 import Autocomplete from '@mui/material/Autocomplete';
+import { ErrorDialogContext } from './CommonErrorDialog';
 
-const MemoAdd = ({ bookId }) => {
+const MemoAdd = ({ bookId, bookTags = [] }) => {
   const { user } = useAuth();
+  const { setGlobalError } = useContext(ErrorDialogContext);
   const [text, setText] = useState('');
   const [comment, setComment] = useState('');
   const [page, setPage] = useState('');
@@ -28,31 +30,44 @@ const MemoAdd = ({ bookId }) => {
         setTagOptions(tags);
       } catch (e) {
         console.error("メモ用タグ履歴の取得に失敗", e);
+        setGlobalError("タグ履歴の取得に失敗しました。");
       }
     };
     fetchTagHistory();
-  }, [user]);
+  }, [user, setGlobalError]);
+
+  // 書籍のタグを初期値として設定
+  useEffect(() => {
+    if (bookTags && bookTags.length > 0) {
+      setTags(bookTags);
+    }
+  }, [bookTags]);
 
   // タグ履歴に新規タグを保存
   const saveNewTagsToHistory = async (newTags) => {
     if (!user?.uid) return;
-    const batch = [];
-    for (const tag of newTags) {
-      if (!tagOptions.includes(tag)) {
-        const ref = doc(db, "users", user.uid, "memoTagHistory", tag);
-        batch.push(setDoc(ref, {
-          tag,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        }, { merge: true }));
-      } else {
-        const ref = doc(db, "users", user.uid, "memoTagHistory", tag);
-        batch.push(setDoc(ref, {
-          updatedAt: serverTimestamp(),
-        }, { merge: true }));
+    try {
+      const batch = [];
+      for (const tag of newTags) {
+        if (!tagOptions.includes(tag)) {
+          const ref = doc(db, "users", user.uid, "memoTagHistory", tag);
+          batch.push(setDoc(ref, {
+            tag,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          }, { merge: true }));
+        } else {
+          const ref = doc(db, "users", user.uid, "memoTagHistory", tag);
+          batch.push(setDoc(ref, {
+            updatedAt: serverTimestamp(),
+          }, { merge: true }));
+        }
       }
+      await Promise.all(batch);
+    } catch (error) {
+      console.error("タグ履歴の保存に失敗", error);
+      setGlobalError("タグ履歴の保存に失敗しました。");
     }
-    await Promise.all(batch);
   };
 
   const handleSubmit = async (e) => {
@@ -81,6 +96,7 @@ const MemoAdd = ({ bookId }) => {
       setInputTagValue('');
     } catch (error) {
       console.error("Error adding memo: ", error);
+      setGlobalError("メモの追加に失敗しました。");
     }
   };
 

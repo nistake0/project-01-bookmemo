@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { List, ListItem, ListItemText, Typography, IconButton, Box, Modal, TextField, Button, Chip, Stack } from '@mui/material';
@@ -10,6 +10,7 @@ import DialogActions from '@mui/material/DialogActions';
 import Alert from '@mui/material/Alert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import { ErrorDialogContext } from './CommonErrorDialog';
 
 const style = {
   position: 'absolute',
@@ -24,6 +25,7 @@ const style = {
 };
 
 const MemoList = ({ bookId }) => {
+  const { setGlobalError } = useContext(ErrorDialogContext);
   const [memos, setMemos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingMemo, setEditingMemo] = useState(null);
@@ -58,6 +60,7 @@ const MemoList = ({ bookId }) => {
       handleClose();
     } catch (error) {
       console.error("Error updating memo: ", error);
+      setGlobalError("メモの更新に失敗しました。");
     }
   };
 
@@ -67,6 +70,7 @@ const MemoList = ({ bookId }) => {
       handleClose();
     } catch (error) {
       console.error("Error deleting memo: ", error);
+      setGlobalError("メモの削除に失敗しました。");
     }
   };
 
@@ -82,11 +86,12 @@ const MemoList = ({ bookId }) => {
       setLoading(false);
     }, (error) => {
       console.error("Error fetching memos:", error);
+      setGlobalError("メモ一覧の取得に失敗しました。");
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [bookId]);
+  }, [bookId, setGlobalError]);
 
   if (loading) return <Typography>メモを読み込み中...</Typography>;
   if (memos.length === 0) return <Typography>まだメモはありません。</Typography>;
@@ -205,36 +210,37 @@ const MemoList = ({ bookId }) => {
                 value={editingMemo?.page || ''}
                 onChange={(e) => setEditingMemo({ ...editingMemo, page: e.target.value })}
                 margin="normal"
+                sx={{ mr: 2 }}
               />
-              <DialogActions sx={{ mt: 2 }}>
-                <Button type="submit" variant="contained">更新</Button>
-                <Button onClick={() => setDialogMode('view')}>キャンセル</Button>
-              </DialogActions>
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ justifyContent: 'space-between', px: 3, pb: 2 }}>
+        <DialogActions>
           {dialogMode === 'view' ? (
             <>
-              <Button onClick={() => setDialogMode('edit')} variant="outlined">編集</Button>
-              <Button onClick={() => setShowDeleteConfirm(true)} color="error" variant="outlined">削除</Button>
+              <Button onClick={() => setDialogMode('edit')}>編集</Button>
+              <Button onClick={() => setShowDeleteConfirm(true)} color="error">削除</Button>
               <Button onClick={handleClose}>閉じる</Button>
             </>
-          ) : null}
+          ) : (
+            <>
+              <Button onClick={() => setDialogMode('view')}>キャンセル</Button>
+              <Button onClick={handleUpdate} variant="contained">更新</Button>
+            </>
+          )}
         </DialogActions>
-        {/* 削除確認ダイアログ */}
-        <Dialog open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)}>
-          <DialogTitle>本当に削除しますか？</DialogTitle>
-          <DialogContent>
-            <Alert severity="error">このメモは完全に削除されます。元に戻せません。</Alert>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setShowDeleteConfirm(false)}>キャンセル</Button>
-            <Button onClick={() => { handleDelete(editingMemo.id); setShowDeleteConfirm(false); }} color="error" variant="contained">削除</Button>
-          </DialogActions>
-        </Dialog>
       </Dialog>
     </Modal>
+    <Dialog open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)}>
+      <DialogTitle>本当に削除しますか？</DialogTitle>
+      <DialogContent>
+        <Typography>このメモを削除すると、元に戻すことはできません。</Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setShowDeleteConfirm(false)}>キャンセル</Button>
+        <Button onClick={() => handleDelete(editingMemo?.id)} color="error" variant="contained">削除</Button>
+      </DialogActions>
+    </Dialog>
     </>
   );
 };
