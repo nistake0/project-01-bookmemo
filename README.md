@@ -79,6 +79,7 @@ npm test
 - CypressでE2Eテストをローカル実行
 - テスト用Firebaseユーザーは自動で作成・削除
 - テストは1ファイル1シナリオで分割・独立性重視
+- **重要**: E2Eテスト実行には開発サーバーの起動が必須
 
 #### 実行方法
 1. Firebaseサービスアカウント鍵（`serviceAccountKey.json`）をプロジェクト直下に配置（`.gitignore`済み）
@@ -90,7 +91,11 @@ npm test
    ```bash
    npm run test:setup
    ```
-4. Cypressテストの実行
+4. **開発サーバーの起動**（E2Eテスト実行に必須）
+   ```bash
+   npm run dev
+   ```
+5. Cypressテストの実行
    - 特定ファイルのみ: `npx cypress run --spec cypress/e2e/book_add.cy.js`
    - すべて実行: `npm run test:e2e` または `npm run e2e`
    - GUIモード: `npm run test:e2e:open`
@@ -98,6 +103,7 @@ npm test
 
 #### 注意事項
 - `serviceAccountKey.json`は**絶対にGit管理しないでください**
+- **E2Eテスト実行前には必ず開発サーバー（`npm run dev`）を起動してください**
 - テスト用ユーザーのメール・パスワードはスクリプトで変更可能
 - 詳細な運用・工夫は[ARCHITECTURE.md](./ARCHITECTURE.md)や`doc/`参照
 
