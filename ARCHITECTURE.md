@@ -168,6 +168,7 @@ graph TD
 - API由来の標準化タグとユーザー独自タグの両立を実現
 
 ### E2Eテスト安定化の工夫
+- **開発サーバーの起動**: E2Eテスト実行前には必ず`npm run dev`で開発サーバーを起動
 - テスト前にFirestore等のテストデータをリセットし、毎回同じ状態からテストを開始
 - 重要なボタンや入力欄にはdata-testidを付与し、セレクタの堅牢性を高める
 - Cypressのactionabilityエラー（要素がhidden/覆われている等）は、`{force: true}`や`should('be.visible')`等で適切に回避
@@ -198,6 +199,7 @@ graph TD
 - **注意事項**:
   - ローカル環境でのFirebase設定が必要
   - `serviceAccountKey.json`の適切な管理
+  - **E2Eテスト実行前には必ず開発サーバー（`npm run dev`）を起動**
   - テスト実行前の環境確認
 
 ### その他の技術的課題
