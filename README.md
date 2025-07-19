@@ -120,6 +120,16 @@ npm test
 - ルール・インデックス・CLI認証・デプロイ手順は`firestore.rules`や`firebase.json`等で管理
 - 詳細は日報や`doc/`参照
 
+## 開発開始時の手順
+
+新しい開発セッションを開始する際は、以下の手順を実行してください：
+
+1. `doc/development-startup-prompts.md` ファイルを確認
+2. 記載されている3つのプロンプトを順番に実行：
+   - プロジェクト状況確認
+   - テスト状況確認  
+   - 開発方針議論
+
 ## 参考ドキュメント
 - [ARCHITECTURE.md](./ARCHITECTURE.md): 設計・運用方針の詳細
 - `doc/`: 日報・バグメモ・開発メモ
