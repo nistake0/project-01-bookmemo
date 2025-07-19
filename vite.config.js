@@ -8,6 +8,8 @@ export default defineConfig({
   base: '/project-01-bookmemo/',
   server: {
     host: true,
+    // CI/CD環境でのHTTPS対応
+    https: process.env.CI ? false : true,
   },
   test: {
   },

@@ -9,7 +9,10 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "jest",
-    "setup-test-user": "node scripts/setupTestUser.cjs"
+    "setup-test-user": "node scripts/setupTestUser.cjs",
+    "e2e": "cypress run",
+    "e2e:open": "cypress open",
+    "e2e:reset": "node scripts/resetTestBooks.cjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
