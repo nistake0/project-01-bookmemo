@@ -15,6 +15,13 @@ import MemoEditor from './MemoEditor';
  * - モード切り替え（表示⇔編集）
  */
 
+// Auth モック
+jest.mock('../auth/AuthProvider', () => ({
+  useAuth: () => ({
+    user: { uid: 'test-user-id' },
+  }),
+}));
+
 // Firebaseのモック
 jest.mock('../firebase', () => ({
   db: {},
@@ -26,6 +33,21 @@ jest.mock('firebase/firestore', () => ({
   updateDoc: jest.fn(() => Promise.resolve()),
   deleteDoc: jest.fn(() => Promise.resolve()),
   serverTimestamp: jest.fn(() => ({ _seconds: 1234567890 })),
+  collection: jest.fn(() => ({ id: 'collection1' })),
+  query: jest.fn(() => ({ id: 'query1' })),
+  orderBy: jest.fn(() => ({ id: 'orderBy1' })),
+  getDocs: jest.fn(() => Promise.resolve({ docs: [] })),
+  addDoc: jest.fn(() => Promise.resolve({ id: 'new-doc-id' })),
+}));
+
+// useTagHistoryフックのモック
+jest.mock('../hooks/useTagHistory', () => ({
+  useTagHistory: () => ({
+    tagOptions: ['テスト', 'サンプル', 'メモ'],
+    loading: false,
+    fetchTagHistory: jest.fn(),
+    saveTagsToHistory: jest.fn(),
+  }),
 }));
 
 const theme = createTheme();
@@ -199,8 +221,9 @@ describe('MemoEditor', () => {
       />
     );
 
-    // 閉じるボタンをクリック
-    const closeButton = screen.getByText('閉じる');
+    // 閉じるボタンをクリック（最初の閉じるボタンを選択）
+    const closeButtons = screen.getAllByText('閉じる');
+    const closeButton = closeButtons[0]; // 最初の閉じるボタンを選択
     fireEvent.click(closeButton);
 
     // onCloseコールバックが呼ばれることを確認

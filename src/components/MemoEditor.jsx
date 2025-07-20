@@ -11,6 +11,7 @@ import {
   Chip,
   Box 
 } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { ErrorDialogContext } from './CommonErrorDialog';
 import { useMemo } from '../hooks/useMemo';
 
@@ -20,6 +21,7 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
   const [dialogMode, setDialogMode] = useState('view'); // 'view' or 'edit'
   const [editingMemo, setEditingMemo] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [inputTagValue, setInputTagValue] = useState("");
 
   // メモが変更されたときに編集状態をリセット
   React.useEffect(() => {
@@ -27,6 +29,7 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
       setEditingMemo(memo);
       setDialogMode('view');
       setShowDeleteConfirm(false);
+      setInputTagValue("");
     }
   }, [memo]);
 
@@ -34,21 +37,36 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
     setEditingMemo(null);
     setDialogMode('view');
     setShowDeleteConfirm(false);
+    setInputTagValue("");
     onClose();
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (!editingMemo || !editingMemo.text.trim()) return;
+    console.log('MemoEditor - handleUpdate開始:', editingMemo);
+
+    // 未確定のタグ入力があればtagsに追加
+    let tagsToSave = editingMemo.tags || [];
+    if (inputTagValue && !tagsToSave.includes(inputTagValue)) {
+      tagsToSave = [...tagsToSave, inputTagValue];
+    }
+    console.log('MemoEditor - 保存するタグ:', tagsToSave);
 
     try {
+      console.log('MemoEditor - updateMemo呼び出し前');
       await updateMemo(editingMemo.id, {
         text: editingMemo.text,
         comment: editingMemo.comment,
         page: Number(editingMemo.page) || null,
+        tags: tagsToSave,
       });
+      console.log('MemoEditor - updateMemo呼び出し完了');
       handleClose();
-      if (onUpdate) onUpdate();
+      if (onUpdate) {
+        console.log('MemoEditor - onUpdateコールバック呼び出し');
+        onUpdate();
+      }
     } catch (error) {
       console.error("Error updating memo: ", error);
       setGlobalError("メモの更新に失敗しました。");
@@ -120,6 +138,39 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
                 margin="normal"
                 sx={{ mr: 2 }}
                 inputProps={{ 'data-testid': 'memo-page-input' }}
+              />
+              <Autocomplete
+                multiple
+                freeSolo
+                options={[]}
+                value={editingMemo?.tags || []}
+                getOptionLabel={option => typeof option === 'string' ? option : (option.inputValue || option.tag || '')}
+                onChange={(event, newValue) => {
+                  const normalized = (newValue || []).map(v => {
+                    if (typeof v === 'string') return v;
+                    if (v && typeof v === 'object') {
+                      if ('inputValue' in v && v.inputValue) return v.inputValue;
+                      if ('tag' in v && v.tag) return v.tag;
+                    }
+                    return '';
+                  }).filter(Boolean);
+                  setEditingMemo({ ...editingMemo, tags: normalized });
+                }}
+                inputValue={inputTagValue}
+                onInputChange={(event, newInputValue) => setInputTagValue(newInputValue)}
+                renderInput={(params) => (
+                  <TextField 
+                    {...params} 
+                    label="タグ" 
+                    margin="normal" 
+                    fullWidth 
+                    placeholder="例: 名言,感想,引用" 
+                    inputProps={{ 
+                      ...params.inputProps,
+                      'data-testid': 'memo-tags-input' 
+                    }} 
+                  />
+                )}
               />
             </Box>
           )}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Paper, Divider, Typography } from '@mui/material';
 import MemoList from '../components/MemoList';
@@ -10,6 +10,7 @@ import { useBook } from '../hooks/useBook';
 const BookDetail = () => {
   const { id } = useParams();
   const { book, loading, error, updateBookStatus, updateBookTags } = useBook(id);
+  const [memoListKey, setMemoListKey] = useState(0); // MemoListの再レンダリング用
 
   const handleStatusChange = (newStatus) => {
     updateBookStatus(newStatus);
@@ -17,6 +18,16 @@ const BookDetail = () => {
 
   const handleTagsChange = (newTags) => {
     updateBookTags(newTags);
+  };
+
+  const handleMemoAdded = () => {
+    console.log('BookDetail - handleMemoAdded: MemoListを再レンダリング');
+    setMemoListKey(prev => prev + 1); // MemoListを強制的に再レンダリング
+  };
+
+  const handleMemoUpdated = () => {
+    console.log('BookDetail - handleMemoUpdated: MemoListを再レンダリング');
+    setMemoListKey(prev => prev + 1); // MemoListを強制的に再レンダリング
   };
 
   if (loading) return <div>Loading...</div>;
@@ -32,10 +43,10 @@ const BookDetail = () => {
         
         <Divider sx={{ my: 2 }} />
         <Typography variant="h5" gutterBottom>メモ一覧</Typography>
-        <MemoList bookId={book.id} />
+        <MemoList key={memoListKey} bookId={book.id} onMemoUpdated={handleMemoUpdated} />
         <Divider sx={{ my: 2 }} />
         <Typography variant="h5" gutterBottom>メモを追加</Typography>
-        <MemoAdd bookId={book.id} bookTags={book.tags || []} />
+        <MemoAdd bookId={book.id} bookTags={book.tags || []} onMemoAdded={handleMemoAdded} />
       </Paper>
     </Box>
   );

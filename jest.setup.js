@@ -19,10 +19,13 @@ configure({
 const originalError = console.error;
 beforeAll(() => {
   console.error = (...args) => {
+    // act()関連の警告を抑制
     if (
       typeof args[0] === 'string' &&
-      args[0].includes('Warning: An update to') &&
-      args[0].includes('was not wrapped in act')
+      (args[0].includes('Warning: An update to') ||
+       args[0].includes('was not wrapped in act') ||
+       args[0].includes('The current testing environment is not configured to support act') ||
+       args[0].includes('You seem to have overlapping act() calls'))
     ) {
       return;
     }
