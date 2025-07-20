@@ -73,7 +73,7 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
   return (
     <>
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>メモ詳細</DialogTitle>
+        <DialogTitle data-testid="memo-detail-title">メモ詳細</DialogTitle>
         <DialogContent>
           {dialogMode === 'view' ? (
             <>
@@ -126,27 +126,27 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
         <DialogActions>
           {dialogMode === 'view' ? (
             <>
-              <Button onClick={() => setDialogMode('edit')}>編集</Button>
-              <Button onClick={() => setShowDeleteConfirm(true)} color="error">削除</Button>
-              <Button onClick={handleClose}>閉じる</Button>
+              <Button onClick={() => setDialogMode('edit')} data-testid="memo-edit-button">編集</Button>
+              <Button onClick={() => setShowDeleteConfirm(true)} color="error" data-testid="memo-delete-button">削除</Button>
+              <Button onClick={handleClose} data-testid="memo-close-button">閉じる</Button>
             </>
           ) : (
             <>
-              <Button onClick={() => setDialogMode('view')}>キャンセル</Button>
-              <Button onClick={handleUpdate} variant="contained">更新</Button>
+              <Button onClick={() => setDialogMode('view')} data-testid="memo-cancel-button">キャンセル</Button>
+              <Button onClick={handleUpdate} variant="contained" data-testid="memo-update-button">更新</Button>
             </>
           )}
         </DialogActions>
       </Dialog>
 
       <Dialog open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)}>
-        <DialogTitle>本当に削除しますか？</DialogTitle>
+        <DialogTitle data-testid="memo-delete-confirm-title">本当に削除しますか？</DialogTitle>
         <DialogContent>
           <Typography>このメモを削除すると、元に戻すことはできません。</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowDeleteConfirm(false)}>キャンセル</Button>
-          <Button onClick={() => handleDelete(editingMemo?.id)} color="error" variant="contained">削除</Button>
+          <Button onClick={() => setShowDeleteConfirm(false)} data-testid="memo-delete-cancel-button">キャンセル</Button>
+          <Button onClick={() => handleDelete(editingMemo?.id)} color="error" variant="contained" data-testid="memo-delete-confirm-button">削除</Button>
         </DialogActions>
       </Dialog>
     </>

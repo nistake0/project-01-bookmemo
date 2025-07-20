@@ -17,7 +17,7 @@ export default function BookAdd() {
 
   return (
     <Box sx={{ maxWidth: 500, mx: "auto", mt: 8, pb: 8 }}>
-      <Typography variant="h5" align="center" gutterBottom>本を追加</Typography>
+      <Typography variant="h5" align="center" gutterBottom data-testid="book-add-title">本を追加</Typography>
       
       <BookScanner 
         onScanDetected={handleScanDetected}
