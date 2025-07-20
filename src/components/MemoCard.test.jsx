@@ -116,56 +116,42 @@ describe('MemoCard', () => {
   });
 
   /**
-   * テストケース: 編集ボタンの動作
+   * テストケース: メモカードの編集・削除ボタン動作確認
    * 
-   * 目的: 編集ボタンをクリックした場合、onEditコールバックが正しいメモデータで呼ばれることを確認
+   * 目的: メモカードの編集・削除ボタンが正しく表示され、クリック時に適切なコールバックが呼ばれることを確認
    * 
    * テストステップ:
-   * 1. MemoCardをレンダリング
-   * 2. 編集ボタンをクリック
-   * 3. mockOnEditが正しいメモデータで呼ばれることを確認
+   * 1. メモカードをレンダリング
+   * 2. 編集ボタンが存在することを確認
+   * 3. 削除ボタンが存在することを確認
+   * 4. 編集ボタンをクリックしてonEditコールバックが呼ばれることを確認
+   * 5. 削除ボタンをクリックしてonDeleteコールバックが呼ばれることを確認
    */
-  it('calls onEdit when edit button is clicked', () => {
+  it('handles edit and delete button clicks', () => {
+    const mockOnEdit = jest.fn();
+    const mockOnDelete = jest.fn();
+
     renderWithProviders(
-      <MemoCard 
-        memo={mockMemo} 
-        onEdit={mockOnEdit} 
-        onDelete={mockOnDelete} 
+      <MemoCard
+        memo={mockMemo}
+        onEdit={mockOnEdit}
+        onDelete={mockOnDelete}
       />
     );
+
+    // 編集・削除ボタンが存在することを確認
+    const editButton = screen.getByTestId('memo-edit-button');
+    const deleteButton = screen.getByTestId('memo-delete-button');
+
+    expect(editButton).toBeInTheDocument();
+    expect(deleteButton).toBeInTheDocument();
 
     // 編集ボタンをクリック
-    const editButton = screen.getByLabelText('edit');
     fireEvent.click(editButton);
-
-    // onEditコールバックが正しいメモデータで呼ばれることを確認
     expect(mockOnEdit).toHaveBeenCalledWith(mockMemo);
-  });
-
-  /**
-   * テストケース: 削除ボタンの動作
-   * 
-   * 目的: 削除ボタンをクリックした場合、onDeleteコールバックが正しいメモIDで呼ばれることを確認
-   * 
-   * テストステップ:
-   * 1. MemoCardをレンダリング
-   * 2. 削除ボタンをクリック
-   * 3. mockOnDeleteが正しいメモIDで呼ばれることを確認
-   */
-  it('calls onDelete when delete button is clicked', () => {
-    renderWithProviders(
-      <MemoCard 
-        memo={mockMemo} 
-        onEdit={mockOnEdit} 
-        onDelete={mockOnDelete} 
-      />
-    );
 
     // 削除ボタンをクリック
-    const deleteButton = screen.getByLabelText('delete');
     fireEvent.click(deleteButton);
-
-    // onDeleteコールバックが正しいメモIDで呼ばれることを確認
     expect(mockOnDelete).toHaveBeenCalledWith('memo1');
   });
 

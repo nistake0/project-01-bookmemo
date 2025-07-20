@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import BookScanner from './BookScanner';
 import { ErrorDialogContext } from './CommonErrorDialog';
 
@@ -26,12 +26,11 @@ jest.mock('./BarcodeScanner', () => {
   };
 });
 
-const mockSetGlobalError = jest.fn();
+// モック関数
+const mockOnScan = jest.fn();
 
-/**
- * テスト用のレンダリング関数
- * ErrorDialogContextでコンポーネントをラップ
- */
+// テスト用のレンダリング関数
+const mockSetGlobalError = jest.fn();
 const renderWithProviders = (component) => {
   return render(
     <ErrorDialogContext.Provider value={{ setGlobalError: mockSetGlobalError }}>
@@ -40,161 +39,157 @@ const renderWithProviders = (component) => {
   );
 };
 
+// モックの設定
+beforeEach(() => {
+  mockOnScan.mockClear();
+});
+
+afterEach(() => {
+  // モックをクリア
+  jest.clearAllMocks();
+});
+
 describe('BookScanner', () => {
-  const mockOnScanDetected = jest.fn();
-  const mockOnScanError = jest.fn();
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   /**
-   * テストケース: スキャンボタンの表示
+   * テストケース: バーコードスキャンボタンの表示確認
    * 
-   * 目的: バーコードスキャンボタンが正しく表示されることを確認
+   * 目的: BookScannerコンポーネントが正しくレンダリングされ、
+   * バーコードスキャンボタンが表示されることを確認
    * 
    * テストステップ:
    * 1. BookScannerコンポーネントをレンダリング
-   * 2. バーコードスキャンボタンが存在することを確認
+   * 2. バーコードスキャンボタンが表示されることを確認
    */
   it('renders scan button', () => {
-    renderWithProviders(
-      <BookScanner 
-        onScanDetected={mockOnScanDetected}
-        onScanError={mockOnScanError}
-      />
-    );
-
-    expect(screen.getByRole('button', { name: /バーコードスキャン/ })).toBeInTheDocument();
+    renderWithProviders(<BookScanner onScan={mockOnScan} />);
+    
+    expect(screen.getByTestId('barcode-scan-button')).toBeInTheDocument();
   });
 
   /**
-   * テストケース: スキャンボタンクリック時のモーダル表示
+   * テストケース: モーダルの開閉機能
    * 
-   * 目的: スキャンボタンをクリックした場合、バーコードスキャナーのモーダルが
-   * 表示されることを確認
+   * 目的: スキャンボタンをクリックした場合、モーダルが開き、
+   * 閉じるボタンをクリックした場合、モーダルが閉じることを確認
    * 
    * テストステップ:
    * 1. BookScannerコンポーネントをレンダリング
-   * 2. バーコードスキャンボタンをクリック
-   * 3. バーコードスキャナーがモーダル内に表示されることを確認
+   * 2. スキャンボタンをクリック
+   * 3. モーダルが開くことを確認
+   * 4. 閉じるボタンをクリック
+   * 5. モーダルが閉じることを確認
    */
-  it('opens modal when scan button is clicked', () => {
-    renderWithProviders(
-      <BookScanner 
-        onScanDetected={mockOnScanDetected}
-        onScanError={mockOnScanError}
-      />
-    );
+  it('opens and closes modal', () => {
+    renderWithProviders(<BookScanner onScan={mockOnScan} />);
 
     // スキャンボタンをクリック
-    const scanButton = screen.getByRole('button', { name: /バーコードスキャン/ });
+    const scanButton = screen.getByTestId('barcode-scan-button');
     fireEvent.click(scanButton);
 
-    // バーコードスキャナーがモーダル内に表示されることを確認
-    expect(screen.getByTestId('barcode-scanner')).toBeInTheDocument();
-  });
-
-  /**
-   * テストケース: モーダル閉じるボタンの動作
-   * 
-   * 目的: モーダルの閉じるボタン（×）をクリックした場合、モーダルが閉じられることを確認
-   * 
-   * テストステップ:
-   * 1. BookScannerコンポーネントをレンダリング
-   * 2. スキャンボタンをクリックしてモーダルを開く
-   * 3. 閉じるボタン（×）をクリック
-   * 4. モーダルが閉じられていることを確認
-   */
-  it('closes modal when close button is clicked', () => {
-    renderWithProviders(
-      <BookScanner 
-        onScanDetected={mockOnScanDetected}
-        onScanError={mockOnScanError}
-      />
-    );
-
-    // モーダルを開く
-    const scanButton = screen.getByRole('button', { name: /バーコードスキャン/ });
-    fireEvent.click(scanButton);
+    // モーダルが開くことを確認
+    expect(screen.getByTestId('barcode-scan-modal')).toBeInTheDocument();
 
     // 閉じるボタンをクリック
     const closeButton = screen.getByText('×');
     fireEvent.click(closeButton);
 
-    // モーダルが閉じられていることを確認
-    expect(screen.queryByTestId('barcode-scanner')).not.toBeInTheDocument();
+    // モーダルが閉じることを確認
+    expect(screen.queryByTestId('barcode-scan-modal')).not.toBeInTheDocument();
   });
 
   /**
-   * テストケース: バーコード検出時の処理
+   * テストケース: バーコード検出時のコールバック呼び出し
    * 
-   * 目的: バーコードが検出された場合、onScanDetectedコールバックが呼ばれ、
-   * モーダルが自動的に閉じられることを確認
+   * 目的: バーコードが検出された場合、onScanコールバックが正しいISBNで呼ばれることを確認
    * 
    * テストステップ:
    * 1. BookScannerコンポーネントをレンダリング
-   * 2. スキャンボタンをクリックしてモーダルを開く
-   * 3. モックのスキャン成功ボタンをクリック
-   * 4. onScanDetectedが正しいISBNで呼ばれることを確認
-   * 5. モーダルが自動的に閉じられることを確認
+   * 2. スキャンボタンをクリック
+   * 3. モーダルが開くことを確認
+   * 4. 成功ボタンをクリック
+   * 5. onScanコールバックが正しいISBNで呼ばれることを確認
    */
-  it('calls onScanDetected when barcode is detected', () => {
-    renderWithProviders(
-      <BookScanner 
-        onScanDetected={mockOnScanDetected}
-        onScanError={mockOnScanError}
-      />
-    );
+  it('calls onScan when barcode is detected', async () => {
+    renderWithProviders(<BookScanner onScan={mockOnScan} />);
 
-    // モーダルを開く
-    const scanButton = screen.getByRole('button', { name: /バーコードスキャン/ });
+    // スキャンボタンをクリック
+    const scanButton = screen.getByTestId('barcode-scan-button');
     fireEvent.click(scanButton);
 
-    // スキャン成功ボタンをクリック（バーコード検出をシミュレート）
-    const scanSuccessButton = screen.getByText('Scan Success');
-    fireEvent.click(scanSuccessButton);
+    // モーダルが開くことを確認
+    expect(screen.getByTestId('barcode-scan-modal')).toBeInTheDocument();
 
-    // onScanDetectedが正しいISBNで呼ばれることを確認
-    expect(mockOnScanDetected).toHaveBeenCalledWith('9784873119485');
-    
-    // モーダルが自動的に閉じられることを確認
-    expect(screen.queryByTestId('barcode-scanner')).not.toBeInTheDocument();
+    // 成功ボタンをクリック
+    const successButton = screen.getByText('Scan Success');
+    fireEvent.click(successButton);
+
+    // onScanコールバックが正しいISBNで呼ばれることを確認
+    await waitFor(() => {
+      expect(mockOnScan).toHaveBeenCalledWith('9784873119485');
+    }, { timeout: 3000 });
   });
 
   /**
    * テストケース: スキャンエラー時の処理
    * 
-   * 目的: スキャンエラーが発生した場合、setGlobalErrorが呼ばれ、
-   * モーダルが自動的に閉じられることを確認
+   * 目的: バーコードスキャンでエラーが発生した場合、エラーメッセージが表示されることを確認
    * 
    * テストステップ:
    * 1. BookScannerコンポーネントをレンダリング
-   * 2. スキャンボタンをクリックしてモーダルを開く
-   * 3. モックのスキャンエラーボタンをクリック
-   * 4. setGlobalErrorが正しいエラーメッセージで呼ばれることを確認
-   * 5. モーダルが自動的に閉じられることを確認
+   * 2. スキャンボタンをクリック
+   * 3. モーダルが開くことを確認
+   * 4. エラーボタンをクリック
+   * 5. setGlobalErrorが呼ばれることを確認
    */
-  it('calls setGlobalError when scan error occurs', () => {
-    renderWithProviders(
-      <BookScanner 
-        onScanDetected={mockOnScanDetected}
-        onScanError={mockOnScanError}
-      />
-    );
+  it('handles scan errors', async () => {
+    renderWithProviders(<BookScanner onScan={mockOnScan} />);
 
-    // モーダルを開く
-    const scanButton = screen.getByRole('button', { name: /バーコードスキャン/ });
+    // スキャンボタンをクリック
+    const scanButton = screen.getByTestId('barcode-scan-button');
     fireEvent.click(scanButton);
 
-    // スキャンエラーボタンをクリック（スキャンエラーをシミュレート）
-    const scanErrorButton = screen.getByText('Scan Error');
-    fireEvent.click(scanErrorButton);
+    // モーダルが開くことを確認
+    expect(screen.getByTestId('barcode-scan-modal')).toBeInTheDocument();
 
-    // setGlobalErrorが正しいエラーメッセージで呼ばれることを確認
-    expect(mockSetGlobalError).toHaveBeenCalledWith('Scanner error');
-    
-    // モーダルが自動的に閉じられることを確認
-    expect(screen.queryByTestId('barcode-scanner')).not.toBeInTheDocument();
+    // エラーボタンをクリック
+    const errorButton = screen.getByText('Scan Error');
+    fireEvent.click(errorButton);
+
+    // setGlobalErrorが呼ばれることを確認
+    await waitFor(() => {
+      expect(mockSetGlobalError).toHaveBeenCalledWith('Scanner error');
+    }, { timeout: 3000 });
+  });
+
+  /**
+   * テストケース: バーコード検出時のモーダル自動閉じ
+   * 
+   * 目的: バーコードが検出された場合、モーダルが自動的に閉じることを確認
+   * 
+   * テストステップ:
+   * 1. BookScannerコンポーネントをレンダリング
+   * 2. スキャンボタンをクリック
+   * 3. モーダルが開くことを確認
+   * 4. 成功ボタンをクリック
+   * 5. モーダルが自動的に閉じることを確認
+   */
+  it('closes modal automatically when barcode is detected', async () => {
+    renderWithProviders(<BookScanner onScan={mockOnScan} />);
+
+    // スキャンボタンをクリック
+    const scanButton = screen.getByTestId('barcode-scan-button');
+    fireEvent.click(scanButton);
+
+    // モーダルが開くことを確認
+    expect(screen.getByTestId('barcode-scan-modal')).toBeInTheDocument();
+
+    // 成功ボタンをクリック
+    const successButton = screen.getByText('Scan Success');
+    fireEvent.click(successButton);
+
+    // モーダルが自動的に閉じることを確認
+    await waitFor(() => {
+      expect(screen.queryByTestId('barcode-scan-modal')).not.toBeInTheDocument();
+    }, { timeout: 3000 });
   });
 }); 

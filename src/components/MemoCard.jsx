@@ -52,10 +52,20 @@ const MemoCard = ({ memo, onEdit, onDelete }) => {
           ))}
         </Stack>
         <Box>
-          <IconButton aria-label="edit" onClick={() => onEdit(memo)} size="small">
+          <IconButton 
+            aria-label="edit" 
+            onClick={() => onEdit(memo)} 
+            size="small"
+            data-testid="memo-edit-button"
+          >
             <EditIcon fontSize="small" />
           </IconButton>
-          <IconButton aria-label="delete" onClick={() => onDelete(memo.id)} size="small">
+          <IconButton 
+            aria-label="delete" 
+            onClick={() => onDelete(memo.id)} 
+            size="small"
+            data-testid="memo-delete-button"
+          >
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Box>

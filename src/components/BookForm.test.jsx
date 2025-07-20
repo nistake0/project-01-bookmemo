@@ -91,16 +91,16 @@ describe('BookForm', () => {
     renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
 
     // 必須入力フィールドの存在確認
-    expect(screen.getByLabelText(/ISBN/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/タイトル/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/著者/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/出版社/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/出版日/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/タグ/)).toBeInTheDocument();
+    expect(screen.getByTestId('book-isbn-input')).toBeInTheDocument();
+    expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    expect(screen.getByTestId('book-author-input')).toBeInTheDocument();
+    expect(screen.getByTestId('book-publisher-input')).toBeInTheDocument();
+    expect(screen.getByTestId('book-publishdate-input')).toBeInTheDocument();
+    expect(screen.getByTestId('book-tags-input')).toBeInTheDocument();
     
     // 機能ボタンの存在確認
-    expect(screen.getByRole('button', { name: /ISBNで書籍情報取得/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /本を追加/ })).toBeInTheDocument();
+    expect(screen.getByTestId('book-fetch-button')).toBeInTheDocument();
+    expect(screen.getByTestId('book-add-submit')).toBeInTheDocument();
   });
 
   /**
@@ -117,11 +117,11 @@ describe('BookForm', () => {
     renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
 
     // フォームの送信をシミュレート（タイトル未入力）
-    fireEvent.submit(screen.getByRole('form'));
+    fireEvent.submit(screen.getByTestId('book-form'));
 
     // エラーメッセージが表示されることを確認
     await waitFor(() => {
-      expect(screen.getByText('タイトルは必須です')).toBeInTheDocument();
+      expect(screen.getByTestId('book-form-error')).toHaveTextContent('タイトルは必須です');
     }, { timeout: 3000 });
   });
 
@@ -144,11 +144,11 @@ describe('BookForm', () => {
     renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
 
     // タイトルを入力（必須項目）
-    const titleInput = screen.getByLabelText(/タイトル/);
+    const titleInput = screen.getByTestId('book-title-input');
     fireEvent.change(titleInput, { target: { value: 'テスト本' } });
 
     // フォームを送信
-    const submitButton = screen.getByRole('button', { name: /本を追加/ });
+    const submitButton = screen.getByTestId('book-add-submit');
     fireEvent.click(submitButton);
 
     // Firestoreへの保存とコールバックの呼び出しを確認
@@ -178,12 +178,12 @@ describe('BookForm', () => {
     renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
 
     // ISBN未入力で書籍情報取得ボタンをクリック
-    const fetchButton = screen.getByRole('button', { name: /ISBNで書籍情報取得/ });
+    const fetchButton = screen.getByTestId('book-fetch-button');
     fireEvent.click(fetchButton);
 
     // エラーメッセージが表示されることを確認
     await waitFor(() => {
-      expect(screen.getByText('ISBNを入力してください')).toBeInTheDocument();
+      expect(screen.getByTestId('book-form-error')).toHaveTextContent('ISBNを入力してください');
     }, { timeout: 3000 });
   });
 
@@ -203,11 +203,11 @@ describe('BookForm', () => {
     const axios = require('axios');
     const mockBookData = {
       summary: {
-        title: 'テスト本',
-        author: 'テスト著者',
-        publisher: 'テスト出版社',
-        pubdate: '2023',
-        cover: 'http://example.com/cover.jpg',
+        title: 'テスト駆動開発',
+        author: 'Kent Beck／著 和田卓人／訳',
+        publisher: 'オーム社',
+        pubdate: '2017-08-25',
+        cover: 'https://cover.openbd.jp/9784873119485.jpg',
       },
     };
     axios.get.mockResolvedValue({ data: [mockBookData] });
@@ -215,11 +215,11 @@ describe('BookForm', () => {
     renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
 
     // ISBNを入力
-    const isbnInput = screen.getByLabelText(/ISBN/);
+    const isbnInput = screen.getByTestId('book-isbn-input');
     fireEvent.change(isbnInput, { target: { value: '9784873119485' } });
 
     // 書籍情報取得ボタンをクリック
-    const fetchButton = screen.getByRole('button', { name: /ISBNで書籍情報取得/ });
+    const fetchButton = screen.getByTestId('book-fetch-button');
     fireEvent.click(fetchButton);
 
     // openBD APIが正しいURLで呼ばれることを確認
@@ -231,10 +231,10 @@ describe('BookForm', () => {
 
     // 取得した書籍情報がフォームに自動入力されることを確認
     await waitFor(() => {
-      expect(screen.getByDisplayValue('テスト本')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('テスト著者')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('テスト出版社')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('2023')).toBeInTheDocument();
+      expect(screen.getByTestId('book-title-input')).toHaveValue('テスト駆動開発');
+      expect(screen.getByTestId('book-author-input')).toHaveValue('Kent Beck／著 和田卓人／訳');
+      expect(screen.getByTestId('book-publisher-input')).toHaveValue('オーム社');
+      expect(screen.getByTestId('book-publishdate-input')).toHaveValue('2017-08-25');
     }, { timeout: 3000 });
   });
 }); 

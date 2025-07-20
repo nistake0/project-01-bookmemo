@@ -171,7 +171,7 @@ export default function BookForm({ onBookAdded }) {
   };
 
   return (
-    <Box component="form" onSubmit={handleAdd} sx={{ mt: 2 }} role="form">
+    <Box component="form" onSubmit={handleAdd} sx={{ mt: 2 }} role="form" data-testid="book-form">
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <TextField
@@ -191,6 +191,7 @@ export default function BookForm({ onBookAdded }) {
             disabled={loading}
             sx={{ mt: 2 }}
             fullWidth
+            data-testid="book-fetch-button"
           >
             {loading ? '取得中...' : 'ISBNで書籍情報取得'}
           </Button>
@@ -199,7 +200,7 @@ export default function BookForm({ onBookAdded }) {
 
       {coverImageUrl && (
         <Box sx={{ textAlign: 'center', my: 2 }}>
-          <img src={coverImageUrl} alt="表紙" style={{ maxHeight: '200px', width: 'auto' }} />
+          <img src={coverImageUrl} alt="表紙" style={{ maxHeight: '200px', width: 'auto' }} data-testid="book-cover-image" />
         </Box>
       )}
 
@@ -267,12 +268,22 @@ export default function BookForm({ onBookAdded }) {
         inputValue={inputTagValue}
         onInputChange={(event, newInputValue) => setInputTagValue(newInputValue)}
         renderInput={(params) => (
-          <TextField {...params} label="タグ" margin="normal" fullWidth placeholder="例: 小説,名作,技術書" />
+          <TextField 
+            {...params} 
+            label="タグ" 
+            margin="normal" 
+            fullWidth 
+            placeholder="例: 小説,名作,技術書" 
+            inputProps={{ 
+              ...params.inputProps,
+              'data-testid': 'book-tags-input' 
+            }} 
+          />
         )}
       />
 
       {error && (
-        <Typography color="error" sx={{ mt: 1 }}>
+        <Typography color="error" sx={{ mt: 1 }} data-testid="book-form-error">
           {error}
         </Typography>
       )}

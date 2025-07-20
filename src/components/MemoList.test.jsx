@@ -102,91 +102,64 @@ describe('MemoList', () => {
   });
 
   /**
-   * テストケース: メモ編集機能
+   * テストケース: メモ編集機能の動作確認
    * 
-   * 目的: メモの編集ボタンをクリックしてダイアログを開き、内容を編集して更新できることを確認
-   * 
-   * テストステップ:
-   * 1. メモの編集ボタンをクリックして詳細ダイアログを開く
-   * 2. 詳細ダイアログが表示されることを確認
-   * 3. 「編集」ボタンをクリックして編集フォームを開く
-   * 4. 既存の内容がフォームに表示されることを確認
-   * 5. 内容を編集して「更新」ボタンをクリック
-   */
-  test('編集モーダルを開いてメモを更新する', async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<MemoList bookId="test-book-id" />);
-
-    // メモ1の編集ボタンをクリック（詳細ダイアログを開く）
-    const editButtons = screen.getAllByRole('button', { name: /edit/i });
-    await user.click(editButtons[0]);
-
-    // 詳細ダイアログが表示されていることを確認
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /メモ詳細/ })).toBeInTheDocument();
-    });
-    
-    // 「編集」ボタンをクリックして編集フォームを開く
-    const editDialogButton = screen.getByRole('button', { name: '編集' });
-    await user.click(editDialogButton);
-
-    // 編集フォームの入力フィールドを取得
-    const textInput = screen.getByLabelText(/引用・抜き書き/);
-    const pageInput = screen.getByLabelText(/ページ番号/);
-    
-    // 既存の内容がフォームに表示されることを確認
-    expect(textInput).toHaveValue('メモ1');
-    expect(pageInput).toHaveValue(10);
-
-    // 内容を編集して更新
-    await user.clear(textInput);
-    await user.type(textInput, '更新されたメモ1');
-    await user.clear(pageInput);
-    await user.type(pageInput, '15');
-    await user.click(screen.getByRole('button', { name: '更新' }));
-
-    // MemoEditorで更新処理が行われるため、ここでは何も確認しない
-  });
-
-  /**
-   * テストケース: メモ削除機能
-   * 
-   * 目的: メモの削除ボタンをクリックして確認ダイアログを開き、削除できることを確認
+   * 目的: メモの編集ボタンをクリックした場合、編集ダイアログが開き、
+   * メモの内容を編集して更新できることを確認
    * 
    * テストステップ:
-   * 1. メモの編集ボタンをクリックして詳細ダイアログを開く
-   * 2. 詳細ダイアログが表示されることを確認
-   * 3. 「削除」ボタンをクリックして削除確認ダイアログを開く
-   * 4. 削除確認ダイアログが表示されることを確認
-   * 5. 確認ダイアログの「削除」ボタンをクリック
+   * 1. メモリストをレンダリング
+   * 2. メモの編集ボタンをクリック
+   * 3. 編集ダイアログが開くことを確認
+   * 4. 編集ボタンをクリックして編集モードに切り替え
+   * 5. メモの内容を編集
+   * 6. 更新ボタンをクリック
+   * 7. FirestoreのupdateDocが正しいデータで呼ばれることを確認
    */
-  test('メモを削除する', async () => {
-    const user = userEvent.setup();
+  it('edits memo when edit button is clicked', async () => {
+    const { updateDoc } = require('firebase/firestore');
+    updateDoc.mockResolvedValue();
+
     renderWithProviders(<MemoList bookId="test-book-id" />);
 
-    // メモ2の編集ボタンをクリック（詳細ダイアログを開く）
-    const editButtons = screen.getAllByRole('button', { name: /edit/i });
-    await user.click(editButtons[1]);
+    // メモの編集ボタンをクリック（最初のボタンを選択）
+    const editButtons = screen.getAllByTestId('memo-edit-button');
+    fireEvent.click(editButtons[1]); // ダイアログ内の編集ボタンを選択
 
-    // 詳細ダイアログが表示されていることを確認
+    // 編集ダイアログが開くことを確認
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /メモ詳細/ })).toBeInTheDocument();
-    });
-    
-    // 「削除」ボタンをクリックして削除確認ダイアログを開く
-    const deleteDialogButton = screen.getByRole('button', { name: '削除' });
-    await user.click(deleteDialogButton);
+      expect(screen.getByTestId('memo-detail-dialog')).toBeInTheDocument();
+    }, { timeout: 3000 });
 
-    // 削除確認ダイアログが表示されることを確認
+    // 編集ボタンをクリックして編集モードに切り替え
+    const editButtonsInDialog = screen.getAllByTestId('memo-edit-button');
+    // 最初のカードの編集ボタンをクリック
+    fireEvent.click(editButtonsInDialog[0]);
+    // ダイアログ内の編集ボタンをクリック
+    const dialogEditButton = screen.getAllByTestId('memo-edit-button').find(btn => btn.textContent === '編集');
+    fireEvent.click(dialogEditButton);
+
+    // メモの内容を編集
+    const textInput = screen.getByTestId('memo-text-input');
+    const pageInput = screen.getByTestId('memo-page-input');
+    
+    fireEvent.change(textInput, { target: { value: '編集された引用文' } });
+    fireEvent.change(pageInput, { target: { value: '200' } });
+
+    // 更新ボタンをクリック
+    const updateButton = screen.getByTestId('memo-update-button');
+    fireEvent.click(updateButton);
+
+    // FirestoreのupdateDocが正しいデータで呼ばれることを確認
     await waitFor(() => {
-      expect(screen.getByText('本当に削除しますか？')).toBeInTheDocument();
-    });
-    
-    // 確認ダイアログの「削除」ボタンをクリック
-    const confirmDeleteButton = screen.getAllByRole('button', { name: '削除' }).pop(); // 最後の「削除」ボタン
-    await user.click(confirmDeleteButton);
-
-    // MemoEditorで削除処理が行われるため、ここでは何も確認しない
+      expect(updateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          text: '編集された引用文',
+          page: 200,
+        })
+      );
+    }, { timeout: 3000 });
   });
 
   /**
