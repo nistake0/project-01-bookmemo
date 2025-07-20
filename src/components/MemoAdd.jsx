@@ -6,7 +6,7 @@ import { ErrorDialogContext } from './CommonErrorDialog';
 import { useTagHistory } from '../hooks/useTagHistory';
 import { useMemo } from '../hooks/useMemo';
 
-const MemoAdd = ({ bookId, bookTags = [] }) => {
+const MemoAdd = ({ bookId, bookTags = [], onMemoAdded }) => {
   const { user } = useAuth();
   const { setGlobalError } = useContext(ErrorDialogContext);
   const { addMemo } = useMemo(bookId);
@@ -33,24 +33,38 @@ const MemoAdd = ({ bookId, bookTags = [] }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
+    console.log('MemoAdd - handleSubmit開始:', { text, comment, page, tags });
+    
     // 未確定のタグ入力があればtagsに追加
     let tagsToSave = tags;
     if (inputTagValue && !tags.includes(inputTagValue)) {
       tagsToSave = [...tags, inputTagValue];
     }
+    console.log('MemoAdd - 保存するタグ:', tagsToSave);
+    
     try {
-      await addMemo({
+      console.log('MemoAdd - addMemo呼び出し前');
+      const memoId = await addMemo({
         text,
         comment,
         page: Number(page) || null,
         tags: tagsToSave,
       });
+      console.log('MemoAdd - addMemo呼び出し完了, memoId:', memoId);
       await saveTagsToHistory(tagsToSave);
+      console.log('MemoAdd - フォームリセット前');
       setText('');
       setComment('');
       setPage('');
       setTags([]);
       setInputTagValue('');
+      console.log('MemoAdd - フォームリセット完了');
+      
+      // メモ追加完了を親コンポーネントに通知
+      if (onMemoAdded) {
+        console.log('MemoAdd - onMemoAddedコールバック呼び出し');
+        onMemoAdded();
+      }
     } catch (error) {
       console.error("Error adding memo: ", error);
       setGlobalError("メモの追加に失敗しました。");

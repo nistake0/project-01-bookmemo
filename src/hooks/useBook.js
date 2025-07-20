@@ -39,7 +39,7 @@ export const useBook = (bookId) => {
     } finally {
       setLoading(false);
     }
-  }, [bookId, user, setGlobalError]);
+  }, [bookId, user]);
 
   const updateBook = useCallback(async (updateData) => {
     if (!user || !bookId) {
@@ -65,7 +65,7 @@ export const useBook = (bookId) => {
       setGlobalError("書籍情報の更新に失敗しました。");
       throw error;
     }
-  }, [bookId, user, setGlobalError]);
+  }, [bookId, user]);
 
   const updateBookStatus = useCallback(async (newStatus) => {
     return await updateBook({ status: newStatus });

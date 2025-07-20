@@ -86,13 +86,20 @@ export const useTagHistory = (type, user) => {
     if (!user?.uid || !tags || tags.length === 0) return;
 
     try {
-      const promises = tags.map(tag => saveTagToHistory(tag));
+      const promises = tags.map(tag => {
+        const collectionName = type === 'book' ? 'bookTagHistory' : 'memoTagHistory';
+        const docRef = doc(db, 'users', user.uid, collectionName, tag);
+        return setDoc(docRef, {
+          tag,
+          updatedAt: serverTimestamp(),
+        });
+      });
       await Promise.all(promises);
     } catch (error) {
       console.error('タグ履歴の一括保存に失敗しました:', error);
       throw error;
     }
-  }, [user?.uid, saveTagToHistory]);
+  }, [user?.uid, type]);
 
   return {
     tagOptions,

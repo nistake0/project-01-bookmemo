@@ -44,9 +44,19 @@ export const useMemo = (bookId) => {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      // 直接メモを追加して状態を更新
-      const newMemo = { id: docRef.id, ...memoData };
-      setMemos(prevMemos => [newMemo, ...prevMemos]);
+      
+      // 即座にローカル状態を更新（一時的なタイムスタンプを使用）
+      const newMemo = {
+        id: docRef.id,
+        ...memoData,
+        createdAt: new Date(), // 一時的なタイムスタンプ
+        updatedAt: new Date(),
+      };
+      setMemos(prevMemos => {
+        const updatedMemos = [newMemo, ...prevMemos];
+        return updatedMemos;
+      });
+      
       return docRef.id;
     } catch (err) {
       console.error('Error adding memo:', err);
@@ -63,14 +73,17 @@ export const useMemo = (bookId) => {
         ...updateData,
         updatedAt: serverTimestamp(),
       });
-      // 直接メモを更新して状態を更新
-      setMemos(prevMemos => 
-        prevMemos.map(memo => 
+      
+      // 即座にローカル状態を更新
+      setMemos(prevMemos => {
+        const updatedMemos = prevMemos.map(memo => 
           memo.id === memoId 
-            ? { ...memo, ...updateData }
+            ? { ...memo, ...updateData, updatedAt: new Date() }
             : memo
-        )
-      );
+        );
+        return updatedMemos;
+      });
+      
       return true;
     } catch (err) {
       console.error('Error updating memo:', err);
