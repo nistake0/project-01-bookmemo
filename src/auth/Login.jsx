@@ -23,7 +23,7 @@ export default function Login() {
 
   return (
     <Box component="form" onSubmit={handleLogin} sx={{ maxWidth: 400, mx: "auto", mt: 8 }}>
-      <Typography variant="h5" align="center" gutterBottom>ログイン</Typography>
+      <Typography variant="h5" align="center" gutterBottom data-testid="login-title">ログイン</Typography>
       <TextField
         label="メールアドレス"
         value={email}

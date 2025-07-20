@@ -70,6 +70,18 @@ npm run dev
 
 ## テスト
 
+### テスト実装方針
+
+#### テスト要素の特定方法
+- **data-testid属性による決定的な要素特定**: すべてのテスト対象要素には `data-testid` 属性を付与し、テストでは `cy.get('[data-testid="element-name"]')` を使用
+- **テキストベースの要素特定の回避**: `cy.contains()` や `getAllByText()` などのテキストベースの要素特定は避け、UI変更に影響されない安定したテストを実装
+- **一貫性の確保**: テスト要素の命名規則を統一し、保守性を向上
+
+#### 実装パターン
+- **Test ID Pattern**: テスト専用のID属性を使用した要素特定
+- **Semantic Test Selectors**: 意味のあるセレクタ名による要素特定
+- **Stable Test Selectors**: UI変更に影響されない安定したセレクタの使用
+
 ### ユニットテスト
 ```bash
 npm test

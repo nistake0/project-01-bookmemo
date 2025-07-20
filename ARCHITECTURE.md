@@ -124,6 +124,23 @@ graph TD
 - テスト安定化の工夫やTipsはAppendix参照
 - 設計ドキュメント（本ファイル）を常に参照し、開発再開時の指針とする
 
+### テスト実装方針（2024-07-20追記）
+
+#### テスト要素の特定方法
+- **data-testid属性による決定的な要素特定**: すべてのテスト対象要素には `data-testid` 属性を付与し、テストでは `cy.get('[data-testid="element-name"]')` を使用
+- **テキストベースの要素特定の回避**: `cy.contains()` や `getAllByText()` などのテキストベースの要素特定は避け、UI変更に影響されない安定したテストを実装
+- **一貫性の確保**: テスト要素の命名規則を統一し、保守性を向上
+
+#### 実装パターン
+- **Test ID Pattern**: テスト専用のID属性を使用した要素特定
+- **Semantic Test Selectors**: 意味のあるセレクタ名による要素特定
+- **Stable Test Selectors**: UI変更に影響されない安定したセレクタの使用
+
+#### 命名規則
+- 要素の役割を明確に表現: `login-email-input`, `book-add-submit`, `memo-detail-title`
+- 階層構造を反映: `memo-edit-button`, `memo-delete-confirm-button`
+- 一意性を保証: 同じ機能の要素でも異なるコンテキストでは異なるID
+
 ### E2Eテスト運用の教訓・安定化の工夫（2024-06-27追記）
 
 - UI/UXの大きな変更時は、E2Eテスト修正工数も見積もりに含める。

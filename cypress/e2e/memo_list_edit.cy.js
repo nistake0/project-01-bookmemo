@@ -35,10 +35,10 @@ describe('メモ一覧UI 編集機能テスト', () => {
     cy.get('[data-testid="memo-card"]').first().within(() => {
       cy.get('button[aria-label="edit"]').click();
     });
-    cy.contains('メモ詳細').should('be.visible');
-    cy.get('button').contains('編集').click();
+    cy.get('[data-testid="memo-detail-title"]').should('be.visible');
+    cy.get('[data-testid="memo-edit-button"]').click();
     cy.get('textarea[label="引用・抜き書き"], textarea').first().clear({force: true}).type('E2Eテストで編集', {force: true});
-    cy.get('button').contains('更新').click();
+    cy.get('[data-testid="memo-update-button"]').click();
     cy.contains('E2Eテストで編集').should('exist');
   });
 }); 

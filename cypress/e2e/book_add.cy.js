@@ -13,10 +13,10 @@ describe('本追加E2Eテスト', () => {
 
   it('本を追加できる', () => {
     // 「本を追加」ボタンをクリック
-    cy.contains('button', '本を追加').click();
+    cy.get('[data-testid="book-add-button"]').click();
 
     // 「本を追加」画面のタイトルを確認
-    cy.contains('本を追加').should('be.visible');
+    cy.get('[data-testid="book-add-title"]').should('be.visible');
 
     // 各inputに値を入力
     cy.get('[data-testid="book-isbn-input"]').type('9781234567890');
@@ -28,9 +28,8 @@ describe('本追加E2Eテスト', () => {
     // 追加ボタンをクリック
     cy.get('[data-testid="book-add-submit"]').click();
 
-    // 本一覧画面に戻り、追加した本が表示されていることを確認
-    cy.url().should('include', '/project-01-bookmemo/'); // baseUrlに合わせて修正
-    cy.contains('本一覧').should('be.visible');
+    // 書籍詳細画面に遷移し、追加した本が表示されていることを確認
+    cy.url().should('include', '/project-01-bookmemo/book/'); // baseUrlに合わせて修正
     cy.contains('E2Eテスト用タイトル').should('be.visible');
     cy.contains('E2Eテスト著者').should('be.visible');
   });

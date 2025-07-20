@@ -4,7 +4,7 @@ describe('ログイン画面のE2Eテスト', () => {
     cy.visit('/project-01-bookmemo/login'); // baseUrlに合わせて修正
 
     // ログイン画面の要素確認
-    cy.contains('ログイン').should('be.visible');
+    cy.get('[data-testid="login-title"]').should('be.visible');
     cy.get('[data-testid="login-email-input"]').should('exist');
     cy.get('[data-testid="login-password-input"]').should('exist');
     cy.get('[data-testid="login-submit"]').should('exist');
@@ -16,6 +16,6 @@ describe('ログイン画面のE2Eテスト', () => {
 
     // 本一覧画面に遷移したことを確認
     cy.url().should('include', '/project-01-bookmemo/'); // baseUrlに合わせて修正
-    cy.contains('本一覧').should('be.visible');
+    cy.get('[data-testid="book-list-title"]').should('be.visible');
   });
 }); 

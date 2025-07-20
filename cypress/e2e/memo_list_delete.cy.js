@@ -35,10 +35,10 @@ describe('メモ一覧UI 削除機能テスト', () => {
     cy.get('[data-testid="memo-card"]').last().within(() => {
       cy.get('button[aria-label="edit"]').click();
     });
-    cy.contains('メモ詳細').should('be.visible');
-    cy.get('button').contains('削除').click();
-    cy.contains('本当に削除しますか？').should('be.visible');
-    cy.get('button').contains('削除').last().click({force: true});
+    cy.get('[data-testid="memo-detail-title"]').should('be.visible');
+    cy.get('[data-testid="memo-delete-button"]').click();
+    cy.get('[data-testid="memo-delete-confirm-title"]').should('be.visible');
+    cy.get('[data-testid="memo-delete-confirm-button"]').click({force: true});
     cy.get('[data-testid="memo-card"]').should('have.length.at.least', 0);
   });
 }); 
