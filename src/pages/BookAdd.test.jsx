@@ -25,52 +25,6 @@ jest.mock('react-router-dom', () => ({
 jest.mock('../auth/AuthProvider', () => ({
   useAuth: () => ({ user: { uid: 'test-user-id' } }),
 }));
-jest.mock('../firebase', () => {
-  // Firestoreのモック
-  const mockCollectionRef = {}; // CollectionReferenceのダミー
-  const mockCollection = jest.fn(() => mockCollectionRef);
-  const mockGetDocs = jest.fn(() => Promise.resolve({
-    docs: [
-      { id: 'tag1', data: () => ({ tag: 'テストタグ1', updatedAt: { toDate: () => new Date() } }) },
-      { id: 'tag2', data: () => ({ tag: 'テストタグ2', updatedAt: { toDate: () => new Date() } }) },
-    ],
-  }));
-  return {
-    db: {},
-    collection: mockCollection,
-    getDocs: mockGetDocs,
-    addDoc: jest.fn(),
-    serverTimestamp: jest.fn(),
-  };
-});
-
-// Firestoreのcollection/getDocsを直接importしている場合にも対応
-jest.mock('firebase/firestore', () => {
-  const mockCollectionRef = {};
-  const mockCollection = jest.fn(() => mockCollectionRef);
-  const mockGetDocs = jest.fn(() => Promise.resolve({
-    docs: [
-      { id: 'tag1', data: () => ({ tag: 'テストタグ1', updatedAt: { toDate: () => new Date() } }) },
-      { id: 'tag2', data: () => ({ tag: 'テストタグ2', updatedAt: { toDate: () => new Date() } }) },
-    ],
-  }));
-  return {
-    collection: mockCollection,
-    getDocs: mockGetDocs,
-    addDoc: jest.fn(),
-    serverTimestamp: jest.fn(),
-    doc: jest.fn(),
-    setDoc: jest.fn(),
-    updateDoc: jest.fn(),
-    deleteDoc: jest.fn(),
-    onSnapshot: jest.fn(),
-    query: jest.fn(),
-    where: jest.fn(),
-    orderBy: jest.fn(),
-    limit: jest.fn(),
-    startAfter: jest.fn(),
-  };
-});
 
 // テスト用のレンダリング関数
 const mockSetGlobalError = jest.fn();

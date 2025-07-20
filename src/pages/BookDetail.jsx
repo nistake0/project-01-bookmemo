@@ -1,58 +1,26 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
-import { useAuth } from '../auth/AuthProvider';
 import { Box, Paper, Divider, Typography } from '@mui/material';
 import MemoList from '../components/MemoList';
 import MemoAdd from '../components/MemoAdd';
 import BookInfo from '../components/BookInfo';
-
 import BookTagEditor from '../components/BookTagEditor';
-import { ErrorDialogContext } from '../components/CommonErrorDialog';
+import { useBook } from '../hooks/useBook';
 
 const BookDetail = () => {
   const { id } = useParams();
-  const { user } = useAuth();
-  const { setGlobalError } = useContext(ErrorDialogContext);
-  const [book, setBook] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user) return;
-    const fetchBook = async () => {
-      try {
-        setLoading(true);
-        const docRef = doc(db, 'books', id);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists() && docSnap.data().userId === user.uid) {
-          setBook({ id: docSnap.id, ...docSnap.data() });
-        } else {
-          console.error("No such document or access denied!");
-          setGlobalError("書籍が見つからないか、アクセス権限がありません。");
-          setBook(null);
-        }
-      } catch (error) {
-        console.error("Error fetching document:", error);
-        setGlobalError("書籍情報の取得に失敗しました。");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBook();
-  }, [id, user, setGlobalError]);
+  const { book, loading, error, updateBookStatus, updateBookTags } = useBook(id);
 
   const handleStatusChange = (newStatus) => {
-    setBook({ ...book, status: newStatus });
+    updateBookStatus(newStatus);
   };
 
   const handleTagsChange = (newTags) => {
-    setBook({ ...book, tags: newTags });
+    updateBookTags(newTags);
   };
 
   if (loading) return <div>Loading...</div>;
+  if (error) return <div>エラーが発生しました: {error}</div>;
   if (!book) return <div>本が見つかりません。</div>;
 
   return (
