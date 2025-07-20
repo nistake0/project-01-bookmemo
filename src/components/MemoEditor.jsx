@@ -72,7 +72,7 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
 
   return (
     <>
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth data-testid="memo-detail-dialog">
         <DialogTitle data-testid="memo-detail-title">メモ詳細</DialogTitle>
         <DialogContent>
           {dialogMode === 'view' ? (
@@ -102,6 +102,7 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
                 onChange={(e) => setEditingMemo({ ...editingMemo, text: e.target.value })}
                 margin="normal"
                 required
+                inputProps={{ 'data-testid': 'memo-text-input' }}
               />
               <TextField
                 label="感想・コメント"
@@ -111,6 +112,7 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
                 value={editingMemo?.comment || ''}
                 onChange={(e) => setEditingMemo({ ...editingMemo, comment: e.target.value })}
                 margin="normal"
+                inputProps={{ 'data-testid': 'memo-comment-input' }}
               />
               <TextField
                 label="ページ番号"
@@ -119,6 +121,7 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
                 onChange={(e) => setEditingMemo({ ...editingMemo, page: e.target.value })}
                 margin="normal"
                 sx={{ mr: 2 }}
+                inputProps={{ 'data-testid': 'memo-page-input' }}
               />
             </Box>
           )}
@@ -139,7 +142,7 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)}>
+      <Dialog open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} data-testid="memo-delete-dialog">
         <DialogTitle data-testid="memo-delete-confirm-title">本当に削除しますか？</DialogTitle>
         <DialogContent>
           <Typography>このメモを削除すると、元に戻すことはできません。</Typography>

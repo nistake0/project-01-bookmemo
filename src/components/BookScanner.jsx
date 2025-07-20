@@ -17,12 +17,12 @@ const modalStyle = {
   p: 4,
 };
 
-const BookScanner = ({ onScanDetected, onScanError }) => {
+const BookScanner = ({ onScan, onScanError }) => {
   const [isScannerOpen, setScannerOpen] = useState(false);
   const { setGlobalError } = useContext(ErrorDialogContext) || { setGlobalError: () => {} };
 
   const handleScanDetected = (code) => {
-    onScanDetected(code);
+    onScan(code);
     setScannerOpen(false);
   };
   
@@ -39,6 +39,7 @@ const BookScanner = ({ onScanDetected, onScanError }) => {
         onClick={() => setScannerOpen(true)}
         sx={{ mt: 2, mb: 2 }}
         fullWidth
+        data-testid="barcode-scan-button"
       >
         バーコードスキャン
       </Button>
@@ -47,6 +48,7 @@ const BookScanner = ({ onScanDetected, onScanError }) => {
         open={isScannerOpen}
         onClose={() => setScannerOpen(false)}
         aria-labelledby="scanner-modal-title"
+        data-testid="barcode-scan-modal"
       >
         <Box sx={modalStyle}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -60,6 +62,7 @@ const BookScanner = ({ onScanDetected, onScanError }) => {
           <BarcodeScanner
             onDetected={handleScanDetected}
             onError={handleScanError}
+            data-testid="barcode-scanner"
           />
         </Box>
       </Modal>

@@ -33,7 +33,12 @@ const BookStatusChanger = ({ book, bookId, onStatusChange }) => {
   const currentStatus = book.status || 'reading';
 
   return (
-    <Button onClick={handleStatusChange} variant="outlined" disabled={updating}>
+    <Button 
+      onClick={handleStatusChange} 
+      variant="outlined" 
+      disabled={updating}
+      data-testid={currentStatus === 'reading' ? 'status-complete-button' : 'status-reading-button'}
+    >
       {updating ? '更新中...' : (currentStatus === 'reading' ? '読了にする' : '読書中にする')}
     </Button>
   );

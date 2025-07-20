@@ -101,7 +101,7 @@ const MemoAdd = ({ bookId, bookTags = [] }) => {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }} data-testid="memo-add-form">
       <TextField
         label="引用・抜き書き"
         fullWidth
@@ -121,6 +121,7 @@ const MemoAdd = ({ bookId, bookTags = [] }) => {
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         margin="normal"
+        inputProps={{ 'data-testid': 'memo-comment-input' }}
       />
       <TextField
         label="ページ番号"
@@ -129,6 +130,7 @@ const MemoAdd = ({ bookId, bookTags = [] }) => {
         onChange={(e) => setPage(e.target.value)}
         margin="normal"
         sx={{ mr: 2 }}
+        inputProps={{ 'data-testid': 'memo-page-input' }}
       />
       <Autocomplete
         multiple
@@ -151,7 +153,17 @@ const MemoAdd = ({ bookId, bookTags = [] }) => {
         inputValue={inputTagValue}
         onInputChange={(event, newInputValue) => setInputTagValue(newInputValue)}
         renderInput={(params) => (
-          <TextField {...params} label="タグ" margin="normal" fullWidth placeholder="例: 名言,感想,引用" />
+          <TextField 
+            {...params} 
+            label="タグ" 
+            margin="normal" 
+            fullWidth 
+            placeholder="例: 名言,感想,引用" 
+            inputProps={{ 
+              ...params.inputProps,
+              'data-testid': 'memo-tags-input' 
+            }} 
+          />
         )}
       />
       <Button type="submit" variant="contained" data-testid="memo-add-submit">メモを追加</Button>
