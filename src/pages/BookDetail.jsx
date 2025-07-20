@@ -7,7 +7,7 @@ import { Box, Paper, Divider, Typography } from '@mui/material';
 import MemoList from '../components/MemoList';
 import MemoAdd from '../components/MemoAdd';
 import BookInfo from '../components/BookInfo';
-import BookStatusChanger from '../components/BookStatusChanger';
+
 import BookTagEditor from '../components/BookTagEditor';
 import { ErrorDialogContext } from '../components/CommonErrorDialog';
 
@@ -58,10 +58,7 @@ const BookDetail = () => {
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, pb: '80px' }}>
       <Paper sx={{ p: 3 }}>
-        <BookInfo book={book} />
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-          <BookStatusChanger book={book} bookId={id} onStatusChange={handleStatusChange} />
-        </Box>
+        <BookInfo book={book} bookId={id} onStatusChange={handleStatusChange} />
         
         <BookTagEditor book={book} bookId={id} onTagsChange={handleTagsChange} />
         
