@@ -1,37 +1,23 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, setDoc, doc } from 'firebase/firestore';
-import { db } from '../firebase';
 import { Button, TextField, Box, Typography, Chip } from '@mui/material';
 import { useAuth } from '../auth/AuthProvider';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ErrorDialogContext } from './CommonErrorDialog';
+import { useTagHistory } from '../hooks/useTagHistory';
+import { useMemo } from '../hooks/useMemo';
 
 const MemoAdd = ({ bookId, bookTags = [] }) => {
   const { user } = useAuth();
   const { setGlobalError } = useContext(ErrorDialogContext);
+  const { addMemo } = useMemo(bookId);
   const [text, setText] = useState('');
   const [comment, setComment] = useState('');
   const [page, setPage] = useState('');
   const [tags, setTags] = useState([]); // タグ配列
-  const [tagOptions, setTagOptions] = useState([]); // サジェスト候補
   const [inputTagValue, setInputTagValue] = useState("");
 
-  // タグ履歴取得（updatedAt降順）
-  const fetchTagHistory = useCallback(async () => {
-    if (!user?.uid) return;
-    try {
-      const q = query(
-        collection(db, "users", user.uid, "memoTagHistory"),
-        orderBy("updatedAt", "desc")
-      );
-      const snap = await getDocs(q);
-      const tags = snap.docs.map(doc => doc.data().tag).filter(Boolean);
-      setTagOptions(tags);
-    } catch (e) {
-      console.error("メモ用タグ履歴の取得に失敗", e);
-      setGlobalError("タグ履歴の取得に失敗しました。");
-    }
-  }, [user, setGlobalError]);
+  // 共通フックを使用してタグ履歴を管理
+  const { tagOptions, fetchTagHistory, saveTagsToHistory } = useTagHistory('memo', user);
 
   useEffect(() => {
     fetchTagHistory();
@@ -44,33 +30,6 @@ const MemoAdd = ({ bookId, bookTags = [] }) => {
     }
   }, [bookTags]);
 
-  // タグ履歴に新規タグを保存
-  const saveNewTagsToHistory = async (newTags) => {
-    if (!user?.uid) return;
-    try {
-      const batch = [];
-      for (const tag of newTags) {
-        if (!tagOptions.includes(tag)) {
-          const ref = doc(db, "users", user.uid, "memoTagHistory", tag);
-          batch.push(setDoc(ref, {
-            tag,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-          }, { merge: true }));
-        } else {
-          const ref = doc(db, "users", user.uid, "memoTagHistory", tag);
-          batch.push(setDoc(ref, {
-            updatedAt: serverTimestamp(),
-          }, { merge: true }));
-        }
-      }
-      await Promise.all(batch);
-    } catch (error) {
-      console.error("タグ履歴の保存に失敗", error);
-      setGlobalError("タグ履歴の保存に失敗しました。");
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
@@ -80,16 +39,13 @@ const MemoAdd = ({ bookId, bookTags = [] }) => {
       tagsToSave = [...tags, inputTagValue];
     }
     try {
-      const memosRef = collection(db, 'books', bookId, 'memos');
-      await addDoc(memosRef, {
+      await addMemo({
         text,
         comment,
         page: Number(page) || null,
         tags: tagsToSave,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
       });
-      await saveNewTagsToHistory(tagsToSave);
+      await saveTagsToHistory(tagsToSave);
       setText('');
       setComment('');
       setPage('');
@@ -149,7 +105,7 @@ const MemoAdd = ({ bookId, bookTags = [] }) => {
             return '';
           }).filter(Boolean);
           setTags(normalized);
-          await saveNewTagsToHistory(normalized);
+          await saveTagsToHistory(normalized);
         }}
         inputValue={inputTagValue}
         onInputChange={(event, newInputValue) => setInputTagValue(newInputValue)}

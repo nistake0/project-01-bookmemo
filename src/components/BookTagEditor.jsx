@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { collection, query, orderBy, getDocs, setDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../auth/AuthProvider';
 import { Typography, Box, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import EditIcon from '@mui/icons-material/Edit';
 import { ErrorDialogContext } from './CommonErrorDialog';
+import { useTagHistory } from '../hooks/useTagHistory';
 
 const BookTagEditor = ({ book, bookId, onTagsChange }) => {
   const { user } = useAuth();
@@ -13,23 +14,9 @@ const BookTagEditor = ({ book, bookId, onTagsChange }) => {
   const setGlobalError = errorContext?.setGlobalError || (() => {});
   const [editTagsOpen, setEditTagsOpen] = useState(false);
   const [editTags, setEditTags] = useState([]);
-  const [tagOptions, setTagOptions] = useState([]);
 
-  // タグ履歴取得（書籍用）
-  const fetchTagHistory = useCallback(async () => {
-    if (!user?.uid) return;
-    try {
-      const q = query(
-        collection(db, "users", user.uid, "bookTagHistory"),
-        orderBy("updatedAt", "desc")
-      );
-      const snap = await getDocs(q);
-      const tags = snap.docs.map(doc => doc.data().tag).filter(Boolean);
-      setTagOptions(tags);
-    } catch (e) {
-      console.error("書籍用タグ履歴の取得に失敗", e);
-    }
-  }, [user]);
+  // 共通フックを使用してタグ履歴を管理
+  const { tagOptions, fetchTagHistory, saveTagsToHistory } = useTagHistory('book', user);
 
   useEffect(() => {
     fetchTagHistory();
@@ -48,6 +35,7 @@ const BookTagEditor = ({ book, bookId, onTagsChange }) => {
         tags: editTags,
         updatedAt: serverTimestamp(),
       });
+      await saveTagsToHistory(editTags);
       onTagsChange(editTags);
       setEditTagsOpen(false);
     } catch (error) {
@@ -56,58 +44,23 @@ const BookTagEditor = ({ book, bookId, onTagsChange }) => {
     }
   };
 
-  const handleSaveTagToHistory = async (newTags) => {
-    if (!user?.uid) return;
-    try {
-      const batch = [];
-      for (const tag of newTags) {
-        if (!tagOptions.includes(tag)) {
-          const ref = doc(db, "users", user.uid, "bookTagHistory", tag);
-          batch.push(setDoc(ref, {
-            tag,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-          }, { merge: true }));
-        } else {
-          const ref = doc(db, "users", user.uid, "bookTagHistory", tag);
-          batch.push(setDoc(ref, {
-            updatedAt: serverTimestamp(),
-          }, { merge: true }));
-        }
-      }
-      await Promise.all(batch);
-    } catch (error) {
-      console.error("タグ履歴の保存に失敗", error);
-    }
-  };
-
   if (!book) return null;
 
   return (
-    <>
-      <Box sx={{ mt: 2, mb: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            タグ:
-          </Typography>
-          <IconButton size="small" onClick={handleEditTags}>
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </Box>
-        {book.tags && book.tags.length > 0 ? (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {book.tags.map((tag, index) => (
-              <Chip key={index} label={tag} size="small" variant="outlined" />
-            ))}
-          </Box>
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            タグが設定されていません
-          </Typography>
-        )}
+    <Box sx={{ mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Typography variant="h6">タグ:</Typography>
+        <IconButton onClick={handleEditTags} size="small" data-testid="edit-tags-button">
+          <EditIcon />
+        </IconButton>
+      </Box>
+      
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        {(book.tags || []).map((tag, index) => (
+          <Chip key={index} label={tag} size="small" />
+        ))}
       </Box>
 
-      {/* タグ編集ダイアログ */}
       <Dialog open={editTagsOpen} onClose={() => setEditTagsOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>タグを編集</DialogTitle>
         <DialogContent>
@@ -116,29 +69,36 @@ const BookTagEditor = ({ book, bookId, onTagsChange }) => {
             freeSolo
             options={tagOptions}
             value={editTags}
-            onChange={async (event, newValue) => {
-              const normalized = (newValue || []).map(v => {
-                if (typeof v === 'string') return v;
-                if (v && typeof v === 'object') {
-                  if ('inputValue' in v && v.inputValue) return v.inputValue;
-                  if ('tag' in v && v.tag) return v.tag;
-                }
-                return '';
-              }).filter(Boolean);
-              setEditTags(normalized);
-              await handleSaveTagToHistory(normalized);
-            }}
+            onChange={(event, newValue) => setEditTags(newValue)}
             renderInput={(params) => (
-              <TextField {...params} label="タグ" margin="normal" fullWidth placeholder="例: 小説,名作,技術書" />
+              <TextField
+                {...params}
+                label="タグ"
+                placeholder="タグを入力または選択"
+                fullWidth
+                margin="normal"
+              />
             )}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  {...getTagProps({ index })}
+                  key={index}
+                  label={option}
+                  size="small"
+                />
+              ))
+            }
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditTagsOpen(false)}>キャンセル</Button>
-          <Button onClick={handleSaveTags} variant="contained">保存</Button>
+          <Button onClick={handleSaveTags} variant="contained" data-testid="save-tags-button">
+            保存
+          </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </Box>
   );
 };
 

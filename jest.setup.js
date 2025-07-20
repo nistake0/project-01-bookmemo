@@ -66,6 +66,13 @@ jest.mock('firebase/firestore', () => {
         { id: 'doc1', data: () => ({ title: 'テスト本1' }) },
         { id: 'doc2', data: () => ({ title: 'テスト本2' }) },
       ],
+      forEach: jest.fn((callback) => {
+        const docs = [
+          { data: () => ({ tag: '小説' }) },
+          { data: () => ({ tag: '技術書' }) },
+        ];
+        docs.forEach(callback);
+      }),
     })),
     getDoc: jest.fn(() => Promise.resolve({
       exists: () => true,
@@ -78,22 +85,11 @@ jest.mock('firebase/firestore', () => {
     updateDoc: jest.fn(() => Promise.resolve()),
     deleteDoc: jest.fn(() => Promise.resolve()),
     
-    // リアルタイムリスナー
-    onSnapshot: jest.fn(() => jest.fn()), // unsubscribe関数を返す
-    
-    // ユーティリティ
+    // タイムスタンプ
     serverTimestamp: jest.fn(() => 'mock-timestamp'),
-    Timestamp: {
-      now: jest.fn(() => 'mock-timestamp'),
-    },
     
-    // バッチ操作
-    writeBatch: jest.fn(() => ({
-      set: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      commit: jest.fn(() => Promise.resolve()),
-    })),
+    // リアルタイムリスナー
+    onSnapshot: jest.fn(() => jest.fn()),
   };
 });
 

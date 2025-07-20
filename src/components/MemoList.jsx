@@ -1,15 +1,13 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { collection, query, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../firebase';
+import React, { useState, useContext } from 'react';
 import { Typography, Box, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import { ErrorDialogContext } from './CommonErrorDialog';
+import { useMemo } from '../hooks/useMemo';
 import MemoCard from './MemoCard';
 import MemoEditor from './MemoEditor';
 
 const MemoList = ({ bookId }) => {
   const { setGlobalError } = useContext(ErrorDialogContext);
-  const [memos, setMemos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { memos, loading, updateMemo, deleteMemo } = useMemo(bookId);
   const [selectedMemo, setSelectedMemo] = useState(null);
   const [editorOpen, setEditorOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -32,7 +30,7 @@ const MemoList = ({ bookId }) => {
     if (!memoToDelete) return;
     
     try {
-      await deleteDoc(doc(db, 'books', bookId, 'memos', memoToDelete.id));
+      await deleteMemo(memoToDelete.id);
       setDeleteDialogOpen(false);
       setMemoToDelete(null);
     } catch (error) {
@@ -50,25 +48,6 @@ const MemoList = ({ bookId }) => {
     setDeleteDialogOpen(false);
     setMemoToDelete(null);
   };
-
-  useEffect(() => {
-    if (!bookId) return;
-
-    const memosRef = collection(db, 'books', bookId, 'memos');
-    const q = query(memosRef, orderBy('createdAt', 'desc'));
-
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const memosData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setMemos(memosData);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error fetching memos:", error);
-      setGlobalError("メモ一覧の取得に失敗しました。");
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [bookId, setGlobalError]);
 
   if (loading) return <Typography>メモを読み込み中...</Typography>;
   if (memos.length === 0) return <Typography>まだメモはありません。</Typography>;
@@ -90,6 +69,7 @@ const MemoList = ({ bookId }) => {
         memo={selectedMemo}
         bookId={bookId}
         onClose={handleClose}
+        onUpdate={updateMemo}
       />
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog} data-testid="memo-delete-dialog">
         <DialogTitle data-testid="memo-delete-confirm-title">本当に削除しますか？</DialogTitle>

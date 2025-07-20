@@ -1,6 +1,4 @@
 import React, { useState, useContext } from 'react';
-import { doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase';
 import { 
   Dialog, 
   DialogTitle, 
@@ -14,9 +12,11 @@ import {
   Box 
 } from '@mui/material';
 import { ErrorDialogContext } from './CommonErrorDialog';
+import { useMemo } from '../hooks/useMemo';
 
 const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
   const { setGlobalError } = useContext(ErrorDialogContext);
+  const { updateMemo, deleteMemo } = useMemo(bookId);
   const [dialogMode, setDialogMode] = useState('view'); // 'view' or 'edit'
   const [editingMemo, setEditingMemo] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -41,13 +41,11 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
     e.preventDefault();
     if (!editingMemo || !editingMemo.text.trim()) return;
 
-    const memoRef = doc(db, 'books', bookId, 'memos', editingMemo.id);
     try {
-      await updateDoc(memoRef, {
+      await updateMemo(editingMemo.id, {
         text: editingMemo.text,
         comment: editingMemo.comment,
         page: Number(editingMemo.page) || null,
-        updatedAt: serverTimestamp(),
       });
       handleClose();
       if (onUpdate) onUpdate();
@@ -59,7 +57,7 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
 
   const handleDelete = async (memoId) => {
     try {
-      await deleteDoc(doc(db, 'books', bookId, 'memos', memoId));
+      await deleteMemo(memoId);
       handleClose();
       if (onDelete) onDelete();
     } catch (error) {

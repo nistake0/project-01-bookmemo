@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, setDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Box, TextField, Button, Typography, Grid, Autocomplete } from '@mui/material';
 import { useAuth } from '../auth/AuthProvider';
 import axios from 'axios';
 import { ErrorDialogContext } from './CommonErrorDialog';
 import { useContext } from 'react';
+import { useTagHistory } from '../hooks/useTagHistory';
 
 export default function BookForm({ onBookAdded }) {
   const { user } = useAuth();
@@ -17,27 +18,13 @@ export default function BookForm({ onBookAdded }) {
   const [publishedDate, setPublishedDate] = useState('');
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [tags, setTags] = useState([]);
-  const [tagOptions, setTagOptions] = useState([]);
   const [inputTagValue, setInputTagValue] = useState("");
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [searchPerformed, setSearchPerformed] = useState(false);
 
-  // タグ履歴取得（updatedAt降順）
-  const fetchTagHistory = useCallback(async () => {
-    if (!user?.uid) return;
-    try {
-      const q = query(
-        collection(db, "users", user.uid, "bookTagHistory"),
-        orderBy("updatedAt", "desc")
-      );
-      const snap = await getDocs(q);
-      const tags = snap.docs.map(doc => doc.data().tag).filter(Boolean);
-      setTagOptions(tags);
-    } catch (e) {
-      console.error("タグ履歴の取得に失敗", e);
-    }
-  }, [user]);
+  // 共通フックを使用してタグ履歴を管理
+  const { tagOptions, fetchTagHistory, saveTagsToHistory } = useTagHistory('book', user);
 
   useEffect(() => {
     fetchTagHistory();
@@ -156,36 +143,10 @@ export default function BookForm({ onBookAdded }) {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      await saveNewTagsToHistory(tagsToSave);
+      await saveTagsToHistory(tagsToSave);
       onBookAdded(docRef.id);
     } catch (err) {
       setError("追加に失敗しました: " + err.message);
-    }
-  };
-
-  // タグ履歴に新規タグを保存
-  const saveNewTagsToHistory = async (newTags) => {
-    if (!user?.uid) return;
-    const batch = [];
-    for (const tag of newTags) {
-      if (!tagOptions.includes(tag)) {
-        const ref = doc(db, "users", user.uid, "bookTagHistory", tag);
-        batch.push(setDoc(ref, {
-          tag,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        }, { merge: true }));
-      } else {
-        const ref = doc(db, "users", user.uid, "bookTagHistory", tag);
-        batch.push(setDoc(ref, {
-          updatedAt: serverTimestamp(),
-        }, { merge: true }));
-      }
-    }
-    try {
-      await Promise.all(batch);
-    } catch (e) {
-      console.error('bookTagHistory保存エラー:', e);
     }
   };
 
