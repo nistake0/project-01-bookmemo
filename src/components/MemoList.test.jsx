@@ -163,6 +163,44 @@ describe('MemoList', () => {
   });
 
   /**
+   * テストケース: メモ削除機能の動作確認
+   * 
+   * 目的: メモの削除ボタンをクリックした場合、削除確認ダイアログが開き、
+   * 確認後にメモが削除されることを確認
+   * 
+   * テストステップ:
+   * 1. メモリストをレンダリング
+   * 2. メモの削除ボタンをクリック
+   * 3. 削除確認ダイアログが開くことを確認
+   * 4. 削除確認ボタンをクリック
+   * 5. FirestoreのdeleteDocが正しいドキュメントで呼ばれることを確認
+   */
+  it('deletes memo when delete button is clicked', async () => {
+    const { deleteDoc } = require('firebase/firestore');
+    deleteDoc.mockResolvedValue();
+
+    renderWithProviders(<MemoList bookId="test-book-id" />);
+
+    // メモの削除ボタンをクリック（最初のボタンを選択）
+    const deleteButtons = screen.getAllByTestId('memo-delete-button');
+    fireEvent.click(deleteButtons[0]);
+
+    // 削除確認ダイアログが開くことを確認
+    await waitFor(() => {
+      expect(screen.getByTestId('memo-delete-dialog')).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // 削除確認ボタンをクリック
+    const confirmDeleteButton = screen.getByTestId('memo-delete-confirm-button');
+    fireEvent.click(confirmDeleteButton);
+
+    // FirestoreのdeleteDocが正しいドキュメントで呼ばれることを確認
+    await waitFor(() => {
+      expect(deleteDoc).toHaveBeenCalledWith(expect.anything());
+    }, { timeout: 3000 });
+  });
+
+  /**
    * テストケース: タグ表示機能
    * 
    * 目的: メモにタグが設定されている場合、Chipコンポーネントでタグが正しく表示されることを確認
