@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, setDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Button, TextField, Box, Typography, Chip } from '@mui/material';
@@ -17,24 +17,25 @@ const MemoAdd = ({ bookId, bookTags = [] }) => {
   const [inputTagValue, setInputTagValue] = useState("");
 
   // タグ履歴取得（updatedAt降順）
-  useEffect(() => {
-    const fetchTagHistory = async () => {
-      if (!user?.uid) return;
-      try {
-        const q = query(
-          collection(db, "users", user.uid, "memoTagHistory"),
-          orderBy("updatedAt", "desc")
-        );
-        const snap = await getDocs(q);
-        const tags = snap.docs.map(doc => doc.data().tag).filter(Boolean);
-        setTagOptions(tags);
-      } catch (e) {
-        console.error("メモ用タグ履歴の取得に失敗", e);
-        setGlobalError("タグ履歴の取得に失敗しました。");
-      }
-    };
-    fetchTagHistory();
+  const fetchTagHistory = useCallback(async () => {
+    if (!user?.uid) return;
+    try {
+      const q = query(
+        collection(db, "users", user.uid, "memoTagHistory"),
+        orderBy("updatedAt", "desc")
+      );
+      const snap = await getDocs(q);
+      const tags = snap.docs.map(doc => doc.data().tag).filter(Boolean);
+      setTagOptions(tags);
+    } catch (e) {
+      console.error("メモ用タグ履歴の取得に失敗", e);
+      setGlobalError("タグ履歴の取得に失敗しました。");
+    }
   }, [user, setGlobalError]);
+
+  useEffect(() => {
+    fetchTagHistory();
+  }, [fetchTagHistory]);
 
   // 書籍のタグを初期値として設定
   useEffect(() => {

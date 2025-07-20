@@ -1,46 +1,47 @@
-import { useState, useEffect, useContext } from "react";
-import { collection, addDoc, serverTimestamp, getDocs, query, where, setDoc, doc, orderBy } from "firebase/firestore";
-import { db } from "../firebase";
-import { useAuth } from "../auth/AuthProvider";
-import { TextField, Button, Box, Typography, Grid } from "@mui/material";
-import axios from "axios";
-import Autocomplete from '@mui/material/Autocomplete';
+import React, { useState, useEffect, useCallback } from 'react';
+import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, setDoc, doc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { Box, TextField, Button, Typography, Grid, Autocomplete } from '@mui/material';
+import { useAuth } from '../auth/AuthProvider';
+import axios from 'axios';
 import { ErrorDialogContext } from './CommonErrorDialog';
+import { useContext } from 'react';
 
 export default function BookForm({ onBookAdded }) {
   const { user } = useAuth();
-  const [isbn, setIsbn] = useState("");
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [publisher, setPublisher] = useState("");
-  const [publishedDate, setPublishedDate] = useState("");
-  const [coverImageUrl, setCoverImageUrl] = useState("");
+  const { setGlobalError } = useContext(ErrorDialogContext);
+  const [isbn, setIsbn] = useState('');
+  const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
+  const [publisher, setPublisher] = useState('');
+  const [publishedDate, setPublishedDate] = useState('');
+  const [coverImageUrl, setCoverImageUrl] = useState('');
   const [tags, setTags] = useState([]);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [searchPerformed, setSearchPerformed] = useState(false);
   const [tagOptions, setTagOptions] = useState([]);
   const [inputTagValue, setInputTagValue] = useState("");
-  const { setGlobalError } = useContext(ErrorDialogContext) || { setGlobalError: () => {} };
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [searchPerformed, setSearchPerformed] = useState(false);
+
+  // タグ履歴取得（updatedAt降順）
+  const fetchTagHistory = useCallback(async () => {
+    if (!user?.uid) return;
+    try {
+      const q = query(
+        collection(db, "users", user.uid, "bookTagHistory"),
+        orderBy("updatedAt", "desc")
+      );
+      const snap = await getDocs(q);
+      const tags = snap.docs.map(doc => doc.data().tag).filter(Boolean);
+      setTagOptions(tags);
+    } catch (e) {
+      console.error("タグ履歴の取得に失敗", e);
+    }
+  }, [user]);
 
   useEffect(() => {
-    // Firestoreからタグ履歴（bookTagHistory）を取得（updatedAt降順）
-    const fetchTagHistory = async () => {
-      if (!user?.uid) return;
-      try {
-        const q = query(
-          collection(db, "users", user.uid, "bookTagHistory"),
-          orderBy("updatedAt", "desc")
-        );
-        const snap = await getDocs(q);
-        const tags = snap.docs.map(doc => doc.data().tag).filter(Boolean);
-        setTagOptions(tags);
-      } catch (e) {
-        console.error("タグ履歴の取得に失敗", e);
-      }
-    };
     fetchTagHistory();
-  }, [user]);
+  }, [fetchTagHistory]);
 
   const handleFetchBookInfo = async () => {
     if (!isbn) {
@@ -191,7 +192,7 @@ export default function BookForm({ onBookAdded }) {
   return (
     <Box component="form" onSubmit={handleAdd} sx={{ mt: 2 }} role="form" data-testid="book-form">
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
+        <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             label="ISBN"
             value={isbn}
@@ -202,7 +203,7 @@ export default function BookForm({ onBookAdded }) {
             inputProps={{ "data-testid": "book-isbn-input" }}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid size={{ xs: 12, sm: 6 }}>
           <Button
             onClick={handleFetchBookInfo}
             variant="outlined"
@@ -223,7 +224,7 @@ export default function BookForm({ onBookAdded }) {
       )}
 
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
+        <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             label="タイトル"
             value={title}
@@ -234,7 +235,7 @@ export default function BookForm({ onBookAdded }) {
             inputProps={{ "data-testid": "book-title-input" }}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             label="著者"
             value={author}
@@ -244,7 +245,7 @@ export default function BookForm({ onBookAdded }) {
             inputProps={{ "data-testid": "book-author-input" }}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             label="出版社"
             value={publisher}
@@ -254,7 +255,7 @@ export default function BookForm({ onBookAdded }) {
             inputProps={{ "data-testid": "book-publisher-input" }}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             label="出版日"
             value={publishedDate}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { collection, query, orderBy, getDocs, setDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../auth/AuthProvider';
@@ -16,23 +16,24 @@ const BookTagEditor = ({ book, bookId, onTagsChange }) => {
   const [tagOptions, setTagOptions] = useState([]);
 
   // タグ履歴取得（書籍用）
-  useEffect(() => {
-    const fetchTagHistory = async () => {
-      if (!user?.uid) return;
-      try {
-        const q = query(
-          collection(db, "users", user.uid, "bookTagHistory"),
-          orderBy("updatedAt", "desc")
-        );
-        const snap = await getDocs(q);
-        const tags = snap.docs.map(doc => doc.data().tag).filter(Boolean);
-        setTagOptions(tags);
-      } catch (e) {
-        console.error("書籍用タグ履歴の取得に失敗", e);
-      }
-    };
-    fetchTagHistory();
+  const fetchTagHistory = useCallback(async () => {
+    if (!user?.uid) return;
+    try {
+      const q = query(
+        collection(db, "users", user.uid, "bookTagHistory"),
+        orderBy("updatedAt", "desc")
+      );
+      const snap = await getDocs(q);
+      const tags = snap.docs.map(doc => doc.data().tag).filter(Boolean);
+      setTagOptions(tags);
+    } catch (e) {
+      console.error("書籍用タグ履歴の取得に失敗", e);
+    }
   }, [user]);
+
+  useEffect(() => {
+    fetchTagHistory();
+  }, [fetchTagHistory]);
 
   const handleEditTags = () => {
     setEditTags(book.tags || []);
