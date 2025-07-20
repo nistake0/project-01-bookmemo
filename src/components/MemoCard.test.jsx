@@ -4,8 +4,23 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { ErrorDialogProvider } from './CommonErrorDialog';
 import MemoCard from './MemoCard';
 
+/**
+ * MemoCard コンポーネントのユニットテスト
+ * 
+ * テスト対象の機能:
+ * - メモカードの表示（全フィールド付き）
+ * - 最小限フィールドでの表示
+ * - 編集・削除ボタンの動作
+ * - オプションフィールドの処理（ページ番号、タグ、日付）
+ * - エッジケースの処理（null値、空文字）
+ */
+
 const theme = createTheme();
 
+/**
+ * テスト用のレンダリング関数
+ * ThemeProviderとErrorDialogProviderでコンポーネントをラップ
+ */
 const renderWithProviders = (component) => {
   return render(
     <ThemeProvider theme={theme}>
@@ -17,6 +32,7 @@ const renderWithProviders = (component) => {
 };
 
 describe('MemoCard', () => {
+  // テスト用のメモデータ（全フィールド付き）
   const mockMemo = {
     id: 'memo1',
     text: 'テストメモの内容',
@@ -33,6 +49,16 @@ describe('MemoCard', () => {
     jest.clearAllMocks();
   });
 
+  /**
+   * テストケース: 全フィールド付きメモカードの表示
+   * 
+   * 目的: メモの全フィールド（テキスト、コメント、ページ番号、タグ、作成日）が
+   * 正しく表示されることを確認
+   * 
+   * テストステップ:
+   * 1. 全フィールド付きのメモデータでMemoCardをレンダリング
+   * 2. メモのテキスト、コメント、ページ番号、タグ、作成日が表示されることを確認
+   */
   it('renders memo card with all information', () => {
     renderWithProviders(
       <MemoCard 
@@ -42,14 +68,30 @@ describe('MemoCard', () => {
       />
     );
 
+    // メモの内容が表示されることを確認
     expect(screen.getByText('テストメモの内容')).toBeInTheDocument();
     expect(screen.getByText('テストコメント')).toBeInTheDocument();
+    
+    // ページ番号とタグが表示されることを確認
     expect(screen.getByText('p.123')).toBeInTheDocument();
     expect(screen.getByText('テスト')).toBeInTheDocument();
     expect(screen.getByText('サンプル')).toBeInTheDocument();
+    
+    // 作成日が表示されることを確認
     expect(screen.getByText('2024/1/1')).toBeInTheDocument();
   });
 
+  /**
+   * テストケース: 最小限フィールドでのメモカード表示
+   * 
+   * 目的: コメント、ページ番号、タグなどのオプションフィールドがないメモでも
+   * 正しく表示されることを確認
+   * 
+   * テストステップ:
+   * 1. 最小限のフィールド（id, text, createdAt）のみのメモデータでレンダリング
+   * 2. メモのテキストが表示されることを確認
+   * 3. オプションフィールド（ページ番号、タグ）が表示されないことを確認
+   */
   it('renders memo card with minimal information', () => {
     const minimalMemo = {
       id: 'memo2',
@@ -65,11 +107,24 @@ describe('MemoCard', () => {
       />
     );
 
+    // メモのテキストが表示されることを確認
     expect(screen.getByText('最小限のメモ')).toBeInTheDocument();
+    
+    // オプションフィールドが表示されないことを確認
     expect(screen.queryByText('p.')).not.toBeInTheDocument();
     expect(screen.queryByText('テスト')).not.toBeInTheDocument();
   });
 
+  /**
+   * テストケース: 編集ボタンの動作
+   * 
+   * 目的: 編集ボタンをクリックした場合、onEditコールバックが正しいメモデータで呼ばれることを確認
+   * 
+   * テストステップ:
+   * 1. MemoCardをレンダリング
+   * 2. 編集ボタンをクリック
+   * 3. mockOnEditが正しいメモデータで呼ばれることを確認
+   */
   it('calls onEdit when edit button is clicked', () => {
     renderWithProviders(
       <MemoCard 
@@ -79,12 +134,24 @@ describe('MemoCard', () => {
       />
     );
 
+    // 編集ボタンをクリック
     const editButton = screen.getByLabelText('edit');
     fireEvent.click(editButton);
 
+    // onEditコールバックが正しいメモデータで呼ばれることを確認
     expect(mockOnEdit).toHaveBeenCalledWith(mockMemo);
   });
 
+  /**
+   * テストケース: 削除ボタンの動作
+   * 
+   * 目的: 削除ボタンをクリックした場合、onDeleteコールバックが正しいメモIDで呼ばれることを確認
+   * 
+   * テストステップ:
+   * 1. MemoCardをレンダリング
+   * 2. 削除ボタンをクリック
+   * 3. mockOnDeleteが正しいメモIDで呼ばれることを確認
+   */
   it('calls onDelete when delete button is clicked', () => {
     renderWithProviders(
       <MemoCard 
@@ -94,12 +161,24 @@ describe('MemoCard', () => {
       />
     );
 
+    // 削除ボタンをクリック
     const deleteButton = screen.getByLabelText('delete');
     fireEvent.click(deleteButton);
 
+    // onDeleteコールバックが正しいメモIDで呼ばれることを確認
     expect(mockOnDelete).toHaveBeenCalledWith('memo1');
   });
 
+  /**
+   * テストケース: 作成日がnullの場合の処理
+   * 
+   * 目的: createdAtがnullの場合でもエラーが発生せず、適切に処理されることを確認
+   * 
+   * テストステップ:
+   * 1. createdAtがnullのメモデータでレンダリング
+   * 2. メモのテキストが表示されることを確認
+   * 3. 作成日が表示されないことを確認
+   */
   it('handles memo without createdAt.toDate method', () => {
     const memoWithoutDate = {
       id: 'memo3',
@@ -115,10 +194,22 @@ describe('MemoCard', () => {
       />
     );
 
+    // メモのテキストが表示されることを確認
     expect(screen.getByText('日付なしメモ')).toBeInTheDocument();
+    
+    // 作成日が表示されないことを確認
     expect(screen.queryByText('1/1/2024')).not.toBeInTheDocument();
   });
 
+  /**
+   * テストケース: 空文字のテキスト処理
+   * 
+   * 目的: メモのテキストが空文字の場合でも、メモカードが正しく表示されることを確認
+   * 
+   * テストステップ:
+   * 1. テキストが空文字のメモデータでレンダリング
+   * 2. メモカードが表示されることを確認
+   */
   it('handles memo with empty text', () => {
     const emptyMemo = {
       id: 'memo4',
@@ -134,9 +225,20 @@ describe('MemoCard', () => {
       />
     );
 
+    // メモカードが表示されることを確認
     expect(screen.getByTestId('memo-card')).toBeInTheDocument();
   });
 
+  /**
+   * テストケース: タグがnullの場合の処理
+   * 
+   * 目的: tagsがnullの場合でもエラーが発生せず、適切に処理されることを確認
+   * 
+   * テストステップ:
+   * 1. tagsがnullのメモデータでレンダリング
+   * 2. メモのテキストが表示されることを確認
+   * 3. タグが表示されないことを確認
+   */
   it('handles memo with null tags', () => {
     const memoWithNullTags = {
       id: 'memo5',
@@ -153,7 +255,10 @@ describe('MemoCard', () => {
       />
     );
 
+    // メモのテキストが表示されることを確認
     expect(screen.getByText('タグなしメモ')).toBeInTheDocument();
+    
+    // タグが表示されないことを確認
     expect(screen.queryByText('テスト')).not.toBeInTheDocument();
   });
 }); 

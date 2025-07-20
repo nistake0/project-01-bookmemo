@@ -3,6 +3,17 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import MemoAdd from './MemoAdd';
+
+/**
+ * MemoAdd コンポーネントのユニットテスト
+ * 
+ * テスト対象の機能:
+ * - メモ追加フォームの表示（引用・抜き書き、感想・コメント、ページ番号）
+ * - フォーム送信時のFirestore保存処理
+ * - 送信後のフォームクリア機能
+ * - タグ履歴の取得・表示
+ */
+
 // Node.js環境用 fetch モック
 import fetch from 'node-fetch';
 global.fetch = fetch;
@@ -51,19 +62,47 @@ describe('MemoAdd', () => {
     collection.mockClear();
   });
 
+  /**
+   * テストケース: メモ追加フォームの表示
+   * 
+   * 目的: メモ追加フォームに必要なすべての入力フィールドとボタンが
+   * 正しく表示されることを確認
+   * 
+   * テストステップ:
+   * 1. MemoAddコンポーネントをレンダリング
+   * 2. 引用・抜き書き入力欄が存在することを確認
+   * 3. 感想・コメント入力欄が存在することを確認
+   * 4. ページ番号入力欄が存在することを確認
+   * 5. メモ追加ボタンが存在することを確認
+   */
   test('ページ番号入力欄を含むメモ追加フォームが正しく表示される', () => {
     render(<MemoAdd bookId="test-book-id" />);
 
+    // 必須入力フィールドの存在確認
     expect(screen.getByLabelText(/引用・抜き書き/)).toBeInTheDocument();
     expect(screen.getByLabelText(/感想・コメント/)).toBeInTheDocument();
     expect(screen.getByLabelText(/ページ番号/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'メモを追加' })).toBeInTheDocument();
   });
 
+  /**
+   * テストケース: フォーム送信時のFirestore保存処理
+   * 
+   * 目的: フォームに入力して送信した場合、正しいデータでFirestoreに保存され、
+   * 送信後にフォームがクリアされることを確認
+   * 
+   * テストステップ:
+   * 1. MemoAddコンポーネントをレンダリング
+   * 2. 各入力フィールドにテストデータを入力
+   * 3. メモ追加ボタンをクリック
+   * 4. addDocが正しいデータで呼ばれることを確認
+   * 5. 送信後にフォームがクリアされることを確認
+   */
   test('フォームを送信すると正しいデータでaddDocが呼ばれる', async () => {
     const user = userEvent.setup();
     render(<MemoAdd bookId="test-book-id" />);
 
+    // 入力フィールドとボタンを取得
     const textInput = screen.getByLabelText(/引用・抜き書き/);
     const commentInput = screen.getByLabelText(/感想・コメント/);
     const pageInput = screen.getByLabelText(/ページ番号/);

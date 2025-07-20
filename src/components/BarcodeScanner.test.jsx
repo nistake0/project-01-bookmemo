@@ -4,6 +4,16 @@ import userEvent from '@testing-library/user-event';
 import BarcodeScanner from './BarcodeScanner';
 import { BrowserMultiFormatReader } from '@zxing/library';
 
+/**
+ * BarcodeScanner コンポーネントのユニットテスト
+ * 
+ * テスト対象の機能:
+ * - バーコード検出時のコールバック処理
+ * - スキャンエラー時のエラーハンドリング
+ * - カメラパーミッション拒否時の処理
+ * - スキャナーリソースの適切なクリーンアップ
+ */
+
 // jest.setup.jsで@zxing/libraryはモック化済み
 
 describe.skip('バーコードスキャナー', () => {
@@ -17,6 +27,21 @@ describe.skip('バーコードスキャナー', () => {
     mockReader.reset.mockClear();
   });
 
+  /**
+   * テストケース: バーコード検出時の処理
+   * 
+   * 目的: バーコードが正常に検出された場合、onDetectedコールバックが正しいバーコードで呼ばれ、
+   * スキャナーがリセットされることを確認
+   * 
+   * テストステップ:
+   * 1. BarcodeScannerコンポーネントをレンダリング
+   * 2. video要素がレンダリングされるのを待つ
+   * 3. decodeFromVideoDeviceが呼ばれた際にテスト用バーコードを返すように設定
+   * 4. decodeFromVideoDeviceが呼ばれることを確認
+   * 5. onDetectedが正しいバーコードで呼ばれることを確認
+   * 6. onErrorが呼ばれないことを確認
+   * 7. スキャナーがリセットされることを確認
+   */
   test('バーコードが検出されたらonDetectedが呼び出される', async () => {
     const handleDetected = jest.fn();
     const handleError = jest.fn();
@@ -44,11 +69,28 @@ describe.skip('バーコードスキャナー', () => {
       expect(handleDetected).toHaveBeenCalledWith(testBarcode);
     });
 
+    // エラーが発生していないことを確認
     expect(handleError).not.toHaveBeenCalled();
+    
+    // スキャナーがリセットされることを確認
     expect(mockReader.reset).toHaveBeenCalled();
   });
 
-
+  /**
+   * テストケース: スキャンエラー時の処理
+   * 
+   * 目的: バーコードスキャン中にエラーが発生した場合、onErrorコールバックが
+   * 適切なエラーメッセージで呼ばれ、スキャナーがリセットされることを確認
+   * 
+   * テストステップ:
+   * 1. BarcodeScannerコンポーネントをレンダリング
+   * 2. video要素がレンダリングされるのを待つ
+   * 3. decodeFromVideoDeviceが呼ばれた際にエラーを返すように設定
+   * 4. decodeFromVideoDeviceが呼ばれることを確認
+   * 5. onErrorが適切なエラーメッセージで呼ばれることを確認
+   * 6. onDetectedが呼ばれないことを確認
+   * 7. スキャナーがリセットされることを確認
+   */
   test('エラーが発生したらonErrorが呼び出される', async () => {
     const handleDetected = jest.fn();
     const handleError = jest.fn();
@@ -65,18 +107,38 @@ describe.skip('バーコードスキャナー', () => {
         return Promise.resolve({ stop: jest.fn() });
     });
 
+    // decodeFromVideoDeviceが呼ばれることを確認
     await waitFor(() => {
         expect(mockReader.decodeFromVideoDevice).toHaveBeenCalled();
     });
 
+    // onErrorが適切なエラーメッセージで呼ばれることを確認
     await waitFor(() => {
       expect(handleError).toHaveBeenCalledWith('バーコードのスキャンに失敗しました。');
     });
 
+    // バーコードが検出されていないことを確認
     expect(handleDetected).not.toHaveBeenCalled();
+    
+    // スキャナーがリセットされることを確認
     expect(mockReader.reset).toHaveBeenCalled();
   });
 
+  /**
+   * テストケース: カメラパーミッション拒否時の処理
+   * 
+   * 目的: カメラのパーミッションが拒否された場合、onErrorコールバックが
+   * 適切なエラーメッセージで呼ばれ、スキャナーがリセットされないことを確認
+   * 
+   * テストステップ:
+   * 1. decodeFromVideoDeviceにパーミッションエラーを設定
+   * 2. BarcodeScannerコンポーネントをレンダリング
+   * 3. video要素がレンダリングされるのを待つ
+   * 4. decodeFromVideoDeviceが呼ばれることを確認
+   * 5. onErrorが適切なエラーメッセージで呼ばれることを確認
+   * 6. onDetectedが呼ばれないことを確認
+   * 7. スキャナーがリセットされないことを確認
+   */
   test('カメラのパーミッションが拒否されたらonErrorが呼ばれる', async () => {
     const handleDetected = jest.fn();
     const handleError = jest.fn();
@@ -89,16 +151,20 @@ describe.skip('バーコードスキャナー', () => {
     // video要素がレンダリングされるのを待つ
     const videoElement = await screen.findByTestId('barcode-scanner-video');
 
+    // decodeFromVideoDeviceが呼ばれることを確認
     await waitFor(() => {
         expect(mockReader.decodeFromVideoDevice).toHaveBeenCalled();
     });
 
+    // onErrorが適切なエラーメッセージで呼ばれることを確認
     await waitFor(() => {
         expect(handleError).toHaveBeenCalledWith("カメラの起動に失敗しました。");
     });
 
+    // バーコードが検出されていないことを確認
     expect(handleDetected).not.toHaveBeenCalled();
-    // resetは呼ばれないはず
+    
+    // パーミッションエラーの場合はresetは呼ばれない
     expect(mockReader.reset).not.toHaveBeenCalled();
   });
 }); 
