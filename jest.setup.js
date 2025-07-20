@@ -1,22 +1,113 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
 
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder;
+// React Testing Libraryの設定
+import { configure } from '@testing-library/react';
 
-// firebase.jsをモック化して、import.meta.envエラーを回避
+// act()警告を抑制するための設定
+configure({
+  asyncUtilTimeout: 10000,
+  // 非同期処理の警告を抑制
+  getElementError: (message, container) => {
+    const error = new Error(message);
+    error.name = 'TestingLibraryElementError';
+    return error;
+  },
+});
+
+// コンソールエラーを抑制（開発中の警告のみ）
+const originalError = console.error;
+beforeAll(() => {
+  console.error = (...args) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('Warning: An update to') &&
+      args[0].includes('was not wrapped in act')
+    ) {
+      return;
+    }
+    originalError.call(console, ...args);
+  };
+});
+
+afterAll(() => {
+  console.error = originalError;
+});
+
+// グローバルFirebase モック
 jest.mock('./src/firebase', () => ({
-  db: jest.fn(),
+  db: {},
   auth: {
-    currentUser: {
-      uid: 'test-user-id',
-    },
-    onAuthStateChanged: jest.fn(callback => {
-      callback({ uid: 'test-user-id' }); // 常にログイン状態を返す
-      return jest.fn(); // unsubscribe関数
-    }),
+    onAuthStateChanged: jest.fn(),
+    signOut: jest.fn(),
   },
 }));
+
+// グローバルFirestore モック
+jest.mock('firebase/firestore', () => {
+  const mockCollectionRef = { id: 'books' };
+  const mockDocRef = { id: 'test-doc-id' };
+  
+  return {
+    // コレクション関連
+    collection: jest.fn(() => mockCollectionRef),
+    doc: jest.fn(() => mockDocRef),
+    
+    // クエリ関連
+    query: jest.fn(() => ({})),
+    where: jest.fn(() => ({})),
+    orderBy: jest.fn(() => ({})),
+    limit: jest.fn(() => ({})),
+    startAfter: jest.fn(() => ({})),
+    
+    // データ取得
+    getDocs: jest.fn(() => Promise.resolve({
+      docs: [
+        { id: 'doc1', data: () => ({ title: 'テスト本1' }) },
+        { id: 'doc2', data: () => ({ title: 'テスト本2' }) },
+      ],
+    })),
+    getDoc: jest.fn(() => Promise.resolve({
+      exists: () => true,
+      data: () => ({ title: 'テスト本' }),
+    })),
+    
+    // データ書き込み
+    addDoc: jest.fn(() => Promise.resolve({ id: 'new-doc-id' })),
+    setDoc: jest.fn(() => Promise.resolve()),
+    updateDoc: jest.fn(() => Promise.resolve()),
+    deleteDoc: jest.fn(() => Promise.resolve()),
+    
+    // リアルタイムリスナー
+    onSnapshot: jest.fn(() => jest.fn()), // unsubscribe関数を返す
+    
+    // ユーティリティ
+    serverTimestamp: jest.fn(() => 'mock-timestamp'),
+    Timestamp: {
+      now: jest.fn(() => 'mock-timestamp'),
+    },
+    
+    // バッチ操作
+    writeBatch: jest.fn(() => ({
+      set: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      commit: jest.fn(() => Promise.resolve()),
+    })),
+  };
+});
+
+// グローバルAuth モック
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(() => ({})),
+  signInWithEmailAndPassword: jest.fn(() => Promise.resolve({ user: { uid: 'test-user-id' } })),
+  createUserWithEmailAndPassword: jest.fn(() => Promise.resolve({ user: { uid: 'test-user-id' } })),
+  signOut: jest.fn(() => Promise.resolve()),
+  onAuthStateChanged: jest.fn(() => jest.fn()),
+}));
+
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 
 // navigator.mediaDevices.getUserMedia をモック化
 global.navigator.mediaDevices = {

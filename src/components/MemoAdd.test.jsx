@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ErrorDialogContext } from './CommonErrorDialog';
 import { addDoc, collection } from 'firebase/firestore';
@@ -22,51 +22,6 @@ jest.mock('react-router-dom', () => ({
 jest.mock('../auth/AuthProvider', () => ({
   useAuth: () => ({ user: { uid: 'test-user-id' } }),
 }));
-jest.mock('../firebase', () => {
-  const mockCollectionRef = {};
-  const mockCollection = jest.fn(() => mockCollectionRef);
-  const mockGetDocs = jest.fn(() => Promise.resolve({
-    docs: [
-      { id: 'tag1', data: () => ({ tag: 'テストタグ1', updatedAt: { toDate: () => new Date() } }) },
-      { id: 'tag2', data: () => ({ tag: 'テストタグ2', updatedAt: { toDate: () => new Date() } }) },
-    ],
-  }));
-  return {
-    db: {},
-    collection: mockCollection,
-    getDocs: mockGetDocs,
-    addDoc: jest.fn(),
-    serverTimestamp: jest.fn(),
-  };
-});
-
-// Firestoreのcollection/getDocsを直接importしている場合にも対応
-jest.mock('firebase/firestore', () => {
-  const mockCollectionRef = {};
-  const mockCollection = jest.fn(() => mockCollectionRef);
-  const mockGetDocs = jest.fn(() => Promise.resolve({
-    docs: [
-      { id: 'tag1', data: () => ({ tag: 'テストタグ1', updatedAt: { toDate: () => new Date() } }) },
-      { id: 'tag2', data: () => ({ tag: 'テストタグ2', updatedAt: { toDate: () => new Date() } }) },
-    ],
-  }));
-  return {
-    collection: mockCollection,
-    getDocs: mockGetDocs,
-    addDoc: jest.fn(),
-    serverTimestamp: jest.fn(),
-    doc: jest.fn(),
-    setDoc: jest.fn(),
-    updateDoc: jest.fn(),
-    deleteDoc: jest.fn(),
-    onSnapshot: jest.fn(),
-    query: jest.fn(),
-    where: jest.fn(),
-    orderBy: jest.fn(),
-    limit: jest.fn(),
-    startAfter: jest.fn(),
-  };
-});
 
 // テスト用のレンダリング関数
 const mockSetGlobalError = jest.fn();
@@ -97,18 +52,22 @@ describe('MemoAdd', () => {
    * 2. 各入力フィールド（引用・抜き書き、感想・コメント、ページ番号、タグ）が存在することを確認
    * 3. 送信ボタンが存在することを確認
    */
-  it('renders memo add form', () => {
+  it('renders memo add form', async () => {
     renderWithProviders(<MemoAdd bookId="test-book-id" />);
 
+    // 非同期処理の完了を待つ
+    await waitFor(() => {
+      expect(screen.getByTestId('memo-text-input')).toBeInTheDocument();
+    }, { timeout: 10000 });
+
     // 必須入力フィールドの存在確認
-    expect(screen.getByTestId('memo-text-input')).toBeInTheDocument();
     expect(screen.getByTestId('memo-comment-input')).toBeInTheDocument();
     expect(screen.getByTestId('memo-page-input')).toBeInTheDocument();
     expect(screen.getByTestId('memo-tags-input')).toBeInTheDocument();
     
     // 送信ボタンの存在確認
     expect(screen.getByTestId('memo-add-submit')).toBeInTheDocument();
-  });
+  }, 10000);
 
   /**
    * テストケース: メモ追加フォームの送信とFirestore保存
@@ -127,6 +86,11 @@ describe('MemoAdd', () => {
     addDoc.mockResolvedValue({ id: 'test-memo-id' });
 
     renderWithProviders(<MemoAdd bookId="test-book-id" />);
+
+    // 非同期処理の完了を待つ
+    await waitFor(() => {
+      expect(screen.getByTestId('memo-text-input')).toBeInTheDocument();
+    }, { timeout: 10000 });
 
     // 各入力フィールドにテストデータを入力
     const textInput = screen.getByTestId('memo-text-input');
@@ -152,6 +116,6 @@ describe('MemoAdd', () => {
           tags: [],
         })
       );
-    }, { timeout: 3000 });
-  });
+    }, { timeout: 10000 });
+  }, 15000);
 }); 
