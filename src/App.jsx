@@ -51,7 +51,7 @@ function AppBottomNav() {
         if (newValue === 4) navigate('/mypage');
       }}
       showLabels
-      sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100 }}
+      sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, backgroundColor: 'background.paper', borderTop: 1, borderColor: 'divider' }}
     >
       <BottomNavigationAction label="本一覧" icon={<LibraryBooksIcon />} />
       <BottomNavigationAction label="本を追加" icon={<AddCircleIcon />} />
