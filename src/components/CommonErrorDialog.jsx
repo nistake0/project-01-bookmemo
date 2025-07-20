@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Alert } from '@mui/material';
 
 export const ErrorDialogContext = React.createContext({ setGlobalError: () => {} });
@@ -18,5 +18,30 @@ const CommonErrorDialog = ({ open, message, onClose }) => (
     </DialogActions>
   </Dialog>
 );
+
+export const ErrorDialogProvider = ({ children }) => {
+  const [error, setError] = useState(null);
+
+  const setGlobalError = (message) => {
+    setError(message);
+  };
+
+  const handleClose = () => {
+    setError(null);
+  };
+
+  return (
+    <ErrorDialogContext.Provider value={{ setGlobalError }}>
+      {children}
+      {error && (
+        <CommonErrorDialog
+          open={!!error}
+          message={error}
+          onClose={handleClose}
+        />
+      )}
+    </ErrorDialogContext.Provider>
+  );
+};
 
 export default CommonErrorDialog; 

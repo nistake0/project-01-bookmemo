@@ -181,6 +181,7 @@ export default function BookForm({ onBookAdded }) {
             fullWidth
             margin="normal"
             placeholder="例: 9784873119485"
+            inputProps={{ "data-testid": "book-isbn-input" }}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -211,6 +212,7 @@ export default function BookForm({ onBookAdded }) {
             fullWidth
             margin="normal"
             required
+            inputProps={{ "data-testid": "book-title-input" }}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -220,6 +222,7 @@ export default function BookForm({ onBookAdded }) {
             onChange={(e) => setAuthor(e.target.value)}
             fullWidth
             margin="normal"
+            inputProps={{ "data-testid": "book-author-input" }}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -229,6 +232,7 @@ export default function BookForm({ onBookAdded }) {
             onChange={(e) => setPublisher(e.target.value)}
             fullWidth
             margin="normal"
+            inputProps={{ "data-testid": "book-publisher-input" }}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -238,6 +242,7 @@ export default function BookForm({ onBookAdded }) {
             onChange={(e) => setPublishedDate(e.target.value)}
             fullWidth
             margin="normal"
+            inputProps={{ "data-testid": "book-publishdate-input" }}
           />
         </Grid>
       </Grid>
@@ -272,7 +277,7 @@ export default function BookForm({ onBookAdded }) {
         </Typography>
       )}
 
-      <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+      <Button type="submit" variant="contained" sx={{ mt: 2 }} data-testid="book-add-submit">
         本を追加
       </Button>
     </Box>
