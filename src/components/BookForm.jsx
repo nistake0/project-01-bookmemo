@@ -54,47 +54,64 @@ export default function BookForm({ onBookAdded }) {
       const openbdResponse = await axios.get(`https://api.openbd.jp/v1/get?isbn=${isbn}`);
       const bookData = openbdResponse.data[0];
       
+      let title = "";
+      let author = "";
+      let publisher = "";
+      let publishedDate = "";
+      let coverUrl = "";
+      let nextTags = [];
+
+      // openBDで書籍情報が見つかった場合
       if (bookData && bookData.summary) {
-        setTitle(bookData.summary.title || "");
-        setAuthor(bookData.summary.author || "");
-        setPublisher(bookData.summary.publisher || "");
-        setPublishedDate(bookData.summary.pubdate || "");
+        title = bookData.summary.title || "";
+        author = bookData.summary.author || "";
+        publisher = bookData.summary.publisher || "";
+        publishedDate = bookData.summary.pubdate || "";
+        coverUrl = bookData.summary.cover || "";
 
-        let coverUrl = bookData.summary.cover || "";
-        let googleBookData = null;
-        // カバー画像が無い場合のみGoogle Books APIを呼ぶ
-        if (!coverUrl) {
-          try {
-            const googleResponse = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
-            googleBookData = googleResponse.data;
-            if (googleBookData.items && googleBookData.items.length > 0) {
-              const imageLinks = googleBookData.items[0].volumeInfo.imageLinks;
-              if (imageLinks) {
-                coverUrl = imageLinks.thumbnail || imageLinks.smallThumbnail || "";
-              }
+        // openBDのタグ情報を追加
+        if (bookData.summary.subject) nextTags.push(bookData.summary.subject);
+        if (bookData.summary.ndc) nextTags.push(bookData.summary.ndc);
+      }
+
+      // カバー画像が無い場合、またはopenBDで書籍情報が見つからない場合はGoogle Books APIを呼ぶ
+      if (!coverUrl || !title) {
+        try {
+          const googleResponse = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
+          const googleBookData = googleResponse.data;
+          
+          if (googleBookData.items && googleBookData.items.length > 0) {
+            const volumeInfo = googleBookData.items[0].volumeInfo;
+            
+            // openBDで取得できなかった情報をGoogle Booksから補完
+            if (!title) title = volumeInfo.title || "";
+            if (!author) author = volumeInfo.authors ? volumeInfo.authors.join(", ") : "";
+            if (!publisher) publisher = volumeInfo.publisher || "";
+            if (!publishedDate) publishedDate = volumeInfo.publishedDate || "";
+            
+            // カバー画像
+            if (!coverUrl && volumeInfo.imageLinks) {
+              coverUrl = volumeInfo.imageLinks.thumbnail || volumeInfo.imageLinks.smallThumbnail || "";
             }
-          } catch (googleErr) {
-            console.error("Failed to fetch from Google Books API", googleErr);
+            
+            // Google Booksのカテゴリをタグに追加
+            if (volumeInfo.categories && volumeInfo.categories.length > 0) {
+              nextTags = [...nextTags, ...volumeInfo.categories];
+            }
           }
+        } catch (googleErr) {
+          console.error("Failed to fetch from Google Books API", googleErr);
         }
+      }
+
+      // 最終的に書籍情報が取得できたかチェック
+      if (title) {
+        setTitle(title);
+        setAuthor(author);
+        setPublisher(publisher);
+        setPublishedDate(publishedDate);
         setCoverImageUrl(coverUrl);
-
-        // Google Books API categoriesとopenBD subject/ndcをマージしてタグ候補に
-        let nextTags = [];
-        if (googleBookData && googleBookData.items && googleBookData.items.length > 0) {
-          const categories = googleBookData.items[0].volumeInfo.categories;
-          if (categories && categories.length > 0) {
-            nextTags = categories;
-          }
-        }
-        // openBD
-        const openbdTags = [];
-        if (bookData.summary.subject) openbdTags.push(bookData.summary.subject);
-        if (bookData.summary.ndc) openbdTags.push(bookData.summary.ndc);
-        // マージ（重複除去）
-        nextTags = Array.from(new Set([...nextTags, ...openbdTags]));
-        setTags(nextTags);
-
+        setTags(Array.from(new Set(nextTags))); // 重複除去
       } else {
         setGlobalError("書籍情報が見つかりませんでした");
         setTitle("");
@@ -102,6 +119,7 @@ export default function BookForm({ onBookAdded }) {
         setPublisher("");
         setPublishedDate("");
         setCoverImageUrl("");
+        setTags([]);
       }
     } catch (err) {
       setGlobalError("書籍情報の取得に失敗しました");

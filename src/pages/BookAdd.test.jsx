@@ -152,13 +152,30 @@ describe('BookAdd', () => {
    * 2. ISBNを入力
    * 3. 書籍情報取得ボタンをクリック
    * 4. openBD APIが正しいURLで呼ばれることを確認
-   * 5. エラーメッセージが表示されることを確認
+   * 5. Google Books APIが呼ばれることを確認
+   * 6. 取得した書籍情報がフォームに自動入力されることを確認
    */
-  it('shows error when openBD fails and no Google Books data', async () => {
+  it('fetches book info from Google Books API when openBD fails', async () => {
     const axios = require('axios');
+    const mockGoogleBookData = {
+      items: [{
+        volumeInfo: {
+          title: 'Clean Architecture',
+          authors: ['Robert C. Martin'],
+          publisher: 'Prentice Hall',
+          publishedDate: '2017-09-20',
+          imageLinks: {
+            thumbnail: 'https://books.google.com/books?id=cover.jpg'
+          },
+          categories: ['Technology', 'Software Engineering']
+        }
+      }]
+    };
     
-    // openBDは空のレスポンス
-    axios.get.mockResolvedValueOnce({ data: [] });
+    // openBDは空のレスポンス、Google Booksは成功
+    axios.get
+      .mockResolvedValueOnce({ data: [] }) // openBD
+      .mockResolvedValueOnce({ data: mockGoogleBookData }); // Google Books
 
     renderWithProviders(<BookAdd />);
 
@@ -176,6 +193,21 @@ describe('BookAdd', () => {
         'https://api.openbd.jp/v1/get?isbn=9780134494166'
       );
     }, { timeout: 3000 });
+
+    // Google Books APIが呼ばれることを確認
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith(
+        'https://www.googleapis.com/books/v1/volumes?q=isbn:9780134494166'
+      );
+    }, { timeout: 3000 });
+
+    // 取得した書籍情報がフォームに自動入力されることを確認
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toHaveValue('Clean Architecture');
+      expect(screen.getByTestId('book-author-input')).toHaveValue('Robert C. Martin');
+      expect(screen.getByTestId('book-publisher-input')).toHaveValue('Prentice Hall');
+      expect(screen.getByTestId('book-publishdate-input')).toHaveValue('2017-09-20');
+    }, { timeout: 5000 });
   }, 15000);
 
   /**
