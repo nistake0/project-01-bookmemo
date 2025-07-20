@@ -56,10 +56,10 @@ const BookDetail = () => {
   if (!book) return <div>本が見つかりません。</div>;
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, pb: '56px' }}>
+    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, pb: '80px' }}>
       <Paper sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <BookInfo book={book} />
+        <BookInfo book={book} />
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
           <BookStatusChanger book={book} bookId={id} onStatusChange={handleStatusChange} />
         </Box>
         

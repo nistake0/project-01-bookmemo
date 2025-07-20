@@ -8,14 +8,14 @@ const BookInfo = ({ book }) => {
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
         <Chip 
           label={currentStatus === 'reading' ? '読書中' : '読了'} 
           color={currentStatus === 'reading' ? 'primary' : 'success'} 
         />
       </Box>
 
-      <Box sx={{ textAlign: 'center', mb: 2 }}>
+      <Box sx={{ textAlign: 'left', mb: 2 }}>
         {book.coverImageUrl ? (
           <img src={book.coverImageUrl} alt={`${book.title}の表紙`} style={{ maxHeight: '250px', width: 'auto' }} />
         ) : (
@@ -33,22 +33,24 @@ const BookInfo = ({ book }) => {
         )}
       </Box>
       
-      <Typography variant="h4" gutterBottom>
-        {book.title}
-      </Typography>
-      <Typography variant="h6" color="text.secondary">
-        {book.author}
-      </Typography>
-      {book.publisher && (
-        <Typography variant="body1" color="text.secondary">
-          出版社: {book.publisher}
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="h4" gutterBottom sx={{ wordBreak: 'break-word' }}>
+          {book.title}
         </Typography>
-      )}
-      {book.publishedDate && (
-        <Typography variant="body1" color="text.secondary">
-          出版日: {book.publishedDate}
+        <Typography variant="h6" color="text.secondary" gutterBottom>
+          {book.author}
         </Typography>
-      )}
+        {book.publisher && (
+          <Typography variant="body1" color="text.secondary" gutterBottom>
+            出版社: {book.publisher}
+          </Typography>
+        )}
+        {book.publishedDate && (
+          <Typography variant="body1" color="text.secondary">
+            出版日: {book.publishedDate}
+          </Typography>
+        )}
+      </Box>
     </>
   );
 };
