@@ -12,9 +12,12 @@ const MemoList = ({ bookId, onMemoUpdated }) => {
   const [editorOpen, setEditorOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [memoToDelete, setMemoToDelete] = useState(null);
+  const [editorEditMode, setEditorEditMode] = useState(false);
 
-  const handleEdit = (memo) => {
+  // 通常の詳細表示（タップ時）
+  const handleEdit = (memo, editMode = false) => {
     setSelectedMemo(memo);
+    setEditorEditMode(editMode);
     setEditorOpen(true);
   };
 
@@ -70,9 +73,9 @@ const MemoList = ({ bookId, onMemoUpdated }) => {
           <MemoCard
             key={memo.id}
             memo={memo}
-            onEdit={handleEdit}
+            onEdit={(m, editMode) => handleEdit(m, editMode)}
             onDelete={handleDelete}
-            onClick={handleEdit}
+            onClick={(m) => handleEdit(m, false)}
           />
         ))}
       </Box>
@@ -83,6 +86,7 @@ const MemoList = ({ bookId, onMemoUpdated }) => {
         onClose={handleClose}
         onUpdate={handleMemoUpdated}
         onDelete={handleMemoUpdated}
+        editMode={editorEditMode}
       />
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog} data-testid="memo-delete-dialog">
         <DialogTitle data-testid="memo-delete-confirm-title">本当に削除しますか？</DialogTitle>
