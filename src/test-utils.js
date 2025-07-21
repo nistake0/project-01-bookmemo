@@ -4,14 +4,6 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { BrowserRouter } from 'react-router-dom';
 import { ErrorDialogContext } from './components/CommonErrorDialog';
 
-// AuthProviderのモックを設定
-jest.mock('./auth/AuthProvider', () => ({
-  useAuth: () => ({
-    user: { uid: 'test-user-id' },
-    loading: false,
-  }),
-}));
-
 // 共通のモック関数
 export const mockSetGlobalError = jest.fn();
 
@@ -65,14 +57,6 @@ export const resetMocks = () => {
  * 共通のモック設定
  */
 export const setupCommonMocks = () => {
-  // AuthProvider モック
-  jest.mock('./auth/AuthProvider', () => ({
-    useAuth: () => ({
-      user: { uid: 'test-user-id' },
-      loading: false,
-    }),
-  }));
-
   // useTagHistory モック
   jest.mock('./hooks/useTagHistory', () => ({
     useTagHistory: () => ({

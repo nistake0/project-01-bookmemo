@@ -105,6 +105,14 @@ jest.mock('firebase/auth', () => ({
   onAuthStateChanged: jest.fn(() => jest.fn()),
 }));
 
+// グローバルAuthProvider モック
+jest.mock('./src/auth/AuthProvider', () => ({
+  useAuth: () => ({
+    user: { uid: 'test-user-id' },
+    loading: false,
+  }),
+}));
+
 // グローバルモックは削除 - テストヘルパーで統一する
 
 global.TextEncoder = TextEncoder;

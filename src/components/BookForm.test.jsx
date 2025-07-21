@@ -15,13 +15,6 @@ import { createMockBook } from '../test-factories';
  * - エラーハンドリング
  */
 
-// Auth モック
-jest.mock('../auth/AuthProvider', () => ({
-  useAuth: () => ({
-    user: { uid: 'test-user-id' },
-  }),
-}));
-
 // axios モック
 jest.mock('axios', () => ({
   get: jest.fn(),
