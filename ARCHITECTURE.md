@@ -218,6 +218,7 @@ graph TD
   - テスト実行前の環境確認
 
 ### 技術的課題・TODOリスト
+- [x] BookForm: ISBN取得ボタンのevent混入防止・テストの型問題修正（[object Object]解消）、ユニットテスト安定化
 - [ ] MemoCard.test.jsxの修正（スワイプアクション対応）
 - [ ] MemoList.test.jsxの再作成（FAB・クリック機能対応）
 - [ ] E2Eテストの安定性向上・追加（memo_swipe_actions.cy.js等）

@@ -28,6 +28,7 @@
 - [x] FAB（Floating Action Button）実装
 - [x] BookDetail.test.jsx修正
 - [x] MemoAdd.test.jsx修正
+- [x] BookForm: ISBN取得ボタンのevent混入防止・テストの型問題修正（[object Object]解消）、ユニットテスト安定化
 
 ### テスト修正
 - [x] BookDetail.test.jsx（FAB対応・複数要素エラー解決）
