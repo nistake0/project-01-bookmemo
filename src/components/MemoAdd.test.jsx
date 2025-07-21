@@ -63,4 +63,30 @@ describe('MemoAdd', () => {
       );
     }, { timeout: 10000 });
   }, 15000);
+
+  it('renders in dialog mode when onClose prop is provided', async () => {
+    const mockOnClose = jest.fn();
+    renderWithProviders(<MemoAdd bookId="test-book-id" onClose={mockOnClose} />);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('memo-add-dialog-title')).toBeInTheDocument();
+    }, { timeout: 10000 });
+    
+    expect(screen.getByTestId('memo-add-cancel')).toBeInTheDocument();
+    expect(screen.getByTestId('memo-add-submit')).toBeInTheDocument();
+  }, 10000);
+
+  it('calls onClose when cancel button is clicked in dialog mode', async () => {
+    const mockOnClose = jest.fn();
+    renderWithProviders(<MemoAdd bookId="test-book-id" onClose={mockOnClose} />);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('memo-add-cancel')).toBeInTheDocument();
+    }, { timeout: 10000 });
+    
+    const cancelButton = screen.getByTestId('memo-add-cancel');
+    fireEvent.click(cancelButton);
+    
+    expect(mockOnClose).toHaveBeenCalled();
+  }, 10000);
 }); 

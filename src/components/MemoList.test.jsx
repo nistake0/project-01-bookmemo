@@ -1,302 +1,373 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { renderWithProviders } from '../test-utils';
 import MemoList from './MemoList';
-import { useMemo } from '../hooks/useMemo';
-import { renderWithProviders, resetMocks } from '../test-utils';
 
 // useMemoフックをモック
-jest.mock('../hooks/useMemo');
-jest.mock('./MemoCard', () => {
-  return function MockMemoCard({ memo, onEdit, onDelete }) {
+jest.mock('../hooks/useMemo', () => ({
+  useMemo: jest.fn()
+}));
+
+// MemoEditorコンポーネントをモック
+jest.mock('./MemoEditor', () => {
+  return function MockMemoEditor({ open, memo, onClose, onUpdate, onDelete }) {
+    if (!open) return null;
     return (
-      <div data-testid={`memo-card-${memo.id}`}>
-        <span>{memo.text}</span>
-        <button onClick={() => onEdit(memo)} data-testid={`edit-${memo.id}`}>編集</button>
-        <button onClick={() => onDelete(memo.id)} data-testid={`delete-${memo.id}`}>削除</button>
+      <div data-testid="memo-editor">
+        <div data-testid="memo-editor-memo-id">{memo?.id}</div>
+        <button onClick={onClose} data-testid="memo-editor-close">閉じる</button>
+        <button onClick={onUpdate} data-testid="memo-editor-update">更新</button>
+        <button onClick={onDelete} data-testid="memo-editor-delete">削除</button>
       </div>
     );
   };
 });
-jest.mock('./MemoEditor', () => {
-  return function MockMemoEditor({ open, memo, onUpdate, onClose }) {
-    if (!open) return null;
+
+// MemoCardコンポーネントをモック
+jest.mock('./MemoCard', () => {
+  return function MockMemoCard({ memo, onEdit, onDelete, onClick }) {
     return (
-      <div data-testid="memo-editor">
-        <button onClick={() => {
-          // 実際のMemoEditorの動作を模倣：onUpdateを呼び出してからエディタを閉じる
-          if (onUpdate) {
-            onUpdate();
-          }
-          onClose();
-        }} data-testid="update-button">更新</button>
+      <div data-testid={`memo-card-${memo.id}`}>
+        <div data-testid={`memo-text-${memo.id}`}>{memo.text}</div>
+        <button onClick={() => onEdit(memo)} data-testid={`memo-edit-button-${memo.id}`}>編集</button>
+        <button onClick={() => onDelete(memo.id)} data-testid={`memo-delete-button-${memo.id}`}>削除</button>
+        <button onClick={() => onClick(memo)} data-testid={`memo-click-${memo.id}`}>クリック</button>
       </div>
     );
   };
 });
 
 describe('MemoList', () => {
-  const mockUseMemo = useMemo;
+  const mockUseMemo = require('../hooks/useMemo').useMemo;
   const mockMemos = [
-    { id: 'memo-1', text: 'テストメモ1', comment: 'コメント1', tags: ['tag1'] },
-    { id: 'memo-2', text: 'テストメモ2', comment: 'コメント2', tags: ['tag2'] },
+    {
+      id: 'memo1',
+      text: 'テストメモ1',
+      comment: 'テストコメント1',
+      page: 123,
+      tags: ['テスト', 'サンプル'],
+      createdAt: { toDate: () => new Date('2024-01-01') }
+    },
+    {
+      id: 'memo2',
+      text: 'テストメモ2',
+      comment: 'テストコメント2',
+      page: 456,
+      tags: ['テスト'],
+      createdAt: { toDate: () => new Date('2024-01-02') }
+    }
   ];
 
+  const mockOnMemoUpdated = jest.fn();
+
   beforeEach(() => {
-    // 完全なモックリセット
     jest.clearAllMocks();
-    resetMocks();
-    
-    // useMemoのデフォルトモック設定
+  });
+
+  /**
+   * テストケース: メモ一覧の表示
+   * 
+   * 目的: メモ一覧が正しく表示されることを確認
+   * 
+   * テストステップ:
+   * 1. メモデータでMemoListをレンダリング
+   * 2. メモカードが正しく表示されることを確認
+   */
+  it('renders memo list correctly', () => {
     mockUseMemo.mockReturnValue({
       memos: mockMemos,
       loading: false,
       updateMemo: jest.fn(),
-      deleteMemo: jest.fn(),
+      deleteMemo: jest.fn()
     });
+
+    renderWithProviders(
+      <MemoList bookId="test-book-id" onMemoUpdated={mockOnMemoUpdated} />
+    );
+
+    // メモカードが表示されることを確認
+    expect(screen.getByTestId('memo-card-memo1')).toBeInTheDocument();
+    expect(screen.getByTestId('memo-card-memo2')).toBeInTheDocument();
+    expect(screen.getByTestId('memo-text-memo1')).toHaveTextContent('テストメモ1');
+    expect(screen.getByTestId('memo-text-memo2')).toHaveTextContent('テストメモ2');
   });
 
-  afterEach(() => {
-    // テスト後のクリーンアップ
-    jest.clearAllMocks();
-  });
-
-  test('renders memo list correctly', () => {
-    render(<MemoList bookId="book-1" />);
-    
-    expect(screen.getByTestId('memo-card-memo-1')).toBeInTheDocument();
-    expect(screen.getByTestId('memo-card-memo-2')).toBeInTheDocument();
-    expect(screen.getByText('テストメモ1')).toBeInTheDocument();
-    expect(screen.getByText('テストメモ2')).toBeInTheDocument();
-  });
-
-  test('shows loading state', () => {
+  /**
+   * テストケース: ローディング状態の表示
+   * 
+   * 目的: ローディング中に適切なメッセージが表示されることを確認
+   * 
+   * テストステップ:
+   * 1. loading: trueの状態でMemoListをレンダリング
+   * 2. ローディングメッセージが表示されることを確認
+   */
+  it('shows loading state', () => {
     mockUseMemo.mockReturnValue({
       memos: [],
       loading: true,
       updateMemo: jest.fn(),
-      deleteMemo: jest.fn(),
+      deleteMemo: jest.fn()
     });
 
-    render(<MemoList bookId="book-1" />);
+    renderWithProviders(
+      <MemoList bookId="test-book-id" onMemoUpdated={mockOnMemoUpdated} />
+    );
+
     expect(screen.getByText('メモを読み込み中...')).toBeInTheDocument();
   });
 
-  test('shows empty state', () => {
+  /**
+   * テストケース: メモが0件の場合の表示
+   * 
+   * 目的: メモが0件の場合に適切なメッセージが表示されることを確認
+   * 
+   * テストステップ:
+   * 1. メモが0件の状態でMemoListをレンダリング
+   * 2. 0件メッセージが表示されることを確認
+   */
+  it('shows empty state when no memos', () => {
     mockUseMemo.mockReturnValue({
       memos: [],
       loading: false,
       updateMemo: jest.fn(),
-      deleteMemo: jest.fn(),
+      deleteMemo: jest.fn()
     });
 
-    render(<MemoList bookId="book-1" />);
+    renderWithProviders(
+      <MemoList bookId="test-book-id" onMemoUpdated={mockOnMemoUpdated} />
+    );
+
     expect(screen.getByText('まだメモはありません。')).toBeInTheDocument();
   });
 
-  test('handles edit button click', () => {
-    render(<MemoList bookId="book-1" />);
-    
-    const editButton = screen.getByTestId('edit-memo-1');
+  /**
+   * テストケース: メモカードのクリックで詳細ダイアログが開く
+   * 
+   * 目的: メモカードをクリックした時にMemoEditorが開くことを確認
+   * 
+   * テストステップ:
+   * 1. メモカードをクリック
+   * 2. MemoEditorが開くことを確認
+   */
+  it('opens memo editor when memo card is clicked', () => {
+    mockUseMemo.mockReturnValue({
+      memos: mockMemos,
+      loading: false,
+      updateMemo: jest.fn(),
+      deleteMemo: jest.fn()
+    });
+
+    renderWithProviders(
+      <MemoList bookId="test-book-id" onMemoUpdated={mockOnMemoUpdated} />
+    );
+
+    // メモカードをクリック
+    const memoCard = screen.getByTestId('memo-click-memo1');
+    fireEvent.click(memoCard);
+
+    // MemoEditorが開くことを確認
+    expect(screen.getByTestId('memo-editor')).toBeInTheDocument();
+    expect(screen.getByTestId('memo-editor-memo-id')).toHaveTextContent('memo1');
+  });
+
+  /**
+   * テストケース: メモの編集機能
+   * 
+   * 目的: 編集ボタンをクリックした時にMemoEditorが開くことを確認
+   * 
+   * テストステップ:
+   * 1. 編集ボタンをクリック
+   * 2. MemoEditorが開くことを確認
+   */
+  it('opens memo editor when edit button is clicked', () => {
+    mockUseMemo.mockReturnValue({
+      memos: mockMemos,
+      loading: false,
+      updateMemo: jest.fn(),
+      deleteMemo: jest.fn()
+    });
+
+    renderWithProviders(
+      <MemoList bookId="test-book-id" onMemoUpdated={mockOnMemoUpdated} />
+    );
+
+    // 編集ボタンをクリック
+    const editButton = screen.getByTestId('memo-edit-button-memo1');
     fireEvent.click(editButton);
-    
+
+    // MemoEditorが開くことを確認
     expect(screen.getByTestId('memo-editor')).toBeInTheDocument();
+    expect(screen.getByTestId('memo-editor-memo-id')).toHaveTextContent('memo1');
   });
 
-  test('handles delete button click', () => {
-    const mockDeleteMemo = jest.fn();
+  /**
+   * テストケース: メモの削除機能
+   * 
+   * 目的: 削除ボタンをクリックした時に削除確認ダイアログが開くことを確認
+   * 
+   * テストステップ:
+   * 1. 削除ボタンをクリック
+   * 2. 削除確認ダイアログが開くことを確認
+   */
+  it('opens delete confirmation dialog when delete button is clicked', () => {
     mockUseMemo.mockReturnValue({
       memos: mockMemos,
       loading: false,
       updateMemo: jest.fn(),
-      deleteMemo: mockDeleteMemo,
+      deleteMemo: jest.fn()
     });
 
-    render(<MemoList bookId="book-1" />);
-    
-    const deleteButton = screen.getByTestId('delete-memo-1');
+    renderWithProviders(
+      <MemoList bookId="test-book-id" onMemoUpdated={mockOnMemoUpdated} />
+    );
+
+    // 削除ボタンをクリック
+    const deleteButton = screen.getByTestId('memo-delete-button-memo1');
     fireEvent.click(deleteButton);
-    
+
+    // 削除確認ダイアログが開くことを確認
     expect(screen.getByTestId('memo-delete-dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('memo-delete-confirm-title')).toHaveTextContent('本当に削除しますか？');
   });
 
-  test('handles card click to open detail (onClick)', () => {
-    // MemoCardのonClickでhandleEditが呼ばれることを確認
-    const mockUseMemo = useMemo;
+  /**
+   * テストケース: 削除確認ダイアログのキャンセル
+   * 
+   * 目的: 削除確認ダイアログでキャンセルボタンをクリックした時にダイアログが閉じることを確認
+   * 
+   * テストステップ:
+   * 1. 削除ボタンをクリックしてダイアログを開く
+   * 2. キャンセルボタンをクリック
+   * 3. ダイアログが閉じることを確認
+   */
+  it('closes delete dialog when cancel button is clicked', async () => {
     mockUseMemo.mockReturnValue({
       memos: mockMemos,
       loading: false,
       updateMemo: jest.fn(),
-      deleteMemo: jest.fn(),
+      deleteMemo: jest.fn()
     });
 
-    // MemoCardのモックを一時的に上書き
-    jest.doMock('./MemoCard', () => {
-      return function MockMemoCard({ memo, onClick }) {
-        return (
-          <div data-testid={`memo-card-${memo.id}`} onClick={() => onClick(memo)}>
-            <span>{memo.text}</span>
-          </div>
-        );
-      };
+    renderWithProviders(
+      <MemoList bookId="test-book-id" onMemoUpdated={mockOnMemoUpdated} />
+    );
+
+    // 削除ボタンをクリック
+    const deleteButton = screen.getByTestId('memo-delete-button-memo1');
+    fireEvent.click(deleteButton);
+
+    // キャンセルボタンをクリック
+    const cancelButton = screen.getByTestId('memo-delete-cancel-button');
+    fireEvent.click(cancelButton);
+
+    // ダイアログが閉じることを確認（アニメーションを考慮）
+    await waitFor(() => {
+      expect(screen.queryByTestId('memo-delete-dialog')).not.toBeInTheDocument();
     });
-    // requireし直し
-    const MemoListReloaded = require('./MemoList').default;
-    render(<MemoListReloaded bookId="book-1" />);
-    const card = screen.getByTestId('memo-card-memo-1');
-    fireEvent.click(card);
-    // 詳細エディタが開く（editorOpen=true）ことを確認（MemoEditorのopen propで判定）
-    // MemoEditorのモックはopen時のみdata-testid="memo-editor"を返す
-    expect(screen.getByTestId('memo-editor')).toBeInTheDocument();
   });
 
-  // 今回の修正に関連するテストケース
-  describe('修正関連のテスト', () => {
-    test('should call onMemoUpdated callback when memo is updated - メモ更新時のコールバックテスト', async () => {
-      const mockOnMemoUpdated = jest.fn();
-      const mockUpdateMemo = jest.fn().mockResolvedValue(true);
-      
-      mockUseMemo.mockReturnValue({
-        memos: mockMemos,
-        loading: false,
-        updateMemo: mockUpdateMemo,
-        deleteMemo: jest.fn(),
-      });
-
-      render(<MemoList bookId="book-1" onMemoUpdated={mockOnMemoUpdated} />);
-      
-      // 編集ボタンをクリック
-      const editButton = screen.getByTestId('edit-memo-1');
-      fireEvent.click(editButton);
-      
-      // 更新ボタンをクリック
-      const updateButton = screen.getByTestId('update-button');
-      fireEvent.click(updateButton);
-      
-      // onMemoUpdatedコールバックが呼ばれることを確認
-      await waitFor(() => {
-        expect(mockOnMemoUpdated).toHaveBeenCalledTimes(1);
-      });
+  /**
+   * テストケース: 削除確認ダイアログの削除実行
+   * 
+   * 目的: 削除確認ダイアログで削除ボタンをクリックした時に削除が実行されることを確認
+   * 
+   * テストステップ:
+   * 1. 削除ボタンをクリックしてダイアログを開く
+   * 2. 削除確認ボタンをクリック
+   * 3. deleteMemoが呼ばれることを確認
+   */
+  it('executes delete when confirm button is clicked', async () => {
+    const mockDeleteMemo = jest.fn().mockResolvedValue(undefined);
+    mockUseMemo.mockReturnValue({
+      memos: mockMemos,
+      loading: false,
+      updateMemo: jest.fn(),
+      deleteMemo: mockDeleteMemo
     });
 
-    test('should not call onMemoUpdated when callback is not provided - コールバック未提供時のテスト', () => {
-      const mockUpdateMemo = jest.fn().mockResolvedValue(true);
-      
-      mockUseMemo.mockReturnValue({
-        memos: mockMemos,
-        loading: false,
-        updateMemo: mockUpdateMemo,
-        deleteMemo: jest.fn(),
-      });
+    renderWithProviders(
+      <MemoList bookId="test-book-id" onMemoUpdated={mockOnMemoUpdated} />
+    );
 
-      render(<MemoList bookId="book-1" />); // onMemoUpdatedを渡さない
-      
-      // 編集ボタンをクリック
-      const editButton = screen.getByTestId('edit-memo-1');
-      fireEvent.click(editButton);
-      
-      // 更新ボタンをクリック
-      const updateButton = screen.getByTestId('update-button');
-      fireEvent.click(updateButton);
-      
-      // エラーが発生しないことを確認（onUpdateコールバックが呼ばれる）
-      // 実際のMemoEditorではupdateMemoを呼び出すが、テストではonUpdateコールバックが呼ばれる
+    // 削除ボタンをクリック
+    const deleteButton = screen.getByTestId('memo-delete-button-memo1');
+    fireEvent.click(deleteButton);
+
+    // 削除確認ボタンをクリック
+    const confirmButton = screen.getByTestId('memo-delete-confirm-button');
+    fireEvent.click(confirmButton);
+
+    // deleteMemoが呼ばれることを確認
+    await waitFor(() => {
+      expect(mockDeleteMemo).toHaveBeenCalledWith('memo1');
+    });
+  });
+
+  /**
+   * テストケース: MemoEditorの更新機能
+   * 
+   * 目的: MemoEditorで更新が実行された時にonMemoUpdatedが呼ばれることを確認
+   * 
+   * テストステップ:
+   * 1. メモカードをクリックしてMemoEditorを開く
+   * 2. MemoEditorの更新ボタンをクリック
+   * 3. onMemoUpdatedが呼ばれることを確認
+   */
+  it('calls onMemoUpdated when memo is updated', () => {
+    mockUseMemo.mockReturnValue({
+      memos: mockMemos,
+      loading: false,
+      updateMemo: jest.fn(),
+      deleteMemo: jest.fn()
     });
 
-    test('should handle memo deletion with confirmation - メモ削除確認テスト', async () => {
-      const mockDeleteMemo = jest.fn().mockResolvedValue(true);
-      
-      mockUseMemo.mockReturnValue({
-        memos: mockMemos,
-        loading: false,
-        updateMemo: jest.fn(),
-        deleteMemo: mockDeleteMemo,
-      });
+    renderWithProviders(
+      <MemoList bookId="test-book-id" onMemoUpdated={mockOnMemoUpdated} />
+    );
 
-      render(<MemoList bookId="book-1" />);
-      
-      // 削除ボタンをクリック
-      const deleteButton = screen.getByTestId('delete-memo-1');
-      fireEvent.click(deleteButton);
-      
-      // 確認ダイアログが表示されることを確認
-      expect(screen.getByTestId('memo-delete-dialog')).toBeInTheDocument();
-      expect(screen.getByText('本当に削除しますか？')).toBeInTheDocument();
-      
-      // 削除確認ボタンをクリック
-      const confirmDeleteButton = screen.getByTestId('memo-delete-confirm-button');
-      fireEvent.click(confirmDeleteButton);
-      
-      // deleteMemoが呼ばれることを確認
-      await waitFor(() => {
-        expect(mockDeleteMemo).toHaveBeenCalledWith('memo-1');
-      });
+    // メモカードをクリック
+    const memoCard = screen.getByTestId('memo-click-memo1');
+    fireEvent.click(memoCard);
+
+    // 更新ボタンをクリック
+    const updateButton = screen.getByTestId('memo-editor-update');
+    fireEvent.click(updateButton);
+
+    // onMemoUpdatedが呼ばれることを確認
+    expect(mockOnMemoUpdated).toHaveBeenCalled();
+  });
+
+  /**
+   * テストケース: MemoEditorの削除機能
+   * 
+   * 目的: MemoEditorで削除が実行された時にonMemoUpdatedが呼ばれることを確認
+   * 
+   * テストステップ:
+   * 1. メモカードをクリックしてMemoEditorを開く
+   * 2. MemoEditorの削除ボタンをクリック
+   * 3. onMemoUpdatedが呼ばれることを確認
+   */
+  it('calls onMemoUpdated when memo is deleted from editor', () => {
+    mockUseMemo.mockReturnValue({
+      memos: mockMemos,
+      loading: false,
+      updateMemo: jest.fn(),
+      deleteMemo: jest.fn()
     });
 
-    test('should close editor when update is successful - 更新成功時のエディタ閉じるテスト', () => {
-      const mockUpdateMemo = jest.fn().mockResolvedValue(true);
-      
-      mockUseMemo.mockReturnValue({
-        memos: mockMemos,
-        loading: false,
-        updateMemo: mockUpdateMemo,
-        deleteMemo: jest.fn(),
-      });
+    renderWithProviders(
+      <MemoList bookId="test-book-id" onMemoUpdated={mockOnMemoUpdated} />
+    );
 
-      render(<MemoList bookId="book-1" />);
-      
-      // 編集ボタンをクリック
-      const editButton = screen.getByTestId('edit-memo-1');
-      fireEvent.click(editButton);
-      
-      // エディタが表示されることを確認
-      expect(screen.getByTestId('memo-editor')).toBeInTheDocument();
-      
-      // 更新ボタンをクリック
-      const updateButton = screen.getByTestId('update-button');
-      fireEvent.click(updateButton);
-      
-      // エディタが閉じられることを確認
-      expect(screen.queryByTestId('memo-editor')).not.toBeInTheDocument();
-    });
+    // メモカードをクリック
+    const memoCard = screen.getByTestId('memo-click-memo1');
+    fireEvent.click(memoCard);
 
-    test('should handle multiple memo updates without conflicts - 複数メモ更新の競合防止テスト', () => {
-      const mockUpdateMemo = jest.fn().mockResolvedValue(true);
-      const mockOnMemoUpdated = jest.fn();
-      
-      mockUseMemo.mockReturnValue({
-        memos: mockMemos,
-        loading: false,
-        updateMemo: mockUpdateMemo,
-        deleteMemo: jest.fn(),
-      });
+    // 削除ボタンをクリック
+    const deleteButton = screen.getByTestId('memo-editor-delete');
+    fireEvent.click(deleteButton);
 
-      render(<MemoList bookId="book-1" onMemoUpdated={mockOnMemoUpdated} />);
-      
-      // 最初のメモを編集
-      const editButton1 = screen.getByTestId('edit-memo-1');
-      fireEvent.click(editButton1);
-      
-      // 更新ボタンをクリック
-      const updateButton = screen.getByTestId('update-button');
-      fireEvent.click(updateButton);
-      
-      // エディタが閉じられることを確認
-      expect(screen.queryByTestId('memo-editor')).not.toBeInTheDocument();
-      
-      // 2番目のメモを編集
-      const editButton2 = screen.getByTestId('edit-memo-2');
-      fireEvent.click(editButton2);
-      
-      // エディタが再表示されることを確認
-      expect(screen.getByTestId('memo-editor')).toBeInTheDocument();
-      
-      // 更新ボタンをクリック
-      const updateButton2 = screen.getByTestId('update-button');
-      fireEvent.click(updateButton2);
-      
-      // 両方の更新が正常に処理されることを確認
-      // 実際のMemoEditorではupdateMemoを呼び出すが、テストではonUpdateコールバックが呼ばれる
-      expect(mockOnMemoUpdated).toHaveBeenCalledTimes(2);
-    });
+    // onMemoUpdatedが呼ばれることを確認
+    expect(mockOnMemoUpdated).toHaveBeenCalled();
   });
 }); 

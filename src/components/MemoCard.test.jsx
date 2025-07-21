@@ -4,6 +4,19 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { ErrorDialogProvider } from './CommonErrorDialog';
 import MemoCard from './MemoCard';
 
+// react-swipeable-listライブラリをモック
+jest.mock('react-swipeable-list', () => ({
+  SwipeableList: ({ children }) => <div data-testid="swipeable-list">{children}</div>,
+  SwipeableListItem: ({ children, swipeRight, threshold }) => (
+    <div data-testid="swipeable-list-item" data-swipe-right={swipeRight ? 'true' : 'false'} data-threshold={threshold}>
+      {children}
+    </div>
+  )
+}));
+
+// CSSファイルのインポートをモック
+jest.mock('react-swipeable-list/dist/styles.css', () => ({}));
+
 /**
  * MemoCard コンポーネントのユニットテスト
  * 
@@ -13,6 +26,7 @@ import MemoCard from './MemoCard';
  * - 編集・削除ボタンの動作
  * - オプションフィールドの処理（ページ番号、タグ、日付）
  * - エッジケースの処理（null値、空文字）
+ * - スワイプアクションの設定
  */
 
 const theme = createTheme();
@@ -261,5 +275,91 @@ describe('MemoCard', () => {
     const card = screen.getByTestId('memo-card');
     fireEvent.click(card);
     expect(mockOnClick).toHaveBeenCalledWith(mockMemo);
+  });
+
+  /**
+   * テストケース: スワイプアクションの表示確認
+   * 
+   * 目的: スワイプアクションが正しく設定されていることを確認
+   * 
+   * テストステップ:
+   * 1. メモカードをレンダリング
+   * 2. SwipeableListが存在することを確認
+   * 3. SwipeableListItemが存在することを確認
+   * 4. スワイプアクションの設定を確認
+   */
+  it('renders swipeable list item', () => {
+    renderWithProviders(
+      <MemoCard 
+        memo={mockMemo} 
+        onEdit={mockOnEdit} 
+        onDelete={mockOnDelete} 
+      />
+    );
+    
+    // SwipeableListが存在することを確認
+    const swipeableList = screen.getByTestId('swipeable-list');
+    expect(swipeableList).toBeInTheDocument();
+    
+    // SwipeableListItemが存在することを確認
+    const swipeableItem = screen.getByTestId('swipeable-list-item');
+    expect(swipeableItem).toBeInTheDocument();
+    
+    // スワイプアクションが設定されていることを確認
+    expect(swipeableItem).toHaveAttribute('data-swipe-right', 'true');
+    expect(swipeableItem).toHaveAttribute('data-threshold', '0.5');
+  });
+
+  /**
+   * テストケース: スワイプアクションの設定確認
+   * 
+   * 目的: スワイプアクションが正しく設定されていることを確認
+   * 
+   * テストステップ:
+   * 1. メモカードをレンダリング
+   * 2. スワイプアクションの設定を確認
+   */
+  it('configures swipe actions correctly', () => {
+    renderWithProviders(
+      <MemoCard 
+        memo={mockMemo} 
+        onEdit={mockOnEdit} 
+        onDelete={mockOnDelete} 
+      />
+    );
+    
+    // メモカードが存在することを確認
+    const card = screen.getByTestId('memo-card');
+    expect(card).toBeInTheDocument();
+    
+    // スワイプアクションが設定されていることを確認
+    const swipeableItem = screen.getByTestId('swipeable-list-item');
+    expect(swipeableItem).toHaveAttribute('data-swipe-right', 'true');
+  });
+
+  /**
+   * テストケース: デスクトップ用ボタンの表示確認
+   * 
+   * 目的: デスクトップでは編集・削除ボタンが表示されることを確認
+   * 
+   * テストステップ:
+   * 1. メモカードをレンダリング
+   * 2. デスクトップ用の編集・削除ボタンが存在することを確認
+   */
+  it('shows desktop buttons on larger screens', () => {
+    renderWithProviders(
+      <MemoCard 
+        memo={mockMemo} 
+        onEdit={mockOnEdit} 
+        onDelete={mockOnDelete} 
+      />
+    );
+    
+    // デスクトップ用のボタンが存在することを確認
+    const editButton = screen.getByTestId('memo-edit-button');
+    const deleteButton = screen.getByTestId('memo-delete-button');
+    
+    expect(editButton).toBeInTheDocument();
+    expect(deleteButton).toBeInTheDocument();
   });
 }); 

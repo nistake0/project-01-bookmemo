@@ -6,35 +6,35 @@ describe('メモ一覧UI 編集・削除ボタン存在テスト', () => {
   beforeEach(() => {
     cy.clearCookies();
     cy.clearLocalStorage();
-    cy.visit('/project-01-bookmemo/login');
-    cy.get('[data-testid="login-email-input"]').type('testuser@example.com');
-    cy.get('[data-testid="login-password-input"]').type('testpassword');
-    cy.get('[data-testid="login-submit"]').click();
-    cy.contains('本一覧', { timeout: 10000 }).should('be.visible');
+    cy.login();
 
     // 本を追加
-    cy.get('[data-testid="book-add-button"]').should('be.visible').click();
-    cy.get('[data-testid="book-isbn-input"]').type('9781234567890');
-    cy.get('[data-testid="book-title-input"]').type('E2Eメモ用本');
-    cy.get('[data-testid="book-author-input"]').type('E2E著者');
-    cy.get('[data-testid="book-publisher-input"]').type('E2E出版社');
-    cy.get('[data-testid="book-publishdate-input"]').type('2024-07-01');
-    cy.get('[data-testid="book-add-submit"]').click();
-    cy.contains('E2Eメモ用本', { timeout: 10000 }).should('be.visible');
+    cy.addBook();
 
     // 追加した本の詳細ページへ
     cy.contains('E2Eメモ用本').click();
 
-    // メモを追加
-    cy.get('[data-testid="memo-text-input"]').should('be.visible').type('E2Eテスト用メモ');
-    cy.get('[data-testid="memo-add-submit"]').click();
-    cy.get('[data-testid="memo-card"]', { timeout: 10000 }).should('exist');
+    // メモを追加（FABを使用）
+    cy.addMemo();
   });
 
-  it('各カードに編集・削除ボタンがある', () => {
+  it('各カードに編集・削除ボタンがある（デスクトップ）', () => {
+    // デスクトップサイズでテスト
+    cy.viewport(1200, 800);
+    
     cy.get('[data-testid="memo-card"]').each(($card) => {
-      cy.wrap($card).find('button[aria-label="edit"]').should('exist');
-      cy.wrap($card).find('button[aria-label="delete"]').should('exist');
+      cy.wrap($card).find('[data-testid="memo-edit-button"]').should('exist');
+      cy.wrap($card).find('[data-testid="memo-delete-button"]').should('exist');
+    });
+  });
+
+  it('モバイルでは編集・削除ボタンが非表示（スワイプアクション使用）', () => {
+    // モバイルサイズでテスト
+    cy.viewport(375, 667);
+    
+    cy.get('[data-testid="memo-card"]').each(($card) => {
+      cy.wrap($card).find('[data-testid="memo-edit-button"]').should('not.exist');
+      cy.wrap($card).find('[data-testid="memo-delete-button"]').should('not.exist');
     });
   });
 }); 

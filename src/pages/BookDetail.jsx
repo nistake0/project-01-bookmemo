@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Paper, Divider, Typography } from '@mui/material';
+import { Box, Paper, Divider, Typography, Fab, Dialog } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import MemoList from '../components/MemoList';
 import MemoAdd from '../components/MemoAdd';
 import BookInfo from '../components/BookInfo';
@@ -11,6 +12,7 @@ const BookDetail = () => {
   const { id } = useParams();
   const { book, loading, error, updateBookStatus, updateBookTags } = useBook(id);
   const [memoListKey, setMemoListKey] = useState(0); // MemoListの再レンダリング用
+  const [memoAddDialogOpen, setMemoAddDialogOpen] = useState(false);
 
   const handleStatusChange = (newStatus) => {
     updateBookStatus(newStatus);
@@ -23,11 +25,20 @@ const BookDetail = () => {
   const handleMemoAdded = () => {
     console.log('BookDetail - handleMemoAdded: MemoListを再レンダリング');
     setMemoListKey(prev => prev + 1); // MemoListを強制的に再レンダリング
+    setMemoAddDialogOpen(false); // ダイアログを閉じる
   };
 
   const handleMemoUpdated = () => {
     console.log('BookDetail - handleMemoUpdated: MemoListを再レンダリング');
     setMemoListKey(prev => prev + 1); // MemoListを強制的に再レンダリング
+  };
+
+  const handleFabClick = () => {
+    setMemoAddDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setMemoAddDialogOpen(false);
   };
 
   if (loading) return <div data-testid="book-detail-loading">Loading...</div>;
@@ -44,10 +55,38 @@ const BookDetail = () => {
         <Divider sx={{ my: 2 }} />
         <Typography variant="h5" gutterBottom data-testid="memo-list-title">メモ一覧</Typography>
         <MemoList key={memoListKey} bookId={book.id} onMemoUpdated={handleMemoUpdated} />
-        <Divider sx={{ my: 2 }} />
-        <Typography variant="h5" gutterBottom data-testid="memo-add-title">メモを追加</Typography>
-        <MemoAdd bookId={book.id} bookTags={book.tags || []} onMemoAdded={handleMemoAdded} />
       </Paper>
+
+      {/* FAB - メモ追加ボタン */}
+      <Fab
+        color="primary"
+        aria-label="メモを追加"
+        sx={{
+          position: 'fixed',
+          bottom: 16,
+          right: 16,
+        }}
+        onClick={handleFabClick}
+        data-testid="memo-add-fab"
+      >
+        <AddIcon />
+      </Fab>
+
+      {/* メモ追加ダイアログ */}
+      <Dialog
+        open={memoAddDialogOpen}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+        data-testid="memo-add-dialog"
+      >
+        <MemoAdd 
+          bookId={book.id} 
+          bookTags={book.tags || []} 
+          onMemoAdded={handleMemoAdded}
+          onClose={handleCloseDialog}
+        />
+      </Dialog>
     </Box>
   );
 };
