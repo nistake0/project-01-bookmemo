@@ -15,6 +15,18 @@ function normalizeTag(tag) {
   return zenkakuToHankaku(tag).toLowerCase();
 }
 
+// ステータスを日本語テキストに変換する関数
+function getStatusText(status) {
+  switch (status) {
+    case 'reading':
+      return '読書中';
+    case 'finished':
+      return '読了';
+    default:
+      return '読書中';
+  }
+}
+
 export default function BookList() {
   const { user } = useAuth();
   const [allBooks, setAllBooks] = useState([]);
@@ -24,11 +36,18 @@ export default function BookList() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('=== BookList useEffect START ===');
+    console.log('user:', user);
+    console.log('user.uid:', user?.uid);
+    
     if (!user) {
+      console.log('=== BookList useEffect: no user, setting loading false ===');
       setLoading(false);
       return;
     }
+    
     const fetchBooks = async () => {
+      console.log('=== BookList fetchBooks START ===');
       setLoading(true);
       try {
         const q = query(
@@ -36,16 +55,22 @@ export default function BookList() {
           where("userId", "==", user.uid),
           orderBy("updatedAt", "desc")
         );
+        console.log('=== BookList getDocs START ===');
         const querySnapshot = await getDocs(q);
+        console.log('=== BookList getDocs END ===');
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log('=== BookList setAllBooks START ===');
         setAllBooks(data);
+        console.log('=== BookList setAllBooks END ===');
       } catch (error) {
         console.error("Error fetching books:", error);
       } finally {
+        console.log('=== BookList setLoading false ===');
         setLoading(false);
       }
     };
     fetchBooks();
+    console.log('=== BookList useEffect END ===');
   }, [user]);
 
   const handleFilterChange = (event, newValue) => {
@@ -94,22 +119,19 @@ export default function BookList() {
       </Box>
 
       <List>
-        {filteredBooks.length === 0 && <ListItem><ListItemText primary="該当する本がありません" /></ListItem>}
+        {filteredBooks.length === 0 && <ListItem data-testid="no-books"><ListItemText primary="該当する本がありません" /></ListItem>}
         {filteredBooks.map(book => (
           <ListItem key={book.id} component={Link} to={`/book/${book.id}`}>
             <ListItemText
-              primary={book.title || "タイトル未設定"}
+              primary={<span data-testid={`book-title-${book.id}`}>{book.title || "タイトル未設定"}</span>}
               secondary={
-                <Box component="span">
-                  {book.author || ""}
-                  {Array.isArray(book.tags) && book.tags.length > 0 && (
-                    <Box component="span" sx={{ mt: 1, display: 'inline-flex', flexWrap: 'wrap', gap: 1 }}>
-                      {book.tags.map((tag, idx) => (
-                        <Chip key={idx} label={tag} size="small" color="primary" component="span" />
-                      ))}
-                    </Box>
-                  )}
-                </Box>
+                <span>
+                  <span>{book.author || "著者未設定"}</span>
+                  <br />
+                  <span data-testid={`book-tags-${book.id}`}>{book.tags?.join(", ") || "タグなし"}</span>
+                  <br />
+                  <span>ステータス: {getStatusText(book.status)}</span>
+                </span>
               }
             />
           </ListItem>

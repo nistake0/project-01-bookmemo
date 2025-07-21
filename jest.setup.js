@@ -47,6 +47,11 @@ jest.mock('./src/firebase', () => ({
 }));
 
 // グローバルFirestore モック
+const mockDocs = [
+  { id: 'doc1', data: () => ({ title: 'テスト本1' }) },
+  { id: 'doc2', data: () => ({ title: 'テスト本2' }) },
+];
+
 jest.mock('firebase/firestore', () => {
   const mockCollectionRef = { id: 'books' };
   const mockDocRef = { id: 'test-doc-id' };
@@ -65,10 +70,7 @@ jest.mock('firebase/firestore', () => {
     
     // データ取得
     getDocs: jest.fn(() => Promise.resolve({
-      docs: [
-        { id: 'doc1', data: () => ({ title: 'テスト本1' }) },
-        { id: 'doc2', data: () => ({ title: 'テスト本2' }) },
-      ],
+      docs: mockDocs,
       forEach: jest.fn((callback) => {
         const docs = [
           { data: () => ({ tag: '小説' }) },
@@ -106,11 +108,21 @@ jest.mock('firebase/auth', () => ({
 }));
 
 // グローバルAuthProvider モック
+const mockUser = { uid: 'test-user-id' };
+const mockAuthContext = {
+  user: mockUser,
+  loading: false,
+};
+
+// 安定した参照を返す関数
+const createStableUseAuth = () => {
+  console.log('=== useAuth mock called ===');
+  console.log('returning:', mockAuthContext);
+  return mockAuthContext;
+};
+
 jest.mock('./src/auth/AuthProvider', () => ({
-  useAuth: () => ({
-    user: { uid: 'test-user-id' },
-    loading: false,
-  }),
+  useAuth: createStableUseAuth,
 }));
 
 // グローバルモックは削除 - テストヘルパーで統一する

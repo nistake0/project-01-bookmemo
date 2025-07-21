@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
 import BookDetail from './BookDetail';
 import { useBook } from '../hooks/useBook';
+import { renderWithProviders, resetMocks } from '../test-utils';
 
 // useBookフックをモック
 jest.mock('../hooks/useBook');
@@ -54,7 +54,7 @@ describe('BookDetail', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    resetMocks();
     useBook.mockReturnValue({
       book: mockBook,
       loading: false,
@@ -64,16 +64,8 @@ describe('BookDetail', () => {
     });
   });
 
-  const renderWithRouter = (component) => {
-    return render(
-      <BrowserRouter>
-        {component}
-      </BrowserRouter>
-    );
-  };
-
   test('renders book detail correctly', () => {
-    renderWithRouter(<BookDetail />);
+    renderWithProviders(<BookDetail />);
     
     expect(screen.getByTestId('book-info')).toBeInTheDocument();
     expect(screen.getByTestId('book-tag-editor')).toBeInTheDocument();
@@ -91,7 +83,7 @@ describe('BookDetail', () => {
       updateBookTags: jest.fn(),
     });
 
-    renderWithRouter(<BookDetail />);
+    renderWithProviders(<BookDetail />);
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
@@ -104,7 +96,7 @@ describe('BookDetail', () => {
       updateBookTags: jest.fn(),
     });
 
-    renderWithRouter(<BookDetail />);
+    renderWithProviders(<BookDetail />);
     expect(screen.getByText('エラーが発生しました: エラーが発生しました')).toBeInTheDocument();
   });
 
@@ -117,7 +109,7 @@ describe('BookDetail', () => {
       updateBookTags: jest.fn(),
     });
 
-    renderWithRouter(<BookDetail />);
+    renderWithProviders(<BookDetail />);
     expect(screen.getByText('本が見つかりません。')).toBeInTheDocument();
   });
 
@@ -131,7 +123,7 @@ describe('BookDetail', () => {
       updateBookTags: jest.fn(),
     });
 
-    renderWithRouter(<BookDetail />);
+    renderWithProviders(<BookDetail />);
     
     const statusChangeButton = screen.getByTestId('status-change');
     fireEvent.click(statusChangeButton);
@@ -149,7 +141,7 @@ describe('BookDetail', () => {
       updateBookTags: mockUpdateBookTags,
     });
 
-    renderWithRouter(<BookDetail />);
+    renderWithProviders(<BookDetail />);
     
     const tagsChangeButton = screen.getByTestId('tags-change');
     fireEvent.click(tagsChangeButton);
@@ -160,7 +152,7 @@ describe('BookDetail', () => {
   // 今回の修正に関連するテストケース
   describe('修正関連のテスト', () => {
     test('should force MemoList re-render when memo is added - メモ追加時の再レンダリングテスト', async () => {
-      renderWithRouter(<BookDetail />);
+      renderWithProviders(<BookDetail />);
       
       // 初期状態でMemoListが表示されていることを確認
       expect(screen.getByTestId('memo-list')).toBeInTheDocument();
@@ -177,7 +169,7 @@ describe('BookDetail', () => {
     });
 
     test('should force MemoList re-render when memo is updated - メモ更新時の再レンダリングテスト', async () => {
-      renderWithRouter(<BookDetail />);
+      renderWithProviders(<BookDetail />);
       
       // 初期状態でMemoListが表示されていることを確認
       expect(screen.getByTestId('memo-list')).toBeInTheDocument();
@@ -193,7 +185,7 @@ describe('BookDetail', () => {
     });
 
     test('should handle multiple memo operations without conflicts - 複数メモ操作の競合防止テスト', async () => {
-      renderWithRouter(<BookDetail />);
+      renderWithProviders(<BookDetail />);
       
       // メモ追加
       const memoAddButton = screen.getByTestId('memo-added');
@@ -214,7 +206,7 @@ describe('BookDetail', () => {
     });
 
     test('should maintain state consistency across re-renders - 再レンダリング時の状態一貫性テスト', async () => {
-      renderWithRouter(<BookDetail />);
+      renderWithProviders(<BookDetail />);
       
       // 初期状態を記録
       const initialMemoList = screen.getByTestId('memo-list');
@@ -237,7 +229,7 @@ describe('BookDetail', () => {
     });
 
     test('should handle rapid successive memo operations - 連続メモ操作テスト', async () => {
-      renderWithRouter(<BookDetail />);
+      renderWithProviders(<BookDetail />);
       
       // 連続してメモ操作を実行
       const memoAddButton = screen.getByTestId('memo-added');
