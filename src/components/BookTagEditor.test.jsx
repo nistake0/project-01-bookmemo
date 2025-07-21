@@ -33,7 +33,14 @@ describe('BookTagEditor', () => {
   const mockOnTagsChange = jest.fn();
 
   beforeEach(() => {
+    // 完全なモックリセット
+    jest.clearAllMocks();
     resetMocks();
+  });
+
+  afterEach(() => {
+    // テスト後のクリーンアップ
+    jest.clearAllMocks();
   });
 
   /**

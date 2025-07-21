@@ -43,9 +43,16 @@ describe('MemoEditor', () => {
   const { mockOnClose, mockOnUpdate, mockOnDelete } = createMockFunctions();
 
   beforeEach(() => {
+    // 完全なモックリセット
+    jest.clearAllMocks();
     resetMocks();
     mockUpdateMemo.mockClear();
     mockDeleteMemo.mockClear();
+  });
+
+  afterEach(() => {
+    // テスト後のクリーンアップ
+    jest.clearAllMocks();
   });
 
   /**

@@ -80,8 +80,15 @@ const BarcodeScanner = ({ onDetected, onError }) => {
   }, [onDetected, onError]);
 
   return (
-    <Box>
-      <video ref={videoRef} style={{ width: '100%', height: 'auto', border: '1px solid gray' }} autoPlay muted playsInline />
+    <Box data-testid="barcode-scanner-container">
+      <video 
+        ref={videoRef} 
+        style={{ width: '100%', height: 'auto', border: '1px solid gray' }} 
+        autoPlay 
+        muted 
+        playsInline 
+        data-testid="barcode-scanner-video"
+      />
     </Box>
   );
 };

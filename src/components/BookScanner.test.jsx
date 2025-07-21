@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import BookScanner from './BookScanner';
 import { ErrorDialogContext } from './CommonErrorDialog';
+import { resetMocks } from '../test-utils';
 
 /**
  * BookScanner コンポーネントのユニットテスト
@@ -39,17 +40,20 @@ const renderWithProviders = (component) => {
   );
 };
 
-// モックの設定
-beforeEach(() => {
-  mockOnScan.mockClear();
-});
-
-afterEach(() => {
-  // モックをクリア
-  jest.clearAllMocks();
-});
-
 describe('BookScanner', () => {
+  beforeEach(() => {
+    // 完全なモックリセット
+    jest.clearAllMocks();
+    resetMocks();
+    mockOnScan.mockClear();
+    mockSetGlobalError.mockClear();
+  });
+
+  afterEach(() => {
+    // テスト後のクリーンアップ
+    jest.clearAllMocks();
+  });
+
   /**
    * テストケース: バーコードスキャンボタンの表示確認
    * 
