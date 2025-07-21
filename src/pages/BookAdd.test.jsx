@@ -40,8 +40,17 @@ const renderWithProviders = (component) => {
 
 describe('BookAdd', () => {
   beforeEach(() => {
+    // 完全なモックリセット
+    jest.clearAllMocks();
+    
     // 各テストの前にモックをリセット
     axios.get.mockClear();
+    mockSetGlobalError.mockClear();
+  });
+
+  afterEach(() => {
+    // テスト後のクリーンアップ
+    jest.clearAllMocks();
   });
 
   /**

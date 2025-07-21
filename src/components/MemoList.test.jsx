@@ -42,13 +42,22 @@ describe('MemoList', () => {
   ];
 
   beforeEach(() => {
+    // 完全なモックリセット
+    jest.clearAllMocks();
     resetMocks();
+    
+    // useMemoのデフォルトモック設定
     mockUseMemo.mockReturnValue({
       memos: mockMemos,
       loading: false,
       updateMemo: jest.fn(),
       deleteMemo: jest.fn(),
     });
+  });
+
+  afterEach(() => {
+    // テスト後のクリーンアップ
+    jest.clearAllMocks();
   });
 
   test('renders memo list correctly', () => {
