@@ -119,6 +119,36 @@ describe('MemoList', () => {
     expect(screen.getByTestId('memo-delete-dialog')).toBeInTheDocument();
   });
 
+  test('handles card click to open detail (onClick)', () => {
+    // MemoCardのonClickでhandleEditが呼ばれることを確認
+    const mockUseMemo = useMemo;
+    mockUseMemo.mockReturnValue({
+      memos: mockMemos,
+      loading: false,
+      updateMemo: jest.fn(),
+      deleteMemo: jest.fn(),
+    });
+
+    // MemoCardのモックを一時的に上書き
+    jest.doMock('./MemoCard', () => {
+      return function MockMemoCard({ memo, onClick }) {
+        return (
+          <div data-testid={`memo-card-${memo.id}`} onClick={() => onClick(memo)}>
+            <span>{memo.text}</span>
+          </div>
+        );
+      };
+    });
+    // requireし直し
+    const MemoListReloaded = require('./MemoList').default;
+    render(<MemoListReloaded bookId="book-1" />);
+    const card = screen.getByTestId('memo-card-memo-1');
+    fireEvent.click(card);
+    // 詳細エディタが開く（editorOpen=true）ことを確認（MemoEditorのopen propで判定）
+    // MemoEditorのモックはopen時のみdata-testid="memo-editor"を返す
+    expect(screen.getByTestId('memo-editor')).toBeInTheDocument();
+  });
+
   // 今回の修正に関連するテストケース
   describe('修正関連のテスト', () => {
     test('should call onMemoUpdated callback when memo is updated - メモ更新時のコールバックテスト', async () => {

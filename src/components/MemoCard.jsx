@@ -3,7 +3,7 @@ import { Card, CardContent, CardActions, Typography, IconButton, Box, Stack, Chi
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
-const MemoCard = ({ memo, onEdit, onDelete }) => {
+const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
   // カードの高さを制限し、本文・コメントは2行まで省略表示
   // メタ情報は1行にまとめて横並び
   const maxLines = 2;
@@ -13,7 +13,11 @@ const MemoCard = ({ memo, onEdit, onDelete }) => {
   const createdAt = memo.createdAt && memo.createdAt.toDate ? memo.createdAt.toDate() : null;
 
   return (
-    <Card data-testid="memo-card" sx={{ position: 'relative', maxWidth: '100%', mx: 'auto' }}>
+    <Card 
+      data-testid="memo-card" 
+      sx={{ position: 'relative', maxWidth: '100%', mx: 'auto', cursor: onClick ? 'pointer' : 'default' }}
+      onClick={onClick ? () => onClick(memo) : undefined}
+    >
       <CardContent sx={{ pb: 1, minHeight: 48, maxHeight: 56, overflow: 'hidden' }}>
         <Typography
           variant="body1"
