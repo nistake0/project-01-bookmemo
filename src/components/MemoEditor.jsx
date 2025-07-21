@@ -44,27 +44,22 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (!editingMemo || !editingMemo.text.trim()) return;
-    console.log('MemoEditor - handleUpdate開始:', editingMemo);
 
     // 未確定のタグ入力があればtagsに追加
     let tagsToSave = editingMemo.tags || [];
     if (inputTagValue && !tagsToSave.includes(inputTagValue)) {
       tagsToSave = [...tagsToSave, inputTagValue];
     }
-    console.log('MemoEditor - 保存するタグ:', tagsToSave);
 
     try {
-      console.log('MemoEditor - updateMemo呼び出し前');
       await updateMemo(editingMemo.id, {
         text: editingMemo.text,
         comment: editingMemo.comment,
         page: Number(editingMemo.page) || null,
         tags: tagsToSave,
       });
-      console.log('MemoEditor - updateMemo呼び出し完了');
       handleClose();
       if (onUpdate) {
-        console.log('MemoEditor - onUpdateコールバック呼び出し');
         onUpdate();
       }
     } catch (error) {
@@ -77,7 +72,9 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
     try {
       await deleteMemo(memoId);
       handleClose();
-      if (onDelete) onDelete();
+      if (onDelete) {
+        onDelete();
+      }
     } catch (error) {
       console.error("Error deleting memo: ", error);
       setGlobalError("メモの削除に失敗しました。");
@@ -198,7 +195,9 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowDeleteConfirm(false)} data-testid="memo-delete-cancel-button">キャンセル</Button>
-          <Button onClick={() => handleDelete(editingMemo?.id)} color="error" variant="contained" data-testid="memo-delete-confirm-button">削除</Button>
+          <Button onClick={() => {
+            handleDelete(editingMemo?.id);
+          }} color="error" variant="contained" data-testid="memo-delete-confirm-button">削除</Button>
         </DialogActions>
       </Dialog>
     </>
