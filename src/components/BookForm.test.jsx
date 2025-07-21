@@ -200,16 +200,16 @@ describe('BookForm', () => {
         cover: 'https://cover.openbd.jp/9784873119485.jpg',
       },
     };
+    axios.get.mockClear(); // mockをリセット
     axios.get.mockResolvedValue({ data: [mockBookData] });
 
     renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
 
-    // 非同期処理の完了を待つ
     await waitFor(() => {
       expect(screen.getByTestId('book-isbn-input')).toBeInTheDocument();
     }, { timeout: 10000 });
 
-    // ISBNを入力
+    // ISBNを入力（stringであることを明示）
     const isbnInput = screen.getByTestId('book-isbn-input');
     fireEvent.change(isbnInput, { target: { value: '9784873119485' } });
 
@@ -225,9 +225,12 @@ describe('BookForm', () => {
       expect(screen.getByTestId('book-publishdate-input')).toHaveValue('2017-08-25');
     });
 
-    // openBD APIが正しいURLで呼ばれることを確認
-    expect(axios.get).toHaveBeenCalledWith(
-      'https://api.openbd.jp/v1/get?isbn=9784873119485'
-    );
+    // axios.getの呼び出し履歴を確認
+    const calls = axios.get.mock.calls;
+    // console.logで呼び出し履歴を出力（デバッグ用）
+    console.log('axios.get calls:', calls);
+    // 1回目の呼び出しURLがstringで正しいことをassert
+    expect(typeof calls[0][0]).toBe('string');
+    expect(calls[0][0]).toBe('https://api.openbd.jp/v1/get?isbn=9784873119485');
   }, 15000);
 }); 
