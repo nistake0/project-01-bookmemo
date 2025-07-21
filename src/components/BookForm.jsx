@@ -8,10 +8,10 @@ import { ErrorDialogContext } from './CommonErrorDialog';
 import { useContext } from 'react';
 import { useTagHistory } from '../hooks/useTagHistory';
 
-export default function BookForm({ onBookAdded }) {
+export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   const { user } = useAuth();
   const { setGlobalError } = useContext(ErrorDialogContext);
-  const [isbn, setIsbn] = useState('');
+  const [isbn, setIsbn] = useState(isbnProp);
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [publisher, setPublisher] = useState('');
@@ -30,8 +30,33 @@ export default function BookForm({ onBookAdded }) {
     fetchTagHistory();
   }, [fetchTagHistory]);
 
-  const handleFetchBookInfo = async () => {
-    if (!isbn) {
+  // propsのisbnが変わったら反映＆自動取得
+  React.useEffect(() => {
+    if (isbnProp && isbnProp !== isbn) {
+      console.log("[BookForm] useEffect: propsのisbnが変化:", isbnProp);
+      setIsbn(isbnProp);
+      // 自動で書籍情報取得
+      if (isbnProp.trim() !== "") {
+        console.log("[BookForm] useEffect: 自動で書籍情報取得を実行", isbnProp);
+        handleFetchBookInfoWrapper(isbnProp);
+      }
+    }
+  }, [isbnProp]);
+
+  // ラップ関数で最新のisbnを使う
+  const handleFetchBookInfoWrapper = React.useCallback((nextIsbn) => {
+    // すでに同じISBNで取得済みならスキップ
+    if (!nextIsbn || nextIsbn === isbn) return;
+    setIsbn(nextIsbn);
+    setTimeout(() => {
+      handleFetchBookInfo(nextIsbn);
+    }, 0);
+  }, [isbn]);
+
+  // handleFetchBookInfoをisbn引数対応に
+  const handleFetchBookInfo = async (overrideIsbn) => {
+    const targetIsbn = overrideIsbn !== undefined ? overrideIsbn : isbn;
+    if (!targetIsbn) {
       setError("ISBNを入力してください");
       return;
     }
@@ -39,7 +64,7 @@ export default function BookForm({ onBookAdded }) {
     setLoading(true);
     setSearchPerformed(true);
     try {
-      const openbdResponse = await axios.get(`https://api.openbd.jp/v1/get?isbn=${isbn}`);
+      const openbdResponse = await axios.get(`https://api.openbd.jp/v1/get?isbn=${targetIsbn}`);
       const bookData = openbdResponse.data[0];
       
       let title = "";
@@ -65,7 +90,7 @@ export default function BookForm({ onBookAdded }) {
       // カバー画像が無い場合、またはopenBDで書籍情報が見つからない場合はGoogle Books APIを呼ぶ
       if (!coverUrl || !title) {
         try {
-          const googleResponse = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
+          const googleResponse = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${targetIsbn}`);
           const googleBookData = googleResponse.data;
           
           if (googleBookData.items && googleBookData.items.length > 0) {
