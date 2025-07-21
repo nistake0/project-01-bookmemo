@@ -32,7 +32,7 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
     trackMouse: true,
   });
 
-  // モバイル用スワイプUI
+  // モバイルのみスワイプUI、PCは従来通り
   if (isMobile) {
     return (
       <Box position="relative" {...handlers} sx={{ mb: 2 }}>
@@ -47,7 +47,7 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
             transition: 'transform 0.2s',
             transform: showActions ? 'translateX(-100px)' : 'none',
           }}
-          onClick={onClick ? () => onClick(memo) : undefined}
+          onClick={onClick ? () => onClick(memo, false) : undefined} // editMode=false
         >
           <CardContent sx={{ pb: 1, minHeight: 48, maxHeight: 56, overflow: 'hidden' }}>
             <Typography
