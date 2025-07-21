@@ -171,3 +171,13 @@ npm test
 - [ARCHITECTURE.md](./ARCHITECTURE.md): 設計・運用方針の詳細
 - `doc/`: 日報・バグメモ・開発メモ
 - `cursor-chats/`: Cursorとの対話ログ
+
+## ドキュメント構成
+
+- `doc/`
+  - `bug-feature-memo.md` ... バグ・機能・改善案などの重要メモ（常時参照）
+  - `development-startup-prompts.md` ... 開発開始時の必須プロンプト・運用ルール
+  - `daily/` ... 日々の開発日報（進捗・議論・技術的知見の記録）
+  - `archive/` ... 一時的な設計メモ・議事録・平時に参照しない記録のアーカイブ
+- `ARCHITECTURE.md` ... 設計・運用方針の詳細
+- `cursor-chats/` ... Cursorとの対話ログ（AI自動生成の全記録）
