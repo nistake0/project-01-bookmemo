@@ -114,15 +114,15 @@ const mockAuthContext = {
   loading: false,
 };
 
-// 安定した参照を返す関数
-const createStableUseAuth = () => {
+// 完全に安定したuseAuthモック
+const stableUseAuth = () => {
   console.log('=== useAuth mock called ===');
   console.log('returning:', mockAuthContext);
   return mockAuthContext;
 };
 
 jest.mock('./src/auth/AuthProvider', () => ({
-  useAuth: createStableUseAuth,
+  useAuth: stableUseAuth,
 }));
 
 // グローバルモックは削除 - テストヘルパーで統一する

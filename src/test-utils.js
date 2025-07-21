@@ -46,11 +46,24 @@ export const renderHookWithProviders = (hook, options = {}) => {
 };
 
 /**
- * テスト前のモックリセット
+ * モックをリセットする関数
  */
 export const resetMocks = () => {
   jest.clearAllMocks();
-  mockSetGlobalError.mockClear();
+  
+  // useAuthのモックを確実にリセット
+  const { useAuth } = require('./auth/AuthProvider');
+  if (useAuth && useAuth.mockClear) {
+    useAuth.mockClear();
+  }
+  
+  // Firestoreのモックをリセット
+  const { getDocs, collection, query, where, orderBy } = require('firebase/firestore');
+  if (getDocs && getDocs.mockClear) getDocs.mockClear();
+  if (collection && collection.mockClear) collection.mockClear();
+  if (query && query.mockClear) query.mockClear();
+  if (where && where.mockClear) where.mockClear();
+  if (orderBy && orderBy.mockClear) orderBy.mockClear();
 };
 
 /**
