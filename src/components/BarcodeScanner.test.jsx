@@ -3,6 +3,7 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import BarcodeScanner from './BarcodeScanner';
 import { BrowserMultiFormatReader } from '@zxing/library';
+import { resetMocks } from '../test-utils';
 
 /**
  * BarcodeScanner コンポーネントのユニットテスト
@@ -20,11 +21,20 @@ describe.skip('バーコードスキャナー', () => {
   let mockReader;
 
   beforeEach(() => {
+    // 完全なモックリセット
+    jest.clearAllMocks();
+    resetMocks();
+    
     // 各テストの前にモックインスタンスを取得
     mockReader = new BrowserMultiFormatReader();
     // モックの関数をクリア
     mockReader.decodeFromVideoDevice.mockClear();
     mockReader.reset.mockClear();
+  });
+
+  afterEach(() => {
+    // テスト後のクリーンアップ
+    jest.clearAllMocks();
   });
 
   /**

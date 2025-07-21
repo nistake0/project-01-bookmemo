@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import BookInfo from './BookInfo';
+import { resetMocks } from '../test-utils';
 
 /**
  * BookInfo コンポーネントのユニットテスト
@@ -26,6 +27,17 @@ describe('BookInfo', () => {
     tags: ['小説', '名作']
   };
 
+  beforeEach(() => {
+    // 完全なモックリセット
+    jest.clearAllMocks();
+    resetMocks();
+  });
+
+  afterEach(() => {
+    // テスト後のクリーンアップ
+    jest.clearAllMocks();
+  });
+
   /**
    * テストケース: 書籍基本情報の表示
    * 
@@ -40,11 +52,12 @@ describe('BookInfo', () => {
     render(<BookInfo book={mockBook} />);
     
     // 書籍の基本情報が表示されることを確認
-    expect(screen.getByText('テストブック')).toBeInTheDocument();
-    expect(screen.getByText('著者A')).toBeInTheDocument();
-    expect(screen.getByText(/出版社: テスト出版社/)).toBeInTheDocument();
-    expect(screen.getByText(/出版日: 2024-01-01/)).toBeInTheDocument();
-    expect(screen.getByText('読書中')).toBeInTheDocument();
+    expect(screen.getByTestId('book-info')).toBeInTheDocument();
+    expect(screen.getByTestId('book-title')).toHaveTextContent('テストブック');
+    expect(screen.getByTestId('book-author')).toHaveTextContent('著者A');
+    expect(screen.getByTestId('book-publisher')).toHaveTextContent('出版社: テスト出版社');
+    expect(screen.getByTestId('book-published-date')).toHaveTextContent('出版日: 2024-01-01');
+    expect(screen.getByTestId('book-status-chip')).toHaveTextContent('読書中');
   });
 
   /**
@@ -60,9 +73,11 @@ describe('BookInfo', () => {
     render(<BookInfo book={mockBook} />);
     
     // 書影画像が正しく表示されることを確認
-    const coverImage = screen.getByAltText('テストブックの表紙');
+    expect(screen.getByTestId('book-cover-section')).toBeInTheDocument();
+    const coverImage = screen.getByTestId('book-cover-image');
     expect(coverImage).toBeInTheDocument();
     expect(coverImage).toHaveAttribute('src', 'http://example.com/cover.jpg');
+    expect(coverImage).toHaveAttribute('alt', 'テストブックの表紙');
   });
 
   /**
@@ -80,8 +95,9 @@ describe('BookInfo', () => {
     render(<BookInfo book={bookWithoutCover} />);
     
     // プレースホルダーが表示されることを確認
+    expect(screen.getByTestId('book-cover-placeholder')).toBeInTheDocument();
     expect(screen.getByText('書影なし')).toBeInTheDocument();
-    expect(screen.queryByAltText('テストブックの表紙')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('book-cover-image')).not.toBeInTheDocument();
   });
 
   /**
@@ -97,7 +113,7 @@ describe('BookInfo', () => {
     const finishedBook = { ...mockBook, status: 'finished' };
     render(<BookInfo book={finishedBook} />);
     
-    expect(screen.getByText('読了')).toBeInTheDocument();
+    expect(screen.getByTestId('book-status-chip')).toHaveTextContent('読了');
   });
 
   /**
@@ -115,7 +131,7 @@ describe('BookInfo', () => {
     delete bookWithoutStatus.status;
     render(<BookInfo book={bookWithoutStatus} />);
     
-    expect(screen.getByText('読書中')).toBeInTheDocument();
+    expect(screen.getByTestId('book-status-chip')).toHaveTextContent('読書中');
   });
 
   /**
@@ -138,12 +154,12 @@ describe('BookInfo', () => {
     render(<BookInfo book={minimalBook} />);
     
     // 必須フィールドが表示されることを確認
-    expect(screen.getByText('テストブック')).toBeInTheDocument();
-    expect(screen.getByText('著者A')).toBeInTheDocument();
+    expect(screen.getByTestId('book-title')).toHaveTextContent('テストブック');
+    expect(screen.getByTestId('book-author')).toHaveTextContent('著者A');
     
     // オプションフィールドが表示されないことを確認
-    expect(screen.queryByText(/出版社:/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/出版日:/)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('book-publisher')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('book-published-date')).not.toBeInTheDocument();
   });
 
   /**
