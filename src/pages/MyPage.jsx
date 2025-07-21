@@ -1,10 +1,30 @@
-import { Box, Typography } from '@mui/material';
+import React from 'react';
+import { useSwipeable } from 'react-swipeable';
 
 export default function MyPage() {
+  const handlers = useSwipeable({
+    onSwipedLeft: () => alert('左スワイプ!'),
+    onSwipedRight: () => alert('右スワイプ!'),
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: true,
+  });
+
   return (
-    <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, mb: 4, p: 2 }}>
-      <Typography variant="h4" gutterBottom>マイページ（仮実装）</Typography>
-      <Typography variant="body1">今後ここにユーザー情報や設定機能を実装予定です。</Typography>
-    </Box>
+    <div style={{ maxWidth: 400, margin: '40px auto' }}>
+      <h2>react-swipeable サンプル</h2>
+      <div
+        {...handlers}
+        style={{
+          background: '#fff',
+          border: '1px solid #ccc',
+          padding: 48,
+          fontSize: 18,
+          textAlign: 'center',
+          userSelect: 'none',
+        }}
+      >
+        このエリアを左右にスワイプ（またはドラッグ）してみてください
+      </div>
+    </div>
   );
 } 

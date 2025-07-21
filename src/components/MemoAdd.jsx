@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { Button, TextField, Box, Typography, Chip } from '@mui/material';
+import { Button, TextField, Box, Typography, Chip, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useAuth } from '../auth/AuthProvider';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ErrorDialogContext } from './CommonErrorDialog';
 import { useTagHistory } from '../hooks/useTagHistory';
 import { useMemo } from '../hooks/useMemo';
 
-const MemoAdd = ({ bookId, bookTags = [], onMemoAdded }) => {
+const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
   const { user } = useAuth();
   const { setGlobalError } = useContext(ErrorDialogContext);
   const { addMemo } = useMemo(bookId);
@@ -71,6 +71,96 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded }) => {
     }
   };
 
+  const handleCancel = () => {
+    if (onClose) {
+      onClose();
+    }
+  };
+
+  const isInDialog = !!onClose;
+
+  if (isInDialog) {
+    // ダイアログ内での表示
+    return (
+      <>
+        <DialogTitle data-testid="memo-add-dialog-title">メモを追加</DialogTitle>
+        <DialogContent>
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }} data-testid="memo-add-form">
+            <TextField
+              label="引用・抜き書き"
+              fullWidth
+              multiline
+              rows={4}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              margin="normal"
+              required
+              inputProps={{ 'data-testid': 'memo-text-input' }}
+            />
+            <TextField
+              label="感想・コメント"
+              fullWidth
+              multiline
+              rows={2}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              margin="normal"
+              inputProps={{ 'data-testid': 'memo-comment-input' }}
+            />
+            <TextField
+              label="ページ番号"
+              type="number"
+              value={page}
+              onChange={(e) => setPage(e.target.value)}
+              margin="normal"
+              sx={{ mr: 2 }}
+              inputProps={{ 'data-testid': 'memo-page-input' }}
+            />
+            <Autocomplete
+              multiple
+              freeSolo
+              options={tagOptions}
+              value={tags}
+              getOptionLabel={option => typeof option === 'string' ? option : (option.inputValue || option.tag || '')}
+              onChange={async (event, newValue) => {
+                const normalized = (newValue || []).map(v => {
+                  if (typeof v === 'string') return v;
+                  if (v && typeof v === 'object') {
+                    if ('inputValue' in v && v.inputValue) return v.inputValue;
+                    if ('tag' in v && v.tag) return v.tag;
+                  }
+                  return '';
+                }).filter(Boolean);
+                setTags(normalized);
+                await saveTagsToHistory(normalized);
+              }}
+              inputValue={inputTagValue}
+              onInputChange={(event, newInputValue) => setInputTagValue(newInputValue)}
+              renderInput={(params) => (
+                <TextField 
+                  {...params} 
+                  label="タグ" 
+                  margin="normal" 
+                  fullWidth 
+                  placeholder="例: 名言,感想,引用" 
+                  inputProps={{ 
+                    ...params.inputProps,
+                    'data-testid': 'memo-tags-input' 
+                  }} 
+                />
+              )}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel} data-testid="memo-add-cancel">キャンセル</Button>
+          <Button onClick={handleSubmit} variant="contained" data-testid="memo-add-submit">メモを追加</Button>
+        </DialogActions>
+      </>
+    );
+  }
+
+  // 通常のページ内での表示（既存の実装）
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }} data-testid="memo-add-form">
       <TextField

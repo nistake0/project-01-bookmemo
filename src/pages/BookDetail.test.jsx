@@ -35,10 +35,12 @@ jest.mock('../components/MemoList', () => {
   };
 });
 jest.mock('../components/MemoAdd', () => {
-  return function MockMemoAdd({ bookId, onMemoAdded }) {
+  return function MockMemoAdd({ bookId, onMemoAdded, onClose }) {
     return (
-      <div data-testid="memo-add">
+      <div data-testid="memo-add-dialog">
+        <div data-testid="memo-add-dialog-title">メモを追加</div>
         <button onClick={() => onMemoAdded && onMemoAdded()} data-testid="memo-added">メモ追加</button>
+        <button onClick={() => onClose && onClose()} data-testid="memo-add-cancel">キャンセル</button>
       </div>
     );
   };
@@ -80,10 +82,16 @@ describe('BookDetail', () => {
     expect(screen.getByTestId('book-info')).toBeInTheDocument();
     expect(screen.getByTestId('book-tag-editor')).toBeInTheDocument();
     expect(screen.getByTestId('memo-list')).toBeInTheDocument();
-    expect(screen.getByTestId('memo-add')).toBeInTheDocument();
     expect(screen.getByTestId('memo-list-title')).toBeInTheDocument();
-    expect(screen.getByTestId('memo-add-title')).toBeInTheDocument();
+    expect(screen.getByTestId('memo-add-fab')).toBeInTheDocument();
     expect(screen.getByText('テスト本')).toBeInTheDocument();
+  });
+
+  test('FABが表示されている', () => {
+    renderWithProviders(<BookDetail />);
+    
+    const fab = screen.getByTestId('memo-add-fab');
+    expect(fab).toBeInTheDocument();
   });
 
   test('shows loading state', () => {
@@ -163,21 +171,11 @@ describe('BookDetail', () => {
 
   // 今回の修正に関連するテストケース
   describe('修正関連のテスト', () => {
-    test('should force MemoList re-render when memo is added - メモ追加時の再レンダリングテスト', async () => {
+    test('should show FAB in book detail - FABが表示されるテスト', () => {
       renderWithProviders(<BookDetail />);
       
-      // 初期状態でMemoListが表示されていることを確認
-      expect(screen.getByTestId('memo-list')).toBeInTheDocument();
-      
-      // メモ追加ボタンをクリック
-      const memoAddButton = screen.getByTestId('memo-added');
-      fireEvent.click(memoAddButton);
-      
-      // MemoListが再レンダリングされることを確認
-      // 実際の実装ではkeyが変更されるため、コンポーネントが再マウントされる
-      await waitFor(() => {
-        expect(screen.getByTestId('memo-list')).toBeInTheDocument();
-      });
+      // FABが表示されていることを確認
+      expect(screen.getByTestId('memo-add-fab')).toBeInTheDocument();
     });
 
     test('should force MemoList re-render when memo is updated - メモ更新時の再レンダリングテスト', async () => {
@@ -196,36 +194,11 @@ describe('BookDetail', () => {
       });
     });
 
-    test('should handle multiple memo operations without conflicts - 複数メモ操作の競合防止テスト', async () => {
-      renderWithProviders(<BookDetail />);
-      
-      // メモ追加
-      const memoAddButton = screen.getByTestId('memo-added');
-      fireEvent.click(memoAddButton);
-      
-      // メモ更新
-      const memoUpdateButton = screen.getByTestId('memo-updated');
-      fireEvent.click(memoUpdateButton);
-      
-      // 再度メモ追加
-      fireEvent.click(memoAddButton);
-      
-      // 全ての操作が正常に処理されることを確認
-      await waitFor(() => {
-        expect(screen.getByTestId('memo-list')).toBeInTheDocument();
-        expect(screen.getByTestId('memo-add')).toBeInTheDocument();
-      });
-    });
-
     test('should maintain state consistency across re-renders - 再レンダリング時の状態一貫性テスト', async () => {
       renderWithProviders(<BookDetail />);
       
       // 初期状態を記録
       const initialMemoList = screen.getByTestId('memo-list');
-      
-      // メモ追加
-      const memoAddButton = screen.getByTestId('memo-added');
-      fireEvent.click(memoAddButton);
       
       // メモ更新
       const memoUpdateButton = screen.getByTestId('memo-updated');
@@ -235,28 +208,28 @@ describe('BookDetail', () => {
       await waitFor(() => {
         const currentMemoList = screen.getByTestId('memo-list');
         expect(currentMemoList).toBeInTheDocument();
-        // コンポーネントが正常に機能していることを確認
-        expect(screen.getByTestId('memo-add')).toBeInTheDocument();
+        // FABが正常に機能していることを確認
+        expect(screen.getByTestId('memo-add-fab')).toBeInTheDocument();
       });
     });
 
-    test('should handle rapid successive memo operations - 連続メモ操作テスト', async () => {
+    test('should handle rapid successive operations - 連続操作テスト', async () => {
       renderWithProviders(<BookDetail />);
       
-      // 連続してメモ操作を実行
-      const memoAddButton = screen.getByTestId('memo-added');
+      // 連続して操作を実行
+      const fab = screen.getByTestId('memo-add-fab');
       const memoUpdateButton = screen.getByTestId('memo-updated');
       
-      fireEvent.click(memoAddButton);
+      fireEvent.click(fab);
       fireEvent.click(memoUpdateButton);
-      fireEvent.click(memoAddButton);
+      fireEvent.click(fab);
       fireEvent.click(memoUpdateButton);
-      fireEvent.click(memoAddButton);
+      fireEvent.click(fab);
       
       // 全ての操作が正常に処理されることを確認
       await waitFor(() => {
         expect(screen.getByTestId('memo-list')).toBeInTheDocument();
-        expect(screen.getByTestId('memo-add')).toBeInTheDocument();
+        expect(screen.getByTestId('memo-add-fab')).toBeInTheDocument();
       });
     });
   });
