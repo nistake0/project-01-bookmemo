@@ -33,12 +33,15 @@ describe('メモ一覧UI 削除機能テスト', () => {
 
   it('削除ボタンで削除確認ダイアログが開き、削除できる', () => {
     cy.get('[data-testid="memo-card"]').last().within(() => {
-      cy.get('button[aria-label="edit"]').click();
+      cy.get('[data-testid="memo-edit-button"]').click();
     });
     cy.get('[data-testid="memo-detail-title"]').should('be.visible');
-    cy.get('[data-testid="memo-delete-button"]').click();
+    // メモ詳細画面で削除ボタンをクリック
+    cy.get('[data-testid="memo-delete-button"]').first().click({force: true});
+    // 削除確認ダイアログが表示されることを確認
     cy.get('[data-testid="memo-delete-confirm-title"]').should('be.visible');
-    cy.get('[data-testid="memo-delete-confirm-button"]').click({force: true});
+    // 削除確認ダイアログで削除ボタンをクリック
+    cy.get('[data-testid="memo-delete-confirm-button"]').click();
     cy.get('[data-testid="memo-card"]').should('have.length.at.least', 0);
   });
 }); 

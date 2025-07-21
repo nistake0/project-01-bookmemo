@@ -23,7 +23,9 @@ jest.mock('./MemoEditor', () => {
       <div data-testid="memo-editor">
         <button onClick={() => {
           // 実際のMemoEditorの動作を模倣：onUpdateを呼び出してからエディタを閉じる
-          onUpdate();
+          if (onUpdate) {
+            onUpdate();
+          }
           onClose();
         }} data-testid="update-button">更新</button>
       </div>

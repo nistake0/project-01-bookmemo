@@ -79,10 +79,13 @@ describe('useMemo', () => {
     
     expect(memoId).toBe('memo-3');
     expect(result.current.memos).toHaveLength(1);
-    expect(result.current.memos[0]).toEqual({
+    expect(result.current.memos[0]).toMatchObject({
       id: 'memo-3',
       text: '新規メモ'
     });
+    // タイムスタンプが存在することを確認
+    expect(result.current.memos[0]).toHaveProperty('createdAt');
+    expect(result.current.memos[0]).toHaveProperty('updatedAt');
     console.log('=== useMemo test: adds memo successfully END ===');
   });
 
@@ -119,12 +122,13 @@ describe('useMemo', () => {
     
     expect(success).toBe(true);
     expect(result.current.memos).toHaveLength(1);
-    expect(result.current.memos[0]).toEqual({
+    expect(result.current.memos[0]).toMatchObject({
       id: 'memo-1',
-      text: '更新後メモ',
-      createdAt: {},
-      updatedAt: {}
+      text: '更新後メモ'
     });
+    // タイムスタンプが存在することを確認
+    expect(result.current.memos[0]).toHaveProperty('createdAt');
+    expect(result.current.memos[0]).toHaveProperty('updatedAt');
     console.log('=== useMemo test: updates memo successfully END ===');
   });
 

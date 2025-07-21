@@ -178,6 +178,13 @@ describe('BookAdd', () => {
     expect(axios.get).toHaveBeenCalledWith(
       'https://api.openbd.jp/v1/get?isbn=9780134494166'
     );
+
+    // Google Books APIも呼ばれることを確認
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith(
+        'https://www.googleapis.com/books/v1/volumes?q=isbn:9780134494166'
+      );
+    });
   });
 
   /**

@@ -33,10 +33,17 @@ describe('メモ一覧UI 編集機能テスト', () => {
 
   it('編集ボタンで編集ダイアログが開き、内容を変更して保存できる', () => {
     cy.get('[data-testid="memo-card"]').first().within(() => {
-      cy.get('button[aria-label="edit"]').click();
+      cy.get('[data-testid="memo-edit-button"]').click();
     });
     cy.get('[data-testid="memo-detail-title"]').should('be.visible');
-    cy.get('[data-testid="memo-edit-button"]').click();
+    // メモ詳細画面の要素が表示されていることを確認
+    cy.get('[data-testid="memo-edit-button"]').should('be.visible');
+    cy.get('[data-testid="memo-delete-button"]').should('be.visible');
+    cy.get('[data-testid="memo-close-button"]').should('be.visible');
+    // メモ詳細画面のDialogActions内の編集ボタンをクリック
+    cy.get('[data-testid="memo-detail-dialog"]').find('[data-testid="memo-edit-button"]').click();
+    // 編集モードに切り替わるまで待つ
+    cy.get('[data-testid="memo-update-button"]', { timeout: 10000 }).should('be.visible');
     cy.get('textarea[label="引用・抜き書き"], textarea').first().clear({force: true}).type('E2Eテストで編集', {force: true});
     cy.get('[data-testid="memo-update-button"]').click();
     cy.contains('E2Eテストで編集').should('exist');
