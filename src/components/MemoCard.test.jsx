@@ -247,4 +247,19 @@ describe('MemoCard', () => {
     // タグが表示されないことを確認
     expect(screen.queryByText('テスト')).not.toBeInTheDocument();
   });
+
+  it('calls onClick when card is clicked', () => {
+    const mockOnClick = jest.fn();
+    renderWithProviders(
+      <MemoCard 
+        memo={mockMemo} 
+        onEdit={mockOnEdit} 
+        onDelete={mockOnDelete} 
+        onClick={mockOnClick}
+      />
+    );
+    const card = screen.getByTestId('memo-card');
+    fireEvent.click(card);
+    expect(mockOnClick).toHaveBeenCalledWith(mockMemo);
+  });
 }); 

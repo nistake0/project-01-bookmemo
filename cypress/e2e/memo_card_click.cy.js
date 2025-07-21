@@ -2,7 +2,7 @@ before(() => {
   cy.exec('node scripts/resetTestBooks.cjs');
 });
 
-describe('メモ一覧UI 表示テスト', () => {
+describe('メモカードクリック機能テスト', () => {
   beforeEach(() => {
     cy.clearCookies();
     cy.clearLocalStorage();
@@ -29,10 +29,6 @@ describe('メモ一覧UI 表示テスト', () => {
     cy.get('[data-testid="memo-text-input"]').should('be.visible').type('E2Eテスト用メモ');
     cy.get('[data-testid="memo-add-submit"]').click();
     cy.get('[data-testid="memo-card"]', { timeout: 10000 }).should('exist');
-  });
-
-  it('メモカードが複数表示される', () => {
-    cy.get('[data-testid="memo-card"]').should('have.length.at.least', 1);
   });
 
   it('メモカード全体をクリックすると詳細ダイアログが開く', () => {

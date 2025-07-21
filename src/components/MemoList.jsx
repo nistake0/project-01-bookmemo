@@ -72,6 +72,7 @@ const MemoList = ({ bookId, onMemoUpdated }) => {
             memo={memo}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onClick={handleEdit}
           />
         ))}
       </Box>
