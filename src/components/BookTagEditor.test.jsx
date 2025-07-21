@@ -1,8 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { renderWithProviders, resetMocks } from '../test-utils';
 import BookTagEditor from './BookTagEditor';
-import { ErrorDialogContext } from './CommonErrorDialog';
 
 /**
  * BookTagEditor コンポーネントのユニットテスト
@@ -14,13 +13,6 @@ import { ErrorDialogContext } from './CommonErrorDialog';
  * - タグ履歴の取得と保存
  */
 
-// Auth モック
-jest.mock('../auth/AuthProvider', () => ({
-  useAuth: () => ({
-    user: { uid: 'test-user-id' },
-  }),
-}));
-
 // useTagHistoryフックのモック
 jest.mock('../hooks/useTagHistory', () => ({
   useTagHistory: () => ({
@@ -30,22 +22,6 @@ jest.mock('../hooks/useTagHistory', () => ({
     saveTagsToHistory: jest.fn(),
   }),
 }));
-
-const mockSetGlobalError = jest.fn();
-
-/**
- * テスト用のレンダリング関数
- * ErrorDialogContextとBrowserRouterでコンポーネントをラップ
- */
-const renderWithProviders = (component) => {
-  return render(
-    <ErrorDialogContext.Provider value={{ setGlobalError: mockSetGlobalError }}>
-      <BrowserRouter>
-        {component}
-      </BrowserRouter>
-    </ErrorDialogContext.Provider>
-  );
-};
 
 describe('BookTagEditor', () => {
   const mockBook = {
@@ -57,7 +33,7 @@ describe('BookTagEditor', () => {
   const mockOnTagsChange = jest.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    resetMocks();
   });
 
   /**
