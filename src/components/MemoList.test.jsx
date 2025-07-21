@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import MemoList from './MemoList';
 import { useMemo } from '../hooks/useMemo';
+import { renderWithProviders, resetMocks } from '../test-utils';
 
 // useMemoフックをモック
 jest.mock('../hooks/useMemo');
@@ -32,23 +33,6 @@ jest.mock('./MemoEditor', () => {
     );
   };
 });
-const mockSetGlobalError = jest.fn();
-jest.mock('./CommonErrorDialog', () => ({
-  ErrorDialogContext: {
-    Provider: ({ children }) => children,
-  },
-}));
-
-// React.useContextをモック
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  useContext: (context) => {
-    if (context === require('./CommonErrorDialog').ErrorDialogContext) {
-      return { setGlobalError: mockSetGlobalError };
-    }
-    return jest.requireActual('react').useContext(context);
-  },
-}));
 
 describe('MemoList', () => {
   const mockUseMemo = useMemo;
@@ -58,7 +42,7 @@ describe('MemoList', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    resetMocks();
     mockUseMemo.mockReturnValue({
       memos: mockMemos,
       loading: false,
