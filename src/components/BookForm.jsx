@@ -191,7 +191,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <Button
-            onClick={handleFetchBookInfo}
+            onClick={() => handleFetchBookInfo()}
             variant="outlined"
             disabled={loading}
             sx={{ mt: 2 }}
