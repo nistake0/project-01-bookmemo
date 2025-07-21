@@ -15,23 +15,23 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { ErrorDialogContext } from './CommonErrorDialog';
 import { useMemo } from '../hooks/useMemo';
 
-const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete }) => {
+const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode = false }) => {
   const { setGlobalError } = useContext(ErrorDialogContext);
   const { updateMemo, deleteMemo } = useMemo(bookId);
-  const [dialogMode, setDialogMode] = useState('view'); // 'view' or 'edit'
+  const [dialogMode, setDialogMode] = useState(editMode ? 'edit' : 'view'); // 'view' or 'edit'
   const [editingMemo, setEditingMemo] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [inputTagValue, setInputTagValue] = useState("");
 
-  // メモが変更されたときに編集状態をリセット
+  // メモやeditModeが変更されたときに編集状態をリセット
   React.useEffect(() => {
     if (memo) {
       setEditingMemo(memo);
-      setDialogMode('view');
+      setDialogMode(editMode ? 'edit' : 'view');
       setShowDeleteConfirm(false);
       setInputTagValue("");
     }
-  }, [memo]);
+  }, [memo, editMode]);
 
   const handleClose = () => {
     setEditingMemo(null);
