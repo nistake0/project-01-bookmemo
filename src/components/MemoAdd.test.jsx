@@ -1,6 +1,6 @@
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { renderWithProviders, mockSetGlobalError } from '../test-utils';
+import { renderWithProviders, mockSetGlobalError, resetMocks } from '../test-utils';
 import MemoAdd from './MemoAdd';
 
 /**
@@ -15,7 +15,13 @@ import MemoAdd from './MemoAdd';
 // AuthProviderのモックを共通化
 describe('MemoAdd', () => {
   beforeEach(() => {
-    // 各テストの前にモックをリセット
+    // 完全なモックリセット
+    jest.clearAllMocks();
+    resetMocks();
+  });
+
+  afterEach(() => {
+    // テスト後のクリーンアップ
     jest.clearAllMocks();
   });
 

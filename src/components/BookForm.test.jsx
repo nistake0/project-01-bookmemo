@@ -24,7 +24,14 @@ describe('BookForm', () => {
   const mockOnBookAdded = jest.fn();
 
   beforeEach(() => {
+    // 完全なモックリセット
+    jest.clearAllMocks();
     resetMocks();
+  });
+
+  afterEach(() => {
+    // テスト後のクリーンアップ
+    jest.clearAllMocks();
   });
 
   /**

@@ -67,8 +67,11 @@ export const resetMocks = () => {
 };
 
 /**
- * 共通のモック設定
+ * 実用的なモック共有システム
+ * Jestの制約に合わせて、静的なモック定義を使用
  */
+
+// 共通のモック設定
 export const setupCommonMocks = () => {
   // useTagHistory モック
   jest.mock('./hooks/useTagHistory', () => ({
@@ -160,4 +163,63 @@ export const mockUseAuth = (overrides = {}) => ({
   user: { uid: 'test-user-id' },
   loading: false,
   ...overrides,
-}); 
+});
+
+/**
+ * 共通のコンポーネントモック
+ * 個別ファイルでの重複を削減
+ */
+export const createComponentMocks = () => {
+  return {
+    // BookInfo モック
+    BookInfo: ({ book, onStatusChange }) => (
+      <div data-testid="book-info">
+        <h1>{book?.title || 'タイトルなし'}</h1>
+        <button onClick={() => onStatusChange?.('reading')} data-testid="status-change">ステータス変更</button>
+      </div>
+    ),
+
+    // BookTagEditor モック
+    BookTagEditor: ({ book, onTagsChange }) => (
+      <div data-testid="book-tag-editor">
+        <button onClick={() => onTagsChange?.(['tag1', 'tag2'])} data-testid="tags-change">タグ変更</button>
+      </div>
+    ),
+
+    // MemoList モック
+    MemoList: ({ bookId, onMemoUpdated }) => (
+      <div data-testid="memo-list">
+        <button onClick={() => onMemoUpdated?.()} data-testid="memo-updated">メモ更新</button>
+      </div>
+    ),
+
+    // MemoAdd モック
+    MemoAdd: ({ bookId, onMemoAdded }) => (
+      <div data-testid="memo-add">
+        <button onClick={() => onMemoAdded?.()} data-testid="memo-added">メモ追加</button>
+      </div>
+    ),
+
+    // MemoCard モック
+    MemoCard: ({ memo, onEdit, onDelete }) => (
+      <div data-testid={`memo-card-${memo.id}`}>
+        <span>{memo.text}</span>
+        <button onClick={() => onEdit?.(memo)} data-testid={`edit-${memo.id}`}>編集</button>
+        <button onClick={() => onDelete?.(memo.id)} data-testid={`delete-${memo.id}`}>削除</button>
+      </div>
+    ),
+
+    // MemoEditor モック
+    MemoEditor: ({ open, memo, onUpdate, onClose }) => {
+      if (!open) return null;
+      return (
+        <div data-testid="memo-editor">
+          <button onClick={() => {
+            onUpdate?.();
+            onClose?.();
+          }} data-testid="update-button">更新</button>
+        </div>
+      );
+    },
+  };
+}; 

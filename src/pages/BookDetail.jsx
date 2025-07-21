@@ -30,22 +30,22 @@ const BookDetail = () => {
     setMemoListKey(prev => prev + 1); // MemoListを強制的に再レンダリング
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>エラーが発生しました: {error}</div>;
-  if (!book) return <div>本が見つかりません。</div>;
+  if (loading) return <div data-testid="book-detail-loading">Loading...</div>;
+  if (error) return <div data-testid="book-detail-error">エラーが発生しました: {error}</div>;
+  if (!book) return <div data-testid="book-detail-not-found">本が見つかりません。</div>;
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, pb: '80px' }}>
+    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, pb: '80px' }} data-testid="book-detail">
       <Paper sx={{ p: 3 }}>
         <BookInfo book={book} bookId={id} onStatusChange={handleStatusChange} />
         
         <BookTagEditor book={book} bookId={id} onTagsChange={handleTagsChange} />
         
         <Divider sx={{ my: 2 }} />
-        <Typography variant="h5" gutterBottom>メモ一覧</Typography>
+        <Typography variant="h5" gutterBottom data-testid="memo-list-title">メモ一覧</Typography>
         <MemoList key={memoListKey} bookId={book.id} onMemoUpdated={handleMemoUpdated} />
         <Divider sx={{ my: 2 }} />
-        <Typography variant="h5" gutterBottom>メモを追加</Typography>
+        <Typography variant="h5" gutterBottom data-testid="memo-add-title">メモを追加</Typography>
         <MemoAdd bookId={book.id} bookTags={book.tags || []} onMemoAdded={handleMemoAdded} />
       </Paper>
     </Box>

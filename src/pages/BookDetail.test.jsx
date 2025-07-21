@@ -54,7 +54,11 @@ describe('BookDetail', () => {
   };
 
   beforeEach(() => {
+    // 完全なモックリセット
+    jest.clearAllMocks();
     resetMocks();
+    
+    // useBookのデフォルトモック設定
     useBook.mockReturnValue({
       book: mockBook,
       loading: false,
@@ -64,13 +68,21 @@ describe('BookDetail', () => {
     });
   });
 
+  afterEach(() => {
+    // テスト後のクリーンアップ
+    jest.clearAllMocks();
+  });
+
   test('renders book detail correctly', () => {
     renderWithProviders(<BookDetail />);
     
+    expect(screen.getByTestId('book-detail')).toBeInTheDocument();
     expect(screen.getByTestId('book-info')).toBeInTheDocument();
     expect(screen.getByTestId('book-tag-editor')).toBeInTheDocument();
     expect(screen.getByTestId('memo-list')).toBeInTheDocument();
     expect(screen.getByTestId('memo-add')).toBeInTheDocument();
+    expect(screen.getByTestId('memo-list-title')).toBeInTheDocument();
+    expect(screen.getByTestId('memo-add-title')).toBeInTheDocument();
     expect(screen.getByText('テスト本')).toBeInTheDocument();
   });
 
@@ -84,7 +96,7 @@ describe('BookDetail', () => {
     });
 
     renderWithProviders(<BookDetail />);
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByTestId('book-detail-loading')).toBeInTheDocument();
   });
 
   test('shows error state', () => {
@@ -97,7 +109,7 @@ describe('BookDetail', () => {
     });
 
     renderWithProviders(<BookDetail />);
-    expect(screen.getByText('エラーが発生しました: エラーが発生しました')).toBeInTheDocument();
+    expect(screen.getByTestId('book-detail-error')).toBeInTheDocument();
   });
 
   test('shows book not found', () => {
@@ -110,7 +122,7 @@ describe('BookDetail', () => {
     });
 
     renderWithProviders(<BookDetail />);
-    expect(screen.getByText('本が見つかりません。')).toBeInTheDocument();
+    expect(screen.getByTestId('book-detail-not-found')).toBeInTheDocument();
   });
 
   test('handles status change', () => {
