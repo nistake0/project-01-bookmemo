@@ -7,11 +7,11 @@
  * メモデータのファクトリー
  */
 export const createMockMemo = (overrides = {}) => ({
-  id: 'memo1',
-  text: 'テストメモの内容',
+  id: 'memo-1',
+  text: 'テストメモ',
   comment: 'テストコメント',
   page: 123,
-  tags: ['テスト', 'サンプル'],
+  tags: ['テスト'],
   createdAt: { toDate: () => new Date('2024-01-01T10:00:00') },
   updatedAt: { toDate: () => new Date('2024-01-01T10:00:00') },
   ...overrides
@@ -42,6 +42,13 @@ export const createMockUser = (overrides = {}) => ({
   email: 'test@example.com',
   displayName: 'テストユーザー',
   ...overrides
+});
+
+/**
+ * テスト用のモックタグ
+ */
+export const createMockTag = (name = 'テスト') => ({
+  name,
 });
 
 /**
@@ -83,4 +90,29 @@ export const createMockEvent = (overrides = {}) => ({
     name: '',
   },
   ...overrides
+});
+
+/**
+ * テスト用のモック関数ファクトリー
+ */
+export const createMockFunctions = () => ({
+  mockOnClose: jest.fn(),
+  mockOnUpdate: jest.fn(),
+  mockOnDelete: jest.fn(),
+  mockOnStatusChange: jest.fn(),
+  mockOnTagsChange: jest.fn(),
+  mockOnMemoAdded: jest.fn(),
+  mockOnMemoUpdated: jest.fn(),
+});
+
+/**
+ * テスト用のFirebase関数ファクトリー
+ */
+export const createMockFirebaseFunctions = () => ({
+  mockUpdateMemo: jest.fn(() => Promise.resolve(true)),
+  mockDeleteMemo: jest.fn(() => Promise.resolve(true)),
+  mockAddMemo: jest.fn(() => Promise.resolve('new-memo-id')),
+  mockFetchMemos: jest.fn(),
+  mockUpdateBookStatus: jest.fn(() => Promise.resolve()),
+  mockUpdateBookTags: jest.fn(() => Promise.resolve()),
 }); 
