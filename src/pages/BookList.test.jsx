@@ -21,11 +21,19 @@ jest.mock('react-router-dom', () => ({
 
 describe('BookList', () => {
   beforeEach(() => {
+    // 完全なモックリセット
     jest.clearAllMocks();
     resetMocks();
+    
+    // デバッグログ（必要に応じて）
     console.log('=== BookList test beforeEach ===');
     console.log('useAuth mock:', useAuth);
     console.log('getDocs mock:', getDocs);
+  });
+
+  afterEach(() => {
+    // テスト後のクリーンアップ
+    jest.clearAllMocks();
   });
 
   test('tagsが存在する場合にChipでタグが表示される', async () => {
