@@ -8,6 +8,9 @@ import {
   Typography,
   Button
 } from '@mui/material';
+import DateRangeSelector from './DateRangeSelector';
+import TagSearchField from './TagSearchField';
+import MemoContentSearchField from './MemoContentSearchField';
 
 /**
  * 高度な検索フォームコンポーネント
@@ -32,6 +35,34 @@ function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSear
     onSearchConditionsChange?.({
       ...searchConditions,
       status: newValue
+    });
+  };
+
+  const handleDateRangeChange = (dateRange) => {
+    onSearchConditionsChange?.({
+      ...searchConditions,
+      dateRange: dateRange
+    });
+  };
+
+  const handleTagsChange = (selectedTags) => {
+    onSearchConditionsChange?.({
+      ...searchConditions,
+      selectedTags: selectedTags
+    });
+  };
+
+  const handleMemoContentChange = (memoContent) => {
+    onSearchConditionsChange?.({
+      ...searchConditions,
+      memoContent: memoContent
+    });
+  };
+
+  const handleIncludeMemoContentChange = (includeMemoContent) => {
+    onSearchConditionsChange?.({
+      ...searchConditions,
+      includeMemoContent: includeMemoContent
     });
   };
 
@@ -71,34 +102,31 @@ function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSear
           </Tabs>
         </Box>
 
-        {/* 日時検索（仮実装） */}
+        {/* 日時検索 */}
         <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            読了日時（実装予定）
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            年別・年月別・直近期間での検索機能を実装予定です。
-          </Typography>
+          <DateRangeSelector
+            value={searchConditions?.dateRange}
+            onChange={handleDateRangeChange}
+          />
         </Box>
 
-        {/* タグ検索（仮実装） */}
+        {/* タグ検索 */}
         <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            タグ検索（実装予定）
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            複数タグでの絞り込み機能を実装予定です。
-          </Typography>
+          <TagSearchField
+            selectedTags={searchConditions?.selectedTags || []}
+            onTagsChange={handleTagsChange}
+            type="book"
+          />
         </Box>
 
-        {/* メモ内容検索（仮実装） */}
+        {/* メモ内容検索 */}
         <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            メモ内容検索（実装予定）
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            メモのテキスト内容での検索機能を実装予定です。
-          </Typography>
+          <MemoContentSearchField
+            memoContent={searchConditions?.memoContent || ''}
+            includeMemoContent={searchConditions?.includeMemoContent || false}
+            onMemoContentChange={handleMemoContentChange}
+            onIncludeMemoContentChange={handleIncludeMemoContentChange}
+          />
         </Box>
       </Paper>
 
