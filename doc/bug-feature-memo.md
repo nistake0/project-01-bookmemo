@@ -4,7 +4,7 @@
 
 ### 1. テスト関連
 - [x] MemoCard.test.jsxの修正（スワイプアクション対応）
-- [ ] MemoList.test.jsxの再作成（FAB・クリック機能対応）
+- [x] MemoList.test.jsxの再作成（FAB・クリック機能対応）
 - [ ] E2Eテストの安定性向上・追加（memo_swipe_actions.cy.js等）
 - [ ] ユニットテストのカバレッジ向上
 
@@ -34,6 +34,7 @@
 - [x] BookDetail.test.jsx（FAB対応・複数要素エラー解決）
 - [x] MemoAdd.test.jsx（ダイアログモード対応テスト追加）
 - [x] MemoCard.test.jsx（react-swipeableライブラリ対応・useMediaQueryモック追加・モバイル・デスクトップ表示切り替えテスト対応）
+- [x] MemoList.test.jsx（実際のコンポーネント構造対応・editModeパラメータ処理追加・エラーハンドリングテスト追加）
 
 ---
 
@@ -59,4 +60,11 @@
 - **解決**: react-swipeableライブラリのuseSwipeableフックのモックに変更
 - **追加**: useMediaQueryフックのモックでモバイル・デスクトップ表示切り替えテスト対応
 - **結果**: テスト成功率向上（1 failed → 0 failed、100 passed）
-- **技術的改善**: 実際のライブラリ使用状況に合わせたモック設計 
+- **技術的改善**: 実際のライブラリ使用状況に合わせたモック設計
+
+### 5. MemoListテスト修正の詳細（2024-08-03）
+- **問題**: 実際のMemoEditorコンポーネント構造との不一致
+- **解決**: 実際のコンポーネント構造に合わせたテスト修正
+- **追加**: editModeパラメータの処理追加（view/editモード区別）
+- **結果**: テストケース改善（100 passed → 101 passed）
+- **技術的改善**: 実際のMemoEditorコンポーネント構造に合わせたモック設計 
