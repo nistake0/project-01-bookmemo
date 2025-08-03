@@ -4,18 +4,21 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { ErrorDialogProvider } from './CommonErrorDialog';
 import MemoCard from './MemoCard';
 
-// react-swipeable-listライブラリをモック
-jest.mock('react-swipeable-list', () => ({
-  SwipeableList: ({ children }) => <div data-testid="swipeable-list">{children}</div>,
-  SwipeableListItem: ({ children, swipeRight, threshold }) => (
-    <div data-testid="swipeable-list-item" data-swipe-right={swipeRight ? 'true' : 'false'} data-threshold={threshold}>
-      {children}
-    </div>
-  )
+// react-swipeableライブラリのuseSwipeableフックをモック
+jest.mock('react-swipeable', () => ({
+  useSwipeable: () => ({
+    onSwipedLeft: jest.fn(),
+    onSwipedRight: jest.fn(),
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: true,
+  })
 }));
 
-// CSSファイルのインポートをモック
-jest.mock('react-swipeable-list/dist/styles.css', () => ({}));
+// useMediaQueryフックをモック
+jest.mock('@mui/material', () => ({
+  ...jest.requireActual('@mui/material'),
+  useMediaQuery: jest.fn()
+}));
 
 /**
  * MemoCard コンポーネントのユニットテスト
@@ -27,6 +30,7 @@ jest.mock('react-swipeable-list/dist/styles.css', () => ({}));
  * - オプションフィールドの処理（ページ番号、タグ、日付）
  * - エッジケースの処理（null値、空文字）
  * - スワイプアクションの設定
+ * - モバイル・デスクトップ表示の切り替え
  */
 
 const theme = createTheme();
@@ -130,20 +134,21 @@ describe('MemoCard', () => {
   });
 
   /**
-   * テストケース: メモカードの編集・削除ボタン動作確認
+   * テストケース: メモカードの編集・削除ボタン動作確認（デスクトップ）
    * 
-   * 目的: メモカードの編集・削除ボタンが正しく表示され、クリック時に適切なコールバックが呼ばれることを確認
+   * 目的: デスクトップ表示でメモカードの編集・削除ボタンが正しく表示され、
+   * クリック時に適切なコールバックが呼ばれることを確認
    * 
    * テストステップ:
-   * 1. メモカードをレンダリング
+   * 1. デスクトップ表示でメモカードをレンダリング
    * 2. 編集ボタンが存在することを確認
    * 3. 削除ボタンが存在することを確認
    * 4. 編集ボタンをクリックしてonEditコールバックが呼ばれることを確認
    * 5. 削除ボタンをクリックしてonDeleteコールバックが呼ばれることを確認
    */
-  it('handles edit and delete button clicks', () => {
-    const mockOnEdit = jest.fn();
-    const mockOnDelete = jest.fn();
+  it('handles edit and delete button clicks on desktop', () => {
+    const { useMediaQuery } = require('@mui/material');
+    useMediaQuery.mockReturnValue(false); // デスクトップ表示
 
     renderWithProviders(
       <MemoCard
@@ -162,11 +167,36 @@ describe('MemoCard', () => {
 
     // 編集ボタンをクリック
     fireEvent.click(editButton);
-    expect(mockOnEdit).toHaveBeenCalledWith(mockMemo);
+    expect(mockOnEdit).toHaveBeenCalledWith(mockMemo, true);
 
     // 削除ボタンをクリック
     fireEvent.click(deleteButton);
     expect(mockOnDelete).toHaveBeenCalledWith('memo1');
+  });
+
+  /**
+   * テストケース: メモカードのクリック機能
+   * 
+   * 目的: メモカード全体をクリックした時にonClickコールバックが呼ばれることを確認
+   * 
+   * テストステップ:
+   * 1. onClickプロパティ付きでメモカードをレンダリング
+   * 2. メモカードをクリック
+   * 3. onClickコールバックが正しく呼ばれることを確認
+   */
+  it('calls onClick when card is clicked', () => {
+    const mockOnClick = jest.fn();
+    renderWithProviders(
+      <MemoCard 
+        memo={mockMemo} 
+        onEdit={mockOnEdit} 
+        onDelete={mockOnDelete} 
+        onClick={mockOnClick}
+      />
+    );
+    const card = screen.getByTestId('memo-card');
+    fireEvent.click(card);
+    expect(mockOnClick).toHaveBeenCalledWith(mockMemo, false);
   });
 
   /**
@@ -262,64 +292,20 @@ describe('MemoCard', () => {
     expect(screen.queryByText('テスト')).not.toBeInTheDocument();
   });
 
-  it('calls onClick when card is clicked', () => {
-    const mockOnClick = jest.fn();
-    renderWithProviders(
-      <MemoCard 
-        memo={mockMemo} 
-        onEdit={mockOnEdit} 
-        onDelete={mockOnDelete} 
-        onClick={mockOnClick}
-      />
-    );
-    const card = screen.getByTestId('memo-card');
-    fireEvent.click(card);
-    expect(mockOnClick).toHaveBeenCalledWith(mockMemo);
-  });
-
   /**
-   * テストケース: スワイプアクションの表示確認
+   * テストケース: モバイル表示でのスワイプアクション
    * 
-   * 目的: スワイプアクションが正しく設定されていることを確認
+   * 目的: モバイル表示でスワイプアクションが正しく設定されていることを確認
    * 
    * テストステップ:
-   * 1. メモカードをレンダリング
-   * 2. SwipeableListが存在することを確認
-   * 3. SwipeableListItemが存在することを確認
-   * 4. スワイプアクションの設定を確認
+   * 1. モバイル表示でメモカードをレンダリング
+   * 2. メモカードが表示されることを確認
+   * 3. デスクトップ用ボタンが非表示になることを確認
    */
-  it('renders swipeable list item', () => {
-    renderWithProviders(
-      <MemoCard 
-        memo={mockMemo} 
-        onEdit={mockOnEdit} 
-        onDelete={mockOnDelete} 
-      />
-    );
-    
-    // SwipeableListが存在することを確認
-    const swipeableList = screen.getByTestId('swipeable-list');
-    expect(swipeableList).toBeInTheDocument();
-    
-    // SwipeableListItemが存在することを確認
-    const swipeableItem = screen.getByTestId('swipeable-list-item');
-    expect(swipeableItem).toBeInTheDocument();
-    
-    // スワイプアクションが設定されていることを確認
-    expect(swipeableItem).toHaveAttribute('data-swipe-right', 'true');
-    expect(swipeableItem).toHaveAttribute('data-threshold', '0.5');
-  });
+  it('renders mobile version with swipe actions', () => {
+    const { useMediaQuery } = require('@mui/material');
+    useMediaQuery.mockReturnValue(true); // モバイル表示
 
-  /**
-   * テストケース: スワイプアクションの設定確認
-   * 
-   * 目的: スワイプアクションが正しく設定されていることを確認
-   * 
-   * テストステップ:
-   * 1. メモカードをレンダリング
-   * 2. スワイプアクションの設定を確認
-   */
-  it('configures swipe actions correctly', () => {
     renderWithProviders(
       <MemoCard 
         memo={mockMemo} 
@@ -332,21 +318,24 @@ describe('MemoCard', () => {
     const card = screen.getByTestId('memo-card');
     expect(card).toBeInTheDocument();
     
-    // スワイプアクションが設定されていることを確認
-    const swipeableItem = screen.getByTestId('swipeable-list-item');
-    expect(swipeableItem).toHaveAttribute('data-swipe-right', 'true');
+    // デスクトップ用ボタンが非表示になることを確認
+    expect(screen.queryByTestId('memo-edit-button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('memo-delete-button')).not.toBeInTheDocument();
   });
 
   /**
-   * テストケース: デスクトップ用ボタンの表示確認
+   * テストケース: デスクトップ表示でのボタン表示
    * 
-   * 目的: デスクトップでは編集・削除ボタンが表示されることを確認
+   * 目的: デスクトップ表示で編集・削除ボタンが表示されることを確認
    * 
    * テストステップ:
-   * 1. メモカードをレンダリング
+   * 1. デスクトップ表示でメモカードをレンダリング
    * 2. デスクトップ用の編集・削除ボタンが存在することを確認
    */
   it('shows desktop buttons on larger screens', () => {
+    const { useMediaQuery } = require('@mui/material');
+    useMediaQuery.mockReturnValue(false); // デスクトップ表示
+
     renderWithProviders(
       <MemoCard 
         memo={mockMemo} 

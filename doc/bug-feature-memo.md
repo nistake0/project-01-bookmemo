@@ -3,7 +3,7 @@
 ## 現在の課題・TODOリスト
 
 ### 1. テスト関連
-- [ ] MemoCard.test.jsxの修正（スワイプアクション対応）
+- [x] MemoCard.test.jsxの修正（スワイプアクション対応）
 - [ ] MemoList.test.jsxの再作成（FAB・クリック機能対応）
 - [ ] E2Eテストの安定性向上・追加（memo_swipe_actions.cy.js等）
 - [ ] ユニットテストのカバレッジ向上
@@ -33,6 +33,7 @@
 ### テスト修正
 - [x] BookDetail.test.jsx（FAB対応・複数要素エラー解決）
 - [x] MemoAdd.test.jsx（ダイアログモード対応テスト追加）
+- [x] MemoCard.test.jsx（react-swipeableライブラリ対応・useMediaQueryモック追加・モバイル・デスクトップ表示切り替えテスト対応）
 
 ---
 
@@ -51,4 +52,11 @@
 ### 3. テスト戦略
 - ユニットテスト: コンポーネントの個別機能
 - E2Eテスト: ユーザーフローの検証
-- モック: 外部依存関係の分離 
+- モック: 外部依存関係の分離
+
+### 4. MemoCardテスト修正の詳細（2024-07-21）
+- **問題**: react-swipeable-listライブラリのモックが実際のコンポーネント構造と不一致
+- **解決**: react-swipeableライブラリのuseSwipeableフックのモックに変更
+- **追加**: useMediaQueryフックのモックでモバイル・デスクトップ表示切り替えテスト対応
+- **結果**: テスト成功率向上（1 failed → 0 failed、100 passed）
+- **技術的改善**: 実際のライブラリ使用状況に合わせたモック設計 
