@@ -46,14 +46,27 @@ const BookDetail = () => {
   if (!book) return <div data-testid="book-detail-not-found">本が見つかりません。</div>;
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, pb: '80px' }} data-testid="book-detail">
-      <Paper sx={{ p: 3 }}>
+    <Box sx={{ 
+      maxWidth: 800, 
+      mx: 'auto', 
+      mt: { xs: 2, sm: 4 }, 
+      pb: '80px',
+      px: { xs: 2, sm: 0 } // モバイルでは左右の余白を追加
+    }} data-testid="book-detail">
+      <Paper sx={{ p: { xs: 2, sm: 3 } }}>
         <BookInfo book={book} bookId={id} onStatusChange={handleStatusChange} />
         
         <BookTagEditor book={book} bookId={id} onTagsChange={handleTagsChange} />
         
-        <Divider sx={{ my: 2 }} />
-        <Typography variant="h5" gutterBottom data-testid="memo-list-title">メモ一覧</Typography>
+        <Divider sx={{ my: { xs: 1, sm: 2 } }} />
+        <Typography 
+          variant="h5" 
+          gutterBottom 
+          sx={{ mb: { xs: 1, sm: 2 } }}
+          data-testid="memo-list-title"
+        >
+          メモ一覧
+        </Typography>
         <MemoList key={memoListKey} bookId={book.id} onMemoUpdated={handleMemoUpdated} />
       </Paper>
 
@@ -63,8 +76,8 @@ const BookDetail = () => {
         aria-label="メモを追加"
         sx={{
           position: 'fixed',
-          bottom: 16,
-          right: 16,
+          bottom: { xs: 72, sm: 16 }, // モバイルではフッターメニューの上に配置
+          right: { xs: 16, sm: 16 },
         }}
         onClick={handleFabClick}
         data-testid="memo-add-fab"

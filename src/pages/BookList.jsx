@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../auth/AuthProvider";
-import { Typography, List, ListItem, ListItemText, Box, Button, Tabs, Tab, Chip, Stack, TextField } from "@mui/material";
-import { useNavigate, Link } from "react-router-dom";
+import { Typography, Box, Button, Tabs, Tab, TextField, Grid } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import BookCard from "../components/BookCard";
 
 // タグ正規化関数（小文字化＋全角英数字→半角）
 function normalizeTag(tag) {
@@ -15,23 +16,11 @@ function normalizeTag(tag) {
   return zenkakuToHankaku(tag).toLowerCase();
 }
 
-// ステータスを日本語テキストに変換する関数
-function getStatusText(status) {
-  switch (status) {
-    case 'reading':
-      return '読書中';
-    case 'finished':
-      return '読了';
-    default:
-      return '読書中';
-  }
-}
-
 export default function BookList() {
   const { user } = useAuth();
   const [allBooks, setAllBooks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // 'all', 'reading', 'finished'
+  const [filter, setFilter] = useState('reading'); // 初期値を'reading'に変更
   const [searchText, setSearchText] = useState('');
   const navigate = useNavigate();
 
@@ -77,6 +66,10 @@ export default function BookList() {
     setFilter(newValue);
   };
 
+  const handleBookClick = (bookId) => {
+    navigate(`/book/${bookId}`);
+  };
+
   const filteredBooks = allBooks.filter(book => {
     if (filter !== 'all') {
       const status = book.status || 'reading';
@@ -95,10 +88,37 @@ export default function BookList() {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <Box sx={{ maxWidth: 600, mx: "auto", mt: 4, pb: "56px" }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" gutterBottom data-testid="book-list-title">本一覧</Typography>
-        <Button variant="contained" data-testid="book-add-button" onClick={() => navigate("/add")}>本を追加</Button>
+    <Box sx={{ 
+      maxWidth: 1200, 
+      mx: "auto", 
+      mt: { xs: 2, sm: 4 }, 
+      pb: "56px",
+      px: { xs: 2, sm: 0 }
+    }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mb: 2,
+        flexDirection: { xs: 'column', sm: 'row' },
+        gap: { xs: 2, sm: 0 }
+      }}>
+        <Typography 
+          variant="h4" 
+          gutterBottom 
+          data-testid="book-list-title"
+          sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}
+        >
+          本一覧
+        </Typography>
+        <Button 
+          variant="contained" 
+          data-testid="book-add-button" 
+          onClick={() => navigate("/add")}
+          sx={{ width: { xs: '100%', sm: 'auto' } }}
+        >
+          本を追加
+        </Button>
       </Box>
 
       <TextField
@@ -106,7 +126,6 @@ export default function BookList() {
         value={searchText}
         onChange={e => setSearchText(e.target.value)}
         fullWidth
-        margin="normal"
         sx={{ mb: 2 }}
       />
 
@@ -118,25 +137,33 @@ export default function BookList() {
         </Tabs>
       </Box>
 
-      <List>
-        {filteredBooks.length === 0 && <ListItem data-testid="no-books"><ListItemText primary="該当する本がありません" /></ListItem>}
-        {filteredBooks.map(book => (
-          <ListItem key={book.id} component={Link} to={`/book/${book.id}`}>
-            <ListItemText
-              primary={<span data-testid={`book-title-${book.id}`}>{book.title || "タイトル未設定"}</span>}
-              secondary={
-                <span>
-                  <span>{book.author || "著者未設定"}</span>
-                  <br />
-                  <span data-testid={`book-tags-${book.id}`}>{book.tags?.join(", ") || "タグなし"}</span>
-                  <br />
-                  <span>ステータス: {getStatusText(book.status)}</span>
-                </span>
-              }
-            />
-          </ListItem>
-        ))}
-      </List>
+      {filteredBooks.length === 0 ? (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <Typography variant="body1" color="text.secondary">
+            該当する本がありません
+          </Typography>
+        </Box>
+      ) : (
+        <Grid container spacing={2} data-testid="book-list-grid">
+          {filteredBooks.map(book => (
+            <Grid 
+              key={book.id} 
+              item
+              xs={12} 
+              sm={6} 
+              md={4} 
+              lg={3}
+              data-testid={`book-grid-item-${book.id}`}
+            >
+              <BookCard 
+                book={book}
+                onClick={() => handleBookClick(book.id)}
+                testId={`book-list-card-${book.id}`}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      )}
     </Box>
   );
 } 

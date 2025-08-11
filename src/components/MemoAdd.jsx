@@ -85,15 +85,14 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
       <>
         <DialogTitle data-testid="memo-add-dialog-title">メモを追加</DialogTitle>
         <DialogContent>
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }} data-testid="memo-add-form">
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }} data-testid="memo-add-form">
             <TextField
               label="引用・抜き書き"
               fullWidth
               multiline
-              rows={4}
+              rows={3}
               value={text}
               onChange={(e) => setText(e.target.value)}
-              margin="normal"
               required
               inputProps={{ 'data-testid': 'memo-text-input' }}
             />
@@ -104,7 +103,6 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
               rows={2}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              margin="normal"
               inputProps={{ 'data-testid': 'memo-comment-input' }}
             />
             <TextField
@@ -112,8 +110,7 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
               type="number"
               value={page}
               onChange={(e) => setPage(e.target.value)}
-              margin="normal"
-              sx={{ mr: 2 }}
+              sx={{ mr: 2, width: { xs: '100%', sm: 'auto' } }}
               inputProps={{ 'data-testid': 'memo-page-input' }}
             />
             <Autocomplete
@@ -140,7 +137,6 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
                 <TextField 
                   {...params} 
                   label="タグ" 
-                  margin="normal" 
                   fullWidth 
                   placeholder="例: 名言,感想,引用" 
                   inputProps={{ 
@@ -162,15 +158,14 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
 
   // 通常のページ内での表示（既存の実装）
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }} data-testid="memo-add-form">
+    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }} data-testid="memo-add-form">
       <TextField
         label="引用・抜き書き"
         fullWidth
         multiline
-        rows={4}
+        rows={3}
         value={text}
         onChange={(e) => setText(e.target.value)}
-        margin="normal"
         required
         inputProps={{ 'data-testid': 'memo-text-input' }}
       />
@@ -181,7 +176,6 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
         rows={2}
         value={comment}
         onChange={(e) => setComment(e.target.value)}
-        margin="normal"
         inputProps={{ 'data-testid': 'memo-comment-input' }}
       />
       <TextField
@@ -189,8 +183,7 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
         type="number"
         value={page}
         onChange={(e) => setPage(e.target.value)}
-        margin="normal"
-        sx={{ mr: 2 }}
+        sx={{ mr: 2, width: { xs: '100%', sm: 'auto' } }}
         inputProps={{ 'data-testid': 'memo-page-input' }}
       />
       <Autocomplete
@@ -217,7 +210,6 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
           <TextField 
             {...params} 
             label="タグ" 
-            margin="normal" 
             fullWidth 
             placeholder="例: 名言,感想,引用" 
             inputProps={{ 
@@ -227,7 +219,18 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
           />
         )}
       />
-      <Button type="submit" variant="contained" data-testid="memo-add-submit">メモを追加</Button>
+      <Button 
+        type="submit" 
+        variant="contained" 
+        sx={{ 
+          mt: 2, 
+          mb: { xs: 8, sm: 2 }, // モバイルではフッターメニューの上に余白を追加
+          width: { xs: '100%', sm: 'auto' } // モバイルでは全幅
+        }} 
+        data-testid="memo-add-submit"
+      >
+        メモを追加
+      </Button>
     </Box>
   );
 };

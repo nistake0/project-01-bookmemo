@@ -18,15 +18,29 @@ export default function BookAdd() {
   };
 
   return (
-    <Box sx={{ maxWidth: 500, mx: "auto", mt: 8, pb: 8 }}>
-      <Typography variant="h5" align="center" gutterBottom data-testid="book-add-title">本を追加</Typography>
+    <Box sx={{ 
+      maxWidth: 500, 
+      mx: "auto", 
+      mt: { xs: 2, sm: 4 }, 
+      pb: { xs: 8, sm: 4 },
+      px: { xs: 2, sm: 0 } // モバイルでは左右の余白を追加
+    }}>
+      <Typography 
+        variant="h5" 
+        align="center" 
+        gutterBottom 
+        sx={{ mb: { xs: 1, sm: 2 } }}
+        data-testid="book-add-title"
+      >
+        本を追加
+      </Typography>
       
       <BookScanner 
         onScan={handleScanDetected}
         onScanError={(error) => console.error(error)}
       />
       
-      <BookForm isbn={isbn} onBookAdded={handleBookAdded} /> {/* isbnを渡す */}
+      <BookForm isbn={isbn} onBookAdded={handleBookAdded} />
     </Box>
   );
 } 

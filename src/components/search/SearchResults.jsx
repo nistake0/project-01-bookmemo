@@ -2,15 +2,15 @@ import {
   Box, 
   Typography, 
   Card, 
-  CardContent, 
-  CardMedia,
-  Chip,
+  CardContent,
   Grid,
   Alert,
   CircularProgress,
-  Divider
+  Divider,
+  Chip
 } from '@mui/material';
 import { useAuth } from '../../auth/AuthProvider';
+import BookCard from '../BookCard';
 
 /**
  * 検索結果表示コンポーネント
@@ -44,56 +44,6 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
       </Box>
     );
   }
-
-  const renderBookResult = (book) => (
-    <Card 
-      key={book.id} 
-      sx={{ 
-        cursor: 'pointer',
-        '&:hover': { boxShadow: 3 }
-      }}
-      onClick={() => onResultClick?.('book', book.id)}
-      data-testid={`book-result-${book.id}`}
-    >
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-          {book.coverImageUrl && (
-            <CardMedia
-              component="img"
-              sx={{ width: 60, height: 80, objectFit: 'cover' }}
-              image={book.coverImageUrl}
-              alt={book.title}
-            />
-          )}
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h6" component="h3" gutterBottom>
-              {book.title}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              {book.author}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              {book.publisher} • {book.publishedDate}
-            </Typography>
-            <Box sx={{ mt: 1 }}>
-              {book.tags && book.tags.map((tag, index) => (
-                <Chip
-                  key={index}
-                  label={tag}
-                  size="small"
-                  variant="outlined"
-                  sx={{ mr: 0.5, mb: 0.5 }}
-                />
-              ))}
-            </Box>
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-              ステータス: {book.status === 'reading' ? '読書中' : '読了'}
-            </Typography>
-          </Box>
-        </Box>
-      </CardContent>
-    </Card>
-  );
 
   const renderMemoResult = (memo) => (
     <Card 
@@ -160,8 +110,12 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
           </Typography>
           <Grid container spacing={2} data-testid="book-results-grid">
             {books.map((book) => (
-              <Grid key={book.id} xs={12} sm={6} md={4} data-testid={`book-grid-item-${book.id}`}>
-                {renderBookResult(book)}
+              <Grid key={book.id} item xs={12} sm={6} md={4} data-testid={`book-grid-item-${book.id}`}>
+                <BookCard 
+                  book={book}
+                  onClick={() => onResultClick?.('book', book.id)}
+                  testId={`book-result-${book.id}`}
+                />
               </Grid>
             ))}
           </Grid>
@@ -177,7 +131,7 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
           </Typography>
           <Grid container spacing={2} data-testid="memo-results-grid">
             {memos.map((memo) => (
-              <Grid key={memo.id} xs={12} sm={6} md={4} data-testid={`memo-grid-item-${memo.id}`}>
+              <Grid key={memo.id} item xs={12} sm={6} md={4} data-testid={`memo-grid-item-${memo.id}`}>
                 {renderMemoResult(memo)}
               </Grid>
             ))}

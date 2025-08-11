@@ -201,11 +201,11 @@ describe('TagSearch', () => {
       
       // 本の結果をクリック
       fireEvent.click(screen.getByTestId('result-0'));
-      expect(mockNavigate).toHaveBeenCalledWith('/books/book1');
+      expect(mockNavigate).toHaveBeenCalledWith('/book/book1');
       
       // メモの結果をクリック
       fireEvent.click(screen.getByTestId('result-1'));
-      expect(mockNavigate).toHaveBeenLastCalledWith('/books/book1?memo=memo1');
+      expect(mockNavigate).toHaveBeenLastCalledWith('/book/book1?memo=memo1');
     });
   });
 

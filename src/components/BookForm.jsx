@@ -176,15 +176,14 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   };
 
   return (
-    <Box component="form" onSubmit={handleAdd} sx={{ mt: 2 }} role="form" data-testid="book-form">
-      <Grid container spacing={2}>
+    <Box component="form" onSubmit={handleAdd} sx={{ mt: 1 }} role="form" data-testid="book-form">
+      <Grid container spacing={1}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             label="ISBN"
             value={isbn}
             onChange={(e) => setIsbn(e.target.value)}
             fullWidth
-            margin="normal"
             placeholder="例: 9784873119485"
             inputProps={{ "data-testid": "book-isbn-input" }}
           />
@@ -194,7 +193,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             onClick={() => handleFetchBookInfo()}
             variant="outlined"
             disabled={loading}
-            sx={{ mt: 2 }}
+            sx={{ mt: { xs: 0, sm: 1 } }}
             fullWidth
             data-testid="book-fetch-button"
           >
@@ -204,19 +203,18 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
       </Grid>
 
       {coverImageUrl && (
-        <Box sx={{ textAlign: 'center', my: 2 }}>
-          <img src={coverImageUrl} alt="表紙" style={{ maxHeight: '200px', width: 'auto' }} data-testid="book-cover-image" />
+        <Box sx={{ textAlign: 'center', my: 1 }}>
+          <img src={coverImageUrl} alt="表紙" style={{ maxHeight: '150px', width: 'auto' }} data-testid="book-cover-image" />
         </Box>
       )}
 
-      <Grid container spacing={2}>
+      <Grid container spacing={1}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             label="タイトル"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             fullWidth
-            margin="normal"
             required
             inputProps={{ "data-testid": "book-title-input" }}
           />
@@ -227,7 +225,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
             fullWidth
-            margin="normal"
             inputProps={{ "data-testid": "book-author-input" }}
           />
         </Grid>
@@ -237,7 +234,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             value={publisher}
             onChange={(e) => setPublisher(e.target.value)}
             fullWidth
-            margin="normal"
             inputProps={{ "data-testid": "book-publisher-input" }}
           />
         </Grid>
@@ -247,7 +243,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             value={publishedDate}
             onChange={(e) => setPublishedDate(e.target.value)}
             fullWidth
-            margin="normal"
             inputProps={{ "data-testid": "book-publishdate-input" }}
           />
         </Grid>
@@ -276,7 +271,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
           <TextField 
             {...params} 
             label="タグ" 
-            margin="normal" 
             fullWidth 
             placeholder="例: 小説,名作,技術書" 
             inputProps={{ 
@@ -293,7 +287,16 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
         </Typography>
       )}
 
-      <Button type="submit" variant="contained" sx={{ mt: 2 }} data-testid="book-add-submit">
+      <Button 
+        type="submit" 
+        variant="contained" 
+        sx={{ 
+          mt: 2, 
+          mb: { xs: 8, sm: 2 }, // モバイルではフッターメニューの上に余白を追加
+          width: { xs: '100%', sm: 'auto' } // モバイルでは全幅
+        }} 
+        data-testid="book-add-submit"
+      >
         本を追加
       </Button>
     </Box>

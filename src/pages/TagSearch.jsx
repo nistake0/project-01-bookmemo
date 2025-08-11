@@ -49,9 +49,9 @@ export default function TagSearch() {
 
   const handleResultClick = (type, bookId, memoId) => {
     if (type === 'book') {
-      navigate(`/books/${bookId}`);
+      navigate(`/book/${bookId}`);
     } else if (type === 'memo') {
-      navigate(`/books/${bookId}?memo=${memoId}`);
+      navigate(`/book/${bookId}?memo=${memoId}`);
     }
   };
 
