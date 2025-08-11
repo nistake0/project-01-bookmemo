@@ -381,6 +381,11 @@ interface SearchResult {
   - TagStatsコンポーネントの実装（タグ使用頻度表示） ✅
   - タグクリック検索機能の実装（検索タブ連携） ✅
   - 状態管理の最適化（親コンポーネントへのリフト） ✅
+  - メモのタグ統計機能の完全実装 ✅
+  - 本とメモの両方のタグ統合管理 ✅
+  - Firestoreセキュリティルールの修正（collectionGroupクエリ対応） ✅
+  - Firestoreインデックスの設定（memosコレクションのuserIdフィールド） ✅
+  - useMemo.jsの修正（userIdフィールド追加） ✅
 - **テスト修正・改善** ✅
   - AdvancedSearchForm.test.jsxの修正 ✅
   - TagSearchField.jsxのReact key警告修正 ✅
@@ -421,7 +426,7 @@ interface SearchResult {
    - クイック検索機能
 
 2. **共通フックの完成**
-   - useBook.js、useMemo.jsの実装
+   - useBook.jsの実装
    - 重複コードの解消
 
 3. **UI/UX改善**
@@ -444,5 +449,5 @@ interface SearchResult {
 
 **作成日**: 2024-08-03  
 **更新日**: 2024-12-19  
-**最終更新**: 2025-08-11（タグ一覧管理機能実装方針追加、次のステップ追加）  
+**最終更新**: 2025-08-11（メモのタグ統計機能実装完了、次のステップ調整）  
 **作成者**: AI Assistant 
