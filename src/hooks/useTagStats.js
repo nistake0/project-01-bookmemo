@@ -6,9 +6,9 @@ import { db } from '../firebase';
  * タグ統計データを取得するためのカスタムフック
  * 
  * 機能:
- * - タグごとの本・メモ件数を集計
+ * - タグごとの本件数を集計
  * - タグ使用頻度の計算
- * - 本・メモ別の統計データ取得
+ * - 本の統計データ取得
  * 
  * @param {object} user - 認証ユーザー情報
  * @returns {object} タグ統計関連の関数と状態
@@ -30,11 +30,10 @@ export const useTagStats = (user) => {
       setLoading(true);
       setError(null);
 
-      // 本とメモのデータを並行して取得
-      const [booksSnapshot, memosSnapshot] = await Promise.all([
-        getDocs(query(collection(db, 'books'), where('userId', '==', user.uid))),
-        getDocs(query(collection(db, 'memos'), where('userId', '==', user.uid)))
-      ]);
+      // 本のデータを取得
+      const booksSnapshot = await getDocs(
+        query(collection(db, 'books'), where('userId', '==', user.uid))
+      );
 
       // タグ統計を初期化
       const stats = {};
@@ -48,25 +47,6 @@ export const useTagStats = (user) => {
               stats[tag] = { bookCount: 0, memoCount: 0, lastUsed: null };
             }
             stats[tag].bookCount++;
-            
-            // 最後に使用された日時を更新
-            const updatedAt = data.updatedAt?.toDate?.() || new Date();
-            if (!stats[tag].lastUsed || updatedAt > stats[tag].lastUsed) {
-              stats[tag].lastUsed = updatedAt;
-            }
-          });
-        }
-      });
-
-      // メモのタグを集計
-      memosSnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.tags && Array.isArray(data.tags)) {
-          data.tags.forEach(tag => {
-            if (!stats[tag]) {
-              stats[tag] = { bookCount: 0, memoCount: 0, lastUsed: null };
-            }
-            stats[tag].memoCount++;
             
             // 最後に使用された日時を更新
             const updatedAt = data.updatedAt?.toDate?.() || new Date();

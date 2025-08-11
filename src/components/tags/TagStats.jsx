@@ -36,7 +36,6 @@ function TagStats({ onTagClick }) {
   // 統計サマリーを計算
   const totalTags = Object.keys(tagStats).length;
   const totalBooks = Object.values(tagStats).reduce((sum, stat) => sum + stat.bookCount, 0);
-  const totalMemos = Object.values(tagStats).reduce((sum, stat) => sum + stat.memoCount, 0);
 
   if (loading) {
     return (
@@ -60,7 +59,7 @@ function TagStats({ onTagClick }) {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="info">
-          タグがまだ登録されていません。本やメモにタグを追加すると、ここに統計が表示されます。
+          タグがまだ登録されていません。本にタグを追加すると、ここに統計が表示されます。
         </Alert>
       </Box>
     );
@@ -74,7 +73,7 @@ function TagStats({ onTagClick }) {
           タグ統計サマリー
         </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={4}>
+          <Grid item xs={6}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h4" color="primary">
                 {totalTags}
@@ -84,23 +83,13 @@ function TagStats({ onTagClick }) {
               </Typography>
             </Box>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h4" color="secondary">
                 {totalBooks}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 本の総件数
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" color="info.main">
-                {totalMemos}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                メモの総件数
               </Typography>
             </Box>
           </Grid>
@@ -159,24 +148,16 @@ function TagStats({ onTagClick }) {
                     {stat.tag}
                   </Typography>
                   <Chip 
-                    label={stat.type} 
+                    label="本" 
                     size="small" 
-                    color={
-                      stat.type === 'both' ? 'primary' : 
-                      stat.type === 'book' ? 'secondary' : 'info'
-                    }
+                    color="secondary"
                     variant="outlined"
                   />
                 </Box>
                 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    本: {stat.bookCount}件
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    メモ: {stat.memoCount}件
-                  </Typography>
-                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  本: {stat.bookCount}件
+                </Typography>
                 
                 <Typography variant="body2" color="primary" sx={{ fontWeight: 'bold' }}>
                   合計: {stat.totalCount}件
