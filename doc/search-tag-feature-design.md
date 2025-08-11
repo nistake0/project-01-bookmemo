@@ -286,13 +286,31 @@ interface SearchResult {
 1. **DateRangeSelector** - 日時検索 ✅
 2. **TagSearchField** - タグ検索 ✅
 3. **MemoContentSearchField** - メモ検索 ✅
-4. **SearchResults** - 検索結果表示
+4. **SearchResults** - 検索結果表示 ✅
 
-### Phase 3: 高度な機能
+### Phase 3: 高度な機能（実装予定）
 1. **TagStatistics** - タグ統計
+   - useTagStatsフックの実装
+   - タグ使用頻度の集計
+   - 本・メモ別の統計データ
 2. **TagManagementPanel** - タグ管理
+   - タグ編集・削除ダイアログ
+   - タグ正規化・統合機能
+   - 一括操作機能
 3. **SearchConditionManager** - 検索条件管理
+   - 検索条件の保存・復元
+   - 検索履歴の管理
+   - クイック検索機能
 4. **useTagStatistics** - タグ統計フック
+   - リアルタイム統計更新
+   - キャッシュ機能
+   - パフォーマンス最適化
+
+### Phase 4: 高度なUI/UX機能（将来実装）
+1. **TagCloud** - タグクラウド表示
+2. **TagUsageChart** - 使用頻度チャート
+3. **TagBulkActions** - 一括操作
+4. **SearchHistoryList** - 検索履歴一覧
 
 ## 技術的考慮事項
 
@@ -317,6 +335,25 @@ interface SearchResult {
 - **統計データ**: タグ使用時に統計を自動更新
 - **検索結果**: リアルタイムでの結果更新
 
+### 5. タグ一覧管理機能の実装方針（2025-08-11追加）
+- **データ構造設計**
+  - tagStatsコレクション: タグ統計データの事前計算
+  - searchHistoryコレクション: 検索履歴の保存
+  - tagAliasesコレクション: タグの別名・正規化マッピング
+- **パフォーマンス最適化**
+  - タグ統計の事前計算とキャッシュ
+  - 遅延読み込みによる初期表示高速化
+  - 仮想化リストによる大量データ対応
+- **UI/UX設計**
+  - ドラッグ&ドロップでのタグ並び替え
+  - フィルタリング・ソート機能
+  - レスポンシブデザイン対応
+  - アクセシビリティ対応（ARIA属性、キーボードナビ）
+- **エラーハンドリング**
+  - ネットワークエラー時のフォールバック
+  - データ不整合時の自動修復
+  - ユーザーフレンドリーなエラーメッセージ
+
 ## 統合のメリット
 
 1. **機能の整理**: 検索とタグ関連の機能を一箇所に集約
@@ -338,17 +375,25 @@ interface SearchResult {
   - TagSearchPage（メインページ） ✅
   - TabPanel（タブ切り替え） ✅
   - AdvancedSearchForm（高度な検索フォーム） ✅
+- **検索結果表示機能** ✅
+  - SearchResultsコンポーネントの実装 ✅
+  - useSearchフックの実装（Firestore検索ロジック） ✅
+  - タグ検索エラーの修正（ネスト配列エラー対応） ✅
+  - クライアントサイドフィルタリングの強化 ✅
+  - 自動フォールバック処理の実装 ✅
 - **テスト修正・改善** ✅
   - AdvancedSearchForm.test.jsxの修正 ✅
   - TagSearchField.jsxのReact key警告修正 ✅
   - SearchResults.jsxのMUI Grid v2警告修正 ✅
   - DateRangeSelector.jsxのMUI Grid v2警告修正 ✅
   - data-testidの追加（Gridコンポーネント） ✅
+  - useSearch.test.jsの作成（14個のテストケース） ✅
 
 ### 未実装機能
 - タグ一覧・統計表示
-- タグ管理機能
-- 検索結果表示（SearchResults）
+- タグ管理機能（編集・削除・正規化）
+- タグクリック検索（検索タブ連携）
+- 検索条件の保存・履歴機能
 - ソート機能（SortOptionsSelector）
 - 日本語タグ正規化の改善（連続スペースの正規化等）
 
@@ -356,5 +401,5 @@ interface SearchResult {
 
 **作成日**: 2024-08-03  
 **更新日**: 2024-12-19  
-**最終更新**: 2024-12-19（テスト修正完了）  
+**最終更新**: 2025-08-11（タグ一覧管理機能実装方針追加）  
 **作成者**: AI Assistant 
