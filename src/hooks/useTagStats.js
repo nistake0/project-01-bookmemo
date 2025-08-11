@@ -1,14 +1,14 @@
 import { useState, useCallback, useEffect } from 'react';
-import { collection, query, getDocs, where } from 'firebase/firestore';
+import { collection, query, getDocs, where, collectionGroup } from 'firebase/firestore';
 import { db } from '../firebase';
 
 /**
  * タグ統計データを取得するためのカスタムフック
  * 
  * 機能:
- * - タグごとの本件数を集計
+ * - タグごとの本・メモ件数を集計
  * - タグ使用頻度の計算
- * - 本の統計データ取得
+ * - 本・メモ別の統計データ取得
  * 
  * @param {object} user - 認証ユーザー情報
  * @returns {object} タグ統計関連の関数と状態
@@ -30,10 +30,15 @@ export const useTagStats = (user) => {
       setLoading(true);
       setError(null);
 
-      // 本のデータを取得
-      const booksSnapshot = await getDocs(
-        query(collection(db, 'books'), where('userId', '==', user.uid))
-      );
+      console.log('useTagStats: タグ統計取得開始, userId:', user.uid);
+
+      // 本とメモのデータを並行して取得
+      const [booksSnapshot, memosSnapshot] = await Promise.all([
+        getDocs(query(collection(db, 'books'), where('userId', '==', user.uid))),
+        getDocs(query(collectionGroup(db, 'memos'), where('userId', '==', user.uid)))
+      ]);
+
+      console.log('useTagStats: データ取得完了, 本:', booksSnapshot.size, 'メモ:', memosSnapshot.size);
 
       // タグ統計を初期化
       const stats = {};
@@ -41,6 +46,8 @@ export const useTagStats = (user) => {
       // 本のタグを集計
       booksSnapshot.forEach((doc) => {
         const data = doc.data();
+        console.log('useTagStats: 本データ:', { id: doc.id, title: data.title, tags: data.tags });
+        
         if (data.tags && Array.isArray(data.tags)) {
           data.tags.forEach(tag => {
             if (!stats[tag]) {
@@ -57,7 +64,38 @@ export const useTagStats = (user) => {
         }
       });
 
+      console.log('useTagStats: 本のタグ集計完了');
+
+      // メモのタグを集計
+      memosSnapshot.forEach((doc) => {
+        const data = doc.data();
+        console.log('useTagStats: メモデータ:', { 
+          id: doc.id, 
+          bookId: doc.ref.parent.parent?.id,
+          tags: data.tags,
+          text: data.text?.substring(0, 30) + '...'
+        });
+        
+        if (data.tags && Array.isArray(data.tags)) {
+          data.tags.forEach(tag => {
+            if (!stats[tag]) {
+              stats[tag] = { bookCount: 0, memoCount: 0, lastUsed: null };
+            }
+            stats[tag].memoCount++;
+            
+            // 最後に使用された日時を更新
+            const updatedAt = data.updatedAt?.toDate?.() || new Date();
+            if (!stats[tag].lastUsed || updatedAt > stats[tag].lastUsed) {
+              stats[tag].lastUsed = updatedAt;
+            }
+          });
+        }
+      });
+
+      console.log('useTagStats: メモのタグ集計完了, 最終統計:', stats);
+
       setTagStats(stats);
+      console.log('useTagStats: タグ統計設定完了');
     } catch (err) {
       console.error('タグ統計の取得に失敗しました:', err);
       setError(err);

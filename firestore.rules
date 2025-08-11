@@ -11,6 +11,13 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
     
+    // collectionGroupクエリのルール
+    // メモのサブコレクションに対するcollectionGroupクエリを許可
+    match /{path=**}/memos/{memoId} {
+      // 読み取り: メモのuserIdが自分のものの場合
+      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+    }
+    
     // booksコレクションのルール
     match /books/{bookId} {
       // 読み取り: 自分の書籍のみ

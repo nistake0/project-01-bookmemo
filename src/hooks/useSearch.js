@@ -82,8 +82,8 @@ export function useSearch(options = {}) {
     );
     queries.push({ type: 'book', query: bookQuery });
 
-    // メモの検索クエリ（メモ内容検索が有効な場合）
-    if (includeMemoContent && memoContent) {
+    // メモの検索クエリ（メモ内容検索またはタグ検索が有効な場合）
+    if ((includeMemoContent && memoContent) || (selectedTags && selectedTags.length > 0)) {
       const memoQueryConstraints = [
         where('userId', '==', user.uid)
       ];
@@ -281,16 +281,58 @@ export function useSearch(options = {}) {
           const querySnapshot = await getDocs(firestoreQuery);
           console.log(`${type}クエリ実行成功, 結果数:`, querySnapshot.size);
           
-          querySnapshot.forEach(doc => {
-            const data = doc.data();
-            allResults.push({
-              id: doc.id,
-              type,
-              ...data,
-              // メモの場合は本のタイトルも含める
-              ...(type === 'memo' && { bookTitle: data.bookTitle || 'メモ' })
+          if (type === 'memo') {
+            // メモの場合は親の本の情報も取得
+            console.log('メモクエリの結果を処理中...');
+            for (const doc of querySnapshot.docs) {
+              const data = doc.data();
+              const bookId = doc.ref.parent.parent?.id; // 親の本のID
+              
+              console.log('メモデータ:', {
+                id: doc.id,
+                bookId,
+                tags: data.tags,
+                userId: data.userId,
+                text: data.text?.substring(0, 50) + '...'
+              });
+              
+              // 親の本の情報を取得
+              let bookTitle = 'メモ';
+              if (bookId) {
+                try {
+                  const bookDoc = await getDocs(query(
+                    collection(db, 'books'),
+                    where('__name__', '==', bookId),
+                    where('userId', '==', user.uid)
+                  ));
+                  if (!bookDoc.empty) {
+                    bookTitle = bookDoc.docs[0].data().title || 'メモ';
+                  }
+                } catch (bookError) {
+                  console.warn('親の本の情報取得に失敗:', bookError);
+                }
+              }
+              
+              allResults.push({
+                id: doc.id,
+                type,
+                bookId,
+                bookTitle,
+                ...data
+              });
+            }
+            console.log('メモ処理完了, 追加されたメモ数:', querySnapshot.size);
+          } else {
+            // 本の場合は通常通り処理
+            querySnapshot.forEach(doc => {
+              const data = doc.data();
+              allResults.push({
+                id: doc.id,
+                type,
+                ...data
+              });
             });
-          });
+          }
         } catch (queryError) {
           console.error(`${type}クエリエラー:`, queryError);
           
@@ -316,8 +358,7 @@ export function useSearch(options = {}) {
               allResults.push({
                 id: doc.id,
                 type,
-                ...data,
-                ...(type === 'memo' && { bookTitle: data.bookTitle || 'メモ' })
+                ...data
               });
             });
           } else {
@@ -325,6 +366,12 @@ export function useSearch(options = {}) {
           }
         }
       }
+
+      console.log('全クエリ実行完了, 総結果数:', allResults.length);
+      console.log('結果の内訳:', {
+        books: allResults.filter(r => r.type === 'book').length,
+        memos: allResults.filter(r => r.type === 'memo').length
+      });
 
       // テキスト検索によるフィルタリング
       let filteredResults = filterByText(allResults, conditions.text);

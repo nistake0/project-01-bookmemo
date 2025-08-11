@@ -41,6 +41,7 @@ export const useMemo = (bookId) => {
       const memosRef = collection(db, 'books', bookId, 'memos');
       const docRef = await addDoc(memosRef, {
         ...memoData,
+        userId: user.uid, // ユーザーIDを追加
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
@@ -49,6 +50,7 @@ export const useMemo = (bookId) => {
       const newMemo = {
         id: docRef.id,
         ...memoData,
+        userId: user.uid, // ユーザーIDを追加
         createdAt: new Date(), // 一時的なタイムスタンプ
         updatedAt: new Date(),
       };
@@ -71,6 +73,7 @@ export const useMemo = (bookId) => {
       const memoRef = doc(db, 'books', bookId, 'memos', memoId);
       await updateDoc(memoRef, {
         ...updateData,
+        userId: user.uid, // ユーザーIDを保持
         updatedAt: serverTimestamp(),
       });
       
@@ -78,7 +81,7 @@ export const useMemo = (bookId) => {
       setMemos(prevMemos => {
         const updatedMemos = prevMemos.map(memo => 
           memo.id === memoId 
-            ? { ...memo, ...updateData, updatedAt: new Date() }
+            ? { ...memo, ...updateData, userId: user.uid, updatedAt: new Date() }
             : memo
         );
         return updatedMemos;
