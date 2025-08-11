@@ -31,6 +31,9 @@
   - [ ] 検索条件の保存・履歴機能
 - [x] 検索結果表示機能（SearchResultsコンポーネントの実装・連携）
 - [x] useSearchフックの実装（Firestore検索ロジック）
+- [x] タグ検索エラーの修正（ネスト配列エラー対応）
+- [x] クライアントサイドフィルタリングの強化
+- [x] 自動フォールバック処理の実装
 - [ ] タグ一覧表示・統計機能（タグごとの本・メモ件数表示）
 - [ ] タグ管理機能
   - [ ] タグクリックでの検索実行
@@ -63,10 +66,12 @@
   - [x] SearchResults.jsx（MUI Grid v2警告修正・data-testid追加）
   - [x] DateRangeSelector.jsx（MUI Grid v2警告修正・data-testid追加）
 - [x] useSearch.test.jsの作成（2025-08-11）
-  - [x] 11個のテストケースを実装
+  - [x] 14個のテストケースを実装
   - [x] 基本的な検索、フィルター、エラーハンドリングのテスト
   - [x] 日時範囲フィルター、ソート機能のテスト
   - [x] ユーザー認証状態のテスト
+  - [x] インデックスエラー時のフォールバック処理テスト
+  - [x] ネスト配列のタグフィルタリングテスト
 
 ---
 
@@ -138,4 +143,19 @@
   - DateRangeSelector.jsxのMUI Grid v2警告修正（同様のGrid props修正）
   - data-testidの追加（Gridコンポーネントにテスト用ID追加）
 - **結果**: テスト成功率向上（Exit code: 0、20 passed、1 skipped）
-- **残り課題**: スキップされたテストの復活、DateRangeSelector.test.jsxでのMUI Grid v2警告 
+- **残り課題**: スキップされたテストの復活、DateRangeSelector.test.jsxでのMUI Grid v2警告
+
+### 9. タグ検索エラー修正の詳細（2025-08-11）
+- **問題**: `FirebaseError: Function where() called with invalid data. Nested arrays are not supported`
+- **原因**: Firestoreの`array-contains-any`クエリでネストした配列が渡される
+- **解決策**: 
+  - タグデータの事前チェック機能の追加
+  - ネスト配列の自動検出と処理
+  - クライアントサイドフィルタリングへの自動フォールバック
+  - タグの正規化とフラット化処理
+- **技術的改善**: 
+  - 堅牢なエラーハンドリング
+  - 詳細なデバッグログ
+  - ユーザー体験の維持
+  - 14個のテストケース追加（インデックスエラー、ネスト配列対応）
+- **結果**: タグ検索エラーの完全解決、検索機能の堅牢性向上 
