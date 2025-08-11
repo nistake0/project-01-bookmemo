@@ -29,7 +29,8 @@
   - [x] メモ内容検索機能
   - [x] 複数タグでの絞り込み
   - [ ] 検索条件の保存・履歴機能
-- [ ] 検索結果表示機能（SearchResultsコンポーネントの実装・連携）
+- [x] 検索結果表示機能（SearchResultsコンポーネントの実装・連携）
+- [x] useSearchフックの実装（Firestore検索ロジック）
 - [ ] タグ一覧表示・統計機能（タグごとの本・メモ件数表示）
 - [ ] タグ管理機能
   - [ ] タグクリックでの検索実行
@@ -61,6 +62,11 @@
   - [x] TagSearchField.jsx（React key警告修正）
   - [x] SearchResults.jsx（MUI Grid v2警告修正・data-testid追加）
   - [x] DateRangeSelector.jsx（MUI Grid v2警告修正・data-testid追加）
+- [x] useSearch.test.jsの作成（2025-08-11）
+  - [x] 11個のテストケースを実装
+  - [x] 基本的な検索、フィルター、エラーハンドリングのテスト
+  - [x] 日時範囲フィルター、ソート機能のテスト
+  - [x] ユーザー認証状態のテスト
 
 ---
 

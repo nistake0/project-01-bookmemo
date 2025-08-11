@@ -4,15 +4,21 @@ import {
   Typography, 
   Tabs, 
   Tab, 
-  Paper 
+  Paper,
+  Alert
 } from '@mui/material';
 import { useAuth } from '../auth/AuthProvider';
 import TabPanel from '../components/common/TabPanel';
 import TagList from '../components/tags/TagList';
 import AdvancedSearchForm from '../components/search/AdvancedSearchForm';
+import SearchResults from '../components/search/SearchResults';
+import { useSearch } from '../hooks/useSearch';
+import { useNavigate } from 'react-router-dom';
 
 // 検索タブのコンテンツ
 function SearchTab() {
+  const navigate = useNavigate();
+  const { results, loading, error, executeSearch, clearResults } = useSearch();
   const [searchConditions, setSearchConditions] = useState({
     text: '',
     status: 'all',
@@ -29,14 +35,35 @@ function SearchTab() {
 
   const handleSearch = (conditions) => {
     console.log('検索実行:', conditions);
-    // TODO: 実際の検索ロジックを実装
+    executeSearch(conditions);
+  };
+
+  const handleResultClick = (type, bookId, memoId) => {
+    if (type === 'book') {
+      navigate(`/books/${bookId}`);
+    } else if (type === 'memo') {
+      navigate(`/books/${bookId}?memo=${memoId}`);
+    }
+  };
+
+  const handleClearSearch = () => {
+    clearResults();
+    setSearchConditions({
+      text: '',
+      status: 'all',
+      dateRange: { type: 'none' },
+      memoContent: '',
+      selectedTags: [],
+      sortBy: 'updatedAt',
+      sortOrder: 'desc'
+    });
   };
 
   return (
     <Box>
       <Typography variant="h5" gutterBottom>高度な検索</Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        複数条件での絞り込み検索機能を実装予定です。
+        複数条件での絞り込み検索ができます。本のタイトル・著者・タグ、メモ内容などで検索できます。
       </Typography>
       
       <AdvancedSearchForm
@@ -44,15 +71,51 @@ function SearchTab() {
         onSearchConditionsChange={handleSearchConditionsChange}
         onSearch={handleSearch}
       />
+
+      {/* エラー表示 */}
+      {error && (
+        <Box sx={{ mt: 2 }}>
+          <Alert severity="error">{error}</Alert>
+        </Box>
+      )}
+
+      {/* 検索結果表示 */}
+      {(results.length > 0 || loading) && (
+        <Box sx={{ mt: 4 }}>
+          <SearchResults
+            results={results}
+            loading={loading}
+            searchQuery={searchConditions.text}
+            onResultClick={handleResultClick}
+          />
+        </Box>
+      )}
+
+      {/* 検索結果がある場合のクリアボタン */}
+      {results.length > 0 && !loading && (
+        <Box sx={{ mt: 2, textAlign: 'center' }}>
+          <Typography 
+            variant="body2" 
+            color="primary" 
+            sx={{ cursor: 'pointer', textDecoration: 'underline' }}
+            onClick={handleClearSearch}
+          >
+            検索結果をクリア
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }
 
 // タグ管理タブのコンテンツ
 function TagManagementTab() {
+  const navigate = useNavigate();
+
   const handleTagClick = (tag) => {
     console.log('タグがクリックされました:', tag);
-    // TODO: タグクリックで検索タブに遷移し、そのタグで検索
+    // タグクリックで検索タブに遷移し、そのタグで検索
+    // TODO: タブ切り替えと検索条件設定の実装
   };
 
   return (
@@ -69,6 +132,7 @@ function TagManagementTab() {
             <li>タグ統計表示（使用頻度グラフ）</li>
             <li>タグの編集・削除機能</li>
             <li>タグ使用頻度の可視化</li>
+            <li>タグクリックでの検索実行</li>
           </Typography>
         </Paper>
       </Box>
