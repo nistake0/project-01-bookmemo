@@ -6,11 +6,20 @@ import {
   where, 
   getDocs, 
   orderBy, 
-  limit
+  limit,
+  collectionGroup
 } from 'firebase/firestore';
 
 // Firebase Firestoreのモック
-jest.mock('firebase/firestore');
+jest.mock('firebase/firestore', () => ({
+  collection: jest.fn(),
+  query: jest.fn(),
+  where: jest.fn(),
+  getDocs: jest.fn(),
+  orderBy: jest.fn(),
+  limit: jest.fn(),
+  collectionGroup: jest.fn()
+}));
 
 // モックの設定
 const mockCollection = collection;
@@ -19,6 +28,7 @@ const mockWhere = where;
 const mockGetDocs = getDocs;
 const mockOrderBy = orderBy;
 const mockLimit = limit;
+const mockCollectionGroup = collectionGroup;
 
 describe('useSearch', () => {
   const mockUser = { uid: 'test-user-id' };
@@ -62,12 +72,23 @@ describe('useSearch', () => {
     mockWhere.mockImplementation((field, operator, value) => ({ field, operator, value }));
     mockOrderBy.mockReturnValue('mock-order');
     mockLimit.mockReturnValue('mock-limit');
+    mockCollectionGroup.mockReturnValue('memos-collection');
 
     // getDocsのモック
     mockGetDocs.mockResolvedValue({
+      docs: mockBooks.map(book => ({
+        id: book.id,
+        data: () => book,
+        ref: { parent: { parent: { id: book.id } } }
+      })),
       forEach: (callback) => {
-        mockBooks.forEach(book => callback({ id: book.id, data: () => book }));
-      }
+        mockBooks.forEach(book => callback({ 
+          id: book.id, 
+          data: () => book,
+          ref: { parent: { parent: { id: book.id } } }
+        }));
+      },
+      size: mockBooks.length
     });
   });
 
@@ -137,7 +158,7 @@ describe('useSearch', () => {
       expect(mockCollection).toHaveBeenCalledWith(expect.anything(), 'books');
       expect(mockWhere).toHaveBeenCalledWith('userId', '==', mockUser.uid);
       expect(mockOrderBy).toHaveBeenCalledWith('updatedAt', 'desc');
-      expect(mockLimit).toHaveBeenCalledWith(100); // resultLimit * 2
+      expect(mockLimit).toHaveBeenCalledWith(100); // resultLimit * 2 (50 * 2)
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBe(null);
     });
@@ -211,10 +232,28 @@ describe('useSearch', () => {
         }
       ];
 
-      mockGetDocs.mockResolvedValue({
+      // 本のクエリのみをモック
+      mockGetDocs.mockResolvedValueOnce({
+        docs: mockBooksWithTags.map(book => ({
+          id: book.id,
+          data: () => book,
+          ref: { parent: { parent: { id: book.id } } }
+        })),
         forEach: (callback) => {
-          mockBooksWithTags.forEach(book => callback({ id: book.id, data: () => book }));
-        }
+          mockBooksWithTags.forEach(book => callback({ 
+            id: book.id, 
+            data: () => book,
+            ref: { parent: { parent: { id: book.id } } }
+          }));
+        },
+        size: mockBooksWithTags.length
+      });
+
+      // メモのクエリは空の結果を返す
+      mockGetDocs.mockResolvedValueOnce({
+        docs: [],
+        forEach: () => {},
+        size: 0
       });
 
       const { result } = renderHook(() => useSearch());
@@ -224,6 +263,7 @@ describe('useSearch', () => {
         status: 'all',
         dateRange: { type: 'none' },
         memoContent: '',
+        includeMemoContent: false,
         selectedTags: ['小説'],
         sortBy: 'updatedAt',
         sortOrder: 'desc'
@@ -269,10 +309,28 @@ describe('useSearch', () => {
         }
       ];
 
-      mockGetDocs.mockResolvedValue({
+      // 本のクエリのみをモック
+      mockGetDocs.mockResolvedValueOnce({
+        docs: mockBooksWithNestedTags.map(book => ({
+          id: book.id,
+          data: () => book,
+          ref: { parent: { parent: { id: book.id } } }
+        })),
         forEach: (callback) => {
-          mockBooksWithNestedTags.forEach(book => callback({ id: book.id, data: () => book }));
-        }
+          mockBooksWithNestedTags.forEach(book => callback({ 
+            id: book.id, 
+            data: () => book,
+            ref: { parent: { parent: { id: book.id } } }
+          }));
+        },
+        size: mockBooksWithNestedTags.length
+      });
+
+      // メモのクエリは空の結果を返す
+      mockGetDocs.mockResolvedValueOnce({
+        docs: [],
+        forEach: () => {},
+        size: 0
       });
 
       const { result } = renderHook(() => useSearch());
@@ -282,6 +340,7 @@ describe('useSearch', () => {
         status: 'all',
         dateRange: { type: 'none' },
         memoContent: '',
+        includeMemoContent: false,
         selectedTags: ['小説'],
         sortBy: 'updatedAt',
         sortOrder: 'desc'

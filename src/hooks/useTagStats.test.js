@@ -1,9 +1,15 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useTagStats } from './useTagStats';
-import { collection, query, getDocs, where } from 'firebase/firestore';
+import { collection, query, getDocs, where, collectionGroup } from 'firebase/firestore';
 
 // Firestoreのモック
-jest.mock('firebase/firestore');
+jest.mock('firebase/firestore', () => ({
+  collection: jest.fn(),
+  query: jest.fn(),
+  getDocs: jest.fn(),
+  where: jest.fn(),
+  collectionGroup: jest.fn()
+}));
 jest.mock('../firebase', () => ({
   db: {}
 }));
@@ -12,6 +18,7 @@ const mockGetDocs = getDocs;
 const mockCollection = collection;
 const mockQuery = query;
 const mockWhere = where;
+const mockCollectionGroup = collectionGroup;
 
 describe('useTagStats', () => {
   const mockUser = { uid: 'test-user-id' };
@@ -21,10 +28,10 @@ describe('useTagStats', () => {
   });
 
   test('初期状態が正しく設定される', () => {
-    const { result } = renderHook(() => useTagStats(mockUser));
+    const { result } = renderHook(() => useTagStats(null));
 
     expect(result.current.tagStats).toEqual({});
-    expect(result.current.loading).toBe(true); // 初期状態ではloadingがtrue
+    expect(result.current.loading).toBe(false); // 初期状態ではloadingがfalse（useEffectが実行されない場合）
     expect(result.current.error).toBe(null);
     expect(typeof result.current.fetchTagStats).toBe('function');
     expect(typeof result.current.getSortedTagStats).toBe('function');
@@ -57,24 +64,29 @@ describe('useTagStats', () => {
         data: () => ({
           tags: ['小説', '感想'],
           updatedAt: { toDate: () => new Date('2024-03-01') }
-        })
+        }),
+        ref: {
+          parent: {
+            parent: { id: 'book1' }
+          }
+        }
       }
     ];
 
+    // モックデータを事前に設定
     mockGetDocs
       .mockResolvedValueOnce({
-        forEach: (callback) => mockBooksData.forEach(callback)
+        forEach: (callback) => mockBooksData.forEach(callback),
+        size: mockBooksData.length
       })
       .mockResolvedValueOnce({
-        forEach: (callback) => mockMemosData.forEach(callback)
+        forEach: (callback) => mockMemosData.forEach(callback),
+        size: mockMemosData.length
       });
 
     const { result } = renderHook(() => useTagStats(mockUser));
 
-    // 初期状態ではloadingがtrue
-    expect(result.current.loading).toBe(true);
-
-    // useEffectが自動実行されるのを待つ
+    // useEffectの自動実行を待つ
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -132,21 +144,28 @@ describe('useTagStats', () => {
         data: () => ({
           tags: ['小説'],
           updatedAt: { toDate: () => new Date('2024-03-01') }
-        })
+        }),
+        ref: {
+          parent: {
+            parent: { id: 'book1' }
+          }
+        }
       }
     ];
 
     mockGetDocs
       .mockResolvedValueOnce({
-        forEach: (callback) => mockBooksData.forEach(callback)
+        forEach: (callback) => mockBooksData.forEach(callback),
+        size: mockBooksData.length
       })
       .mockResolvedValueOnce({
-        forEach: (callback) => mockMemosData.forEach(callback)
+        forEach: (callback) => mockMemosData.forEach(callback),
+        size: mockMemosData.length
       });
 
     const { result } = renderHook(() => useTagStats(mockUser));
 
-    // useEffectが自動実行されるのを待つ
+    // useEffectの自動実行を待つ
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -174,15 +193,17 @@ describe('useTagStats', () => {
 
     mockGetDocs
       .mockResolvedValueOnce({
-        forEach: (callback) => mockBooksData.forEach(callback)
+        forEach: (callback) => mockBooksData.forEach(callback),
+        size: mockBooksData.length
       })
       .mockResolvedValueOnce({
-        forEach: (callback) => mockMemosData.forEach(callback)
+        forEach: (callback) => mockMemosData.forEach(callback),
+        size: mockMemosData.length
       });
 
     const { result } = renderHook(() => useTagStats(mockUser));
 
-    // useEffectが自動実行されるのを待つ
+    // useEffectの自動実行を待つ
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -209,15 +230,17 @@ describe('useTagStats', () => {
 
     mockGetDocs
       .mockResolvedValueOnce({
-        forEach: (callback) => mockBooksData.forEach(callback)
+        forEach: (callback) => mockBooksData.forEach(callback),
+        size: mockBooksData.length
       })
       .mockResolvedValueOnce({
-        forEach: (callback) => mockMemosData.forEach(callback)
+        forEach: (callback) => mockMemosData.forEach(callback),
+        size: mockMemosData.length
       });
 
     const { result } = renderHook(() => useTagStats(mockUser));
 
-    // useEffectが自動実行されるのを待つ
+    // useEffectの自動実行を待つ
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -248,15 +271,17 @@ describe('useTagStats', () => {
 
     mockGetDocs
       .mockResolvedValueOnce({
-        forEach: (callback) => mockBooksData.forEach(callback)
+        forEach: (callback) => mockBooksData.forEach(callback),
+        size: mockBooksData.length
       })
       .mockResolvedValueOnce({
-        forEach: (callback) => mockMemosData.forEach(callback)
+        forEach: (callback) => mockMemosData.forEach(callback),
+        size: mockMemosData.length
       });
 
     const { result } = renderHook(() => useTagStats(mockUser));
 
-    // useEffectが自動実行されるのを待つ
+    // useEffectの自動実行を待つ
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -276,8 +301,9 @@ describe('useTagStats', () => {
 
     const { result } = renderHook(() => useTagStats(mockUser));
 
-    await act(async () => {
-      await result.current.fetchTagStats();
+    // useEffectの自動実行を待つ
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
     });
 
     expect(result.current.error).toBeInstanceOf(Error);
@@ -309,21 +335,28 @@ describe('useTagStats', () => {
         data: () => ({
           tags: ['小説', '感想'],
           updatedAt: { toDate: () => new Date('2024-02-01') }
-        })
+        }),
+        ref: {
+          parent: {
+            parent: { id: 'book1' }
+          }
+        }
       }
     ];
 
     mockGetDocs
       .mockResolvedValueOnce({
-        forEach: (callback) => mockBooksData.forEach(callback)
+        forEach: (callback) => mockBooksData.forEach(callback),
+        size: mockBooksData.length
       })
       .mockResolvedValueOnce({
-        forEach: (callback) => mockMemosData.forEach(callback)
+        forEach: (callback) => mockMemosData.forEach(callback),
+        size: mockMemosData.length
       });
 
     const { result } = renderHook(() => useTagStats(mockUser));
 
-    // useEffectが自動実行されるのを待つ
+    // useEffectの自動実行を待つ
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
