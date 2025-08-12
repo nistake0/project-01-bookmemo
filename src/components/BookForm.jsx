@@ -1,16 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase';
+import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, Typography, Grid, Autocomplete } from '@mui/material';
-import { useAuth } from '../auth/AuthProvider';
-import axios from 'axios';
-import { ErrorDialogContext } from './CommonErrorDialog';
-import { useContext } from 'react';
 import { useTagHistory } from '../hooks/useTagHistory';
+import { useBookActions } from '../hooks/useBookActions';
+import { useBookSearch } from '../hooks/useBookSearch';
 
 export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
-  const { user } = useAuth();
-  const { setGlobalError } = useContext(ErrorDialogContext);
   const [isbn, setIsbn] = useState(isbnProp);
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -19,159 +13,63 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [tags, setTags] = useState([]);
   const [inputTagValue, setInputTagValue] = useState("");
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [searchPerformed, setSearchPerformed] = useState(false);
 
-  // 共通フックを使用してタグ履歴を管理
-  const { tagOptions, fetchTagHistory, saveTagsToHistory } = useTagHistory('book', user);
+  // 共通フックを使用
+  const { tagOptions, fetchTagHistory } = useTagHistory('book');
+  const { addBook, loading: addBookLoading, error: addBookError } = useBookActions();
+  const { searchBookByIsbn, loading: searchLoading, error: searchError, searchPerformed } = useBookSearch();
 
   useEffect(() => {
     fetchTagHistory();
   }, [fetchTagHistory]);
 
   // propsのisbnが変わったら反映＆自動取得
-  React.useEffect(() => {
+  useEffect(() => {
     if (isbnProp && isbnProp !== isbn) {
       console.log("[BookForm] useEffect: propsのisbnが変化:", isbnProp);
       setIsbn(isbnProp);
       // 自動で書籍情報取得
       if (isbnProp.trim() !== "") {
         console.log("[BookForm] useEffect: 自動で書籍情報取得を実行", isbnProp);
-        handleFetchBookInfoWrapper(isbnProp);
+        handleFetchBookInfo(isbnProp);
       }
     }
-  }, [isbnProp]);
+  }, [isbnProp, isbn]);
 
-  // ラップ関数で最新のisbnを使う
-  const handleFetchBookInfoWrapper = React.useCallback((nextIsbn) => {
-    // すでに同じISBNで取得済みならスキップ
-    if (!nextIsbn || nextIsbn === isbn) return;
-    setIsbn(nextIsbn);
-    setTimeout(() => {
-      handleFetchBookInfo(nextIsbn);
-    }, 0);
-  }, [isbn]);
-
-  // handleFetchBookInfoをisbn引数対応に
+  // 書籍情報取得処理
   const handleFetchBookInfo = async (overrideIsbn) => {
     const targetIsbn = overrideIsbn !== undefined ? overrideIsbn : isbn;
-    if (!targetIsbn) {
-      setError("ISBNを入力してください");
-      return;
-    }
-    setError("");
-    setLoading(true);
-    setSearchPerformed(true);
-    try {
-      const openbdResponse = await axios.get(`https://api.openbd.jp/v1/get?isbn=${targetIsbn}`);
-      const bookData = openbdResponse.data[0];
-      
-      let title = "";
-      let author = "";
-      let publisher = "";
-      let publishedDate = "";
-      let coverUrl = "";
-      let nextTags = [];
+    if (!targetIsbn || !targetIsbn.trim()) return;
 
-      // openBDで書籍情報が見つかった場合
-      if (bookData && bookData.summary) {
-        title = bookData.summary.title || "";
-        author = bookData.summary.author || "";
-        publisher = bookData.summary.publisher || "";
-        publishedDate = bookData.summary.pubdate || "";
-        coverUrl = bookData.summary.cover || "";
-
-        // openBDのタグ情報を追加
-        if (bookData.summary.subject) nextTags.push(bookData.summary.subject);
-        if (bookData.summary.ndc) nextTags.push(bookData.summary.ndc);
-      }
-
-      // カバー画像が無い場合、またはopenBDで書籍情報が見つからない場合はGoogle Books APIを呼ぶ
-      if (!coverUrl || !title) {
-        try {
-          const googleResponse = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${targetIsbn}`);
-          const googleBookData = googleResponse.data;
-          
-          if (googleBookData.items && googleBookData.items.length > 0) {
-            const volumeInfo = googleBookData.items[0].volumeInfo;
-            
-            // openBDで取得できなかった情報をGoogle Booksから補完
-            if (!title) title = volumeInfo.title || "";
-            if (!author) author = volumeInfo.authors ? volumeInfo.authors.join(", ") : "";
-            if (!publisher) publisher = volumeInfo.publisher || "";
-            if (!publishedDate) publishedDate = volumeInfo.publishedDate || "";
-            
-            // カバー画像
-            if (!coverUrl && volumeInfo.imageLinks) {
-              coverUrl = volumeInfo.imageLinks.thumbnail || volumeInfo.imageLinks.smallThumbnail || "";
-            }
-            
-            // Google Booksのカテゴリをタグに追加
-            if (volumeInfo.categories && volumeInfo.categories.length > 0) {
-              nextTags = [...nextTags, ...volumeInfo.categories];
-            }
-          }
-        } catch (googleErr) {
-          console.error("Failed to fetch from Google Books API", googleErr);
-        }
-      }
-
-      // 最終的に書籍情報が取得できたかチェック
-      if (title) {
-        setTitle(title);
-        setAuthor(author);
-        setPublisher(publisher);
-        setPublishedDate(publishedDate);
-        setCoverImageUrl(coverUrl);
-        setTags(Array.from(new Set(nextTags))); // 重複除去
-      } else {
-        setGlobalError("書籍情報が見つかりませんでした");
-        setTitle("");
-        setAuthor("");
-        setPublisher("");
-        setPublishedDate("");
-        setCoverImageUrl("");
-        setTags([]);
-      }
-    } catch (err) {
-      setGlobalError("書籍情報の取得に失敗しました");
-    } finally {
-      setLoading(false);
+    const bookData = await searchBookByIsbn(targetIsbn);
+    if (bookData) {
+      setTitle(bookData.title);
+      setAuthor(bookData.author);
+      setPublisher(bookData.publisher);
+      setPublishedDate(bookData.publishedDate);
+      setCoverImageUrl(bookData.coverImageUrl);
+      setTags(bookData.tags);
     }
   };
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    setError("");
-    if (!title) {
-      setError("タイトルは必須です");
-      return;
-    }
-    // 空文字・空白タグを除去し、未確定inputValueも考慮
-    let tagsToSave = tags.filter(tag => tag && tag.trim() !== "");
-    if (inputTagValue && !tagsToSave.includes(inputTagValue.trim())) {
-      tagsToSave = [...tagsToSave, inputTagValue.trim()];
-    }
-    tagsToSave = tagsToSave.filter(tag => tag && tag.trim() !== "");
-    try {
-      const docRef = await addDoc(collection(db, "books"), {
-        userId: user.uid,
-        isbn,
-        title,
-        author,
-        publisher,
-        publishedDate,
-        coverImageUrl,
-        tags: tagsToSave,
-        status: 'reading',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-      await saveTagsToHistory(tagsToSave);
-      onBookAdded(docRef.id);
-    } catch (err) {
-      setError("追加に失敗しました: " + err.message);
+    if (!title) return;
+
+    const bookData = {
+      isbn,
+      title,
+      author,
+      publisher,
+      publishedDate,
+      coverImageUrl,
+      tags,
+      inputTagValue,
+    };
+
+    const bookId = await addBook(bookData);
+    if (bookId) {
+      onBookAdded(bookId);
     }
   };
 
@@ -192,12 +90,12 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
           <Button
             onClick={() => handleFetchBookInfo()}
             variant="outlined"
-            disabled={loading}
+            disabled={searchLoading}
             sx={{ mt: { xs: 0, sm: 1 } }}
             fullWidth
             data-testid="book-fetch-button"
           >
-            {loading ? '取得中...' : 'ISBNで書籍情報取得'}
+            {searchLoading ? '取得中...' : 'ISBNで書籍情報取得'}
           </Button>
         </Grid>
       </Grid>
@@ -281,15 +179,16 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
         )}
       />
 
-      {error && (
+      {(searchError || addBookError) && (
         <Typography color="error" sx={{ mt: 1 }} data-testid="book-form-error">
-          {error}
+          {searchError || addBookError}
         </Typography>
       )}
 
       <Button 
         type="submit" 
         variant="contained" 
+        disabled={addBookLoading}
         sx={{ 
           mt: 2, 
           mb: { xs: 8, sm: 2 }, // モバイルではフッターメニューの上に余白を追加
@@ -297,7 +196,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
         }} 
         data-testid="book-add-submit"
       >
-        本を追加
+        {addBookLoading ? '追加中...' : '本を追加'}
       </Button>
     </Box>
   );

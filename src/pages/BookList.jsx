@@ -1,89 +1,23 @@
-import { useEffect, useState } from "react";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import { db } from "../firebase";
-import { useAuth } from "../auth/AuthProvider";
 import { Typography, Box, Button, Tabs, Tab, TextField, Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import BookCard from "../components/BookCard";
-
-// タグ正規化関数（小文字化＋全角英数字→半角）
-function normalizeTag(tag) {
-  if (!tag) return '';
-  // 全角英数字→半角
-  const zenkakuToHankaku = s => s.replace(/[Ａ-Ｚａ-ｚ０-９]/g, ch =>
-    String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)
-  );
-  return zenkakuToHankaku(tag).toLowerCase();
-}
+import { useBookList } from "../hooks/useBookList";
 
 export default function BookList() {
-  const { user } = useAuth();
-  const [allBooks, setAllBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('reading'); // 初期値を'reading'に変更
-  const [searchText, setSearchText] = useState('');
   const navigate = useNavigate();
-
-  useEffect(() => {
-    console.log('=== BookList useEffect START ===');
-    console.log('user:', user);
-    console.log('user.uid:', user?.uid);
-    
-    if (!user) {
-      console.log('=== BookList useEffect: no user, setting loading false ===');
-      setLoading(false);
-      return;
-    }
-    
-    const fetchBooks = async () => {
-      console.log('=== BookList fetchBooks START ===');
-      setLoading(true);
-      try {
-        const q = query(
-          collection(db, "books"),
-          where("userId", "==", user.uid),
-          orderBy("updatedAt", "desc")
-        );
-        console.log('=== BookList getDocs START ===');
-        const querySnapshot = await getDocs(q);
-        console.log('=== BookList getDocs END ===');
-        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log('=== BookList setAllBooks START ===');
-        setAllBooks(data);
-        console.log('=== BookList setAllBooks END ===');
-      } catch (error) {
-        console.error("Error fetching books:", error);
-      } finally {
-        console.log('=== BookList setLoading false ===');
-        setLoading(false);
-      }
-    };
-    fetchBooks();
-    console.log('=== BookList useEffect END ===');
-  }, [user]);
-
-  const handleFilterChange = (event, newValue) => {
-    setFilter(newValue);
-  };
+  const {
+    filteredBooks,
+    loading,
+    error,
+    filter,
+    searchText,
+    handleFilterChange,
+    handleSearchChange,
+  } = useBookList();
 
   const handleBookClick = (bookId) => {
     navigate(`/book/${bookId}`);
   };
-
-  const filteredBooks = allBooks.filter(book => {
-    if (filter !== 'all') {
-      const status = book.status || 'reading';
-      if (status !== filter) return false;
-    }
-    if (!searchText.trim()) return true;
-    const normalizedQuery = normalizeTag(searchText);
-    // タイトル・著者・タグで部分一致（正規化）
-    return (
-      (book.title && normalizeTag(book.title).includes(normalizedQuery)) ||
-      (book.author && normalizeTag(book.author).includes(normalizedQuery)) ||
-      (Array.isArray(book.tags) && book.tags.some(tag => normalizeTag(tag).includes(normalizedQuery)))
-    );
-  });
 
   if (loading) return <div>Loading...</div>;
 
@@ -124,7 +58,7 @@ export default function BookList() {
       <TextField
         label="検索（タイトル・著者・タグ）"
         value={searchText}
-        onChange={e => setSearchText(e.target.value)}
+        onChange={handleSearchChange}
         fullWidth
         sx={{ mb: 2 }}
       />
