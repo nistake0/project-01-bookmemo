@@ -5,6 +5,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { ErrorDialogContext } from './CommonErrorDialog';
 import { useTagHistory } from '../hooks/useTagHistory';
 import { useMemo } from '../hooks/useMemo';
+import CameraPasteOCR from './CameraPasteOCR';
 
 const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
   const { user } = useAuth();
@@ -77,6 +78,12 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
     }
   };
 
+  // OCR機能のコールバック
+  const handleTextDetected = (detectedText) => {
+    console.log('[MemoAdd] OCRで検出されたテキスト:', detectedText);
+    setText(detectedText);
+  };
+
   const isInDialog = !!onClose;
 
   if (isInDialog) {
@@ -96,6 +103,7 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
               required
               inputProps={{ 'data-testid': 'memo-text-input' }}
             />
+            <CameraPasteOCR onTextDetected={handleTextDetected} />
             <TextField
               label="感想・コメント"
               fullWidth
@@ -169,6 +177,7 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
         required
         inputProps={{ 'data-testid': 'memo-text-input' }}
       />
+      <CameraPasteOCR onTextDetected={handleTextDetected} />
       <TextField
         label="感想・コメント"
         fullWidth
