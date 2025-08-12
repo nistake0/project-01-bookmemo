@@ -1,5 +1,11 @@
 # 本番デプロイ環境構築ガイド
 
+## ⚠️ セキュリティ警告
+**重要**: 環境変数ファイル（`.env`、`.env.production`等）は絶対にGitにコミットしないでください。
+- 本番環境のAPIキーや機密情報が漏洩する可能性があります
+- `.gitignore`に環境変数ファイルが含まれていることを確認してください
+- 既にコミットされた環境変数ファイルがある場合は、Git履歴から完全に削除してください
+
 ## 概要
 BookMemoアプリの本番デプロイ環境をGitHub Pages + Firebaseで構築します。
 
@@ -83,6 +89,26 @@ mainブランチへのマージ時に自動ビルド・デプロイします。
 - `.env.production`は絶対にGitにコミットしない
 - GitHub Secretsを使用して環境変数を管理
 - 本番環境のAPIキーは厳重に管理
+
+**環境変数ファイルの管理手順:**
+1. `.gitignore`に以下が含まれていることを確認:
+   ```
+   .env
+   .env.local
+   .env.development
+   .env.production
+   .env.test
+   ```
+
+2. 既存の環境変数ファイルをGit履歴から削除:
+   ```bash
+   git rm --cached .env
+   git commit -m "Remove .env file from repository"
+   ```
+
+3. GitHub Secretsで環境変数を管理:
+   - リポジトリのSettings → Secrets and variables → Actions
+   - 各環境変数を個別にシークレットとして追加
 
 ### Firestoreセキュリティ
 - 本番環境のFirestoreルールを適切に設定
