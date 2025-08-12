@@ -25,23 +25,28 @@ export default function BookList() {
     <Box sx={{ 
       maxWidth: 1200, 
       mx: "auto", 
-      mt: { xs: 2, sm: 4 }, 
-      pb: "56px",
-      px: { xs: 2, sm: 0 }
+      mt: { xs: 1, sm: 2, md: 4 }, 
+      pb: { xs: "72px", sm: "80px" },
+      px: { xs: 1.5, sm: 2, md: 0 }
     }}>
+      {/* ヘッダーエリア */}
       <Box sx={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        mb: 2,
+        mb: { xs: 1.5, sm: 2 },
         flexDirection: { xs: 'column', sm: 'row' },
-        gap: { xs: 2, sm: 0 }
+        gap: { xs: 1.5, sm: 0 }
       }}>
         <Typography 
           variant="h4" 
           gutterBottom 
           data-testid="book-list-title"
-          sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}
+          sx={{ 
+            fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
+            fontWeight: 600,
+            mb: 0
+          }}
         >
           本一覧
         </Typography>
@@ -49,36 +54,77 @@ export default function BookList() {
           variant="contained" 
           data-testid="book-add-button" 
           onClick={() => navigate("/add")}
-          sx={{ width: { xs: '100%', sm: 'auto' } }}
+          sx={{ 
+            width: { xs: '100%', sm: 'auto' },
+            fontSize: { xs: '0.9rem', sm: '1rem' },
+            py: { xs: 1, sm: 1.5 }
+          }}
         >
           本を追加
         </Button>
       </Box>
 
+      {/* 検索フィールド */}
       <TextField
         label="検索（タイトル・著者・タグ）"
         value={searchText}
         onChange={handleSearchChange}
         fullWidth
-        sx={{ mb: 2 }}
+        size="small"
+        sx={{ 
+          mb: { xs: 1.5, sm: 2 },
+          '& .MuiOutlinedInput-root': {
+            fontSize: { xs: '0.9rem', sm: '1rem' }
+          }
+        }}
       />
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-        <Tabs value={filter} onChange={handleFilterChange} centered>
+      {/* タブナビゲーション */}
+      <Box sx={{ 
+        borderBottom: 1, 
+        borderColor: 'divider', 
+        mb: { xs: 1.5, sm: 2 }
+      }}>
+        <Tabs 
+          value={filter} 
+          onChange={handleFilterChange} 
+          centered
+          sx={{
+            '& .MuiTab-root': {
+              fontSize: { xs: '0.8rem', sm: '0.9rem' },
+              minHeight: { xs: '40px', sm: '48px' }
+            }
+          }}
+        >
           <Tab label="すべて" value="all" />
           <Tab label="読書中" value="reading" />
           <Tab label="読了" value="finished" />
         </Tabs>
       </Box>
 
+      {/* 書籍一覧 */}
       {filteredBooks.length === 0 ? (
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <Typography variant="body1" color="text.secondary">
+        <Box sx={{ 
+          textAlign: 'center', 
+          py: { xs: 3, sm: 4 },
+          px: { xs: 2, sm: 0 }
+        }}>
+          <Typography 
+            variant="body1" 
+            color="text.secondary"
+            sx={{ 
+              fontSize: { xs: '0.9rem', sm: '1rem' }
+            }}
+          >
             該当する本がありません
           </Typography>
         </Box>
       ) : (
-        <Grid container spacing={2} data-testid="book-list-grid">
+        <Grid 
+          container 
+          spacing={{ xs: 1.5, sm: 2 }} 
+          data-testid="book-list-grid"
+        >
           {filteredBooks.map(book => (
             <Grid 
               key={book.id} 

@@ -11,6 +11,7 @@ import {
 /**
  * 書籍カードコンポーネント
  * 検索・タグページと書籍一覧ページで共通使用
+ * モバイル最適化対応版
  * 
  * @param {Object} props
  * @param {Object} props.book - 書籍データ
@@ -36,34 +37,60 @@ function BookCard({ book, onClick, testId }) {
         '&:hover': { boxShadow: 3 },
         height: '100%',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        minHeight: { xs: '140px', sm: '160px' }
       }}
       onClick={onClick}
       data-testid={testId || `book-card-${book.id}`}
     >
-      <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+      <CardContent sx={{ 
+        flex: 1, 
+        display: 'flex', 
+        flexDirection: 'column',
+        p: { xs: 1.5, sm: 2 },
+        '&:last-child': { pb: { xs: 1.5, sm: 2 } }
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'flex-start', 
+          gap: { xs: 1.5, sm: 2 },
+          height: '100%'
+        }}>
           {book.coverImageUrl && (
             <CardMedia
               component="img"
               sx={{ 
-                width: 60, 
-                height: 80, 
+                width: { xs: 50, sm: 60 }, 
+                height: { xs: 70, sm: 80 }, 
                 objectFit: 'cover',
-                flexShrink: 0
+                flexShrink: 0,
+                borderRadius: 1
               }}
               image={book.coverImageUrl}
               alt={book.title}
             />
           )}
-          <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ 
+            flex: 1, 
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%'
+          }}>
             <Typography 
               variant="h6" 
               component="h3" 
               gutterBottom
               sx={{ 
-                fontSize: { xs: '1rem', sm: '1.1rem' },
-                lineHeight: 1.2
+                fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
+                lineHeight: 1.2,
+                fontWeight: 600,
+                mb: 0.5,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical'
               }}
             >
               {book.title || "タイトル未設定"}
@@ -71,8 +98,13 @@ function BookCard({ book, onClick, testId }) {
             <Typography 
               variant="body2" 
               color="text.secondary" 
-              gutterBottom
-              sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' } }}
+              sx={{ 
+                fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.9rem' },
+                mb: 0.5,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
             >
               {book.author || "著者未設定"}
             </Typography>
@@ -80,13 +112,26 @@ function BookCard({ book, onClick, testId }) {
               <Typography 
                 variant="body2" 
                 color="text.secondary" 
-                gutterBottom
-                sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' } }}
+                sx={{ 
+                  fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
+                  mb: 1,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
               >
                 {book.publisher} {book.publisher && book.publishedDate && '•'} {book.publishedDate}
               </Typography>
             )}
-            <Box sx={{ mt: 1, mb: 1 }}>
+            
+            {/* タグエリア - 固定高さで統一 */}
+            <Box sx={{ 
+              minHeight: { xs: '32px', sm: '36px' },
+              mb: 1,
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 0.5
+            }}>
               {book.tags && book.tags.length > 0 ? (
                 book.tags.slice(0, 3).map((tag, index) => (
                   <Chip
@@ -95,10 +140,11 @@ function BookCard({ book, onClick, testId }) {
                     size="small"
                     variant="outlined"
                     sx={{ 
-                      mr: 0.5, 
-                      mb: 0.5,
-                      fontSize: { xs: '0.7rem', sm: '0.8rem' },
-                      height: { xs: '20px', sm: '24px' }
+                      fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' },
+                      height: { xs: '18px', sm: '20px', md: '22px' },
+                      '& .MuiChip-label': {
+                        px: { xs: 0.5, sm: 0.75 }
+                      }
                     }}
                   />
                 ))
@@ -106,18 +152,24 @@ function BookCard({ book, onClick, testId }) {
                 <Typography 
                   variant="caption" 
                   color="text.secondary"
-                  sx={{ fontSize: { xs: '0.7rem', sm: '0.8rem' } }}
+                  sx={{ 
+                    fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' },
+                    alignSelf: 'center'
+                  }}
                 >
                   タグなし
                 </Typography>
               )}
             </Box>
+            
+            {/* ステータス - 下部に固定 */}
             <Typography 
               variant="caption" 
               color="text.secondary" 
               sx={{ 
                 mt: 'auto',
-                fontSize: { xs: '0.7rem', sm: '0.8rem' }
+                fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' },
+                fontWeight: 500
               }}
             >
               ステータス: {getStatusText(book.status)}

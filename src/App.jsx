@@ -18,6 +18,126 @@ import TagSearch from "./pages/TagSearch";
 import Stats from "./pages/Stats";
 import MyPage from "./pages/MyPage";
 import CommonErrorDialog, { ErrorDialogContext } from "./components/CommonErrorDialog";
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+
+// モバイル最適化テーマの作成
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+  typography: {
+    h4: {
+      fontSize: '1.5rem',
+      '@media (min-width:600px)': {
+        fontSize: '2rem',
+      },
+    },
+    h6: {
+      fontSize: '1rem',
+      '@media (min-width:600px)': {
+        fontSize: '1.1rem',
+      },
+    },
+    body2: {
+      fontSize: '0.8rem',
+      '@media (min-width:600px)': {
+        fontSize: '0.9rem',
+      },
+    },
+    caption: {
+      fontSize: '0.7rem',
+      '@media (min-width:600px)': {
+        fontSize: '0.8rem',
+      },
+    },
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+        },
+      },
+    },
+    MuiCardContent: {
+      styleOverrides: {
+        root: {
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '12px',
+          '@media (min-width:600px)': {
+            padding: '16px',
+          },
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiInputBase-root': {
+            fontSize: '0.9rem',
+            '@media (min-width:600px)': {
+              fontSize: '1rem',
+            },
+          },
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          fontSize: '0.9rem',
+          padding: '8px 16px',
+          '@media (min-width:600px)': {
+            fontSize: '1rem',
+            padding: '10px 20px',
+          },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontSize: '0.7rem',
+          height: '20px',
+          '@media (min-width:600px)': {
+            fontSize: '0.8rem',
+            height: '24px',
+          },
+        },
+      },
+    },
+    MuiBottomNavigation: {
+      styleOverrides: {
+        root: {
+          height: '64px',
+          '@media (min-width:600px)': {
+            height: '72px',
+          },
+        },
+      },
+    },
+    MuiBottomNavigationAction: {
+      styleOverrides: {
+        root: {
+          fontSize: '0.7rem',
+          '@media (min-width:600px)': {
+            fontSize: '0.8rem',
+          },
+        },
+      },
+    },
+  },
+});
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -51,13 +171,74 @@ function AppBottomNav() {
         if (newValue === 4) navigate('/mypage');
       }}
       showLabels
-      sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, backgroundColor: 'background.paper', borderTop: 1, borderColor: 'divider' }}
+      sx={{ 
+        position: 'fixed', 
+        bottom: 0, 
+        left: 0, 
+        right: 0, 
+        zIndex: 1000, 
+        backgroundColor: 'background.paper', 
+        borderTop: 1, 
+        borderColor: 'divider',
+        height: { xs: '64px', sm: '72px' },
+        '& .MuiBottomNavigationAction-root': {
+          minWidth: { xs: '60px', sm: '80px' },
+          padding: { xs: '6px 4px', sm: '8px 6px' }
+        },
+        '& .MuiBottomNavigationAction-label': {
+          fontSize: { xs: '0.7rem', sm: '0.8rem' },
+          marginTop: { xs: '2px', sm: '4px' }
+        },
+        '& .MuiBottomNavigationAction-iconOnly': {
+          fontSize: { xs: '1.5rem', sm: '1.75rem' }
+        }
+      }}
     >
-      <BottomNavigationAction label="本一覧" icon={<LibraryBooksIcon />} />
-      <BottomNavigationAction label="本を追加" icon={<AddCircleIcon />} />
-      <BottomNavigationAction label="検索・タグ" icon={<SearchIcon />} />
-      <BottomNavigationAction label="統計" icon={<BarChartIcon />} />
-      <BottomNavigationAction label="マイページ" icon={<PersonIcon />} />
+      <BottomNavigationAction 
+        label="本一覧" 
+        icon={<LibraryBooksIcon />} 
+        sx={{ 
+          '&.Mui-selected': {
+            color: 'primary.main'
+          }
+        }}
+      />
+      <BottomNavigationAction 
+        label="本を追加" 
+        icon={<AddCircleIcon />} 
+        sx={{ 
+          '&.Mui-selected': {
+            color: 'primary.main'
+          }
+        }}
+      />
+      <BottomNavigationAction 
+        label="検索・タグ" 
+        icon={<SearchIcon />} 
+        sx={{ 
+          '&.Mui-selected': {
+            color: 'primary.main'
+          }
+        }}
+      />
+      <BottomNavigationAction 
+        label="統計" 
+        icon={<BarChartIcon />} 
+        sx={{ 
+          '&.Mui-selected': {
+            color: 'primary.main'
+          }
+        }}
+      />
+      <BottomNavigationAction 
+        label="マイページ" 
+        icon={<PersonIcon />} 
+        sx={{ 
+          '&.Mui-selected': {
+            color: 'primary.main'
+          }
+        }}
+      />
     </BottomNavigation>
   );
 }
@@ -96,12 +277,15 @@ function App() {
     <AuthProvider>
       <ErrorDialogContext.Provider value={{ setGlobalError }}>
         <BrowserRouter basename="/project-01-bookmemo">
-          <AppRoutes />
-          <CommonErrorDialog
-            open={!!globalError}
-            message={globalError}
-            onClose={() => setGlobalError("")}
-          />
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <AppRoutes />
+            <CommonErrorDialog
+              open={!!globalError}
+              message={globalError}
+              onClose={() => setGlobalError("")}
+            />
+          </ThemeProvider>
         </BrowserRouter>
       </ErrorDialogContext.Provider>
     </AuthProvider>

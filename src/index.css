@@ -28,6 +28,34 @@ html, body, #root {
   min-height: 100vh;
   margin: 0;
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, 'sans-serif';
+  /* モバイル最適化 */
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
+/* モバイルでのスクロール改善 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* タッチ操作の改善 */
+* {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* 入力フィールドは選択可能にする */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  -khtml-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
 h1 {
@@ -45,6 +73,9 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  /* モバイル最適化 */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 button:hover {
   border-color: #646cff;
@@ -52,6 +83,29 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* モバイルでのフォーカス改善 */
+@media (max-width: 768px) {
+  button:focus,
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: 2px solid #1976d2;
+    outline-offset: 2px;
+  }
+}
+
+/* モバイルでのタッチターゲットサイズ改善 */
+@media (max-width: 768px) {
+  button, 
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 @media (prefers-color-scheme: light) {
@@ -65,4 +119,13 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+/* モバイルでのスクロールバー非表示 */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

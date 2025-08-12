@@ -74,24 +74,35 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   };
 
   return (
-    <Box component="form" onSubmit={handleAdd} sx={{ mt: 1 }} role="form" data-testid="book-form">
-      <Grid container spacing={1}>
-        <Grid size={{ xs: 12, sm: 6 }}>
+    <Box component="form" onSubmit={handleAdd} sx={{ mt: { xs: 1, sm: 2 } }} role="form" data-testid="book-form">
+      {/* ISBN入力エリア */}
+      <Grid container spacing={{ xs: 1, sm: 1.5 }}>
+        <Grid item xs={12} sm={6}>
           <TextField
             label="ISBN"
             value={isbn}
             onChange={(e) => setIsbn(e.target.value)}
             fullWidth
+            size="small"
             placeholder="例: 9784873119485"
             inputProps={{ "data-testid": "book-isbn-input" }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                fontSize: { xs: '0.9rem', sm: '1rem' }
+              }
+            }}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid item xs={12} sm={6}>
           <Button
             onClick={() => handleFetchBookInfo()}
             variant="outlined"
             disabled={searchLoading}
-            sx={{ mt: { xs: 0, sm: 1 } }}
+            sx={{ 
+              mt: { xs: 1, sm: 0 },
+              height: { xs: '40px', sm: '56px' },
+              fontSize: { xs: '0.8rem', sm: '0.9rem' }
+            }}
             fullWidth
             data-testid="book-fetch-button"
           >
@@ -100,99 +111,166 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
         </Grid>
       </Grid>
 
+      {/* 表紙画像表示 */}
       {coverImageUrl && (
-        <Box sx={{ textAlign: 'center', my: 1 }}>
-          <img src={coverImageUrl} alt="表紙" style={{ maxHeight: '150px', width: 'auto' }} data-testid="book-cover-image" />
+        <Box sx={{ 
+          textAlign: 'center', 
+          my: { xs: 1.5, sm: 2 },
+          px: { xs: 1, sm: 0 }
+        }}>
+          <img 
+            src={coverImageUrl} 
+            alt="表紙" 
+            style={{ 
+              maxHeight: '120px', 
+              maxWidth: '100%',
+              width: 'auto',
+              borderRadius: '4px'
+            }} 
+            data-testid="book-cover-image" 
+          />
         </Box>
       )}
 
-      <Grid container spacing={1}>
-        <Grid size={{ xs: 12, sm: 6 }}>
+      {/* 基本情報入力エリア */}
+      <Grid container spacing={{ xs: 1, sm: 1.5 }} sx={{ mt: { xs: 0.5, sm: 1 } }}>
+        <Grid item xs={12} sm={6}>
           <TextField
             label="タイトル"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             fullWidth
             required
+            size="small"
             inputProps={{ "data-testid": "book-title-input" }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                fontSize: { xs: '0.9rem', sm: '1rem' }
+              }
+            }}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid item xs={12} sm={6}>
           <TextField
             label="著者"
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
             fullWidth
+            size="small"
             inputProps={{ "data-testid": "book-author-input" }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                fontSize: { xs: '0.9rem', sm: '1rem' }
+              }
+            }}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid item xs={12} sm={6}>
           <TextField
             label="出版社"
             value={publisher}
             onChange={(e) => setPublisher(e.target.value)}
             fullWidth
+            size="small"
             inputProps={{ "data-testid": "book-publisher-input" }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                fontSize: { xs: '0.9rem', sm: '1rem' }
+              }
+            }}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid item xs={12} sm={6}>
           <TextField
             label="出版日"
             value={publishedDate}
             onChange={(e) => setPublishedDate(e.target.value)}
             fullWidth
+            size="small"
             inputProps={{ "data-testid": "book-publishdate-input" }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                fontSize: { xs: '0.9rem', sm: '1rem' }
+              }
+            }}
           />
         </Grid>
       </Grid>
 
-      <Autocomplete
-        multiple
-        freeSolo
-        options={tagOptions}
-        value={tags}
-        getOptionLabel={option => typeof option === 'string' ? option : (option.inputValue || option.tag || '')}
-        onChange={(event, newValue) => {
-          const normalized = (newValue || []).map(v => {
-            if (typeof v === 'string') return v;
-            if (v && typeof v === 'object') {
-              if ('inputValue' in v && v.inputValue) return v.inputValue;
-              if ('tag' in v && v.tag) return v.tag;
+      {/* タグ入力エリア */}
+      <Box sx={{ mt: { xs: 1.5, sm: 2 } }}>
+        <Autocomplete
+          multiple
+          freeSolo
+          options={tagOptions}
+          value={tags}
+          getOptionLabel={option => typeof option === 'string' ? option : (option.inputValue || option.tag || '')}
+          onChange={(event, newValue) => {
+            const normalized = (newValue || []).map(v => {
+              if (typeof v === 'string') return v;
+              if (v && typeof v === 'object') {
+                if ('inputValue' in v && v.inputValue) return v.inputValue;
+                if ('tag' in v && v.tag) return v.tag;
+              }
+              return '';
+            }).filter(Boolean);
+            setTags(normalized);
+          }}
+          inputValue={inputTagValue}
+          onInputChange={(event, newInputValue) => setInputTagValue(newInputValue)}
+          renderInput={(params) => (
+            <TextField 
+              {...params} 
+              label="タグ" 
+              fullWidth 
+              size="small"
+              placeholder="例: 小説,名作,技術書" 
+              inputProps={{ 
+                ...params.inputProps,
+                'data-testid': 'book-tags-input',
+                style: { fontSize: '0.9rem' }
+              }} 
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  fontSize: { xs: '0.9rem', sm: '1rem' }
+                }
+              }}
+            />
+          )}
+          sx={{
+            '& .MuiChip-root': {
+              fontSize: { xs: '0.75rem', sm: '0.8rem' },
+              height: { xs: '24px', sm: '28px' }
             }
-            return '';
-          }).filter(Boolean);
-          setTags(normalized);
-        }}
-        inputValue={inputTagValue}
-        onInputChange={(event, newInputValue) => setInputTagValue(newInputValue)}
-        renderInput={(params) => (
-          <TextField 
-            {...params} 
-            label="タグ" 
-            fullWidth 
-            placeholder="例: 小説,名作,技術書" 
-            inputProps={{ 
-              ...params.inputProps,
-              'data-testid': 'book-tags-input' 
-            }} 
-          />
-        )}
-      />
+          }}
+        />
+      </Box>
 
+      {/* エラーメッセージ */}
       {(searchError || addBookError) && (
-        <Typography color="error" sx={{ mt: 1 }} data-testid="book-form-error">
+        <Typography 
+          color="error" 
+          sx={{ 
+            mt: { xs: 1.5, sm: 2 },
+            fontSize: { xs: '0.8rem', sm: '0.9rem' }
+          }} 
+          data-testid="book-form-error"
+        >
           {searchError || addBookError}
         </Typography>
       )}
 
+      {/* 送信ボタン */}
       <Button 
         type="submit" 
         variant="contained" 
         disabled={addBookLoading}
         sx={{ 
-          mt: 2, 
-          mb: { xs: 8, sm: 2 }, // モバイルではフッターメニューの上に余白を追加
-          width: { xs: '100%', sm: 'auto' } // モバイルでは全幅
+          mt: { xs: 2, sm: 3 }, 
+          mb: { xs: "72px", sm: 2 }, // モバイルではフッターメニューの上に余白を追加
+          width: { xs: '100%', sm: 'auto' }, // モバイルでは全幅
+          fontSize: { xs: '0.9rem', sm: '1rem' },
+          py: { xs: 1.5, sm: 2 }
         }} 
         data-testid="book-add-submit"
       >
