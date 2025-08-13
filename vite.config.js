@@ -14,6 +14,23 @@ export default defineConfig(({ mode }) => {
       // CI/CD環境でのHTTPS対応
       https: process.env.CI ? false : true,
     },
+    build: {
+      // バンドルサイズの最適化
+      chunkSizeWarningLimit: 1000, // 警告閾値を1MBに設定
+      rollupOptions: {
+        output: {
+          // コード分割の設定
+          manualChunks: {
+            // React関連を分離
+            'react-vendor': ['react', 'react-dom'],
+            // Material-UI関連を分離
+            'mui-vendor': ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+            // その他のライブラリを分離
+            'utils-vendor': ['axios', 'react-router-dom', 'react-swipeable', 'react-swipeable-list'],
+          },
+        },
+      },
+    },
     test: {
     },
   }
