@@ -133,6 +133,9 @@ npm test
  - 書籍一覧・検索/タグでタブをsticky固定
    - `App.jsx` 直下に `#app-scroll-container`（height: 100vh, overflow-y: auto）を導入し、確実にstickyが効くように調整
    - `BookList.jsx` / `TagSearch.jsx` のタブコンテナに `position: 'sticky', top: 0, zIndex: 1100` を付与
+- タグ管理
+  - タグの編集・削除・統合（別名→正規名）に対応
+  - 正規化の最小強化（NFKC/小文字化/空白正規化）
 - バグ・改善案・TODOは`doc/bug-feature-memo.md`で管理
 - 設計・運用方針は`ARCHITECTURE.md`や日報に詳細記載
 
