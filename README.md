@@ -135,6 +135,7 @@ npm test
    - `BookList.jsx` / `TagSearch.jsx` のタブコンテナに `position: 'sticky', top: 0, zIndex: 1100` を付与
 - タグ管理
   - タグの編集・削除・統合（別名→正規名）に対応
+  - 一括削除ダイアログ（補完対応）を追加（タグ履歴から候補提示／複数選択）
   - 正規化の最小強化（NFKC/小文字化/空白正規化）
 - バグ・改善案・TODOは`doc/bug-feature-memo.md`で管理
 - 設計・運用方針は`ARCHITECTURE.md`や日報に詳細記載

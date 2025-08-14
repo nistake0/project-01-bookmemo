@@ -212,6 +212,8 @@ graph TD
 - 正規化: `normalizeTag`でNFKC＋小文字化＋空白正規化を実施（最小強化）
 - UI: `TagEditDialog.jsx`
   - 名前変更・削除・統合（カンマ区切りで別名入力）
+- UI: `BulkDeleteTagsDialog.jsx`
+  - タグ一括削除（Autocompleteでbook/memoのタグ履歴を統合表示、複数選択、確認/キャンセル）
 - TODO: ダイアログ閉鎖後の統計再計算（再フェッチ or 楽観更新）
 
 ### その他運用Tips
