@@ -15,9 +15,11 @@ const BookStatusChanger = ({ book, bookId, onStatusChange }) => {
     const newStatus = book.status === 'reading' ? 'finished' : 'reading';
     const docRef = doc(db, 'books', bookId);
     try {
+      const isFinished = newStatus === 'finished';
       await updateDoc(docRef, {
         status: newStatus,
         updatedAt: serverTimestamp(),
+        finishedAt: isFinished ? serverTimestamp() : null,
       });
       onStatusChange(newStatus);
     } catch (error) {

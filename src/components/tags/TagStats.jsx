@@ -15,6 +15,8 @@ import {
   Paper
 } from '@mui/material';
 import { useTagStats } from '../../hooks/useTagStats';
+import useTagManagement from '../../hooks/useTagManagement';
+import TagEditDialog from './TagEditDialog';
 import { useAuth } from '../../auth/AuthProvider';
 
 /**
@@ -26,9 +28,12 @@ import { useAuth } from '../../auth/AuthProvider';
 function TagStats({ onTagClick }) {
   const { user } = useAuth();
   const { tagStats, loading, error, getSortedTagStats } = useTagStats(user);
+  const { loading: managing, renameTag, deleteTag } = useTagManagement();
   
   const [sortBy, setSortBy] = useState('count');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [editOpen, setEditOpen] = useState(false);
+  const [targetTag, setTargetTag] = useState('');
 
   // ソートされたタグ統計を取得
   const sortedStats = getSortedTagStats(sortBy, sortOrder);
@@ -141,18 +146,7 @@ function TagStats({ onTagClick }) {
       <Grid container spacing={2}>
         {sortedStats.map((stat) => (
           <Grid item xs={12} sm={6} md={4} key={stat.tag}>
-            <Card 
-              sx={{ 
-                cursor: 'pointer',
-                '&:hover': { 
-                  backgroundColor: 'action.hover',
-                  transform: 'translateY(-2px)',
-                  transition: 'all 0.2s ease-in-out'
-                }
-              }}
-              onClick={() => onTagClick?.(stat.tag)}
-              data-testid={`tag-stat-card-${stat.tag}`}
-            >
+            <Card data-testid={`tag-stat-card-${stat.tag}`} onClick={() => onTagClick?.(stat.tag)} sx={{ cursor: 'pointer' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                   <Typography variant="h6" component="div" sx={{ wordBreak: 'break-all' }}>
@@ -178,9 +172,14 @@ function TagStats({ onTagClick }) {
                   </Typography>
                 </Box>
                 
-                <Typography variant="body2" color="primary" sx={{ fontWeight: 'bold' }}>
-                  合計: {stat.totalCount}件
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" color="primary" sx={{ fontWeight: 'bold' }}>
+                    合計: {stat.totalCount}件
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Chip size="small" label="編集" onClick={(e) => { e.stopPropagation(); setTargetTag(stat.tag); setEditOpen(true); }} clickable color="primary" variant="outlined" data-testid={`tag-edit-${stat.tag}`} />
+                  </Box>
+                </Box>
                 
                 {stat.lastUsed && (
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
@@ -192,6 +191,21 @@ function TagStats({ onTagClick }) {
           </Grid>
         ))}
       </Grid>
+
+      <TagEditDialog
+        open={editOpen}
+        tag={targetTag}
+        busy={managing}
+        onClose={() => setEditOpen(false)}
+        onRename={async (oldTag, newTag) => {
+          await renameTag(oldTag, newTag);
+          setEditOpen(false);
+        }}
+        onDelete={async (tag) => {
+          await deleteTag(tag);
+          setEditOpen(false);
+        }}
+      />
     </Box>
   );
 }
