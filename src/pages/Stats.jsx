@@ -3,7 +3,7 @@ import useStats from '../hooks/useStats';
 import { BarChart, PieChart } from '@mui/x-charts';
 
 export default function Stats() {
-  const { loading, error, summary, tagStats, monthlyFinished } = useStats();
+  const { loading, error, summary, tagStats, monthlyFinished, monthlyAddedBooks, monthlyMemos, topAuthors, topPublishers, statusDistribution } = useStats();
 
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto', mt: 4, mb: 10, p: 2 }}>
@@ -47,6 +47,25 @@ export default function Stats() {
         </Grid>
       </Grid>
 
+      {!!summary && (
+        <Card sx={{ mb: 2 }} data-testid="chart-status-pie">
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 1 }}>ステータス内訳</Typography>
+            <PieChart
+              height={220}
+              series={[{
+                data: [
+                  { id: 'finished', label: '読了', value: statusDistribution?.finished ?? 0 },
+                  { id: 'reading', label: '読書中', value: statusDistribution?.reading ?? 0 },
+                ],
+                innerRadius: 30,
+                paddingAngle: 2,
+              }]}
+            />
+          </CardContent>
+        </Card>
+      )}
+
       <Divider sx={{ my: 2 }} />
       <Typography variant="h6" sx={{ mb: 1 }}>月別読了冊数（直近12ヶ月）</Typography>
       <Card sx={{ mb: 2 }} data-testid="chart-monthly-finished">
@@ -58,6 +77,33 @@ export default function Stats() {
           />
         </CardContent>
       </Card>
+
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle1" sx={{ mb: 1 }}>月別追加冊数（直近12ヶ月）</Typography>
+          <Card data-testid="chart-monthly-added">
+            <CardContent>
+              <BarChart
+                xAxis={[{ scaleType: 'band', data: (monthlyAddedBooks ?? []).map(b => b.key) }]}
+                series={[{ data: (monthlyAddedBooks ?? []).map(b => b.count), label: '追加冊数', color: '#42a5f5' }]}
+                height={220}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle1" sx={{ mb: 1 }}>月別メモ数（直近12ヶ月）</Typography>
+          <Card data-testid="chart-monthly-memos">
+            <CardContent>
+              <BarChart
+                xAxis={[{ scaleType: 'band', data: (monthlyMemos ?? []).map(b => b.key) }]}
+                series={[{ data: (monthlyMemos ?? []).map(b => b.count), label: 'メモ数', color: '#9c27b0' }]}
+                height={220}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       <Divider sx={{ my: 2 }} />
       <Typography variant="h6" sx={{ mb: 1 }}>タグ使用頻度（上位）</Typography>
@@ -91,6 +137,45 @@ export default function Stats() {
         {(!tagStats || tagStats.length === 0) && !loading && (
           <Grid item xs={12}>
             <Typography variant="body2" color="text.secondary">タグデータがありません。</Typography>
+          </Grid>
+        )}
+      </Grid>
+
+      <Divider sx={{ my: 2 }} />
+      <Typography variant="h6" sx={{ mb: 1 }}>著者トップ</Typography>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        {(topAuthors?.slice(0, 10) ?? []).map(row => (
+          <Grid item xs={12} sm={6} key={row.author}>
+            <Card data-testid={`author-top-${row.author}`}>
+              <CardContent>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{row.author}</Typography>
+                <Typography variant="body2" color="text.secondary">冊数: {row.total}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+        {(!topAuthors || topAuthors.length === 0) && !loading && (
+          <Grid item xs={12}>
+            <Typography variant="body2" color="text.secondary">著者データがありません。</Typography>
+          </Grid>
+        )}
+      </Grid>
+
+      <Typography variant="h6" sx={{ mb: 1 }}>出版社トップ</Typography>
+      <Grid container spacing={2}>
+        {(topPublishers?.slice(0, 10) ?? []).map(row => (
+          <Grid item xs={12} sm={6} key={row.publisher}>
+            <Card data-testid={`publisher-top-${row.publisher}`}>
+              <CardContent>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{row.publisher}</Typography>
+                <Typography variant="body2" color="text.secondary">冊数: {row.total}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+        {(!topPublishers || topPublishers.length === 0) && !loading && (
+          <Grid item xs={12}>
+            <Typography variant="body2" color="text.secondary">出版社データがありません。</Typography>
           </Grid>
         )}
       </Grid>

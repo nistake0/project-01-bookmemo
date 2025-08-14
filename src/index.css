@@ -129,3 +129,13 @@ button:focus-visible {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Stats charts spacing without touching JSX */
+[data-testid^="chart-"] {
+  margin-bottom: 16px;
+}
+
+/* Ensure heading after a chart gets top margin to avoid overlap */
+[data-testid^="chart-"] + .MuiTypography-root.MuiTypography-h6 {
+  margin-top: 12px;
+}
