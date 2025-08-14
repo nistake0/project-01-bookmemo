@@ -199,6 +199,11 @@ graph TD
 - グラフ: @mui/x-charts（BarChart, PieChart）
 - 余白調整: CSS（`[data-testid^="chart-"]` にマージン）でタイトル重なりを解消
 
+### Stickyタブの実装方針
+- スクロールコンテナ: `App.jsx` のルーティング直下を `#app-scroll-container`（`height: 100vh; overflow-y: auto;`）として定義
+- ページ側: `BookList.jsx` / `TagSearch.jsx` のタブコンテナに `position: 'sticky'; top: 0; z-index: 1100; background: theme.palette.background.paper;`
+- テスト: `data-testid` を付与し、ユニットテストで `style.position === 'sticky'` を確認
+
 ### その他運用Tips
 - 設計ドキュメントは常に最新化し、開発再開時の指針とする
 - 詳細仕様や運用ノウハウはAppendixに集約し、他章からは参照のみとする

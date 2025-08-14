@@ -130,6 +130,9 @@ npm test
   - 月別読了冊数、月別追加冊数、月別メモ数
   - タグ上位の円グラフ、著者トップ／出版社トップ
   - ステータス内訳の円グラフ
+ - 書籍一覧・検索/タグでタブをsticky固定
+   - `App.jsx` 直下に `#app-scroll-container`（height: 100vh, overflow-y: auto）を導入し、確実にstickyが効くように調整
+   - `BookList.jsx` / `TagSearch.jsx` のタブコンテナに `position: 'sticky', top: 0, zIndex: 1100` を付与
 - バグ・改善案・TODOは`doc/bug-feature-memo.md`で管理
 - 設計・運用方針は`ARCHITECTURE.md`や日報に詳細記載
 
@@ -158,7 +161,7 @@ npm test
 
 ### 現在の品質指標
 - **テスト成功率**: 100% (30/30 テストスイート成功)
-- **テストケース**: 273 passed, 0 skipped, 0 failed
+- **テストケース**: 275 passed, 0 skipped, 0 failed
 - **実行時間**: 約11秒で安定実行
 - **重複コード**: タグ履歴関連の重複を100%解消
 - **UI/UX改善**: モバイル対応の完全実装
