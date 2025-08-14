@@ -25,7 +25,25 @@ jobs:
     - name: Run unit tests
       run: npm run test:unit
     
-    - name: Run E2E tests
+    - name: Prepare env for E2E (optional)
+      if: ${{ vars.RUN_E2E == 'true' }}
+      run: |
+        if [ -n "${{ secrets.VITE_FIREBASE_API_KEY }}" ]; then
+          cat > .env.local << EOF
+          VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID=${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }}
+          EOF
+        fi
+        if [ -n "${{ secrets.SERVICE_ACCOUNT_KEY_JSON }}" ]; then
+          echo "${{ secrets.SERVICE_ACCOUNT_KEY_JSON }}" > serviceAccountKey.json
+        fi
+
+    - name: Run E2E tests (optional)
+      if: ${{ vars.RUN_E2E == 'true' }}
       run: |
         npm run dev &
         sleep 10
