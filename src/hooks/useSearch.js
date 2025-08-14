@@ -96,17 +96,17 @@ export function useSearch(options = {}) {
       // メモのみの場合は常にメモクエリを実行
       // 統合の場合はメモ内容検索またはタグ検索が有効な場合のみ実行
       if (searchTarget === 'memos' || (searchTarget === 'integrated' && ((includeMemoContent && memoContent) || (selectedTags && selectedTags.length > 0)))) {
+        // メモ検索はクライアントサイド全文検索で実装
+        // Firestoreの全文検索制限とインデックス問題を回避
         const memoQueryConstraints = [
           where('userId', '==', user.uid)
         ];
 
-        // メモ内容のテキスト検索（簡易実装）
-        // 実際の実装では全文検索サービス（Algolia等）の使用を推奨
+        // 基本的なクエリ（インデックス不要）
         const memoQuery = query(
           collectionGroup(db, 'memos'),
           ...memoQueryConstraints,
-          orderBy('updatedAt', 'desc'),
-          limit(resultLimit)
+          limit(resultLimit * 3) // より多くのデータを取得（クライアントサイドフィルタリング用）
         );
         queries.push({ type: 'memo', query: memoQuery });
       }
@@ -360,7 +360,6 @@ export function useSearch(options = {}) {
               const fallbackQuery = query(
                 collectionGroup(db, 'memos'),
                 where('userId', '==', user.uid),
-                orderBy('updatedAt', 'desc'),
                 limit(resultLimit * 2) // より多くのデータを取得
               );
               
