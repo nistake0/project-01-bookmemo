@@ -2,18 +2,15 @@ import { useState } from 'react';
 import { 
   Box, 
   TextField, 
-  Tabs, 
-  Tab, 
   Paper,
   Typography,
   Button
 } from '@mui/material';
 import DateRangeSelector from './DateRangeSelector';
 import TagSearchField from './TagSearchField';
-import MemoContentSearchField from './MemoContentSearchField';
 
 /**
- * 高度な検索フォームコンポーネント
+ * 高度な検索フォームコンポーネント（アプローチ2：完全統合検索）
  * 
  * @param {Object} props
  * @param {Object} props.searchConditions - 検索条件
@@ -22,20 +19,11 @@ import MemoContentSearchField from './MemoContentSearchField';
  */
 function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSearch }) {
   const [statusFilter, setStatusFilter] = useState('all');
-  const [searchTarget, setSearchTarget] = useState(searchConditions?.searchTarget || 'integrated');
 
   const handleTextChange = (event) => {
     onSearchConditionsChange?.({
       ...searchConditions,
       text: event.target.value
-    });
-  };
-
-  const handleSearchTargetChange = (event, newValue) => {
-    setSearchTarget(newValue);
-    onSearchConditionsChange?.({
-      ...searchConditions,
-      searchTarget: newValue
     });
   };
 
@@ -61,20 +49,6 @@ function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSear
     });
   };
 
-  const handleMemoContentChange = (memoContent) => {
-    onSearchConditionsChange?.({
-      ...searchConditions,
-      memoContent: memoContent
-    });
-  };
-
-  const handleIncludeMemoContentChange = (includeMemoContent) => {
-    onSearchConditionsChange?.({
-      ...searchConditions,
-      includeMemoContent: includeMemoContent
-    });
-  };
-
   const handleSearch = () => {
     onSearch?.(searchConditions);
   };
@@ -84,81 +58,56 @@ function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSear
       <Typography variant="h6" gutterBottom>検索条件</Typography>
       
       <Paper sx={{ p: 2, mb: 2 }}>
-        {/* 検索対象選択 */}
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            検索対象
-          </Typography>
-          <Tabs 
-            value={searchTarget} 
-            onChange={handleSearchTargetChange}
-            data-testid="search-target-tabs"
-          >
-            <Tab label="統合" value="integrated" />
-            <Tab label="書籍のみ" value="books" />
-            <Tab label="メモのみ" value="memos" />
-          </Tabs>
-        </Box>
-
-        {/* テキスト検索 */}
-        <TextField
-          label="テキスト検索（タイトル・著者・タグ）"
-          value={searchConditions?.text || ''}
-          onChange={handleTextChange}
-          fullWidth
-          margin="normal"
+        {/* 統合テキスト検索 */}
+        <TextField 
+          label="テキスト検索（タイトル・著者・メモ内容・タグ）" 
+          value={searchConditions?.text || ''} 
+          onChange={handleTextChange} 
+          fullWidth 
+          margin="normal" 
           placeholder="検索したいキーワードを入力"
           data-testid="text-search-field"
         />
-
-        {/* ステータスフィルター（書籍のみの場合は表示） */}
-        {(searchTarget === 'integrated' || searchTarget === 'books') && (
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              ステータス
-            </Typography>
-            <Tabs 
-              value={statusFilter} 
-              onChange={handleStatusChange}
-              data-testid="status-filter-tabs"
-            >
-              <Tab label="すべて" value="all" />
-              <Tab label="読書中" value="reading" />
-              <Tab label="読了" value="finished" />
-            </Tabs>
-          </Box>
-        )}
-
-        {/* 日時検索（書籍のみの場合は表示） */}
-        {(searchTarget === 'integrated' || searchTarget === 'books') && (
-          <Box sx={{ mt: 2 }}>
-            <DateRangeSelector
-              value={searchConditions?.dateRange}
-              onChange={handleDateRangeChange}
-            />
-          </Box>
-        )}
-
-        {/* タグ検索 */}
+        
+        {/* ステータスフィルター */}
         <Box sx={{ mt: 2 }}>
-          <TagSearchField
-            selectedTags={searchConditions?.selectedTags || []}
-            onTagsChange={handleTagsChange}
-            type={searchTarget === 'memos' ? 'memo' : 'book'}
+          <Typography variant="subtitle2" gutterBottom>
+            ステータス
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            {['all', 'reading', 'finished', 'wish'].map((status) => (
+              <Button
+                key={status}
+                variant={statusFilter === status ? 'contained' : 'outlined'}
+                size="small"
+                onClick={() => handleStatusChange(null, status)}
+                data-testid={`status-filter-${status}`}
+              >
+                {status === 'all' && '全て'}
+                {status === 'reading' && '読書中'}
+                {status === 'finished' && '読了'}
+                {status === 'wish' && '読みたい'}
+              </Button>
+            ))}
+          </Box>
+        </Box>
+
+        {/* 日時検索 */}
+        <Box sx={{ mt: 2 }}>
+          <DateRangeSelector 
+            dateRange={searchConditions?.dateRange || { type: 'none' }}
+            onDateRangeChange={handleDateRangeChange}
           />
         </Box>
 
-        {/* メモ内容検索（メモのみまたは統合の場合に表示） */}
-        {(searchTarget === 'integrated' || searchTarget === 'memos') && (
-          <Box sx={{ mt: 2 }}>
-            <MemoContentSearchField
-              memoContent={searchConditions?.memoContent || ''}
-              includeMemoContent={searchConditions?.includeMemoContent || false}
-              onMemoContentChange={handleMemoContentChange}
-              onIncludeMemoContentChange={handleIncludeMemoContentChange}
-            />
-          </Box>
-        )}
+        {/* タグ検索 */}
+        <Box sx={{ mt: 2 }}>
+          <TagSearchField 
+            selectedTags={searchConditions?.selectedTags || []}
+            onTagsChange={handleTagsChange}
+            type="book"
+          />
+        </Box>
       </Paper>
 
       {/* 検索ボタン */}

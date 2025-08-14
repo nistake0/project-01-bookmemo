@@ -126,7 +126,7 @@ describe('useSearch', () => {
       expect(mockWhere).toHaveBeenCalledWith('userId', '==', mockUser.uid);
       expect(mockOrderBy).toHaveBeenCalledWith('updatedAt', 'desc');
       expect(mockLimit).toHaveBeenCalledWith(50);
-      expect(result.current.results).toHaveLength(2);
+      expect(result.current.results).toHaveLength(4);
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBe(null);
     });
@@ -512,8 +512,8 @@ describe('useSearch', () => {
       });
 
       expect(mockOrderBy).toHaveBeenCalledWith('updatedAt', 'desc');
-      // クライアントサイドでのソートは結果の順序で確認
-      expect(result.current.results).toHaveLength(2);
+      // クライアントサイドでのソートは結果の順序で確認（統合表示で本+メモの4件）
+      expect(result.current.results).toHaveLength(4);
     });
   });
 }); 

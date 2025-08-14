@@ -17,14 +17,6 @@ const renderWithTheme = (component) => {
 // モック関数
 const mockOnResultClick = jest.fn();
 
-// useAuthのモック
-jest.mock('../../auth/AuthProvider', () => ({
-  useAuth: () => ({
-    user: { uid: 'test-user-id' },
-    loading: false
-  })
-}));
-
 describe('SearchResults', () => {
   beforeEach(() => {
     mockOnResultClick.mockClear();
@@ -33,7 +25,10 @@ describe('SearchResults', () => {
   describe('基本的なレンダリング', () => {
     test('コンポーネントが正しくレンダリングされる', () => {
       renderWithTheme(
-        <SearchResults results={[]} onResultClick={mockOnResultClick} />
+        <SearchResults
+          results={[]}
+          onResultClick={mockOnResultClick}
+        />
       );
 
       expect(screen.getByText('検索条件を設定して検索を実行してください。')).toBeInTheDocument();
@@ -41,7 +36,9 @@ describe('SearchResults', () => {
 
     test('デフォルト値でレンダリングされる', () => {
       renderWithTheme(
-        <SearchResults onResultClick={mockOnResultClick} />
+        <SearchResults
+          onResultClick={mockOnResultClick}
+        />
       );
 
       expect(screen.getByText('検索条件を設定して検索を実行してください。')).toBeInTheDocument();
@@ -51,7 +48,10 @@ describe('SearchResults', () => {
   describe('ローディング状態', () => {
     test('ローディング中はCircularProgressが表示される', () => {
       renderWithTheme(
-        <SearchResults loading={true} results={[]} onResultClick={mockOnResultClick} />
+        <SearchResults
+          loading={true}
+          onResultClick={mockOnResultClick}
+        />
       );
 
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
@@ -61,10 +61,10 @@ describe('SearchResults', () => {
   describe('検索結果なし', () => {
     test('検索クエリがある場合のメッセージ', () => {
       renderWithTheme(
-        <SearchResults 
-          results={[]} 
-          searchQuery="テスト" 
-          onResultClick={mockOnResultClick} 
+        <SearchResults
+          results={[]}
+          searchQuery="テスト"
+          onResultClick={mockOnResultClick}
         />
       );
 
@@ -73,176 +73,48 @@ describe('SearchResults', () => {
 
     test('検索クエリがない場合のメッセージ', () => {
       renderWithTheme(
-        <SearchResults results={[]} onResultClick={mockOnResultClick} />
+        <SearchResults
+          results={[]}
+          onResultClick={mockOnResultClick}
+        />
       );
 
       expect(screen.getByText('検索条件を設定して検索を実行してください。')).toBeInTheDocument();
     });
   });
 
-  describe('タブ切り替え機能', () => {
-    const mockMixedResults = [
+  describe('統合検索結果表示', () => {
+    const mockBooks = [
       {
         id: 'book-1',
         type: 'book',
         title: 'テスト本1',
         author: 'テスト著者1',
-        publisher: 'テスト出版社',
-        publishedDate: '2024-01-01',
         status: 'reading',
-        tags: ['小説']
-      },
-      {
-        id: 'memo-1',
-        type: 'memo',
-        bookId: 'book-1',
-        bookTitle: 'テスト本1',
-        page: 123,
-        text: 'テストメモ',
-        comment: 'テストコメント',
-        tags: ['名言']
-      }
-    ];
-
-    test('タブが正しく表示される', () => {
-      renderWithTheme(
-        <SearchResults results={mockMixedResults} onResultClick={mockOnResultClick} />
-      );
-
-      expect(screen.getByTestId('search-results-tabs')).toBeInTheDocument();
-      expect(screen.getByTestId('integrated-tab')).toBeInTheDocument();
-      expect(screen.getByTestId('books-tab')).toBeInTheDocument();
-      expect(screen.getByTestId('memos-tab')).toBeInTheDocument();
-    });
-
-    test('タブの件数が正しく表示される', () => {
-      renderWithTheme(
-        <SearchResults results={mockMixedResults} onResultClick={mockOnResultClick} />
-      );
-
-      expect(screen.getByText('統合 (2)')).toBeInTheDocument();
-      expect(screen.getByText('書籍 (1)')).toBeInTheDocument();
-      expect(screen.getByText('メモ (1)')).toBeInTheDocument();
-    });
-
-    test('統合タブがデフォルトで表示される', () => {
-      renderWithTheme(
-        <SearchResults results={mockMixedResults} onResultClick={mockOnResultClick} />
-      );
-
-      expect(screen.getByTestId('integrated-tab-panel')).toBeInTheDocument();
-      expect(screen.getByText('本 (1件)')).toBeInTheDocument();
-      expect(screen.getByText('メモ (1件)')).toBeInTheDocument();
-    });
-
-    test('書籍タブに切り替えられる', () => {
-      renderWithTheme(
-        <SearchResults results={mockMixedResults} onResultClick={mockOnResultClick} />
-      );
-
-      const booksTab = screen.getByTestId('books-tab');
-      fireEvent.click(booksTab);
-
-      expect(screen.getByTestId('books-tab-panel')).toBeInTheDocument();
-      expect(screen.getByText('書籍 (1件)')).toBeInTheDocument();
-      expect(screen.queryByText('メモ (1件)')).not.toBeInTheDocument();
-    });
-
-    test('メモタブに切り替えられる', () => {
-      renderWithTheme(
-        <SearchResults results={mockMixedResults} onResultClick={mockOnResultClick} />
-      );
-
-      const memosTab = screen.getByTestId('memos-tab');
-      fireEvent.click(memosTab);
-
-      expect(screen.getByTestId('memos-tab-panel')).toBeInTheDocument();
-      expect(screen.getByText('メモ (1件)')).toBeInTheDocument();
-      expect(screen.queryByText('本 (1件)')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('本の検索結果表示', () => {
-    const mockBookResults = [
-      {
-        id: 'book-1',
-        type: 'book',
-        title: 'テスト本1',
-        author: 'テスト著者1',
-        publisher: 'テスト出版社',
-        publishedDate: '2024-01-01',
-        status: 'reading',
-        tags: ['小説', '名作'],
-        coverImageUrl: 'https://example.com/cover1.jpg'
+        tags: ['タグ1', 'タグ2'],
+        updatedAt: { toDate: () => new Date('2024-01-01') }
       },
       {
         id: 'book-2',
         type: 'book',
         title: 'テスト本2',
         author: 'テスト著者2',
-        publisher: 'テスト出版社2',
-        publishedDate: '2024-02-01',
         status: 'finished',
-        tags: ['技術書'],
-        coverImageUrl: null
+        tags: ['タグ3'],
+        updatedAt: { toDate: () => new Date('2024-01-02') }
       }
     ];
 
-    test('本の検索結果が表示される', () => {
-      renderWithTheme(
-        <SearchResults results={mockBookResults} onResultClick={mockOnResultClick} />
-      );
-
-      expect(screen.getByText('検索結果 (2件)')).toBeInTheDocument();
-      expect(screen.getByText('本: 2件, メモ: 0件')).toBeInTheDocument();
-      expect(screen.getByText('テスト本1')).toBeInTheDocument();
-      expect(screen.getByText('テスト本2')).toBeInTheDocument();
-    });
-
-    test('本の詳細情報が表示される', () => {
-      renderWithTheme(
-        <SearchResults results={mockBookResults} onResultClick={mockOnResultClick} />
-      );
-
-      expect(screen.getByText('テスト著者1')).toBeInTheDocument();
-      expect(screen.getByText('テスト出版社 • 2024-01-01')).toBeInTheDocument();
-      expect(screen.getByText('ステータス: 読書中')).toBeInTheDocument();
-      expect(screen.getByText('ステータス: 読了')).toBeInTheDocument();
-    });
-
-    test('本のタグが表示される', () => {
-      renderWithTheme(
-        <SearchResults results={mockBookResults} onResultClick={mockOnResultClick} />
-      );
-
-      expect(screen.getByText('小説')).toBeInTheDocument();
-      expect(screen.getByText('名作')).toBeInTheDocument();
-      expect(screen.getByText('技術書')).toBeInTheDocument();
-    });
-
-    test('本をクリックできる', () => {
-      renderWithTheme(
-        <SearchResults results={mockBookResults} onResultClick={mockOnResultClick} />
-      );
-
-      const bookCard = screen.getByTestId('integrated-book-result-book-1');
-      fireEvent.click(bookCard);
-
-      expect(mockOnResultClick).toHaveBeenCalledWith('book', 'book-1');
-    });
-  });
-
-  describe('メモの検索結果表示', () => {
-    const mockMemoResults = [
+    const mockMemos = [
       {
         id: 'memo-1',
         type: 'memo',
         bookId: 'book-1',
         bookTitle: 'テスト本1',
         page: 123,
-        text: 'これはテストメモのテキストです。',
-        comment: 'これはテストメモのコメントです。',
-        tags: ['名言', '感想'],
+        text: 'テストメモ内容1',
+        comment: 'テストコメント1',
+        tags: ['タグ1'],
         createdAt: { toDate: () => new Date('2024-01-01') }
       },
       {
@@ -251,54 +123,112 @@ describe('SearchResults', () => {
         bookId: 'book-2',
         bookTitle: 'テスト本2',
         page: 456,
-        text: 'これは2番目のテストメモのテキストです。',
-        comment: null,
-        tags: []
+        text: 'テストメモ内容2',
+        comment: 'テストコメント2',
+        tags: ['タグ2'],
+        createdAt: { toDate: () => new Date('2024-01-02') }
       }
     ];
 
+    test('検索結果統計が正しく表示される', () => {
+      const results = [...mockBooks, ...mockMemos];
+      renderWithTheme(
+        <SearchResults
+          results={results}
+          onResultClick={mockOnResultClick}
+        />
+      );
+
+      expect(screen.getByText('検索結果 (4件)')).toBeInTheDocument();
+      expect(screen.getByText('📚 書籍: 2件, 📝 メモ: 2件')).toBeInTheDocument();
+    });
+
+    test('書籍の検索結果が表示される', () => {
+      renderWithTheme(
+        <SearchResults
+          results={mockBooks}
+          onResultClick={mockOnResultClick}
+        />
+      );
+
+      expect(screen.getByText('テスト本1')).toBeInTheDocument();
+      expect(screen.getByText('テスト本2')).toBeInTheDocument();
+      expect(screen.getByText('テスト著者1')).toBeInTheDocument();
+      expect(screen.getByText('テスト著者2')).toBeInTheDocument();
+    });
+
     test('メモの検索結果が表示される', () => {
       renderWithTheme(
-        <SearchResults results={mockMemoResults} onResultClick={mockOnResultClick} />
+        <SearchResults
+          results={mockMemos}
+          onResultClick={mockOnResultClick}
+        />
+      );
+
+      expect(screen.getByText('テスト本1 - ページ123')).toBeInTheDocument();
+      expect(screen.getByText('テスト本2 - ページ456')).toBeInTheDocument();
+      expect(screen.getByText('テストメモ内容1')).toBeInTheDocument();
+      expect(screen.getByText('テストメモ内容2')).toBeInTheDocument();
+    });
+
+    test('書籍とメモの混合結果が表示される', () => {
+      const results = [mockBooks[0], mockMemos[0]];
+      renderWithTheme(
+        <SearchResults
+          results={results}
+          onResultClick={mockOnResultClick}
+        />
       );
 
       expect(screen.getByText('検索結果 (2件)')).toBeInTheDocument();
-      expect(screen.getByText('本: 0件, メモ: 2件')).toBeInTheDocument();
+      expect(screen.getByText('📚 書籍: 1件, 📝 メモ: 1件')).toBeInTheDocument();
       expect(screen.getByText('テスト本1')).toBeInTheDocument();
-      expect(screen.getByText('テスト本2')).toBeInTheDocument();
+      expect(screen.getByText('テスト本1 - ページ123')).toBeInTheDocument();
     });
+  });
 
-    test('メモの詳細情報が表示される', () => {
+  describe('クリック機能', () => {
+    test('書籍をクリックできる', () => {
+      const mockBook = {
+        id: 'book-1',
+        type: 'book',
+        title: 'テスト本',
+        author: 'テスト著者',
+        status: 'reading',
+        tags: [],
+        updatedAt: { toDate: () => new Date('2024-01-01') }
+      };
+
       renderWithTheme(
-        <SearchResults results={mockMemoResults} onResultClick={mockOnResultClick} />
+        <SearchResults
+          results={[mockBook]}
+          onResultClick={mockOnResultClick}
+        />
       );
 
-      expect(screen.getByText('ページ: 123')).toBeInTheDocument();
-      expect(screen.getByText('ページ: 456')).toBeInTheDocument();
-      expect(screen.getByText('これはテストメモのテキストです。')).toBeInTheDocument();
-      expect(screen.getByText('💭 これはテストメモのコメントです。')).toBeInTheDocument();
-    });
+      const bookCard = screen.getByTestId('book-result-book-1');
+      fireEvent.click(bookCard);
 
-    test('メモのタグが表示される', () => {
-      renderWithTheme(
-        <SearchResults results={mockMemoResults} onResultClick={mockOnResultClick} />
-      );
-
-      expect(screen.getByText('名言')).toBeInTheDocument();
-      expect(screen.getByText('感想')).toBeInTheDocument();
-    });
-
-    test('メモの作成日時が表示される', () => {
-      renderWithTheme(
-        <SearchResults results={mockMemoResults} onResultClick={mockOnResultClick} />
-      );
-
-      expect(screen.getByText(/📅 2024\/1\/1/)).toBeInTheDocument();
+      expect(mockOnResultClick).toHaveBeenCalledWith('book', 'book-1');
     });
 
     test('メモをクリックできる', () => {
+      const mockMemo = {
+        id: 'memo-1',
+        type: 'memo',
+        bookId: 'book-1',
+        bookTitle: 'テスト本',
+        page: 123,
+        text: 'テストメモ',
+        tags: [],
+        createdAt: { toDate: () => new Date('2024-01-01') }
+      };
+
       renderWithTheme(
-        <SearchResults results={mockMemoResults} onResultClick={mockOnResultClick} />
+        <SearchResults
+          results={[mockMemo]}
+          onResultClick={mockOnResultClick}
+        />
       );
 
       const memoCard = screen.getByTestId('memo-result-memo-1');
@@ -306,70 +236,61 @@ describe('SearchResults', () => {
 
       expect(mockOnResultClick).toHaveBeenCalledWith('memo', 'book-1', 'memo-1');
     });
-
-    test('ページが未設定の場合の表示', () => {
-      const mockMemoWithoutPage = [
-        {
-          id: 'memo-3',
-          type: 'memo',
-          bookId: 'book-3',
-          bookTitle: 'テスト本3',
-          page: null,
-          text: 'テストメモ',
-          comment: null,
-          tags: []
-        }
-      ];
-
-      renderWithTheme(
-        <SearchResults results={mockMemoWithoutPage} onResultClick={mockOnResultClick} />
-      );
-
-      expect(screen.getByText('ページ: 未設定')).toBeInTheDocument();
-    });
   });
 
-  describe('本とメモの混合結果', () => {
-    const mockMixedResults = [
-      {
+  describe('視覚的区別', () => {
+    test('書籍とメモが視覚的に区別される', () => {
+      const mockBook = {
         id: 'book-1',
         type: 'book',
-        title: 'テスト本1',
-        author: 'テスト著者1',
-        publisher: 'テスト出版社',
-        publishedDate: '2024-01-01',
+        title: 'テスト本',
+        author: 'テスト著者',
         status: 'reading',
-        tags: ['小説']
-      },
-      {
+        tags: [],
+        updatedAt: { toDate: () => new Date('2024-01-01') }
+      };
+
+      const mockMemo = {
         id: 'memo-1',
         type: 'memo',
         bookId: 'book-1',
-        bookTitle: 'テスト本1',
+        bookTitle: 'テスト本',
         page: 123,
         text: 'テストメモ',
-        comment: 'テストコメント',
-        tags: ['名言']
-      }
-    ];
+        tags: [],
+        createdAt: { toDate: () => new Date('2024-01-01') }
+      };
 
-    test('本とメモの両方が表示される', () => {
       renderWithTheme(
-        <SearchResults results={mockMixedResults} onResultClick={mockOnResultClick} />
+        <SearchResults
+          results={[mockBook, mockMemo]}
+          onResultClick={mockOnResultClick}
+        />
       );
 
-      expect(screen.getByText('検索結果 (2件)')).toBeInTheDocument();
-      expect(screen.getByText('本: 1件, メモ: 1件')).toBeInTheDocument();
-      expect(screen.getAllByText('テスト本1')).toHaveLength(2);
-      expect(screen.getByText('ページ: 123')).toBeInTheDocument();
+      // 書籍アイコンとメモアイコンの確認
+      expect(screen.getByText('📚')).toBeInTheDocument();
+      expect(screen.getByText('📝')).toBeInTheDocument();
     });
   });
 
   describe('エラーハンドリング', () => {
     test('onResultClickが未定義でもエラーが発生しない', () => {
+      const mockBook = {
+        id: 'book-1',
+        type: 'book',
+        title: 'テスト本',
+        author: 'テスト著者',
+        status: 'reading',
+        tags: [],
+        updatedAt: { toDate: () => new Date('2024-01-01') }
+      };
+
       expect(() => {
         renderWithTheme(
-          <SearchResults results={[]} />
+          <SearchResults
+            results={[mockBook]}
+          />
         );
       }).not.toThrow();
     });
@@ -377,7 +298,9 @@ describe('SearchResults', () => {
     test('resultsが未定義でもデフォルト値で動作する', () => {
       expect(() => {
         renderWithTheme(
-          <SearchResults onResultClick={mockOnResultClick} />
+          <SearchResults
+            onResultClick={mockOnResultClick}
+          />
         );
       }).not.toThrow();
 
