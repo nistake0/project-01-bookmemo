@@ -15,6 +15,23 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { ErrorDialogContext } from './CommonErrorDialog';
 import { useMemo } from '../hooks/useMemo';
 
+// CI環境でも安定する固定フォーマットで日時を表示（yyyy/M/d H:mm:ss）
+const formatDateTime = (createdAt) => {
+  try {
+    const date = createdAt && typeof createdAt.toDate === 'function' ? createdAt.toDate() : (createdAt instanceof Date ? createdAt : null);
+    if (!date) return '';
+    const yyyy = date.getFullYear();
+    const m = date.getMonth() + 1; // 月は0始まりのため+1
+    const d = date.getDate();
+    const h = date.getHours();
+    const mm = String(date.getMinutes()).padStart(2, '0');
+    const ss = String(date.getSeconds()).padStart(2, '0');
+    return `${yyyy}/${m}/${d} ${h}:${mm}:${ss}`;
+  } catch (e) {
+    return '';
+  }
+};
+
 const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode = false }) => {
   const { setGlobalError } = useContext(ErrorDialogContext);
   const { updateMemo, deleteMemo } = useMemo(bookId);
@@ -98,9 +115,9 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode 
                 ))}
               </Stack>
               {editingMemo?.page && <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>p. {editingMemo.page}</Typography>}
-              {editingMemo?.createdAt && editingMemo.createdAt.toDate && (
+              {editingMemo?.createdAt && (
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                  {editingMemo.createdAt.toDate().toLocaleString()}
+                  {formatDateTime(editingMemo.createdAt)}
                 </Typography>
               )}
             </>
