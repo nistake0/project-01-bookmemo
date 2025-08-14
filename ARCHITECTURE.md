@@ -119,6 +119,60 @@ graph TD
 - ステージングで十分にテスト・確認後、本番環境に反映
 - デプロイ手順や環境構築の詳細はAppendix参照
 
+### 6.1 GitHub Pages（本番デプロイ）の構成
+- CI: GitHub Actions（`.github/workflows/deploy.yml`）
+- ビルド: Vite（`vite build`）。本番時は `vite.config.js` の `base` が `'/project-01-bookmemo/'` に切り替わり、Pages配信パスへ最適化
+- 公開: `peaceiris/actions-gh-pages@v3` で `dist/` を `gh-pages` ブランチに公開
+- 権限: ワークフローに `permissions: contents: write` を付与。`actions/checkout` は `persist-credentials: false`
+- ブランチ: `gh-pages` はビルド成果物のみを保持。通常は orphan push（`main` と履歴は結合されない）
+
+### 6.2 ワークフロー構成
+- job: test（全PR/`main` push 対象）
+  - `npm ci`
+  - `npm run test:unit`
+  - （任意）E2E: 変数 `RUN_E2E == 'true'` の場合のみ実行
+    - Secrets から `.env.local` を生成（Firebaseクライアント設定）
+    - `SERVICE_ACCOUNT_KEY_JSON` があれば `serviceAccountKey.json` を生成
+    - `npm run dev` をバックグラウンド起動 → `npm run test:e2e`
+- job: build-and-deploy（`main` への push 時のみ）
+  - Secrets から `.env.production` を生成
+  - `npm run build`
+  - `peaceiris/actions-gh-pages` で `dist/` を `gh-pages` へ公開
+
+### 6.3 Secrets / Variables（GitHub）
+- Secrets（本番Firebase設定）
+  - `VITE_FIREBASE_API_KEY`
+  - `VITE_FIREBASE_AUTH_DOMAIN`
+  - `VITE_FIREBASE_PROJECT_ID`
+  - `VITE_FIREBASE_STORAGE_BUCKET`
+  - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+  - `VITE_FIREBASE_APP_ID`
+- （任意/E2E 用）
+  - Secret: `SERVICE_ACCOUNT_KEY_JSON`（JSON文字列）。E2Eのテストデータセットアップ用スクリプトが参照
+  - Variable: `RUN_E2E = true`（CIでE2Eを回したい場合）
+
+### 6.4 デプロイフロー
+1. `main` に push
+2. Actions（test job）でユニットテスト実行（必要に応じてE2Eも）
+3. Actions（build-and-deploy job）で本番ビルド→`gh-pages` へ公開
+4. GitHub Pages が `gh-pages` の `dist/` を配信
+
+### 6.5 gh-pages ブランチの扱い
+- `main` と履歴が結合しない（orphan push）運用。`gh-pages` はビルド成果物のみの履歴
+- 追跡性が必要であれば、デプロイコミットメッセージへ `main` のSHAを含める、または `dist/build-meta.json` 等に `github.sha` を書き出す
+- 通常は orphan 運用を推奨（リポジトリサイズの肥大化を防止）
+
+### 6.6 トラブルシューティング
+- 403（Pages への push 失敗）
+  - ワークフローに `permissions: contents: write` があるか
+  - `actions/checkout` で `persist-credentials: false` を設定
+- Firebase `auth/invalid-api-key`
+  - `.env.production` 生成のための Firebase Secrets が設定されているか
+- `serviceAccountKey.json` 不足（E2E）
+  - `SERVICE_ACCOUNT_KEY_JSON` を Secrets に設定、または E2E をオフ（`RUN_E2E`未設定）
+
+参考: 運用手順の概説は `README.md`「本番デプロイ」、詳細手順は `doc/production-deployment-guide.md` を参照。
+
 ## 7. テスト・開発運用
 - React Testing Library＋Jestでユニットテスト
 - CypressによるE2Eテストは「1ファイル＝1シナリオ（単体実行）」運用とし、テストごとに状態が独立するように設計
