@@ -110,11 +110,40 @@ export default function useStats() {
     return rows;
   }, [books, memos]);
 
+  const monthlyFinished = useMemo(() => {
+    // 直近12ヶ月の読了冊数を月別集計（finishedAtが存在しない場合はupdatedAtやcreatedAtの年月にフォールバック）
+    const now = new Date();
+    const buckets = [];
+    const keyToIndex = new Map();
+    for (let i = 11; i >= 0; i -= 1) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      keyToIndex.set(key, buckets.length);
+      buckets.push({ key, year: d.getFullYear(), month: d.getMonth() + 1, count: 0 });
+    }
+
+    for (const b of books) {
+      const status = b.status || 'reading';
+      const ts = b.finishedAt || b.updatedAt || b.createdAt;
+      if (!ts || status !== 'finished') continue;
+      // Firestore Timestamp互換（toDate）やDate、文字列ISOを許容
+      const date = typeof ts?.toDate === 'function' ? ts.toDate() : new Date(ts);
+      if (Number.isNaN(date?.getTime?.())) continue;
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!keyToIndex.has(key)) continue; // 直近12ヶ月のみ
+      const idx = keyToIndex.get(key);
+      buckets[idx].count += 1;
+    }
+
+    return buckets;
+  }, [books]);
+
   return {
     loading,
     error,
     summary,
     tagStats,
+    monthlyFinished,
   };
 }
 
