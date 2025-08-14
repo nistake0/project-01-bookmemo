@@ -275,3 +275,57 @@ npm test
   - `archive/` ... 一時的な設計メモ・議事録・平時に参照しない記録のアーカイブ
 - `ARCHITECTURE.md` ... 設計・運用方針の詳細
 - `cursor-chats/` ... Cursorとの対話ログ（AI自動生成の全記録）
+
+## 本番デプロイ（GitHub Pages）
+
+### 仕組み
+- GitHub Actions（`.github/workflows/deploy.yml`）で `main` ブランチへの push を契機に自動ビルド・デプロイ
+- ビルド: `vite build`（`vite.config.js` の `base` は production 時に `'/project-01-bookmemo/'` に自動切替）
+- デプロイ: `peaceiris/actions-gh-pages@v3` で `dist/` を `gh-pages` ブランチへ公開
+  - `permissions: contents: write` を付与し、`actions/checkout` は `persist-credentials: false`
+  - `gh-pages` はビルド成果物のみを保持（通常は orphan push。`main` と履歴は結合しません）
+
+### 実装（ワークフロー概要）
+- Job: test
+  - `npm ci`
+  - `npm run test:unit`
+  - 任意で E2E 実行（`RUN_E2E == 'true'` の場合のみ）
+    - `.env.local` を Secrets から生成
+    - 必要であれば `serviceAccountKey.json` を Secrets から生成
+    - `npm run dev` をバックグラウンド起動 → `npm run test:e2e`
+- Job: build-and-deploy（main 時のみ）
+  - `.env.production` を Secrets から生成
+  - `npm run build`
+  - `peaceiris/actions-gh-pages` で `dist/` を `gh-pages` に公開
+
+### 事前準備
+1. GitHub Pages の有効化
+   - GitHub → Settings → Pages → Source: `Deploy from a branch`, Branch: `gh-pages`
+2. Secrets（本番 Firebase 設定）
+   - `VITE_FIREBASE_API_KEY`
+   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_PROJECT_ID`
+   - `VITE_FIREBASE_STORAGE_BUCKET`
+   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+   - `VITE_FIREBASE_APP_ID`
+3. （任意/E2E 用）Secrets と Variables
+   - `SERVICE_ACCOUNT_KEY_JSON`（JSON文字列; E2E のテストデータセットアップ用）
+   - Actions Variables: `RUN_E2E = true`（E2E をCIで回したい場合）
+
+### 手順
+- 通常運用: `main` に push するだけで、自動でビルド→`gh-pages` へデプロイ
+- 手動検証（ローカル）:
+  - `npm run build:prod`
+  - `npm run preview`
+
+### 本番環境へのアクセス
+- 本番URL: `https://nistake0.github.io/project-01-bookmemo/`
+
+### トラブルシューティング
+- 403（Pages への push 失敗）
+  - ワークフローに `permissions: contents: write` があるか確認
+  - `actions/checkout` で `persist-credentials: false` を設定
+- `auth/invalid-api-key`
+  - 上記 Firebase Secrets が設定されているか確認（`.env.production` 生成）
+- `serviceAccountKey.json` が無い（E2E）
+  - `SERVICE_ACCOUNT_KEY_JSON` を Secrets に設定、もしくは E2E をオフにする（`RUN_E2E` 未設定）
