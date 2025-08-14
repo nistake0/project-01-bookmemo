@@ -204,6 +204,15 @@ graph TD
 - ページ側: `BookList.jsx` / `TagSearch.jsx` のタブコンテナに `position: 'sticky'; top: 0; z-index: 1100; background: theme.palette.background.paper;`
 - テスト: `data-testid` を付与し、ユニットテストで `style.position === 'sticky'` を確認
 
+### タグ管理（編集・削除・統合）
+- フック: `useTagManagement.js`
+  - renameTag: 既存タグ名の変更（本/メモ横断で一括更新）
+  - deleteTag: 既存タグの削除（本/メモから当該タグを除去）
+  - mergeTags: 別名タグ群を正規名へ統合（重複除去・バッチ更新）
+- UI: `TagEditDialog.jsx`
+  - 名前変更・削除・統合（カンマ区切りで別名入力）
+- TODO: ダイアログ閉鎖後の統計再計算（再フェッチ or 楽観更新）
+
 ### その他運用Tips
 - 設計ドキュメントは常に最新化し、開発再開時の指針とする
 - 詳細仕様や運用ノウハウはAppendixに集約し、他章からは参照のみとする
