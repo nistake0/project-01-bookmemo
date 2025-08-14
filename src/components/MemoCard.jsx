@@ -4,6 +4,20 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useSwipeable } from 'react-swipeable';
 
+// CI環境でも安定する固定フォーマットで日付を表示（yyyy/M/d）
+const formatDateYMD = (createdAt) => {
+  try {
+    const date = createdAt && typeof createdAt.toDate === 'function' ? createdAt.toDate() : (createdAt instanceof Date ? createdAt : null);
+    if (!date) return '';
+    const yyyy = date.getFullYear();
+    const m = date.getMonth() + 1; // 月は0始まりのため+1
+    const d = date.getDate();
+    return `${yyyy}/${m}/${d}`;
+  } catch (e) {
+    return '';
+  }
+};
+
 const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const [showActions, setShowActions] = useState(false);
@@ -81,7 +95,7 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
           <CardActions sx={{ justifyContent: 'space-between', alignItems: 'center', py: 0 }}>
             <Stack direction="row" spacing={1} alignItems="center">
               {memo.page && <Typography variant="caption">p.{memo.page}</Typography>}
-              {createdAt && <Typography variant="caption" color="text.secondary">{createdAt.toLocaleDateString()}</Typography>}
+              {createdAt && <Typography variant="caption" color="text.secondary">{formatDateYMD(createdAt)}</Typography>}
               {Array.isArray(memo.tags) && memo.tags.map((tag, idx) => (
                 <Chip key={idx} label={tag} size="small" color="secondary" />
               ))}
@@ -158,7 +172,7 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
       <CardActions sx={{ justifyContent: 'space-between', alignItems: 'center', py: 0 }}>
         <Stack direction="row" spacing={1} alignItems="center">
           {memo.page && <Typography variant="caption">p.{memo.page}</Typography>}
-          {createdAt && <Typography variant="caption" color="text.secondary">{createdAt.toLocaleDateString()}</Typography>}
+          {createdAt && <Typography variant="caption" color="text.secondary">{formatDateYMD(createdAt)}</Typography>}
           {Array.isArray(memo.tags) && memo.tags.map((tag, idx) => (
             <Chip key={idx} label={tag} size="small" color="secondary" />
           ))}
