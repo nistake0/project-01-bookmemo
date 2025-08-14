@@ -18,6 +18,12 @@
   - [x] useBookSearch.js - ISBN検索と外部API呼び出し
   - [x] useBook.js - 書籍詳細・編集・削除（既に実装済み）
   - [x] useMemo.js - メモ関連ロジック（既に実装済み）
+ - [ ] useSearch.js の責務分割（可読性・保守性向上）
+   - [ ] クエリ構築処理を分離: `buildBookQuery` / `buildMemoQuery`
+   - [ ] 結果整形/加工を分離: `hydrateMemoWithBookTitle` / `sortResults`
+   - [ ] フィルタ関数を専用モジュールへ抽出: `searchFilters.js`（text/tags/memoContent）
+   - [ ] 親書籍タイトル取得のキャッシュ（Map）導入（I/O削減）
+   - [ ] デバッグログの制御（`debug`フラグで出力抑制）
 
 ### 3. UI/UX・アクセシビリティ
 - [ ] アクセシビリティ改善（ARIA属性、キーボードナビ等）
@@ -32,6 +38,12 @@
  - [x] 書籍一覧ページのUX改善（スクロール時に現在タブ「すべて／読書中／読了」が不明になる問題の解消）
    - 対応: タブヘッダをsticky化（同上）。`BookList.jsx` にテストIDを付与しユニットテストで確認
 - [x] スマートフォンUI/UX改善（2025-08-11追加） ✅ **Phase 8完了**
+- [ ] ページ/コンポーネントの抽象度そろえ・構造化
+  - [ ] `TagSearch.jsx`: タブ内ビューを別ファイルへ分離（`SearchTab.jsx` / `TagManagementTab.jsx`）
+  - [ ] `SearchResults.jsx`: カード描画を小コンポーネント化（`BookResultCard.jsx` / `MemoResultCard.jsx`）
+  - [ ] `Stats.jsx`: チャートを小コンポーネント化（`StatusPie.jsx` / `MonthlyBar.jsx` / `TopList.jsx`）
+  - [ ] ページ内`sx`の繰り返しをテーマの`styleOverrides`/`variants`へ移管（共通化）
+
   - [x] Material-UIテーマのモバイル最適化
   - [x] フォームフィールドのサイズ・余白調整
   - [x] レイアウトの効率化（ボタン配置、スクロール量削減）
