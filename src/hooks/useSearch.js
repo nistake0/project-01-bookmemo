@@ -95,7 +95,7 @@ export function useSearch(options = {}) {
     if (searchTarget === 'integrated' || searchTarget === 'memos') {
       // メモのみの場合は常にメモクエリを実行
       // 統合の場合はメモ内容検索またはタグ検索が有効な場合のみ実行
-      if (searchTarget === 'memos' || (includeMemoContent && memoContent) || (selectedTags && selectedTags.length > 0)) {
+      if (searchTarget === 'memos' || (searchTarget === 'integrated' && ((includeMemoContent && memoContent) || (selectedTags && selectedTags.length > 0)))) {
         const memoQueryConstraints = [
           where('userId', '==', user.uid)
         ];
