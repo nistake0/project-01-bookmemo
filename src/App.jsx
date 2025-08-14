@@ -273,10 +273,14 @@ function AppRoutes() {
 
 function App() {
   const [globalError, setGlobalError] = useState("");
+  
+  // 環境に応じてbasenameを設定
+  const basename = import.meta.env.PROD ? "/project-01-bookmemo" : "";
+  
   return (
     <AuthProvider>
       <ErrorDialogContext.Provider value={{ setGlobalError }}>
-        <BrowserRouter basename="/project-01-bookmemo">
+        <BrowserRouter basename={basename}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <AppRoutes />
