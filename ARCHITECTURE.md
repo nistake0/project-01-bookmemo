@@ -161,6 +161,17 @@ graph TD
 - Blazeプラン移行や他サービス利用時に画像添付機能を拡張予定
 - Algolia等の全文検索サービス、PWA化、タグ分析機能なども今後の拡張候補
 
+### 優先度変更（2025-08-14）
+- **PWA化を優先**
+  - App Shell戦略を採用し、Service Workerで静的アセットを事前キャッシュ
+  - `manifest.webmanifest` を追加（`start_url`, `scope`, `display: standalone`, `icons`, `theme_color`, `background_color`）
+  - キャッシュ戦略:
+    - 静的アセット: Cache First
+    - API（Firestore/Storage関連）: Network First/ Stale-While-Revalidate（オンライン優先）
+  - オフラインフォールバック（簡易オフラインページ or App Shell）
+  - SW更新通知（登録後の更新検知→スナックバーで再読み込み促し）
+- **タグ関連の残課題は優先度を下げる**（正規化高度化、一括操作専用画面、UI分割など）
+
 ## 10. 補足・詳細仕様・FAQ（Appendix）
 
 ### タグ履歴のFirestore設計

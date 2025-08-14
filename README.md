@@ -223,6 +223,16 @@ npm test
   - 画像最適化（WebP形式、遅延読み込み）
   - OCR機能の拡張（Tesseract.jsベース）
 
+### 優先度変更（2025-08-14）
+- **PWA化を最優先で着手**
+  - Service Worker導入（Workbox or 手動実装）
+  - Web App Manifest作成（アイコン、display、theme_color、start_url）
+  - ルートフォールバック（オフライン時のApp Shell）
+  - キャッシュ戦略（静的: CacheFirst、API: StaleWhileRevalidate）
+  - 更新検知と再読み込みUX（SW更新通知）
+  - PWA関連のユニット/E2Eテスト整備
+- **タグの残タスクは優先度を下げ、後続で対応**（正規化高度化、一括操作専用画面など）
+
 ## 運用・セキュリティ履歴
 - Firestoreのセキュリティルールを本番用に設定し、認証ユーザーのみ自分のデータにアクセス可能に
 - ルール・インデックス・CLI認証・デプロイ手順は`firestore.rules`や`firebase.json`等で管理
