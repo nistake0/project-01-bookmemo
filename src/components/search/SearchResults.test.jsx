@@ -80,6 +80,88 @@ describe('SearchResults', () => {
     });
   });
 
+  describe('タブ切り替え機能', () => {
+    const mockMixedResults = [
+      {
+        id: 'book-1',
+        type: 'book',
+        title: 'テスト本1',
+        author: 'テスト著者1',
+        publisher: 'テスト出版社',
+        publishedDate: '2024-01-01',
+        status: 'reading',
+        tags: ['小説']
+      },
+      {
+        id: 'memo-1',
+        type: 'memo',
+        bookId: 'book-1',
+        bookTitle: 'テスト本1',
+        page: 123,
+        text: 'テストメモ',
+        comment: 'テストコメント',
+        tags: ['名言']
+      }
+    ];
+
+    test('タブが正しく表示される', () => {
+      renderWithTheme(
+        <SearchResults results={mockMixedResults} onResultClick={mockOnResultClick} />
+      );
+
+      expect(screen.getByTestId('search-results-tabs')).toBeInTheDocument();
+      expect(screen.getByTestId('integrated-tab')).toBeInTheDocument();
+      expect(screen.getByTestId('books-tab')).toBeInTheDocument();
+      expect(screen.getByTestId('memos-tab')).toBeInTheDocument();
+    });
+
+    test('タブの件数が正しく表示される', () => {
+      renderWithTheme(
+        <SearchResults results={mockMixedResults} onResultClick={mockOnResultClick} />
+      );
+
+      expect(screen.getByText('統合 (2)')).toBeInTheDocument();
+      expect(screen.getByText('書籍 (1)')).toBeInTheDocument();
+      expect(screen.getByText('メモ (1)')).toBeInTheDocument();
+    });
+
+    test('統合タブがデフォルトで表示される', () => {
+      renderWithTheme(
+        <SearchResults results={mockMixedResults} onResultClick={mockOnResultClick} />
+      );
+
+      expect(screen.getByTestId('integrated-tab-panel')).toBeInTheDocument();
+      expect(screen.getByText('本 (1件)')).toBeInTheDocument();
+      expect(screen.getByText('メモ (1件)')).toBeInTheDocument();
+    });
+
+    test('書籍タブに切り替えられる', () => {
+      renderWithTheme(
+        <SearchResults results={mockMixedResults} onResultClick={mockOnResultClick} />
+      );
+
+      const booksTab = screen.getByTestId('books-tab');
+      fireEvent.click(booksTab);
+
+      expect(screen.getByTestId('books-tab-panel')).toBeInTheDocument();
+      expect(screen.getByText('書籍 (1件)')).toBeInTheDocument();
+      expect(screen.queryByText('メモ (1件)')).not.toBeInTheDocument();
+    });
+
+    test('メモタブに切り替えられる', () => {
+      renderWithTheme(
+        <SearchResults results={mockMixedResults} onResultClick={mockOnResultClick} />
+      );
+
+      const memosTab = screen.getByTestId('memos-tab');
+      fireEvent.click(memosTab);
+
+      expect(screen.getByTestId('memos-tab-panel')).toBeInTheDocument();
+      expect(screen.getByText('メモ (1件)')).toBeInTheDocument();
+      expect(screen.queryByText('本 (1件)')).not.toBeInTheDocument();
+    });
+  });
+
   describe('本の検索結果表示', () => {
     const mockBookResults = [
       {
@@ -112,7 +194,6 @@ describe('SearchResults', () => {
       );
 
       expect(screen.getByText('検索結果 (2件)')).toBeInTheDocument();
-      expect(screen.getByText('本 (2件)')).toBeInTheDocument();
       expect(screen.getByText('本: 2件, メモ: 0件')).toBeInTheDocument();
       expect(screen.getByText('テスト本1')).toBeInTheDocument();
       expect(screen.getByText('テスト本2')).toBeInTheDocument();
@@ -144,7 +225,7 @@ describe('SearchResults', () => {
         <SearchResults results={mockBookResults} onResultClick={mockOnResultClick} />
       );
 
-      const bookCard = screen.getByTestId('book-result-book-1');
+      const bookCard = screen.getByTestId('integrated-book-result-book-1');
       fireEvent.click(bookCard);
 
       expect(mockOnResultClick).toHaveBeenCalledWith('book', 'book-1');
@@ -161,7 +242,8 @@ describe('SearchResults', () => {
         page: 123,
         text: 'これはテストメモのテキストです。',
         comment: 'これはテストメモのコメントです。',
-        tags: ['名言', '感想']
+        tags: ['名言', '感想'],
+        createdAt: { toDate: () => new Date('2024-01-01') }
       },
       {
         id: 'memo-2',
@@ -182,7 +264,6 @@ describe('SearchResults', () => {
 
       expect(screen.getByText('検索結果 (2件)')).toBeInTheDocument();
       expect(screen.getByText('本: 0件, メモ: 2件')).toBeInTheDocument();
-      expect(screen.getByText('メモ (2件)')).toBeInTheDocument();
       expect(screen.getByText('テスト本1')).toBeInTheDocument();
       expect(screen.getByText('テスト本2')).toBeInTheDocument();
     });
@@ -195,7 +276,7 @@ describe('SearchResults', () => {
       expect(screen.getByText('ページ: 123')).toBeInTheDocument();
       expect(screen.getByText('ページ: 456')).toBeInTheDocument();
       expect(screen.getByText('これはテストメモのテキストです。')).toBeInTheDocument();
-      expect(screen.getByText('これはテストメモのコメントです。')).toBeInTheDocument();
+      expect(screen.getByText('💭 これはテストメモのコメントです。')).toBeInTheDocument();
     });
 
     test('メモのタグが表示される', () => {
@@ -207,6 +288,14 @@ describe('SearchResults', () => {
       expect(screen.getByText('感想')).toBeInTheDocument();
     });
 
+    test('メモの作成日時が表示される', () => {
+      renderWithTheme(
+        <SearchResults results={mockMemoResults} onResultClick={mockOnResultClick} />
+      );
+
+      expect(screen.getByText(/📅 2024\/1\/1/)).toBeInTheDocument();
+    });
+
     test('メモをクリックできる', () => {
       renderWithTheme(
         <SearchResults results={mockMemoResults} onResultClick={mockOnResultClick} />
@@ -216,6 +305,27 @@ describe('SearchResults', () => {
       fireEvent.click(memoCard);
 
       expect(mockOnResultClick).toHaveBeenCalledWith('memo', 'book-1', 'memo-1');
+    });
+
+    test('ページが未設定の場合の表示', () => {
+      const mockMemoWithoutPage = [
+        {
+          id: 'memo-3',
+          type: 'memo',
+          bookId: 'book-3',
+          bookTitle: 'テスト本3',
+          page: null,
+          text: 'テストメモ',
+          comment: null,
+          tags: []
+        }
+      ];
+
+      renderWithTheme(
+        <SearchResults results={mockMemoWithoutPage} onResultClick={mockOnResultClick} />
+      );
+
+      expect(screen.getByText('ページ: 未設定')).toBeInTheDocument();
     });
   });
 
@@ -250,8 +360,6 @@ describe('SearchResults', () => {
 
       expect(screen.getByText('検索結果 (2件)')).toBeInTheDocument();
       expect(screen.getByText('本: 1件, メモ: 1件')).toBeInTheDocument();
-      expect(screen.getByText('本 (1件)')).toBeInTheDocument();
-      expect(screen.getByText('メモ (1件)')).toBeInTheDocument();
       expect(screen.getAllByText('テスト本1')).toHaveLength(2);
       expect(screen.getByText('ページ: 123')).toBeInTheDocument();
     });
