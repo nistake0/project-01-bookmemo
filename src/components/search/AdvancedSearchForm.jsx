@@ -22,11 +22,20 @@ import MemoContentSearchField from './MemoContentSearchField';
  */
 function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSearch }) {
   const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTarget, setSearchTarget] = useState(searchConditions?.searchTarget || 'integrated');
 
   const handleTextChange = (event) => {
     onSearchConditionsChange?.({
       ...searchConditions,
       text: event.target.value
+    });
+  };
+
+  const handleSearchTargetChange = (event, newValue) => {
+    setSearchTarget(newValue);
+    onSearchConditionsChange?.({
+      ...searchConditions,
+      searchTarget: newValue
     });
   };
 
@@ -75,6 +84,22 @@ function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSear
       <Typography variant="h6" gutterBottom>検索条件</Typography>
       
       <Paper sx={{ p: 2, mb: 2 }}>
+        {/* 検索対象選択 */}
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle2" gutterBottom>
+            検索対象
+          </Typography>
+          <Tabs 
+            value={searchTarget} 
+            onChange={handleSearchTargetChange}
+            data-testid="search-target-tabs"
+          >
+            <Tab label="統合" value="integrated" />
+            <Tab label="書籍のみ" value="books" />
+            <Tab label="メモのみ" value="memos" />
+          </Tabs>
+        </Box>
+
         {/* テキスト検索 */}
         <TextField
           label="テキスト検索（タイトル・著者・タグ）"
@@ -86,48 +111,54 @@ function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSear
           data-testid="text-search-field"
         />
 
-        {/* ステータスフィルター */}
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            ステータス
-          </Typography>
-          <Tabs 
-            value={statusFilter} 
-            onChange={handleStatusChange}
-            data-testid="status-filter-tabs"
-          >
-            <Tab label="すべて" value="all" />
-            <Tab label="読書中" value="reading" />
-            <Tab label="読了" value="finished" />
-          </Tabs>
-        </Box>
+        {/* ステータスフィルター（書籍のみの場合は表示） */}
+        {(searchTarget === 'integrated' || searchTarget === 'books') && (
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              ステータス
+            </Typography>
+            <Tabs 
+              value={statusFilter} 
+              onChange={handleStatusChange}
+              data-testid="status-filter-tabs"
+            >
+              <Tab label="すべて" value="all" />
+              <Tab label="読書中" value="reading" />
+              <Tab label="読了" value="finished" />
+            </Tabs>
+          </Box>
+        )}
 
-        {/* 日時検索 */}
-        <Box sx={{ mt: 2 }}>
-          <DateRangeSelector
-            value={searchConditions?.dateRange}
-            onChange={handleDateRangeChange}
-          />
-        </Box>
+        {/* 日時検索（書籍のみの場合は表示） */}
+        {(searchTarget === 'integrated' || searchTarget === 'books') && (
+          <Box sx={{ mt: 2 }}>
+            <DateRangeSelector
+              value={searchConditions?.dateRange}
+              onChange={handleDateRangeChange}
+            />
+          </Box>
+        )}
 
         {/* タグ検索 */}
         <Box sx={{ mt: 2 }}>
           <TagSearchField
             selectedTags={searchConditions?.selectedTags || []}
             onTagsChange={handleTagsChange}
-            type="book"
+            type={searchTarget === 'memos' ? 'memo' : 'book'}
           />
         </Box>
 
-        {/* メモ内容検索 */}
-        <Box sx={{ mt: 2 }}>
-          <MemoContentSearchField
-            memoContent={searchConditions?.memoContent || ''}
-            includeMemoContent={searchConditions?.includeMemoContent || false}
-            onMemoContentChange={handleMemoContentChange}
-            onIncludeMemoContentChange={handleIncludeMemoContentChange}
-          />
-        </Box>
+        {/* メモ内容検索（メモのみまたは統合の場合に表示） */}
+        {(searchTarget === 'integrated' || searchTarget === 'memos') && (
+          <Box sx={{ mt: 2 }}>
+            <MemoContentSearchField
+              memoContent={searchConditions?.memoContent || ''}
+              includeMemoContent={searchConditions?.includeMemoContent || false}
+              onMemoContentChange={handleMemoContentChange}
+              onIncludeMemoContentChange={handleIncludeMemoContentChange}
+            />
+          </Box>
+        )}
       </Paper>
 
       {/* 検索ボタン */}

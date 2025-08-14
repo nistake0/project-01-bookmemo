@@ -143,6 +143,7 @@ describe('TagSearch', () => {
         dateRange: { type: 'none' },
         memoContent: '',
         selectedTags: [],
+        searchTarget: 'integrated',
         sortBy: 'updatedAt',
         sortOrder: 'desc'
       });
@@ -232,6 +233,7 @@ describe('TagSearch', () => {
         dateRange: { type: 'none' },
         memoContent: '',
         selectedTags: ['小説'],
+        searchTarget: 'integrated',
         sortBy: 'updatedAt',
         sortOrder: 'desc'
       });
@@ -269,6 +271,7 @@ describe('TagSearch', () => {
         dateRange: { type: 'none' },
         memoContent: '',
         selectedTags: ['技術書'],
+        searchTarget: 'integrated',
         sortBy: 'updatedAt',
         sortOrder: 'desc'
       });
@@ -302,6 +305,7 @@ describe('TagSearch', () => {
         dateRange: { type: 'none' },
         memoContent: '',
         selectedTags: ['小説'],
+        searchTarget: 'integrated',
         sortBy: 'updatedAt',
         sortOrder: 'desc'
       });

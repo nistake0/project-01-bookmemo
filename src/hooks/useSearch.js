@@ -26,77 +26,89 @@ export function useSearch(options = {}) {
   const { limit: resultLimit = 50 } = options;
 
   /**
-   * 検索条件をFirestoreクエリに変換
+   * 検索条件からクエリを構築
    * 
    * @param {Object} conditions - 検索条件
-   * @returns {Array} Firestoreクエリの配列
+   * @returns {Array} クエリの配列
    */
   const buildQueries = useCallback((conditions) => {
-    if (!user) return [];
+    const { 
+      text, 
+      status, 
+      dateRange, 
+      memoContent, 
+      includeMemoContent, 
+      selectedTags,
+      searchTarget = 'integrated'
+    } = conditions;
 
     const queries = [];
-    const { text, status, dateRange, selectedTags, memoContent, includeMemoContent } = conditions;
 
-    // 本の検索クエリ
-    const bookQueryConstraints = [
-      where('userId', '==', user.uid)
-    ];
-
-    // ステータスフィルター
-    if (status && status !== 'all') {
-      bookQueryConstraints.push(where('status', '==', status));
-    }
-
-    // 日時フィルター
-    if (dateRange && dateRange.type !== 'none') {
-      const { startDate, endDate } = getDateRangeFilter(dateRange);
-      if (startDate) {
-        bookQueryConstraints.push(where('updatedAt', '>=', startDate));
-      }
-      if (endDate) {
-        bookQueryConstraints.push(where('updatedAt', '<=', endDate));
-      }
-    }
-
-    // タグフィルター
-    if (selectedTags && selectedTags.length > 0) {
-      // インデックスエラーを避けるため、クライアントサイドフィルタリングにフォールバック
-      // 複合インデックスが不足している場合があるため
-      console.log('タグフィルター適用:', selectedTags);
-      console.log('タグフィルターの型:', typeof selectedTags, Array.isArray(selectedTags));
-      console.log('タグフィルターの内容:', JSON.stringify(selectedTags));
-      
-      // タグが配列でない場合やネストした配列の場合は、クライアントサイドフィルタリングのみ使用
-      if (!Array.isArray(selectedTags) || selectedTags.some(tag => Array.isArray(tag))) {
-        console.log('ネストした配列または無効なタグ形式を検出、クライアントサイドフィルタリングのみ使用');
-      } else {
-        bookQueryConstraints.push(where('tags', 'array-contains-any', selectedTags));
-      }
-    }
-
-    const bookQuery = query(
-      collection(db, 'books'),
-      ...bookQueryConstraints,
-      orderBy('updatedAt', 'desc'),
-      limit(resultLimit)
-    );
-    queries.push({ type: 'book', query: bookQuery });
-
-    // メモの検索クエリ（メモ内容検索またはタグ検索が有効な場合）
-    if ((includeMemoContent && memoContent) || (selectedTags && selectedTags.length > 0)) {
-      const memoQueryConstraints = [
+    // 書籍の検索クエリ（統合または書籍のみの場合）
+    if (searchTarget === 'integrated' || searchTarget === 'books') {
+      const bookQueryConstraints = [
         where('userId', '==', user.uid)
       ];
 
-      // メモ内容のテキスト検索（簡易実装）
-      // 実際の実装では全文検索サービス（Algolia等）の使用を推奨
-      const memoQuery = query(
-        collectionGroup(db, 'memos'),
-        ...memoQueryConstraints,
+      // ステータスフィルター
+      if (status && status !== 'all') {
+        bookQueryConstraints.push(where('status', '==', status));
+      }
+
+      // 日時フィルター
+      if (dateRange && dateRange.type !== 'none') {
+        const { startDate, endDate } = getDateRangeFilter(dateRange);
+        if (startDate) {
+          bookQueryConstraints.push(where('updatedAt', '>=', startDate));
+        }
+        if (endDate) {
+          bookQueryConstraints.push(where('updatedAt', '<=', endDate));
+        }
+      }
+
+      // タグフィルター
+      if (selectedTags && selectedTags.length > 0) {
+        // インデックスエラーを避けるため、クライアントサイドフィルタリングにフォールバック
+        // 複合インデックスが不足している場合があるため
+        console.log('タグフィルター適用:', selectedTags);
+        console.log('タグフィルターの型:', typeof selectedTags, Array.isArray(selectedTags));
+        console.log('タグフィルターの内容:', JSON.stringify(selectedTags));
+        
+        // タグが配列でない場合やネストした配列の場合は、クライアントサイドフィルタリングのみ使用
+        if (!Array.isArray(selectedTags) || selectedTags.some(tag => Array.isArray(tag))) {
+          console.log('ネストした配列または無効なタグ形式を検出、クライアントサイドフィルタリングのみ使用');
+        } else {
+          bookQueryConstraints.push(where('tags', 'array-contains-any', selectedTags));
+        }
+      }
+
+      const bookQuery = query(
+        collection(db, 'books'),
+        ...bookQueryConstraints,
         orderBy('updatedAt', 'desc'),
         limit(resultLimit)
       );
-      queries.push({ type: 'memo', query: memoQuery });
+      queries.push({ type: 'book', query: bookQuery });
+    }
+
+    // メモの検索クエリ（統合またはメモのみの場合）
+    if (searchTarget === 'integrated' || searchTarget === 'memos') {
+      // メモ内容検索またはタグ検索が有効な場合
+      if ((includeMemoContent && memoContent) || (selectedTags && selectedTags.length > 0)) {
+        const memoQueryConstraints = [
+          where('userId', '==', user.uid)
+        ];
+
+        // メモ内容のテキスト検索（簡易実装）
+        // 実際の実装では全文検索サービス（Algolia等）の使用を推奨
+        const memoQuery = query(
+          collectionGroup(db, 'memos'),
+          ...memoQueryConstraints,
+          orderBy('updatedAt', 'desc'),
+          limit(resultLimit)
+        );
+        queries.push({ type: 'memo', query: memoQuery });
+      }
     }
 
     return queries;

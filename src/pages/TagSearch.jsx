@@ -28,6 +28,7 @@ export default function TagSearch() {
     dateRange: { type: 'none' },
     memoContent: '',
     selectedTags: [],
+    searchTarget: 'integrated',
     sortBy: 'updatedAt',
     sortOrder: 'desc'
   });
@@ -63,6 +64,7 @@ export default function TagSearch() {
       dateRange: { type: 'none' },
       memoContent: '',
       selectedTags: [],
+      searchTarget: 'integrated',
       sortBy: 'updatedAt',
       sortOrder: 'desc'
     });
