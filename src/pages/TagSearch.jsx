@@ -189,8 +189,8 @@ function SearchTab({
   return (
     <Box>
       <Typography variant="h5" gutterBottom>高度な検索</Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        複数条件での絞り込み検索ができます。本のタイトル・著者・タグ、メモ内容などで検索できます。
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        タイトル・著者・タグ・メモ内容で絞り込みできます。
       </Typography>
       
       <AdvancedSearchForm
@@ -240,8 +240,8 @@ function TagManagementTab({ onTagClick }) {
   return (
     <Box>
       <Typography variant="h5" gutterBottom>タグ管理</Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        タグの統計情報を確認し、タグをクリックして検索を実行できます。
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        統計を確認し、タグクリックで検索できます。
       </Typography>
       
       <TagStats onTagClick={onTagClick} />

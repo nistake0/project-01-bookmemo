@@ -6,7 +6,14 @@ import { ErrorDialogContext } from '../components/CommonErrorDialog';
 
 function normalizeTag(tag) {
   if (tag == null) return '';
-  return String(tag).trim();
+  // 最小限の正規化: NFKC正規化 + 前後空白除去 + 小文字化 + 連続空白の単一化
+  try {
+    const s = String(tag)
+      .normalize?.('NFKC') ?? String(tag);
+    return s.trim().replace(/\s+/g, ' ').toLowerCase();
+  } catch {
+    return String(tag).trim().toLowerCase();
+  }
 }
 
 export default function useTagManagement() {
@@ -125,6 +132,58 @@ export default function useTagManagement() {
     }
   }, [user?.uid]);
 
+  const deleteTags = useCallback(async (tagsInput) => {
+    if (!user?.uid) throw new Error('ユーザーが未認証です。');
+    const tagSet = new Set(
+      (Array.isArray(tagsInput) ? tagsInput : String(tagsInput || '').split(','))
+        .map((t) => normalizeTag(t))
+        .filter((t) => !!t)
+    );
+    if (tagSet.size === 0) throw new Error('削除対象のタグがありません。');
+
+    setLoading(true);
+    try {
+      const booksQ = query(collection(db, 'books'), where('userId', '==', user.uid));
+      const booksSnap = await getDocs(booksQ);
+      const booksToUpdate = [];
+      booksSnap.forEach((d) => {
+        const data = d.data();
+        const tags = Array.isArray(data.tags) ? data.tags : [];
+        const filtered = tags.filter((t) => !tagSet.has(normalizeTag(t)));
+        if (filtered.length !== tags.length) {
+          booksToUpdate.push({ ref: d.ref, tags: filtered });
+        }
+      });
+
+      const memosQ = query(collectionGroup(db, 'memos'), where('userId', '==', user.uid));
+      const memosSnap = await getDocs(memosQ);
+      const memosToUpdate = [];
+      memosSnap.forEach((d) => {
+        const data = d.data();
+        const tags = Array.isArray(data.tags) ? data.tags : [];
+        const filtered = tags.filter((t) => !tagSet.has(normalizeTag(t)));
+        if (filtered.length !== tags.length) {
+          memosToUpdate.push({ ref: d.ref, tags: filtered });
+        }
+      });
+
+      await processInBatches(booksToUpdate, (batch, item) => {
+        batch.update(item.ref, { tags: item.tags });
+      });
+      await processInBatches(memosToUpdate, (batch, item) => {
+        batch.update(item.ref, { tags: item.tags });
+      });
+
+      return { booksUpdated: booksToUpdate.length, memosUpdated: memosToUpdate.length };
+    } catch (e) {
+      console.error('タグ一括削除に失敗:', e);
+      setGlobalError('タグの一括削除に失敗しました。');
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.uid]);
+
   const mergeTags = useCallback(async (aliasesInput, canonicalInput) => {
     if (!user?.uid) throw new Error('ユーザーが未認証です。');
     const canonical = normalizeTag(canonicalInput);
@@ -194,6 +253,7 @@ export default function useTagManagement() {
     loading,
     renameTag,
     deleteTag,
+    deleteTags,
     mergeTags,
   };
 }

@@ -17,6 +17,8 @@ import {
 import { useTagStats } from '../../hooks/useTagStats';
 import useTagManagement from '../../hooks/useTagManagement';
 import TagEditDialog from './TagEditDialog';
+import BulkDeleteTagsDialog from './BulkDeleteTagsDialog';
+import BulkMergeTagsDialog from './BulkMergeTagsDialog';
 import { useAuth } from '../../auth/AuthProvider';
 
 /**
@@ -27,13 +29,15 @@ import { useAuth } from '../../auth/AuthProvider';
  */
 function TagStats({ onTagClick }) {
   const { user } = useAuth();
-  const { tagStats, loading, error, getSortedTagStats } = useTagStats(user);
-  const { loading: managing, renameTag, deleteTag, mergeTags } = useTagManagement();
+  const { tagStats, loading, error, getSortedTagStats, fetchTagStats } = useTagStats(user);
+  const { loading: managing, renameTag, deleteTag, deleteTags, mergeTags } = useTagManagement();
   
   const [sortBy, setSortBy] = useState('count');
   const [sortOrder, setSortOrder] = useState('desc');
   const [editOpen, setEditOpen] = useState(false);
   const [targetTag, setTargetTag] = useState('');
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkMergeOpen, setBulkMergeOpen] = useState(false);
 
   // ソートされたタグ統計を取得
   const sortedStats = getSortedTagStats(sortBy, sortOrder);
@@ -113,10 +117,26 @@ function TagStats({ onTagClick }) {
       </Paper>
 
       {/* ソート設定 */}
-      <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+       <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
         <Typography variant="h6">
           タグ一覧 ({totalTags}件)
         </Typography>
+         <Chip
+           label="一括削除"
+           size="small"
+           color="error"
+           variant="outlined"
+           onClick={() => setBulkDeleteOpen(true)}
+           data-testid="open-bulk-delete"
+         />
+         <Chip
+           label="一括統合"
+           size="small"
+           color="primary"
+           variant="outlined"
+           onClick={() => setBulkMergeOpen(true)}
+           data-testid="open-bulk-merge"
+         />
         <FormControl size="small" sx={{ minWidth: 120 }}>
           <InputLabel>ソート基準</InputLabel>
           <Select
@@ -199,15 +219,42 @@ function TagStats({ onTagClick }) {
         onClose={() => setEditOpen(false)}
         onRename={async (oldTag, newTag) => {
           await renameTag(oldTag, newTag);
+          await fetchTagStats();
           setEditOpen(false);
         }}
         onDelete={async (tag) => {
           await deleteTag(tag);
+          await fetchTagStats();
           setEditOpen(false);
         }}
         onMerge={async (aliases, canonical) => {
           await mergeTags(aliases, canonical);
+          await fetchTagStats();
           setEditOpen(false);
+        }}
+      />
+
+      <BulkDeleteTagsDialog
+        open={bulkDeleteOpen}
+        onClose={() => setBulkDeleteOpen(false)}
+        busy={managing}
+        onConfirm={async (tags) => {
+          if (!tags || tags.length === 0) return;
+          await deleteTags(tags);
+          await fetchTagStats();
+          setBulkDeleteOpen(false);
+        }}
+      />
+
+      <BulkMergeTagsDialog
+        open={bulkMergeOpen}
+        onClose={() => setBulkMergeOpen(false)}
+        busy={managing}
+        onConfirm={async (aliases, canonical) => {
+          if (!aliases || aliases.length === 0 || !canonical) return;
+          await mergeTags(aliases.join(','), canonical);
+          await fetchTagStats();
+          setBulkMergeOpen(false);
         }}
       />
     </Box>

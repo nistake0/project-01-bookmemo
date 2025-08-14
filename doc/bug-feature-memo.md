@@ -137,6 +137,8 @@
   - [x] タグ管理UIの改善（一括削除ダイアログ追加）
   - [x] 一括削除の入力UI改善（アプリ内Dialog化＋補完対応）
     - `BulkDeleteTagsDialog` で確認/キャンセル、説明テキスト、Autocomplete補完を提供
+ - [x] 一括統合ダイアログの追加（正規タグ＋別名複数、Autocomplete対応）
+   - `BulkMergeTagsDialog` を追加し、`TagStats.jsx` から起動。実行後に `fetchTagStats()` で即時反映
   - [ ] **Phase 15-4: マイページの実装**（3-4時間）
     - [ ] MyPage.jsxの基本構造作成
     - [ ] ユーザー情報管理機能
