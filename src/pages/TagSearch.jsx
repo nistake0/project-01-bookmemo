@@ -15,6 +15,7 @@ import AdvancedSearchForm from '../components/search/AdvancedSearchForm';
 import SearchResults from '../components/search/SearchResults';
 import { useSearch } from '../hooks/useSearch';
 import { useNavigate } from 'react-router-dom';
+import MemoEditor from '../components/MemoEditor';
 
 export default function TagSearch() {
   const { user } = useAuth();
@@ -26,14 +27,17 @@ export default function TagSearch() {
     text: '',
     status: 'all',
     dateRange: { type: 'none' },
-    memoContent: '',
     selectedTags: [],
-    searchTarget: 'integrated',
     sortBy: 'updatedAt',
     sortOrder: 'desc'
   });
 
   const { results, loading, error, executeSearch, clearResults } = useSearch();
+
+  // メモ詳細ダイアログ用の状態
+  const [memoDialogOpen, setMemoDialogOpen] = useState(false);
+  const [selectedMemo, setSelectedMemo] = useState(null);
+  const [selectedMemoBookId, setSelectedMemoBookId] = useState(null);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -52,8 +56,23 @@ export default function TagSearch() {
     if (type === 'book') {
       navigate(`/book/${bookId}`);
     } else if (type === 'memo') {
-      navigate(`/book/${bookId}?memo=${memoId}`);
+      // 現在の結果から対象メモを特定し、ダイアログを開く
+      const memo = (results || []).find(r => r.type === 'memo' && r.id === memoId);
+      if (memo) {
+        setSelectedMemo(memo);
+        setSelectedMemoBookId(bookId);
+        setMemoDialogOpen(true);
+      } else {
+        // フォールバックとして書籍詳細へ遷移
+        navigate(`/book/${bookId}?memo=${memoId}`);
+      }
     }
+  };
+
+  const handleCloseMemoDialog = () => {
+    setMemoDialogOpen(false);
+    setSelectedMemo(null);
+    setSelectedMemoBookId(null);
   };
 
   const handleClearSearch = () => {
@@ -62,9 +81,7 @@ export default function TagSearch() {
       text: '',
       status: 'all',
       dateRange: { type: 'none' },
-      memoContent: '',
       selectedTags: [],
-      searchTarget: 'integrated',
       sortBy: 'updatedAt',
       sortOrder: 'desc'
     });
@@ -78,8 +95,7 @@ export default function TagSearch() {
     const newSearchConditions = {
       ...searchConditions,
       selectedTags: [tag], // クリックされたタグを選択
-      text: '', // テキスト検索はクリア
-      memoContent: '' // メモ内容検索もクリア
+      text: '' // テキスト検索はクリア
     };
     
     setSearchConditions(newSearchConditions);
@@ -145,6 +161,16 @@ export default function TagSearch() {
       <TabPanel value={activeTab} index={1} data-testid="tag-management-tab-panel">
         <TagManagementTab onTagClick={handleTagClick} />
       </TabPanel>
+
+      {/* メモ詳細ダイアログ */}
+      <MemoEditor 
+        open={memoDialogOpen}
+        memo={selectedMemo}
+        bookId={selectedMemoBookId}
+        onClose={handleCloseMemoDialog}
+        onUpdate={handleCloseMemoDialog}
+        onDelete={handleCloseMemoDialog}
+      />
     </Box>
   );
 }

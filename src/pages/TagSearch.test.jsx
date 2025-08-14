@@ -141,9 +141,7 @@ describe('TagSearch', () => {
         text: '',
         status: 'all',
         dateRange: { type: 'none' },
-        memoContent: '',
         selectedTags: [],
-        searchTarget: 'integrated',
         sortBy: 'updatedAt',
         sortOrder: 'desc'
       });
@@ -184,7 +182,7 @@ describe('TagSearch', () => {
       expect(screen.getByText('検索エラーが発生しました')).toBeInTheDocument();
     });
 
-    test('検索結果をクリックすると詳細ページに遷移する', () => {
+    test('検索結果クリック: 本は遷移し、メモはダイアログを開く', async () => {
       const mockResults = [
         { id: 'book1', type: 'book', title: 'テスト本' },
         { id: 'memo1', type: 'memo', content: 'テストメモ', bookId: 'book1' }
@@ -200,13 +198,16 @@ describe('TagSearch', () => {
       
       renderTagSearch();
       
-      // 本の結果をクリック
+      // 本の結果をクリック → 書籍詳細へ遷移
       fireEvent.click(screen.getByTestId('result-0'));
       expect(mockNavigate).toHaveBeenCalledWith('/book/book1');
-      
-      // メモの結果をクリック
+
+      // メモの結果をクリック → メモ詳細ダイアログが開く（遷移しない）
       fireEvent.click(screen.getByTestId('result-1'));
-      expect(mockNavigate).toHaveBeenLastCalledWith('/book/book1?memo=memo1');
+      await waitFor(() => {
+        expect(screen.getByTestId('memo-detail-dialog')).toBeInTheDocument();
+      });
+      expect(mockNavigate).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -231,9 +232,7 @@ describe('TagSearch', () => {
         text: '',
         status: 'all',
         dateRange: { type: 'none' },
-        memoContent: '',
         selectedTags: ['小説'],
-        searchTarget: 'integrated',
         sortBy: 'updatedAt',
         sortOrder: 'desc'
       });
@@ -269,9 +268,7 @@ describe('TagSearch', () => {
         text: '',
         status: 'all',
         dateRange: { type: 'none' },
-        memoContent: '',
         selectedTags: ['技術書'],
-        searchTarget: 'integrated',
         sortBy: 'updatedAt',
         sortOrder: 'desc'
       });
@@ -303,9 +300,7 @@ describe('TagSearch', () => {
         text: '',
         status: 'all',
         dateRange: { type: 'none' },
-        memoContent: '',
         selectedTags: ['小説'],
-        searchTarget: 'integrated',
         sortBy: 'updatedAt',
         sortOrder: 'desc'
       });
