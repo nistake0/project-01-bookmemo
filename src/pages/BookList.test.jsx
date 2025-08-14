@@ -113,4 +113,23 @@ describe('BookList', () => {
     await user.type(searchInput, '技術');
     expect(mockHandleSearchChange).toHaveBeenCalled();
   });
+
+  test('タブコンテナにstickyスタイルが付与されている', async () => {
+    mockUseBookList.mockReturnValue({
+      filteredBooks: [],
+      loading: false,
+      error: null,
+      filter: 'all',
+      searchText: '',
+      handleFilterChange: jest.fn(),
+      handleSearchChange: jest.fn(),
+    });
+
+    render(<BookList />);
+
+    const tabsContainer = await screen.findByTestId('book-list-tabs-container');
+    expect(tabsContainer).toBeInTheDocument();
+    // inline style フォールバックも含めチェック
+    expect(tabsContainer.style.position).toBe('sticky');
+  });
 }); 

@@ -83,8 +83,12 @@ export default function BookList() {
       <Box sx={{ 
         borderBottom: 1, 
         borderColor: 'divider', 
-        mb: { xs: 1.5, sm: 2 }
-      }}>
+        mb: { xs: 1.5, sm: 2 },
+        position: 'sticky',
+        top: 0,
+        zIndex: 1100,
+        backgroundColor: 'background.paper'
+      }} data-testid="book-list-tabs-container" style={{ position: 'sticky', top: 0, zIndex: 1100 }}>
         <Tabs 
           value={filter} 
           onChange={handleFilterChange} 

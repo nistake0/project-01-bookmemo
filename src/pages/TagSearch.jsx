@@ -123,7 +123,7 @@ export default function TagSearch() {
         検索・タグ
       </Typography>
       
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2, position: 'sticky', top: 0, zIndex: 1100, backgroundColor: 'background.paper' }} data-testid="tag-search-tabs-container" style={{ position: 'sticky', top: 0, zIndex: 1100 }}>
         <Tabs 
           value={activeTab} 
           onChange={handleTabChange} 

@@ -19,6 +19,7 @@ import Stats from "./pages/Stats";
 import MyPage from "./pages/MyPage";
 import CommonErrorDialog, { ErrorDialogContext } from "./components/CommonErrorDialog";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 
 // モバイル最適化テーマの作成
@@ -255,17 +256,28 @@ function AppRoutes() {
 
   return (
     <>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/" element={<PrivateRoute><BookList /></PrivateRoute>} />
-        <Route path="/add" element={<PrivateRoute><BookAdd /></PrivateRoute>} />
-        <Route path="/book/:id" element={<PrivateRoute><BookDetail /></PrivateRoute>} />
-        <Route path="/tags" element={<PrivateRoute><TagSearch /></PrivateRoute>} />
-        <Route path="/stats" element={<PrivateRoute><Stats /></PrivateRoute>} />
-        <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      <Box
+        id="app-scroll-container"
+        sx={{
+          height: '100vh',
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          // 画面下部のボトムナビの重なり回避（各ページでもpbしているが二重でも実害なし）
+          pb: hideBottomNav ? 0 : { xs: '64px', sm: '72px' },
+        }}
+      >
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/" element={<PrivateRoute><BookList /></PrivateRoute>} />
+          <Route path="/add" element={<PrivateRoute><BookAdd /></PrivateRoute>} />
+          <Route path="/book/:id" element={<PrivateRoute><BookDetail /></PrivateRoute>} />
+          <Route path="/tags" element={<PrivateRoute><TagSearch /></PrivateRoute>} />
+          <Route path="/stats" element={<PrivateRoute><Stats /></PrivateRoute>} />
+          <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Box>
       {!hideBottomNav && <AppBottomNav />}
     </>
   );

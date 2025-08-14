@@ -100,6 +100,13 @@ describe('TagSearch', () => {
       expect(screen.getByTestId('tag-management-tab')).toHaveTextContent('タグ管理');
     });
 
+    test('タブコンテナにstickyスタイルが付与されている', () => {
+      renderTagSearch();
+      const tabsContainer = screen.getByTestId('tag-search-tabs-container');
+      expect(tabsContainer).toBeInTheDocument();
+      expect(tabsContainer.style.position).toBe('sticky');
+    });
+
     test('ログインしていない場合はエラーメッセージが表示される', () => {
       useAuth.mockReturnValue({ user: null });
       renderTagSearch();

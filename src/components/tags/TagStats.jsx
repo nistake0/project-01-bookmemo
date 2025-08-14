@@ -28,7 +28,7 @@ import { useAuth } from '../../auth/AuthProvider';
 function TagStats({ onTagClick }) {
   const { user } = useAuth();
   const { tagStats, loading, error, getSortedTagStats } = useTagStats(user);
-  const { loading: managing, renameTag, deleteTag } = useTagManagement();
+  const { loading: managing, renameTag, deleteTag, mergeTags } = useTagManagement();
   
   const [sortBy, setSortBy] = useState('count');
   const [sortOrder, setSortOrder] = useState('desc');
@@ -203,6 +203,10 @@ function TagStats({ onTagClick }) {
         }}
         onDelete={async (tag) => {
           await deleteTag(tag);
+          setEditOpen(false);
+        }}
+        onMerge={async (aliases, canonical) => {
+          await mergeTags(aliases, canonical);
           setEditOpen(false);
         }}
       />

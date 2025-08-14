@@ -125,10 +125,76 @@ export default function useTagManagement() {
     }
   }, [user?.uid]);
 
+  const mergeTags = useCallback(async (aliasesInput, canonicalInput) => {
+    if (!user?.uid) throw new Error('ユーザーが未認証です。');
+    const canonical = normalizeTag(canonicalInput);
+    const aliases = Array.from(new Set(String(aliasesInput || '')
+      .split(',')
+      .map((s) => normalizeTag(s))
+      .filter((s) => !!s)));
+    if (!canonical || aliases.length === 0) throw new Error('統合先と別名を入力してください。');
+    if (aliases.includes(canonical)) {
+      throw new Error('統合先と別名が同一です。');
+    }
+
+    setLoading(true);
+    try {
+      // Books
+      const booksQ = query(collection(db, 'books'), where('userId', '==', user.uid));
+      const booksSnap = await getDocs(booksQ);
+      const booksToUpdate = [];
+      booksSnap.forEach((d) => {
+        const data = d.data();
+        const tags = Array.isArray(data.tags) ? data.tags : [];
+        const hasAlias = tags.some((t) => aliases.includes(t));
+        if (hasAlias) {
+          const kept = tags.filter((t) => !aliases.includes(t));
+          const merged = Array.from(new Set([...kept, canonical]));
+          if (merged.join('|') !== tags.join('|')) {
+            booksToUpdate.push({ ref: d.ref, tags: merged });
+          }
+        }
+      });
+
+      // Memos
+      const memosQ = query(collectionGroup(db, 'memos'), where('userId', '==', user.uid));
+      const memosSnap = await getDocs(memosQ);
+      const memosToUpdate = [];
+      memosSnap.forEach((d) => {
+        const data = d.data();
+        const tags = Array.isArray(data.tags) ? data.tags : [];
+        const hasAlias = tags.some((t) => aliases.includes(t));
+        if (hasAlias) {
+          const kept = tags.filter((t) => !aliases.includes(t));
+          const merged = Array.from(new Set([...kept, canonical]));
+          if (merged.join('|') !== tags.join('|')) {
+            memosToUpdate.push({ ref: d.ref, tags: merged });
+          }
+        }
+      });
+
+      await processInBatches(booksToUpdate, (batch, item) => {
+        batch.update(item.ref, { tags: item.tags });
+      });
+      await processInBatches(memosToUpdate, (batch, item) => {
+        batch.update(item.ref, { tags: item.tags });
+      });
+
+      return { booksUpdated: booksToUpdate.length, memosUpdated: memosToUpdate.length };
+    } catch (e) {
+      console.error('タグ統合に失敗:', e);
+      setGlobalError('タグの統合に失敗しました。');
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.uid]);
+
   return {
     loading,
     renameTag,
     deleteTag,
+    mergeTags,
   };
 }
 
