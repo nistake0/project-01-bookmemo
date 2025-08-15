@@ -3,6 +3,7 @@ import { Typography, Box, Button, TextField, Autocomplete, Chip, Alert, Circular
 import { useTagHistory } from '../hooks/useTagHistory';
 import { useBookActions } from '../hooks/useBookActions';
 import { useBookSearch } from '../hooks/useBookSearch';
+import { useAuth } from '../auth/AuthProvider';
 
 export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   const [isbn, setIsbn] = useState(isbnProp);
@@ -15,7 +16,8 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   const [inputTagValue, setInputTagValue] = useState("");
 
   // 共通フックを使用
-  const { tagOptions, fetchTagHistory } = useTagHistory('book');
+  const { user } = useAuth();
+  const { tagOptions, fetchTagHistory } = useTagHistory('book', user);
   const { addBook, loading: addBookLoading, error: addBookError } = useBookActions();
   const { searchBookByIsbn, loading: searchLoading, error: searchError, searchPerformed } = useBookSearch();
 

@@ -13,6 +13,50 @@ import React, { useState, useEffect, useCallback } from 'react';
  * @returns {object} PWA関連の状態と関数
  */
 export const usePWA = () => {
+  // Reactコンテキストの安全性チェック
+  try {
+    if (typeof React === 'undefined' || !React.useState) {
+      return {
+        isOnline: true,
+        isInstallable: false,
+        isInstalled: false,
+        swRegistration: null,
+        userEngagement: 0,
+        lastVisitTime: null,
+        shouldShowInstallPrompt: false,
+        shouldShowManualInstallGuide: false,
+        registerServiceWorker: async () => null,
+        installApp: async () => {},
+        requestNotificationPermission: async () => 'denied',
+        sendNotification: () => null,
+        checkForUpdates: async () => {},
+        clearCache: async () => {},
+        reloadApp: () => {},
+        recordInstallPromptDismiss: () => {}
+      };
+    }
+  } catch (error) {
+    console.warn('React context not available in usePWA:', error);
+    return {
+      isOnline: true,
+      isInstallable: false,
+      isInstalled: false,
+      swRegistration: null,
+      userEngagement: 0,
+      lastVisitTime: null,
+      shouldShowInstallPrompt: false,
+      shouldShowManualInstallGuide: false,
+      registerServiceWorker: async () => null,
+      installApp: async () => {},
+      requestNotificationPermission: async () => 'denied',
+      sendNotification: () => null,
+      checkForUpdates: async () => {},
+      clearCache: async () => {},
+      reloadApp: () => {},
+      recordInstallPromptDismiss: () => {}
+    };
+  }
+
   // PWA機能がサポートされているかチェック
   const isPWASupported = typeof window !== 'undefined' && 
     typeof navigator !== 'undefined' && 

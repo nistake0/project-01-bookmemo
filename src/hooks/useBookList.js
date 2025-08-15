@@ -15,6 +15,43 @@ function normalizeTag(tag) {
 }
 
 export const useBookList = () => {
+  // Reactコンテキストの安全性チェック
+  try {
+    if (typeof React === 'undefined' || !React.useState) {
+      return {
+        allBooks: [],
+        filteredBooks: [],
+        stats: { total: 0, reading: 0, finished: 0, filtered: 0 },
+        loading: false,
+        error: null,
+        filter: 'reading',
+        searchText: '',
+        fetchBooks: async () => {},
+        handleFilterChange: () => {},
+        handleSearchChange: () => {},
+        clearSearch: () => {},
+        clearFilter: () => {},
+        normalizeTag: () => '',
+      };
+    }
+  } catch (error) {
+    console.warn('React context not available in useBookList:', error);
+    return {
+      allBooks: [],
+      filteredBooks: [],
+      stats: { total: 0, reading: 0, finished: 0, filtered: 0 },
+      loading: false,
+      error: null,
+      filter: 'reading',
+      searchText: '',
+      fetchBooks: async () => {},
+      handleFilterChange: () => {},
+      handleSearchChange: () => {},
+      clearSearch: () => {},
+      clearFilter: () => {},
+      normalizeTag: () => '',
+    };
+  }
 
   const { user } = useAuth();
   const errorContext = useContext(ErrorDialogContext);

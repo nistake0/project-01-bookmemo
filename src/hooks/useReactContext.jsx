@@ -1,83 +1,46 @@
-import { useState, useEffect } from 'react';
+import React from 'react';
 
 /**
- * Reactコンテキストが正しく初期化されているかをチェックし、
- * 初期化を待つためのカスタムフック
+ * Reactコンテキストが正しく初期化されているかをチェックする関数
  */
-export const useReactContext = () => {
-  const [isContextReady, setIsContextReady] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
-  const maxRetries = 10;
-  const retryInterval = 100; // 100ms間隔でリトライ
+const checkReactContext = () => {
+  try {
+    // Reactの基本機能が利用可能かチェック
+    if (typeof React === 'undefined') {
+      return false;
+    }
 
-  useEffect(() => {
-    const checkContext = () => {
-      try {
-        // Reactの基本機能が利用可能かチェック
-        if (typeof React === 'undefined') {
-          return false;
-        }
+    // useStateが利用可能かチェック
+    if (!React.useState) {
+      return false;
+    }
 
-        // useStateが利用可能かチェック
-        if (!React.useState) {
-          return false;
-        }
+    // useContextが利用可能かチェック
+    if (!React.useContext) {
+      return false;
+    }
 
-        // useContextが利用可能かチェック
-        if (!React.useContext) {
-          return false;
-        }
+    // windowとnavigatorが利用可能かチェック
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return false;
+    }
 
-        // windowとnavigatorが利用可能かチェック
-        if (typeof window === 'undefined' || typeof navigator === 'undefined') {
-          return false;
-        }
-
-        // コンテキストが正しく初期化されているかチェック
-        const testContext = React.createContext();
-        const TestComponent = () => {
-          React.useContext(testContext);
-          return null;
-        };
-
-        // テストコンポーネントをレンダリングしてエラーが発生しないかチェック
-        try {
-          // 簡易的なテスト（実際のレンダリングは行わない）
-          const testHook = () => {
-            const [test] = React.useState('test');
-            return test;
-          };
-          testHook();
-          return true;
-        } catch (error) {
-          console.warn('React context test failed:', error);
-          return false;
-        }
-      } catch (error) {
-        console.warn('React context check failed:', error);
-        return false;
-      }
-    };
-
-    const attemptInitialization = () => {
-      if (checkContext()) {
-        setIsContextReady(true);
-        return;
-      }
-
-      if (retryCount < maxRetries) {
-        setRetryCount(prev => prev + 1);
-        setTimeout(attemptInitialization, retryInterval);
-      } else {
-        console.warn('React context initialization timeout, proceeding with fallback');
-        setIsContextReady(true); // タイムアウト時は強制的に準備完了とする
-      }
-    };
-
-    attemptInitialization();
-  }, [retryCount]);
-
-  return isContextReady;
+    // 簡易的なテスト
+    try {
+      const testHook = () => {
+        const [test] = React.useState('test');
+        return test;
+      };
+      testHook();
+      return true;
+    } catch (error) {
+      console.warn('React context test failed:', error);
+      return false;
+    }
+  } catch (error) {
+    console.warn('React context check failed:', error);
+    return false;
+  }
 };
 
 /**
@@ -85,7 +48,29 @@ export const useReactContext = () => {
  */
 export const withReactContext = (Component) => {
   return function WithReactContextWrapper(props) {
-    const isContextReady = useReactContext();
+    const [isContextReady, setIsContextReady] = React.useState(false);
+    const [retryCount, setRetryCount] = React.useState(0);
+    const maxRetries = 20; // リトライ回数を増やす
+    const retryInterval = 50; // 間隔を短くする
+
+    React.useEffect(() => {
+      const attemptInitialization = () => {
+        if (checkReactContext()) {
+          setIsContextReady(true);
+          return;
+        }
+
+        if (retryCount < maxRetries) {
+          setRetryCount(prev => prev + 1);
+          setTimeout(attemptInitialization, retryInterval);
+        } else {
+          console.warn('React context initialization timeout, proceeding with fallback');
+          setIsContextReady(true); // タイムアウト時は強制的に準備完了とする
+        }
+      };
+
+      attemptInitialization();
+    }, [retryCount]);
 
     if (!isContextReady) {
       // コンテキストが準備できるまでローディング表示
