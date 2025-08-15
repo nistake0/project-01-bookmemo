@@ -58,32 +58,35 @@ export default function BookList() {
     <Box sx={{ 
       maxWidth: 1200, 
       mx: "auto", 
-      pb: { xs: "72px", sm: "80px" },
-      px: { xs: 1.5, sm: 2, md: 0 }
+      pb: { xs: "72px", sm: "80px" }
     }}>
       {/* 統一されたヘッダー */}
       <PageHeader 
         title="本一覧"
         subtitle="あなたの読書ライブラリ"
-      >
+      />
+      
+      {/* メインコンテンツ */}
+      <Box sx={{ px: { xs: 1.5, sm: 2, md: 0 } }}>
+        {/* PWAインストールボタン */}
         <Box sx={{ 
           display: 'flex', 
           justifyContent: 'center', 
           alignItems: 'center', 
           gap: 1,
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          mb: 2
         }}>
-          {/* PWAインストールボタン */}
           {isInstallable && !isInstalled && (
             <Tooltip title="BookMemoをアプリとしてインストール">
               <IconButton
-                color="inherit"
+                color="primary"
                 onClick={handleInstallClick}
                 sx={{ 
-                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  backgroundColor: 'primary.main',
                   color: 'white',
                   '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.3)',
+                    backgroundColor: 'primary.dark',
                   }
                 }}
                 data-testid="pwa-install-header-button"
@@ -96,13 +99,13 @@ export default function BookList() {
           {shouldShowManualInstallGuide && !isInstalled && (
             <Tooltip title="iPhoneでホーム画面に追加する手順を表示">
               <IconButton
-                color="inherit"
+                color="secondary"
                 onClick={handleManualInstallGuide}
                 sx={{ 
-                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  backgroundColor: 'secondary.main',
                   color: 'white',
                   '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.3)',
+                    backgroundColor: 'secondary.dark',
                   }
                 }}
                 data-testid="pwa-manual-install-button"
@@ -112,10 +115,7 @@ export default function BookList() {
             </Tooltip>
           )}
         </Box>
-      </PageHeader>
 
-      {/* メインコンテンツ */}
-      <Box sx={{ px: { xs: 1.5, sm: 2, md: 0 } }}>
         {/* 本を追加ボタン */}
         <Box sx={{ 
           display: 'flex', 
