@@ -1,0 +1,60 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景円 -->
+  <circle cx="256" cy="256" r="240" fill="#1976d2"/>
+  
+  <!-- 本のベース -->
+  <rect x="128" y="160" width="224" height="176" rx="8" fill="#ffffff" stroke="#1976d2" stroke-width="4"/>
+  
+  <!-- 本のページ（複数枚重ねた表現） -->
+  <rect x="136" y="168" width="208" height="160" rx="4" fill="#f5f5f5"/>
+  <rect x="144" y="176" width="192" height="144" rx="4" fill="#ffffff"/>
+  <rect x="152" y="184" width="176" height="128" rx="2" fill="#fafafa"/>
+  
+  <!-- 本のタイトルライン -->
+  <rect x="168" y="208" width="144" height="4" fill="#1976d2"/>
+  <rect x="168" y="220" width="96" height="4" fill="#1976d2"/>
+  <rect x="168" y="232" width="120" height="4" fill="#1976d2"/>
+  <rect x="168" y="244" width="80" height="4" fill="#1976d2"/>
+  <rect x="168" y="256" width="112" height="4" fill="#1976d2"/>
+  
+  <!-- 本の内容ライン -->
+  <rect x="168" y="272" width="152" height="2" fill="#666666"/>
+  <rect x="168" y="280" width="136" height="2" fill="#666666"/>
+  <rect x="168" y="288" width="144" height="2" fill="#666666"/>
+  <rect x="168" y="296" width="128" height="2" fill="#666666"/>
+  <rect x="168" y="304" width="140" height="2" fill="#666666"/>
+  
+  <!-- メモ用の付箋 -->
+  <rect x="280" y="200" width="96" height="120" fill="#ffeb3b" stroke="#f57f17" stroke-width="2"/>
+  <polygon points="280,200 304,176 376,176 376,320 280,320" fill="#ffeb3b"/>
+  
+  <!-- メモのテキストライン -->
+  <rect x="288" y="216" width="80" height="3" fill="#333333"/>
+  <rect x="288" y="228" width="72" height="3" fill="#333333"/>
+  <rect x="288" y="240" width="76" height="3" fill="#333333"/>
+  <rect x="288" y="252" width="68" height="3" fill="#333333"/>
+  <rect x="288" y="264" width="80" height="3" fill="#333333"/>
+  <rect x="288" y="276" width="64" height="3" fill="#333333"/>
+  <rect x="288" y="288" width="72" height="3" fill="#333333"/>
+  <rect x="288" y="300" width="76" height="3" fill="#333333"/>
+  
+  <!-- ペン -->
+  <rect x="304" y="304" width="4" height="16" fill="#333333"/>
+  <polygon points="304,304 312,296 320,304 312,312" fill="#333333"/>
+  
+  <!-- 装飾的な要素 -->
+  <circle cx="380" cy="160" r="16" fill="#ff9800" opacity="0.8"/>
+  <circle cx="140" cy="380" r="12" fill="#4caf50" opacity="0.8"/>
+  <circle cx="380" cy="380" r="8" fill="#e91e63" opacity="0.8"/>
+  
+  <!-- 本の背表紙の装飾 -->
+  <rect x="128" y="160" width="8" height="176" fill="#1565c0"/>
+  <rect x="128" y="180" width="8" height="4" fill="#ffffff"/>
+  <rect x="128" y="200" width="8" height="4" fill="#ffffff"/>
+  <rect x="128" y="220" width="8" height="4" fill="#ffffff"/>
+  <rect x="128" y="240" width="8" height="4" fill="#ffffff"/>
+  <rect x="128" y="260" width="8" height="4" fill="#ffffff"/>
+  <rect x="128" y="280" width="8" height="4" fill="#ffffff"/>
+  <rect x="128" y="300" width="8" height="4" fill="#ffffff"/>
+  <rect x="128" y="320" width="8" height="4" fill="#ffffff"/>
+</svg>
