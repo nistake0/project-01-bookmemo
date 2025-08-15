@@ -6,7 +6,7 @@ import { Box, Typography, Paper } from '@mui/material';
  * 
  * 機能:
  * - 全ページで統一されたヘッダーデザイン
- * - アプリらしい背景画像
+ * - 古い紙のテクスチャに合った温かみのある背景
  * - レスポンシブ対応
  * - シンプルで統一感のあるデザイン
  */
@@ -15,15 +15,25 @@ const PageHeader = ({ title, subtitle, children }) => {
     <Paper
       elevation={0}
       sx={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        backgroundImage: `
-          linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%),
-          url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="books" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><rect width="20" height="20" fill="none"/><rect x="2" y="2" width="16" height="16" fill="rgba(255,255,255,0.1)" rx="2"/><rect x="4" y="4" width="12" height="2" fill="rgba(255,255,255,0.2)"/><rect x="4" y="8" width="8" height="1" fill="rgba(255,255,255,0.2)"/><rect x="4" y="11" width="10" height="1" fill="rgba(255,255,255,0.2)"/></pattern></defs><rect width="100" height="100" fill="url(%23books)"/></svg>')
+        background: `
+          linear-gradient(135deg, rgba(139, 69, 19, 0.9) 0%, rgba(160, 82, 45, 0.8) 100%),
+          repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 4px,
+            rgba(139, 69, 19, 0.1) 4px,
+            rgba(139, 69, 19, 0.1) 8px
+          ),
+          linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #CD853F 100%)
         `,
+        backgroundSize: 'cover, 16px 16px, cover',
+        backgroundRepeat: 'no-repeat, repeat, no-repeat',
+        backgroundPosition: 'center, center, center',
         borderRadius: 0,
         mb: 3,
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        borderBottom: '3px solid rgba(139, 69, 19, 0.3)'
       }}
     >
       <Box
@@ -42,7 +52,8 @@ const PageHeader = ({ title, subtitle, children }) => {
             fontWeight: 700,
             fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
             mb: subtitle ? 1 : 0,
-            textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+            textShadow: '0 2px 4px rgba(0,0,0,0.7)',
+            color: '#FFF8DC'
           }}
         >
           {title}
@@ -51,9 +62,10 @@ const PageHeader = ({ title, subtitle, children }) => {
           <Typography
             variant="body1"
             sx={{
-              opacity: 0.9,
+              opacity: 0.95,
               fontSize: { xs: '0.9rem', sm: '1rem' },
-              textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+              textShadow: '0 1px 2px rgba(0,0,0,0.7)',
+              color: '#F5F5DC'
             }}
           >
             {subtitle}
@@ -66,7 +78,7 @@ const PageHeader = ({ title, subtitle, children }) => {
         )}
       </Box>
       
-      {/* 装飾的な要素 */}
+      {/* 装飾的な要素 - 古い紙らしい質感 */}
       <Box
         sx={{
           position: 'absolute',
@@ -74,7 +86,10 @@ const PageHeader = ({ title, subtitle, children }) => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%)',
+          background: `
+            radial-gradient(circle at 30% 70%, rgba(255,255,255,0.15) 0%, transparent 40%),
+            radial-gradient(circle at 70% 30%, rgba(255,255,255,0.1) 0%, transparent 30%)
+          `,
           pointerEvents: 'none'
         }}
       />
