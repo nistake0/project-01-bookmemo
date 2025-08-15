@@ -18,7 +18,8 @@
     "test:unit": "jest",
     "test:e2e": "cypress run",
     "test:e2e:open": "cypress open",
-    "test:setup": "npm run setup-test-user"
+    "test:setup": "npm run setup-test-user",
+    "generate-icons": "node scripts/convert-icons.cjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -47,6 +48,7 @@
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-basic-ssl": "^2.0.0",
     "@vitejs/plugin-react": "^4.4.1",
+    "canvas": "^3.1.2",
     "cypress": "^14.5.0",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
