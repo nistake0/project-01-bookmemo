@@ -266,6 +266,16 @@ function AppRoutes() {
           WebkitOverflowScrolling: 'touch',
           // 画面下部のボトムナビの重なり回避（各ページでもpbしているが二重でも実害なし）
           pb: hideBottomNav ? 0 : { xs: '64px', sm: '72px' },
+          // ページ全体の背景画像設定
+          background: `
+            linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%),
+            url('/paper-texture.jpg')
+          `,
+          backgroundSize: 'cover, 100% auto',
+          backgroundRepeat: 'no-repeat, repeat-y',
+          backgroundPosition: 'center, center top',
+          backgroundAttachment: 'fixed',
+          minHeight: '100vh'
         }}
       >
         <Routes>
