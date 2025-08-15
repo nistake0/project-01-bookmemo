@@ -21,6 +21,8 @@ import CommonErrorDialog, { ErrorDialogContext } from "./components/CommonErrorD
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import { usePWA } from "./hooks/usePWA";
 
 // モバイル最適化テーマの作成
 const theme = createTheme({
@@ -295,7 +297,9 @@ function App() {
         <BrowserRouter basename={basename}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
+            <PWAProvider />
             <AppRoutes />
+            <PWAInstallPrompt />
             <CommonErrorDialog
               open={!!globalError}
               message={globalError}
@@ -306,6 +310,17 @@ function App() {
       </ErrorDialogContext.Provider>
     </AuthProvider>
   );
+}
+
+// PWA機能を初期化するコンポーネント
+function PWAProvider() {
+  const { registerServiceWorker } = usePWA();
+
+  useEffect(() => {
+    registerServiceWorker();
+  }, [registerServiceWorker]);
+
+  return null;
 }
 
 export default App;

@@ -4,7 +4,7 @@ export default defineConfig({
   e2e: {
     baseUrl: process.env.CI 
       ? 'http://localhost:5173/project-01-bookmemo'
-      : 'https://localhost:5173/project-01-bookmemo',
+      : 'https://localhost:5173',
     chromeWebSecurity: false,
     video: true,
     screenshotOnRunFailure: true,

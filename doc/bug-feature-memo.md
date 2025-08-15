@@ -128,7 +128,7 @@
     - ✅ グラフ: 月別読了・月別追加・月別メモ・タグ上位円・ステータス内訳円
     - ✅ ランキング: 著者トップ／出版社トップ
     - ✅ 表示微調整: CSSでグラフと見出しの重なり解消
-  - [ ] **Phase 15-3: タグ編集・削除機能**（4-5時間）
+  - [x] **Phase 15-3: タグ編集・削除機能**（4-5時間）✅ **完了**
     - [x] TagEditDialog.jsxの作成
     - [x] タグ編集・削除ロジックの実装
     - [x] TagStats.jsxの拡張
@@ -148,14 +148,16 @@
     - [ ] アカウント削除機能
 **優先度変更（2025-08-14）**
 
-- [ ] **優先度1: PWA化**（最優先で着手）
-  - [ ] Service Workerの実装（Workbox検討）
-  - [ ] Web App Manifestの作成（`manifest.webmanifest`）
-  - [ ] オフライン対応（App Shell、フォールバック）
-  - [ ] キャッシュ戦略の設計（静的: CacheFirst、API: StaleWhileRevalidate）
-  - [ ] 更新検知と再読み込みUX（SW更新通知）
-  - [ ] アイコン生成・登録（192/512/Maskable）
-  - [ ] PWAのユニット/E2Eテスト整備
+- [x] **優先度1: PWA化**（最優先で着手）✅ **完了**
+  - [x] Service Workerの実装（`public/sw.js`）
+  - [x] Web App Manifestの作成（`public/manifest.webmanifest`）
+  - [x] オフライン対応（App Shell、フォールバック）
+  - [x] キャッシュ戦略の設計（静的: CacheFirst、API: StaleWhileRevalidate）
+  - [x] 更新検知と再読み込みUX（SW更新通知）
+  - [x] PWA管理フックの実装（`usePWA.js`）
+  - [x] インストールプロンプトコンポーネント（`PWAInstallPrompt.jsx`）
+  - [x] PWAのユニットテスト整備
+  - [ ] アイコン生成・登録（192/512/Maskable）（プレースホルダー作成済み）
 
 - [ ] **優先度2: Phase 15 機能改善プロジェクトの残項目（タグ）**（優先度を下げる）
   - [ ] タグ正規化の高度化（ひらがな/カタカナ、長音、記号揺れ等）
