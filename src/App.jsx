@@ -266,14 +266,22 @@ function AppRoutes() {
           WebkitOverflowScrolling: 'touch',
           // 画面下部のボトムナビの重なり回避（各ページでもpbしているが二重でも実害なし）
           pb: hideBottomNav ? 0 : { xs: '64px', sm: '72px' },
-          // ページ全体の背景画像設定
+          // ページ全体の背景画像設定 - CSSで直接テクスチャを作成
           background: `
-            linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%),
-            url('/paper-texture.jpg')
+            linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%),
+            radial-gradient(circle at 50% 50%, rgba(139, 69, 19, 0.1) 0%, rgba(160, 82, 45, 0.05) 100%),
+            repeating-linear-gradient(
+              45deg,
+              transparent,
+              transparent 2px,
+              rgba(139, 69, 19, 0.02) 2px,
+              rgba(139, 69, 19, 0.02) 4px
+            ),
+            linear-gradient(135deg, #f5f5dc 0%, #f0e68c 50%, #daa520 100%)
           `,
-          backgroundSize: 'cover, 100% auto',
-          backgroundRepeat: 'no-repeat, repeat-y',
-          backgroundPosition: 'center, center top',
+          backgroundSize: 'cover, cover, 8px 8px, cover',
+          backgroundRepeat: 'no-repeat, no-repeat, repeat, no-repeat',
+          backgroundPosition: 'center, center, center, center',
           backgroundAttachment: 'fixed',
           minHeight: '100vh'
         }}
