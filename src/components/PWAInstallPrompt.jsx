@@ -32,15 +32,26 @@ import { usePWA } from '../hooks/usePWA';
  * - インストール促進機能
  */
 const PWAInstallPrompt = () => {
-  const {
-    isOnline,
-    isInstallable,
-    isInstalled,
-    installApp,
-    shouldShowInstallPrompt,
-    shouldShowManualInstallGuide,
-    recordInstallPromptDismiss
-  } = usePWA();
+  // PWA機能がサポートされているかチェック
+  const isPWASupported = typeof window !== 'undefined' && 
+    'serviceWorker' in navigator && 
+    'PushManager' in window;
+
+  // PWAがサポートされていない場合は何も表示しない
+  if (!isPWASupported) {
+    return null;
+  }
+
+  try {
+    const {
+      isOnline,
+      isInstallable,
+      isInstalled,
+      installApp,
+      shouldShowInstallPrompt,
+      shouldShowManualInstallGuide,
+      recordInstallPromptDismiss
+    } = usePWA();
 
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showOfflineAlert, setShowOfflineAlert] = useState(false);
@@ -352,6 +363,11 @@ const PWAInstallPrompt = () => {
       </Snackbar>
     </>
   );
+  } catch (error) {
+    // usePWAフックでエラーが発生した場合は何も表示しない
+    console.warn('PWA hook error in PWAInstallPrompt, skipping PWA features:', error);
+    return null;
+  }
 };
 
 export default PWAInstallPrompt;

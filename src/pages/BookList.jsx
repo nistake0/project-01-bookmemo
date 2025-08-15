@@ -1,4 +1,4 @@
-import { Typography, Box, Button, Tabs, Tab, TextField, Grid, IconButton, Tooltip } from "@mui/material";
+import { Typography, Box, Button, Tabs, Tab, TextField, IconButton, Tooltip } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { GetApp as InstallIcon } from '@mui/icons-material';
 import BookCard from "../components/BookCard";
@@ -196,19 +196,23 @@ export default function BookList() {
             </Typography>
           </Box>
         ) : (
-          <Grid 
-            container 
-            spacing={{ xs: 1.5, sm: 2 }} 
+          <Box 
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+                lg: 'repeat(4, 1fr)'
+              },
+              gap: { xs: 1.5, sm: 2 },
+              dataTestid: 'book-list-grid'
+            }}
             data-testid="book-list-grid"
           >
             {filteredBooks.map(book => (
-              <Grid 
+              <Box 
                 key={book.id} 
-                item
-                xs={12} 
-                sm={6} 
-                md={4} 
-                lg={3}
                 data-testid={`book-grid-item-${book.id}`}
               >
                 <BookCard 
@@ -216,9 +220,9 @@ export default function BookList() {
                   onClick={() => handleBookClick(book.id)}
                   testId={`book-list-card-${book.id}`}
                 />
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         )}
       </Box>
     </Box>

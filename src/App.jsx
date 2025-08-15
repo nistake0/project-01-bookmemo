@@ -23,6 +23,7 @@ import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import { usePWA } from "./hooks/usePWA";
+import { withReactContext } from "./hooks/useReactContext.jsx";
 
 // モバイル最適化テーマの作成
 const theme = createTheme({
@@ -318,7 +319,10 @@ function App() {
             <CssBaseline />
             <PWAProvider />
             <AppRoutes />
-            <PWAInstallPrompt />
+            {/* PWA機能がサポートされている場合のみPWAInstallPromptを表示 */}
+            {typeof window !== 'undefined' && 'serviceWorker' in navigator && (
+              <PWAInstallPrompt />
+            )}
             <CommonErrorDialog
               open={!!globalError}
               message={globalError}
@@ -333,13 +337,31 @@ function App() {
 
 // PWA機能を初期化するコンポーネント
 function PWAProvider() {
-  const { registerServiceWorker } = usePWA();
+  // PWA機能がサポートされているかチェック
+  const isPWASupported = 'serviceWorker' in navigator && 'PushManager' in window;
+  
+  // PWAがサポートされていない場合は何も表示しない
+  if (!isPWASupported) {
+    return null;
+  }
 
-  useEffect(() => {
-    registerServiceWorker();
-  }, [registerServiceWorker]);
+  try {
+    const { registerServiceWorker } = usePWA();
 
-  return null;
+    useEffect(() => {
+      registerServiceWorker().catch(error => {
+        // Service Worker登録エラーはアプリの動作に影響しないため、ログのみ記録
+        console.warn('Service Worker registration failed in PWAProvider:', error);
+      });
+    }, [registerServiceWorker]);
+
+    return null;
+  } catch (error) {
+    // usePWAフックでエラーが発生した場合は何も表示しない
+    console.warn('PWA hook error, skipping PWA initialization:', error);
+    return null;
+  }
 }
 
-export default App;
+// Reactコンテキスト初期化チェッカーを適用
+export default withReactContext(App);

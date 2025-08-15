@@ -7,7 +7,6 @@ import {
   Select, 
   MenuItem,
   TextField,
-  Grid,
   Paper
 } from '@mui/material';
 
@@ -163,8 +162,13 @@ function DateRangeSelector({ value, onChange }) {
 
         {/* カスタム期間選択 */}
         {dateRangeType === 'custom' && (
-          <Grid container spacing={2} sx={{ mt: 1 }} data-testid="custom-date-range-grid">
-            <Grid xs={6} data-testid="start-date-grid-item">
+          <Box sx={{ 
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 2,
+            mt: 1
+          }} data-testid="custom-date-range-grid">
+            <Box data-testid="start-date-grid-item">
               <TextField
                 label="開始日"
                 type="date"
@@ -174,8 +178,8 @@ function DateRangeSelector({ value, onChange }) {
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ 'data-testid': 'start-date-input' }}
               />
-            </Grid>
-            <Grid xs={6} data-testid="end-date-grid-item">
+            </Box>
+            <Box data-testid="end-date-grid-item">
               <TextField
                 label="終了日"
                 type="date"
@@ -185,8 +189,8 @@ function DateRangeSelector({ value, onChange }) {
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ 'data-testid': 'end-date-input' }}
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         )}
 
         {/* 説明テキスト */}

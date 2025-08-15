@@ -1,14 +1,4 @@
-import { 
-  Box, 
-  Typography, 
-  Card, 
-  CardContent,
-  Grid,
-  Alert,
-  CircularProgress,
-  Divider,
-  Chip
-} from '@mui/material';
+import { Typography, Box, Card, CardContent, Chip, Alert, CircularProgress } from "@mui/material";
 import { useAuth } from '../../auth/AuthProvider';
 import BookCard from '../BookCard';
 
@@ -213,13 +203,17 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
       </Box>
 
       {/* 統合検索結果 */}
-      <Grid container spacing={2}>
+      <Box sx={{ 
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' },
+        gap: 2
+      }}>
         {results.map((result) => (
-          <Grid item xs={12} sm={6} md={4} key={`${result.type}-${result.id}`}>
+          <Box key={`${result.type}-${result.id}`}>
             {result.type === 'book' ? renderBookResult(result) : renderMemoResult(result)}
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 }

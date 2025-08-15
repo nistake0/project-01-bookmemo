@@ -10,6 +10,19 @@ jest.mock('../hooks/usePWA', () => ({
   usePWA: () => mockUsePWA(),
 }));
 
+// PWA機能のサポートをモック
+Object.defineProperty(window, 'navigator', {
+  value: {
+    serviceWorker: {},
+  },
+  writable: true,
+});
+
+Object.defineProperty(window, 'PushManager', {
+  value: {},
+  writable: true,
+});
+
 describe('PWAInstallPrompt', () => {
   beforeEach(() => {
     // モックをリセット

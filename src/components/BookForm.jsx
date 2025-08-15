@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography, Grid, Autocomplete } from '@mui/material';
+import { Typography, Box, Button, TextField, Autocomplete, Chip, Alert, CircularProgress } from "@mui/material";
 import { useTagHistory } from '../hooks/useTagHistory';
 import { useBookActions } from '../hooks/useBookActions';
 import { useBookSearch } from '../hooks/useBookSearch';
@@ -76,8 +76,12 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   return (
     <Box component="form" onSubmit={handleAdd} sx={{ mt: { xs: 1, sm: 2 } }} role="form" data-testid="book-form">
       {/* ISBN入力エリア */}
-      <Grid container spacing={{ xs: 1, sm: 1.5 }}>
-        <Grid item xs={12} sm={6}>
+      <Box sx={{ 
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+        gap: { xs: 1, sm: 1.5 }
+      }}>
+        <Box>
           <TextField
             label="ISBN"
             value={isbn}
@@ -92,8 +96,8 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
               }
             }}
           />
-        </Grid>
-        <Grid item xs={12} sm={6}>
+        </Box>
+        <Box>
           <Button
             onClick={() => handleFetchBookInfo()}
             variant="outlined"
@@ -108,8 +112,8 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
           >
             {searchLoading ? '取得中...' : 'ISBNで書籍情報取得'}
           </Button>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
       {/* 表紙画像表示 */}
       {coverImageUrl && (
@@ -133,8 +137,13 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
       )}
 
       {/* 基本情報入力エリア */}
-      <Grid container spacing={{ xs: 1, sm: 1.5 }} sx={{ mt: { xs: 0.5, sm: 1 } }}>
-        <Grid item xs={12} sm={6}>
+      <Box sx={{ 
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+        gap: { xs: 1, sm: 1.5 },
+        mt: { xs: 0.5, sm: 1 }
+      }}>
+        <Box>
           <TextField
             label="タイトル"
             value={title}
@@ -149,8 +158,8 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
               }
             }}
           />
-        </Grid>
-        <Grid item xs={12} sm={6}>
+        </Box>
+        <Box>
           <TextField
             label="著者"
             value={author}
@@ -164,8 +173,8 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
               }
             }}
           />
-        </Grid>
-        <Grid item xs={12} sm={6}>
+        </Box>
+        <Box>
           <TextField
             label="出版社"
             value={publisher}
@@ -179,8 +188,8 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
               }
             }}
           />
-        </Grid>
-        <Grid item xs={12} sm={6}>
+        </Box>
+        <Box>
           <TextField
             label="出版日"
             value={publishedDate}
@@ -194,8 +203,8 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
               }
             }}
           />
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
       {/* タグ入力エリア */}
       <Box sx={{ mt: { xs: 1.5, sm: 2 } }}>

@@ -4,7 +4,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
   Chip,
   FormControl,
   InputLabel,
@@ -20,6 +19,7 @@ import TagEditDialog from './TagEditDialog';
 import BulkDeleteTagsDialog from './BulkDeleteTagsDialog';
 import BulkMergeTagsDialog from './BulkMergeTagsDialog';
 import { useAuth } from '../../auth/AuthProvider';
+import './TagStats.css';
 
 /**
  * タグ統計表示コンポーネント
@@ -82,38 +82,36 @@ function TagStats({ onTagClick }) {
         <Typography variant="h6" gutterBottom>
           タグ統計サマリー
         </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={4}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" color="primary">
-                {totalTags}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                総タグ数
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" color="secondary">
-                {totalBooks}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                本の総件数
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" color="info.main">
-                {totalMemos}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                メモの総件数
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
+        <Box sx={{ 
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 2
+        }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h4" color="primary">
+              {totalTags}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              総タグ数
+            </Typography>
+          </Box>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h4" color="secondary">
+              {totalBooks}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              本の総件数
+            </Typography>
+          </Box>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h4" color="info.main">
+              {totalMemos}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              メモの総件数
+            </Typography>
+          </Box>
+        </Box>
       </Paper>
 
       {/* ソート設定 */}
@@ -163,10 +161,9 @@ function TagStats({ onTagClick }) {
       </Box>
 
       {/* タグ統計一覧 */}
-      <Grid container spacing={2}>
+      <Box className="tag-stats-grid">
         {sortedStats.map((stat) => (
-          <Grid item xs={12} sm={6} md={4} key={stat.tag}>
-            <Card data-testid={`tag-stat-card-${stat.tag}`} onClick={() => onTagClick?.(stat.tag)} sx={{ cursor: 'pointer' }}>
+          <Card key={stat.tag} data-testid={`tag-stat-card-${stat.tag}`} onClick={() => onTagClick?.(stat.tag)} className="tag-stat-card">
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                   <Typography variant="h6" component="div" sx={{ wordBreak: 'break-all' }}>
@@ -205,12 +202,11 @@ function TagStats({ onTagClick }) {
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
                     最終使用: {stat.lastUsed.toLocaleDateString('ja-JP')}
                   </Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                                 )}
+               </CardContent>
+             </Card>
+         ))}
+       </Box>
 
       <TagEditDialog
         open={editOpen}

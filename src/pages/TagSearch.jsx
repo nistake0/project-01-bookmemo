@@ -119,7 +119,7 @@ export default function TagSearch() {
   }
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mb: 4, pb: "56px" }}>
+    <Box sx={{ maxWidth: 1000, mx: 'auto', mb: 4, pb: "56px" }}>
       {/* 統一されたヘッダー */}
       <PageHeader 
         title="検索・タグ"

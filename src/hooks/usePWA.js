@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 /**
  * PWA機能を管理するカスタムフック
@@ -13,6 +13,34 @@ import { useState, useEffect, useCallback } from 'react';
  * @returns {object} PWA関連の状態と関数
  */
 export const usePWA = () => {
+  // PWA機能がサポートされているかチェック
+  const isPWASupported = typeof window !== 'undefined' && 
+    typeof navigator !== 'undefined' && 
+    'serviceWorker' in navigator && 
+    'PushManager' in window;
+  
+  // PWAがサポートされていない場合は最小限の状態を返す
+  if (!isPWASupported) {
+    return {
+      isOnline: true,
+      isInstallable: false,
+      isInstalled: false,
+      swRegistration: null,
+      userEngagement: 0,
+      lastVisitTime: null,
+      shouldShowInstallPrompt: false,
+      shouldShowManualInstallGuide: false,
+      registerServiceWorker: async () => null,
+      installApp: async () => {},
+      requestNotificationPermission: async () => 'denied',
+      sendNotification: () => null,
+      checkForUpdates: async () => {},
+      clearCache: async () => {},
+      reloadApp: () => {},
+      recordInstallPromptDismiss: () => {}
+    };
+  }
+  
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [swRegistration, setSwRegistration] = useState(null);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -37,6 +65,8 @@ export const usePWA = () => {
 
   // ユーザーエンゲージメントの追跡
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleUserActivity = () => {
       setUserEngagement(prev => prev + 1);
     };
@@ -55,6 +85,8 @@ export const usePWA = () => {
 
   // 訪問回数の追跡
   useEffect(() => {
+    if (typeof localStorage === 'undefined') return;
+
     const now = Date.now();
     const lastVisit = localStorage.getItem('bookmemo_last_visit');
     
@@ -75,34 +107,43 @@ export const usePWA = () => {
 
   // Service Workerの登録
   const registerServiceWorker = useCallback(async () => {
-    if ('serviceWorker' in navigator) {
-      try {
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        setSwRegistration(registration);
-        console.log('Service Worker registered:', registration);
 
-        // 更新の確認
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      setSwRegistration(registration);
+      console.log('Service Worker registered:', registration);
+
+      // 更新の確認
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               // 新しいService Workerが利用可能
               console.log('New Service Worker available');
             }
           });
-        });
+        }
+      });
 
-        return registration;
-      } catch (error) {
-        console.error('Service Worker registration failed:', error);
-        throw error;
+      return registration;
+    } catch (error) {
+      console.error('Service Worker registration failed:', error);
+      // 開発環境でのHTTPSエラーは無視する（Service Workerは本番環境で動作）
+      if (process.env.NODE_ENV === 'development' && error.name === 'SecurityError') {
+        console.log('Service Worker registration skipped in development (HTTPS required)');
+        return null;
       }
+      // その他のエラーはログに記録するが、アプリの動作は継続
+      console.warn('Service Worker registration failed, but app will continue without PWA features');
+      return null;
     }
-    return null;
   }, []);
 
   // インストールプロンプトの管理
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
+
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -177,29 +218,43 @@ export const usePWA = () => {
 
   // インストール促進の記録
   const recordInstallPromptDismiss = useCallback(() => {
+    if (typeof localStorage === 'undefined') return;
+    
     const dismissCount = parseInt(localStorage.getItem('bookmemo_dismiss_count') || '0') + 1;
     localStorage.setItem('bookmemo_dismiss_count', dismissCount.toString());
   }, []);
 
   // プッシュ通知の許可要求
   const requestNotificationPermission = useCallback(async () => {
-    if ('Notification' in window) {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      return 'denied';
+    }
+    
+    try {
       const permission = await Notification.requestPermission();
       return permission;
+    } catch (error) {
+      console.warn('Notification permission request failed:', error);
+      return 'denied';
     }
-    return 'denied';
   }, []);
 
   // プッシュ通知の送信
   const sendNotification = useCallback((title, options = {}) => {
-    if ('Notification' in window && Notification.permission === 'granted') {
+    if (typeof window === 'undefined' || !('Notification' in window) || Notification.permission !== 'granted') {
+      return null;
+    }
+    
+    try {
       return new Notification(title, {
         icon: '/icons/icon-192x192.png',
         badge: '/icons/icon-192x192.png',
         ...options
       });
+    } catch (error) {
+      console.warn('Notification send failed:', error);
+      return null;
     }
-    return null;
   }, []);
 
   // 更新の確認
@@ -211,11 +266,17 @@ export const usePWA = () => {
 
   // キャッシュのクリア
   const clearCache = useCallback(async () => {
-    if ('caches' in window) {
+    if (typeof window === 'undefined' || !('caches' in window)) {
+      return;
+    }
+    
+    try {
       const cacheNames = await caches.keys();
       await Promise.all(
         cacheNames.map(cacheName => caches.delete(cacheName))
       );
+    } catch (error) {
+      console.warn('Cache clear failed:', error);
     }
   }, []);
 

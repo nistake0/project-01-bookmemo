@@ -6,6 +6,20 @@ import userEvent from '@testing-library/user-event';
 
 // useBookListフックをモック
 jest.mock('../hooks/useBookList');
+
+// PWA機能のサポートをモック
+Object.defineProperty(window, 'navigator', {
+  value: {
+    serviceWorker: {},
+  },
+  writable: true,
+});
+
+Object.defineProperty(window, 'PushManager', {
+  value: {},
+  writable: true,
+});
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => jest.fn(),
