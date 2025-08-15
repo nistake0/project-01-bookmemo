@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '../auth/AuthProvider';
 import TabPanel from '../components/common/TabPanel';
+import PageHeader from '../components/common/PageHeader';
 import TagList from '../components/tags/TagList';
 import TagStats from '../components/tags/TagStats';
 import AdvancedSearchForm from '../components/search/AdvancedSearchForm';
@@ -118,59 +119,64 @@ export default function TagSearch() {
   }
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, mb: 4, pb: "56px" }}>
-      <Typography variant="h4" gutterBottom data-testid="tag-search-title">
-        検索・タグ
-      </Typography>
-      
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2, position: 'sticky', top: 0, zIndex: 1100, backgroundColor: 'background.paper' }} data-testid="tag-search-tabs-container" style={{ position: 'sticky', top: 0, zIndex: 1100 }}>
-        <Tabs 
-          value={activeTab} 
-          onChange={handleTabChange} 
-          centered
-          data-testid="tag-search-tabs"
-        >
-          <Tab 
-            label="高度な検索" 
-            id="tag-search-tab-0"
-            aria-controls="tag-search-tabpanel-0"
-            data-testid="search-tab"
-          />
-          <Tab 
-            label="タグ管理" 
-            id="tag-search-tab-1"
-            aria-controls="tag-search-tabpanel-1"
-            data-testid="tag-management-tab"
-          />
-        </Tabs>
-      </Box>
-      
-      <TabPanel value={activeTab} index={0} data-testid="search-tab-panel">
-        <SearchTab 
-          searchConditions={searchConditions}
-          onSearchConditionsChange={handleSearchConditionsChange}
-          onSearch={handleSearch}
-          results={results}
-          loading={loading}
-          error={error}
-          onResultClick={handleResultClick}
-          onClearSearch={handleClearSearch}
-        />
-      </TabPanel>
-      
-      <TabPanel value={activeTab} index={1} data-testid="tag-management-tab-panel">
-        <TagManagementTab onTagClick={handleTagClick} />
-      </TabPanel>
-
-      {/* メモ詳細ダイアログ */}
-      <MemoEditor 
-        open={memoDialogOpen}
-        memo={selectedMemo}
-        bookId={selectedMemoBookId}
-        onClose={handleCloseMemoDialog}
-        onUpdate={handleCloseMemoDialog}
-        onDelete={handleCloseMemoDialog}
+    <Box sx={{ maxWidth: 800, mx: 'auto', mb: 4, pb: "56px" }}>
+      {/* 統一されたヘッダー */}
+      <PageHeader 
+        title="検索・タグ"
+        subtitle="高度な検索とタグ管理"
       />
+      
+      {/* メインコンテンツ */}
+      <Box sx={{ px: { xs: 1.5, sm: 2, md: 0 } }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2, position: 'sticky', top: 0, zIndex: 1100, backgroundColor: 'background.paper' }} data-testid="tag-search-tabs-container" style={{ position: 'sticky', top: 0, zIndex: 1100 }}>
+          <Tabs 
+            value={activeTab} 
+            onChange={handleTabChange} 
+            centered
+            data-testid="tag-search-tabs"
+          >
+            <Tab 
+              label="高度な検索" 
+              id="tag-search-tab-0"
+              aria-controls="tag-search-tabpanel-0"
+              data-testid="search-tab"
+            />
+            <Tab 
+              label="タグ管理" 
+              id="tag-search-tab-1"
+              aria-controls="tag-search-tabpanel-1"
+              data-testid="tag-management-tab"
+            />
+          </Tabs>
+        </Box>
+        
+        <TabPanel value={activeTab} index={0} data-testid="search-tab-panel">
+          <SearchTab 
+            searchConditions={searchConditions}
+            onSearchConditionsChange={handleSearchConditionsChange}
+            onSearch={handleSearch}
+            results={results}
+            loading={loading}
+            error={error}
+            onResultClick={handleResultClick}
+            onClearSearch={handleClearSearch}
+          />
+        </TabPanel>
+        
+        <TabPanel value={activeTab} index={1} data-testid="tag-management-tab-panel">
+          <TagManagementTab onTagClick={handleTagClick} />
+        </TabPanel>
+
+        {/* メモ詳細ダイアログ */}
+        <MemoEditor 
+          open={memoDialogOpen}
+          memo={selectedMemo}
+          bookId={selectedMemoBookId}
+          onClose={handleCloseMemoDialog}
+          onUpdate={handleCloseMemoDialog}
+          onDelete={handleCloseMemoDialog}
+        />
+      </Box>
     </Box>
   );
 }

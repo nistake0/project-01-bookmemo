@@ -95,7 +95,9 @@ describe('TagSearch', () => {
     test('タイトルとタブが正しく表示される', () => {
       renderTagSearch();
       
-      expect(screen.getByTestId('tag-search-title')).toHaveTextContent('検索・タグ');
+      // PageHeaderコンポーネントのタイトルを確認
+      expect(screen.getByText('検索・タグ')).toBeInTheDocument();
+      expect(screen.getByText('高度な検索とタグ管理')).toBeInTheDocument();
       expect(screen.getByTestId('search-tab')).toHaveTextContent('高度な検索');
       expect(screen.getByTestId('tag-management-tab')).toHaveTextContent('タグ管理');
     });
