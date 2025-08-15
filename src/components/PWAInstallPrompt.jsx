@@ -1,17 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Snackbar,
   Alert,
   Button,
   Box,
   Typography,
-  IconButton
+  IconButton,
+  Card,
+  CardContent,
+  Chip,
+  Stack
 } from '@mui/material';
 import {
   GetApp as InstallIcon,
   Close as CloseIcon,
   WifiOff as OfflineIcon,
-  Wifi as OnlineIcon
+  Wifi as OnlineIcon,
+  Star as StarIcon,
+  Speed as SpeedIcon,
+  Storage as StorageIcon
 } from '@mui/icons-material';
 import { usePWA } from '../hooks/usePWA';
 
@@ -22,27 +29,34 @@ import { usePWA } from '../hooks/usePWA';
  * - アプリインストールプロンプトの表示
  * - オフライン状態の表示
  * - インストール状態の管理
+ * - インストール促進機能
  */
 const PWAInstallPrompt = () => {
   const {
     isOnline,
     isInstallable,
     isInstalled,
-    installApp
+    installApp,
+    shouldShowInstallPrompt,
+    recordInstallPromptDismiss
   } = usePWA();
 
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showOfflineAlert, setShowOfflineAlert] = useState(false);
+  const [showEnhancedPrompt, setShowEnhancedPrompt] = useState(false);
 
   // インストール可能になったらプロンプトを表示
-  React.useEffect(() => {
-    if (isInstallable && !isInstalled) {
+  useEffect(() => {
+    if (isInstallable && !isInstalled && shouldShowInstallPrompt) {
+      // 強化版プロンプトを表示（テスト用に即座に表示）
+      setShowEnhancedPrompt(true);
+    } else if (isInstallable && !isInstalled) {
       setShowInstallPrompt(true);
     }
-  }, [isInstallable, isInstalled]);
+  }, [isInstallable, isInstalled, shouldShowInstallPrompt]);
 
   // オフライン状態の監視
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isOnline) {
       setShowOfflineAlert(true);
     } else {
@@ -54,6 +68,7 @@ const PWAInstallPrompt = () => {
     try {
       await installApp();
       setShowInstallPrompt(false);
+      setShowEnhancedPrompt(false);
     } catch (error) {
       console.error('Installation failed:', error);
     }
@@ -61,19 +76,35 @@ const PWAInstallPrompt = () => {
 
   const handleCloseInstallPrompt = () => {
     setShowInstallPrompt(false);
+    if (recordInstallPromptDismiss) {
+      recordInstallPromptDismiss();
+    }
+  };
+
+  const handleCloseEnhancedPrompt = () => {
+    setShowEnhancedPrompt(false);
+    if (recordInstallPromptDismiss) {
+      recordInstallPromptDismiss();
+    }
   };
 
   const handleCloseOfflineAlert = () => {
     setShowOfflineAlert(false);
   };
 
+  const pwaBenefits = [
+    { icon: <SpeedIcon />, title: '高速起動', description: 'アプリのように素早く起動' },
+    { icon: <StorageIcon />, title: 'オフライン対応', description: 'インターネットなしでも利用可能' },
+    { icon: <StarIcon />, title: 'ホーム画面に追加', description: 'いつでも簡単にアクセス' }
+  ];
+
   return (
     <>
-      {/* インストールプロンプト */}
+      {/* 基本インストールプロンプト */}
       <Snackbar
         open={showInstallPrompt}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        sx={{ mb: 8 }} // フッターメニューの上に表示
+        sx={{ mb: 8 }}
       >
         <Alert
           severity="info"
@@ -85,6 +116,12 @@ const PWAInstallPrompt = () => {
                 startIcon={<InstallIcon />}
                 onClick={handleInstall}
                 data-testid="pwa-install-button"
+                variant="contained"
+                sx={{ 
+                  backgroundColor: 'primary.main',
+                  color: 'white',
+                  '&:hover': { backgroundColor: 'primary.dark' }
+                }}
               >
                 インストール
               </Button>
@@ -104,6 +141,69 @@ const PWAInstallPrompt = () => {
             BookMemoをホーム画面に追加して、より快適にご利用いただけます
           </Typography>
         </Alert>
+      </Snackbar>
+
+      {/* 強化版インストールプロンプト */}
+      <Snackbar
+        open={showEnhancedPrompt}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        sx={{ mb: 8, width: '100%', maxWidth: '600px' }}
+      >
+        <Card sx={{ width: '100%', boxShadow: 3 }}>
+          <CardContent sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+              <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
+                📱 BookMemoをアプリとしてインストール
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={handleCloseEnhancedPrompt}
+                sx={{ mt: -0.5 }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            
+            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+              より快適な読書メモ管理体験をお届けします
+            </Typography>
+
+            <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}>
+              {pwaBenefits.map((benefit, index) => (
+                <Chip
+                  key={index}
+                  icon={benefit.icon}
+                  label={benefit.title}
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.75rem' }}
+                />
+              ))}
+            </Stack>
+
+            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleCloseEnhancedPrompt}
+              >
+                後で
+              </Button>
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<InstallIcon />}
+                onClick={handleInstall}
+                sx={{ 
+                  backgroundColor: 'primary.main',
+                  '&:hover': { backgroundColor: 'primary.dark' }
+                }}
+              >
+                今すぐインストール
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
       </Snackbar>
 
       {/* オフラインアラート */}

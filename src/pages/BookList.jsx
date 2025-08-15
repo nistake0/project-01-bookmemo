@@ -1,10 +1,13 @@
-import { Typography, Box, Button, Tabs, Tab, TextField, Grid } from "@mui/material";
+import { Typography, Box, Button, Tabs, Tab, TextField, Grid, IconButton, Tooltip } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { GetApp as InstallIcon } from '@mui/icons-material';
 import BookCard from "../components/BookCard";
 import { useBookList } from "../hooks/useBookList";
+import { usePWA } from "../hooks/usePWA";
 
 export default function BookList() {
   const navigate = useNavigate();
+  const { isInstallable, isInstalled, installApp } = usePWA();
   const {
     filteredBooks,
     loading,
@@ -17,6 +20,14 @@ export default function BookList() {
 
   const handleBookClick = (bookId) => {
     navigate(`/book/${bookId}`);
+  };
+
+  const handleInstallClick = async () => {
+    try {
+      await installApp();
+    } catch (error) {
+      console.error('Installation failed:', error);
+    }
   };
 
   if (loading) return <div>Loading...</div>;
@@ -38,18 +49,45 @@ export default function BookList() {
         flexDirection: { xs: 'column', sm: 'row' },
         gap: { xs: 1.5, sm: 0 }
       }}>
-        <Typography 
-          variant="h4" 
-          gutterBottom 
-          data-testid="book-list-title"
-          sx={{ 
-            fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
-            fontWeight: 600,
-            mb: 0
-          }}
-        >
-          本一覧
-        </Typography>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1,
+          width: { xs: '100%', sm: 'auto' }
+        }}>
+          <Typography 
+            variant="h4" 
+            gutterBottom 
+            data-testid="book-list-title"
+            sx={{ 
+              fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
+              fontWeight: 600,
+              mb: 0
+            }}
+          >
+            本一覧
+          </Typography>
+          {/* PWAインストールボタン */}
+          {isInstallable && !isInstalled && (
+            <Tooltip title="BookMemoをアプリとしてインストール">
+              <IconButton
+                color="primary"
+                onClick={handleInstallClick}
+                sx={{ 
+                  ml: 1,
+                  backgroundColor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'primary.dark',
+                  }
+                }}
+                data-testid="pwa-install-header-button"
+              >
+                <InstallIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
         <Button 
           variant="contained" 
           data-testid="book-add-button" 

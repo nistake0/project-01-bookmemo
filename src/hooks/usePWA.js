@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback } from 'react';
  * - インストールプロンプトの管理
  * - オフライン状態の監視
  * - プッシュ通知の管理
+ * - インストール促進機能
  * 
  * @returns {object} PWA関連の状態と関数
  */
@@ -17,6 +18,8 @@ export const usePWA = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [userEngagement, setUserEngagement] = useState(0);
+  const [lastVisitTime, setLastVisitTime] = useState(null);
 
   // オンライン状態の監視
   useEffect(() => {
@@ -30,6 +33,44 @@ export const usePWA = () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
+  }, []);
+
+  // ユーザーエンゲージメントの追跡
+  useEffect(() => {
+    const handleUserActivity = () => {
+      setUserEngagement(prev => prev + 1);
+    };
+
+    const events = ['click', 'scroll', 'keydown', 'touchstart'];
+    events.forEach(event => {
+      window.addEventListener(event, handleUserActivity, { passive: true });
+    });
+
+    return () => {
+      events.forEach(event => {
+        window.removeEventListener(event, handleUserActivity);
+      });
+    };
+  }, []);
+
+  // 訪問回数の追跡
+  useEffect(() => {
+    const now = Date.now();
+    const lastVisit = localStorage.getItem('bookmemo_last_visit');
+    
+    if (lastVisit) {
+      const timeDiff = now - parseInt(lastVisit);
+      // 24時間以上経過している場合は新しい訪問としてカウント
+      if (timeDiff > 24 * 60 * 60 * 1000) {
+        const visitCount = parseInt(localStorage.getItem('bookmemo_visit_count') || '0') + 1;
+        localStorage.setItem('bookmemo_visit_count', visitCount.toString());
+      }
+    } else {
+      localStorage.setItem('bookmemo_visit_count', '1');
+    }
+    
+    localStorage.setItem('bookmemo_last_visit', now.toString());
+    setLastVisitTime(now);
   }, []);
 
   // Service Workerの登録
@@ -73,10 +114,21 @@ export const usePWA = () => {
       setIsInstallable(false);
       setDeferredPrompt(null);
       console.log('PWA was installed');
+      
+      // インストール完了を記録
+      localStorage.setItem('bookmemo_installed', 'true');
+      localStorage.setItem('bookmemo_install_date', Date.now().toString());
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
+
+    // 既にインストールされているかチェック
+    const isAlreadyInstalled = localStorage.getItem('bookmemo_installed') === 'true';
+    if (isAlreadyInstalled) {
+      setIsInstalled(true);
+      setIsInstallable(false);
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -101,35 +153,45 @@ export const usePWA = () => {
     }
   }, [deferredPrompt]);
 
-  // プッシュ通知の許可
+  // インストール促進のタイミング判定
+  const shouldShowInstallPrompt = useCallback(() => {
+    if (isInstalled || !isInstallable) return false;
+    
+    const visitCount = parseInt(localStorage.getItem('bookmemo_visit_count') || '0');
+    const dismissCount = parseInt(localStorage.getItem('bookmemo_dismiss_count') || '0');
+    
+    // 訪問回数が3回以上で、かつユーザーエンゲージメントが一定以上
+    return visitCount >= 3 && userEngagement >= 10 && dismissCount < 5;
+  }, [isInstalled, isInstallable, userEngagement]);
+
+  // インストール促進の記録
+  const recordInstallPromptDismiss = useCallback(() => {
+    const dismissCount = parseInt(localStorage.getItem('bookmemo_dismiss_count') || '0') + 1;
+    localStorage.setItem('bookmemo_dismiss_count', dismissCount.toString());
+  }, []);
+
+  // プッシュ通知の許可要求
   const requestNotificationPermission = useCallback(async () => {
     if ('Notification' in window) {
       const permission = await Notification.requestPermission();
-      return permission === 'granted';
+      return permission;
     }
-    return false;
+    return 'denied';
   }, []);
 
   // プッシュ通知の送信
-  const sendNotification = useCallback(async (title, options = {}) => {
+  const sendNotification = useCallback((title, options = {}) => {
     if ('Notification' in window && Notification.permission === 'granted') {
-      const notification = new Notification(title, {
+      return new Notification(title, {
         icon: '/icons/icon-192x192.png',
         badge: '/icons/icon-192x192.png',
         ...options
       });
-
-      notification.addEventListener('click', () => {
-        window.focus();
-        notification.close();
-      });
-
-      return notification;
     }
     return null;
   }, []);
 
-  // Service Workerの更新確認
+  // 更新の確認
   const checkForUpdates = useCallback(async () => {
     if (swRegistration) {
       await swRegistration.update();
@@ -143,7 +205,6 @@ export const usePWA = () => {
       await Promise.all(
         cacheNames.map(cacheName => caches.delete(cacheName))
       );
-      console.log('Cache cleared');
     }
   }, []);
 
@@ -153,19 +214,20 @@ export const usePWA = () => {
   }, []);
 
   return {
-    // 状態
     isOnline,
     isInstallable,
     isInstalled,
     swRegistration,
-    
-    // 関数
+    userEngagement,
+    lastVisitTime,
+    shouldShowInstallPrompt: shouldShowInstallPrompt(),
     registerServiceWorker,
     installApp,
     requestNotificationPermission,
     sendNotification,
     checkForUpdates,
     clearCache,
-    reloadApp
+    reloadApp,
+    recordInstallPromptDismiss
   };
 };
