@@ -24,6 +24,7 @@ export default function Signup() {
       <Typography variant="h5" align="center" gutterBottom>新規登録</Typography>
       <TextField
         label="メールアドレス"
+        type="email"
         value={email}
         onChange={e => setEmail(e.target.value)}
         fullWidth

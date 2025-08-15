@@ -26,6 +26,7 @@ export default function Login() {
       <Typography variant="h5" align="center" gutterBottom data-testid="login-title">ログイン</Typography>
       <TextField
         label="メールアドレス"
+        type="email"
         value={email}
         onChange={e => setEmail(e.target.value)}
         fullWidth
