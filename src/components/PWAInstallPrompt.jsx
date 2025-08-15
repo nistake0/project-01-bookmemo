@@ -38,12 +38,14 @@ const PWAInstallPrompt = () => {
     isInstalled,
     installApp,
     shouldShowInstallPrompt,
+    shouldShowManualInstallGuide,
     recordInstallPromptDismiss
   } = usePWA();
 
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showOfflineAlert, setShowOfflineAlert] = useState(false);
   const [showEnhancedPrompt, setShowEnhancedPrompt] = useState(false);
+  const [showManualGuide, setShowManualGuide] = useState(false);
 
   // インストール可能になったらプロンプトを表示
   useEffect(() => {
@@ -54,6 +56,13 @@ const PWAInstallPrompt = () => {
       setShowInstallPrompt(true);
     }
   }, [isInstallable, isInstalled, shouldShowInstallPrompt]);
+
+  // iPhone用の手動インストールガイドを表示
+  useEffect(() => {
+    if (shouldShowManualInstallGuide && !isInstalled) {
+      setShowManualGuide(true);
+    }
+  }, [shouldShowManualInstallGuide, isInstalled]);
 
   // オフライン状態の監視
   useEffect(() => {
@@ -90,6 +99,13 @@ const PWAInstallPrompt = () => {
 
   const handleCloseOfflineAlert = () => {
     setShowOfflineAlert(false);
+  };
+
+  const handleCloseManualGuide = () => {
+    setShowManualGuide(false);
+    if (recordInstallPromptDismiss) {
+      recordInstallPromptDismiss();
+    }
   };
 
   const pwaBenefits = [
@@ -248,6 +264,91 @@ const PWAInstallPrompt = () => {
             オンラインに復帰しました
           </Typography>
         </Alert>
+      </Snackbar>
+
+      {/* iPhone用の手動インストールガイド */}
+      <Snackbar
+        open={showManualGuide}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        sx={{ mb: 8, width: '100%', maxWidth: '600px' }}
+      >
+        <Card sx={{ width: '100%', boxShadow: 3 }}>
+          <CardContent sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+              <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
+                📱 BookMemoをホーム画面に追加
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={handleCloseManualGuide}
+                sx={{ mt: -0.5 }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            
+            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+              iPhoneでBookMemoをアプリとして使用するには、以下の手順でホーム画面に追加してください：
+            </Typography>
+
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                1. 共有ボタンをタップ
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1, pl: 2 }}>
+                Safariの下部にある「共有」ボタン（□↑）をタップします
+              </Typography>
+              
+              <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                2. 「ホーム画面に追加」を選択
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1, pl: 2 }}>
+                共有メニューから「ホーム画面に追加」を選択します
+              </Typography>
+              
+              <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                3. 追加を確認
+              </Typography>
+              <Typography variant="body2" sx={{ pl: 2 }}>
+                「追加」をタップしてホーム画面に追加します
+              </Typography>
+            </Box>
+
+            <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}>
+              {pwaBenefits.map((benefit, index) => (
+                <Chip
+                  key={index}
+                  icon={benefit.icon}
+                  label={benefit.title}
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.75rem' }}
+                />
+              ))}
+            </Stack>
+
+            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleCloseManualGuide}
+              >
+                後で
+              </Button>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleCloseManualGuide}
+                sx={{ 
+                  backgroundColor: 'primary.main',
+                  '&:hover': { backgroundColor: 'primary.dark' }
+                }}
+              >
+                手順を確認しました
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
       </Snackbar>
     </>
   );

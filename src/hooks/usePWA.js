@@ -160,9 +160,20 @@ export const usePWA = () => {
     const visitCount = parseInt(localStorage.getItem('bookmemo_visit_count') || '0');
     const dismissCount = parseInt(localStorage.getItem('bookmemo_dismiss_count') || '0');
     
-    // 訪問回数が3回以上で、かつユーザーエンゲージメントが一定以上
-    return visitCount >= 3 && userEngagement >= 10 && dismissCount < 5;
+    // 条件を緩和：訪問回数1回以上、エンゲージメント5以上、拒否回数3回未満
+    return visitCount >= 1 && userEngagement >= 5 && dismissCount < 3;
   }, [isInstalled, isInstallable, userEngagement]);
+
+  // 手動インストールガイドの表示判定（iPhone用）
+  const shouldShowManualInstallGuide = useCallback(() => {
+    if (isInstalled) return false;
+    
+    // iPhone Safariの場合は手動インストールガイドを表示
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    
+    return isIOS && isSafari;
+  }, [isInstalled]);
 
   // インストール促進の記録
   const recordInstallPromptDismiss = useCallback(() => {
@@ -221,6 +232,7 @@ export const usePWA = () => {
     userEngagement,
     lastVisitTime,
     shouldShowInstallPrompt: shouldShowInstallPrompt(),
+    shouldShowManualInstallGuide: shouldShowManualInstallGuide(),
     registerServiceWorker,
     installApp,
     requestNotificationPermission,

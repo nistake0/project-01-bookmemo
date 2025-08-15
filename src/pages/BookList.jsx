@@ -7,7 +7,7 @@ import { usePWA } from "../hooks/usePWA";
 
 export default function BookList() {
   const navigate = useNavigate();
-  const { isInstallable, isInstalled, installApp } = usePWA();
+  const { isInstallable, isInstalled, installApp, shouldShowManualInstallGuide } = usePWA();
   const {
     filteredBooks,
     loading,
@@ -27,6 +27,27 @@ export default function BookList() {
       await installApp();
     } catch (error) {
       console.error('Installation failed:', error);
+    }
+  };
+
+  const handleManualInstallGuide = () => {
+    // iPhone用の手動インストールガイドを表示
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    
+    if (isIOS && isSafari) {
+      alert(`📱 BookMemoをホーム画面に追加する手順：
+
+1. 共有ボタンをタップ
+   Safariの下部にある「共有」ボタン（□↑）をタップ
+
+2. 「ホーム画面に追加」を選択
+   共有メニューから「ホーム画面に追加」を選択
+
+3. 追加を確認
+   「追加」をタップしてホーム画面に追加
+
+これでBookMemoをアプリとして使用できます！`);
     }
   };
 
@@ -82,6 +103,26 @@ export default function BookList() {
                   }
                 }}
                 data-testid="pwa-install-header-button"
+              >
+                <InstallIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+          {/* iPhone用の手動インストールガイドボタン */}
+          {shouldShowManualInstallGuide && !isInstalled && (
+            <Tooltip title="iPhoneでホーム画面に追加する手順を表示">
+              <IconButton
+                color="primary"
+                onClick={handleManualInstallGuide}
+                sx={{ 
+                  ml: 1,
+                  backgroundColor: 'secondary.main',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'secondary.dark',
+                  }
+                }}
+                data-testid="pwa-manual-install-button"
               >
                 <InstallIcon />
               </IconButton>
