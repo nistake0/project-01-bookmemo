@@ -256,6 +256,14 @@ function AppRoutes() {
     !user
   );
 
+  // ページ変更時にスクロール位置を最上部にリセット
+  useEffect(() => {
+    const scrollContainer = document.getElementById('app-scroll-container');
+    if (scrollContainer) {
+      scrollContainer.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
+
   return (
     <>
       <Box
