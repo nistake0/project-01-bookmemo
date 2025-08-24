@@ -14,6 +14,7 @@ const PageHeader = ({ title, subtitle, children }) => {
   return (
     <Paper
       elevation={0}
+      data-testid="page-header"
       sx={{
         background: `
           linear-gradient(135deg, rgba(139, 69, 19, 0.9) 0%, rgba(160, 82, 45, 0.8) 100%),
@@ -48,6 +49,7 @@ const PageHeader = ({ title, subtitle, children }) => {
         <Typography
           variant="h4"
           component="h1"
+          data-testid="page-header-title"
           sx={{
             fontWeight: 700,
             fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
@@ -61,6 +63,7 @@ const PageHeader = ({ title, subtitle, children }) => {
         {subtitle && (
           <Typography
             variant="body1"
+            data-testid="page-header-subtitle"
             sx={{
               opacity: 0.95,
               fontSize: { xs: '0.9rem', sm: '1rem' },

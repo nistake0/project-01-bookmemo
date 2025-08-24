@@ -28,6 +28,7 @@ export default function BookAdd() {
       <PageHeader 
         title="本を追加"
         subtitle="新しい本をライブラリに追加"
+        data-testid="book-add-header"
       />
       
       {/* メインコンテンツ */}

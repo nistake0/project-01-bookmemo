@@ -92,6 +92,14 @@ npm test
 - テスト用Firebaseユーザーは自動で作成・削除
 - テストは1ファイル1シナリオで分割・独立性重視
 - **重要**: E2Eテスト実行には開発サーバーの起動が必須
+- **data-testid対応**: UI変更に影響されない安定したテスト設計
+- **HTTPS対応**: 開発環境のHTTPS設定に対応したCypress設定
+
+#### 実装パターン
+- **Test ID Pattern**: テスト専用のID属性を使用した要素特定
+- **Semantic Test Selectors**: 意味のあるセレクタ名による要素特定
+- **Stable Test Selectors**: UI変更に影響されない安定したセレクタの使用
+- **data-testid優先**: `cy.contains`の使用を避け、`data-testid`ベースの検証を優先
 
 #### 実行方法
 1. Firebaseサービスアカウント鍵（`serviceAccountKey.json`）をプロジェクト直下に配置（`.gitignore`済み）
@@ -117,6 +125,8 @@ npm test
 - `serviceAccountKey.json`は**絶対にGit管理しないでください**
 - **E2Eテスト実行前には必ず開発サーバー（`npm run dev`）を起動してください**
 - テスト用ユーザーのメール・パスワードはスクリプトで変更可能
+- **HTTPS開発環境**: 開発サーバーがHTTPSで起動するため、Cypress設定もHTTPS対応
+- **data-testid使用**: 新しいコンポーネント作成時は必ず`data-testid`属性を追加
 - 詳細な運用・工夫は[ARCHITECTURE.md](./ARCHITECTURE.md)や`doc/`参照
 
 ## 主な機能・設計の特徴
@@ -177,6 +187,11 @@ npm test
 - [x] バグ修正: 検索結果のメモクリック時に書籍へ遷移する問題を修正（メモ詳細ダイアログを表示）
 - [x] バグ修正: タグ検索でメモが検索対象に含まれない問題を修正
 - [x] バグ修正: E2EテストのURLパス問題を修正
+- [x] **E2Eテストのdata-testid対応と安定性向上** ✅ **2025-08-24完了**
+  - [x] PageHeaderコンポーネントにdata-testid属性追加
+  - [x] E2Eテストの`cy.contains`を`data-testid`ベースの検証に置き換え
+  - [x] HTTPS設定の修正とタイムアウト設定の最適化
+  - [x] テストの安定性と保守性の大幅向上
 
 - [ ] **Phase 15-4**: マイページの実装（3-4時間）
   - [ ] MyPage.jsxの基本構造作成

@@ -16,6 +16,6 @@ describe('ログイン画面のE2Eテスト', () => {
 
     // 本一覧画面に遷移したことを確認
     cy.url().should('include', '/'); // 開発環境用に修正
-    cy.get('[data-testid="book-list-title"]').should('be.visible');
+    cy.get('[data-testid="page-header-title"]').should('contain', '本一覧');
   });
 }); 

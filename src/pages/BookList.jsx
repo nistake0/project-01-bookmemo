@@ -64,6 +64,7 @@ export default function BookList() {
       <PageHeader 
         title="本一覧"
         subtitle="あなたの読書ライブラリ"
+        data-testid="book-list-header"
       />
       
       {/* メインコンテンツ */}

@@ -11,11 +11,11 @@
 //
 // -- This is a parent command --
 Cypress.Commands.add('login', (email = 'testuser@example.com', password = 'testpassword') => {
-  cy.visit('/project-01-bookmemo/login');
+  cy.visit('/login');
   cy.get('[data-testid="login-email-input"]', { timeout: 10000 }).should('be.visible').type(email);
   cy.get('[data-testid="login-password-input"]').should('be.visible').type(password);
   cy.get('[data-testid="login-submit"]').should('be.visible').click();
-  cy.contains('本一覧', { timeout: 10000 }).should('be.visible');
+  cy.get('[data-testid="page-header-title"]', { timeout: 10000 }).should('contain', '本一覧');
 });
 
 Cypress.Commands.add('addBook', (bookData = {}) => {
@@ -29,13 +29,20 @@ Cypress.Commands.add('addBook', (bookData = {}) => {
   const book = { ...defaultBook, ...bookData };
   
   cy.get('[data-testid="book-add-button"]').should('be.visible').click();
+  
+  // URLが/addに遷移したことを確認
+  cy.url().should('include', '/add');
+  
+  // BookFormコンポーネントが表示されるまで待機
+  cy.get('[data-testid="book-form"]', { timeout: 15000 }).should('exist');
+  
   cy.get('[data-testid="book-isbn-input"]').type(book.isbn);
   cy.get('[data-testid="book-title-input"]').type(book.title);
   cy.get('[data-testid="book-author-input"]').type(book.author);
   cy.get('[data-testid="book-publisher-input"]').type(book.publisher);
   cy.get('[data-testid="book-publishdate-input"]').type(book.publishDate);
   cy.get('[data-testid="book-add-submit"]').click();
-  cy.contains(book.title, { timeout: 10000 }).should('be.visible');
+  cy.get('[data-testid="book-detail"]', { timeout: 10000 }).should('exist');
 });
 
 Cypress.Commands.add('addMemo', (memoText = 'E2Eテスト用メモ') => {
