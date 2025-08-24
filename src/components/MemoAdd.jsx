@@ -24,12 +24,12 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
     fetchTagHistory();
   }, [fetchTagHistory]);
 
-  // 書籍のタグを初期値として設定
-  useEffect(() => {
-    if (bookTags && bookTags.length > 0) {
-      setTags(bookTags);
-    }
-  }, [bookTags]);
+  // 書籍のタグを初期値として設定（削除：タグ欄を空欄で開始するように変更）
+  // useEffect(() => {
+  //   if (bookTags && bookTags.length > 0) {
+  //     setTags(bookTags);
+  //   }
+  // }, [bookTags]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
