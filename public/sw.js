@@ -109,6 +109,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // SPAルーティング処理
+  if (request.method === 'GET' && !isStaticFile(request) && !isApiRequest(request)) {
+    event.respondWith(
+      caches.match('/index.html')
+        .then((response) => {
+          if (response) {
+            return response;
+          }
+          return fetch(request);
+        })
+        .catch(() => {
+          return caches.match('/index.html');
+        })
+    );
+    return;
+  }
+
   // その他のリクエストはネットワークファースト
   event.respondWith(
     fetch(request)
