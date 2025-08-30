@@ -16,13 +16,24 @@
             
             console.log('404.html processing:', { path, basePath, search, hash });
             
-            // 無限ループを防ぐためのチェック（完全版）
-            // index.htmlが含まれている場合は無限ループと判定
+            // 無限ループを防ぐためのチェック（修正版）
+            // 正しいSPAルーティングパスと無限ループを区別
             if (path.includes('/index.html')) {
-                console.log('404.html: index.html detected, redirecting to root');
-                // 既にindex.htmlが含まれている場合は、ルートにリダイレクト
-                window.location.replace(basePath + '/');
-                return;
+                // 正しいSPAルーティングパスの場合は処理を続行
+                if (path.includes('/index.html/book/') || 
+                    path.includes('/index.html/add') || 
+                    path.includes('/index.html/tags') || 
+                    path.includes('/index.html/stats') || 
+                    path.includes('/index.html/mypage') ||
+                    path.includes('/index.html/login') ||
+                    path.includes('/index.html/signup')) {
+                    console.log('404.html: Valid SPA routing path detected, continuing...');
+                } else {
+                    console.log('404.html: Invalid index.html path detected, redirecting to root');
+                    // 不正なindex.htmlパスの場合は、ルートにリダイレクト
+                    window.location.replace(basePath + '/');
+                    return;
+                }
             }
             
             // ベースパスを除去してクリーンなパスを取得
@@ -38,7 +49,20 @@
             
             console.log('404.html: cleanPath =', cleanPath);
             
-            // SPAルーティング処理（安全版）
+            // SPAルーティング処理（修正版）
+            // 正しいSPAルーティングパスの場合は、React Routerに処理を委譲
+            if (path.includes('/index.html/book/') || 
+                path.includes('/index.html/add') || 
+                path.includes('/index.html/tags') || 
+                path.includes('/index.html/stats') || 
+                path.includes('/index.html/mypage') ||
+                path.includes('/index.html/login') ||
+                path.includes('/index.html/signup')) {
+                console.log('404.html: Valid SPA routing path, letting React Router handle it');
+                // 正しいSPAルーティングパスの場合は、何もしない（React Routerに処理を委譲）
+                return;
+            }
+            
             // 書籍詳細ページの場合は特別な処理
             if (cleanPath.startsWith('/book/')) {
                 console.log('404.html: Book detail page detected:', cleanPath);
