@@ -24,6 +24,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import { usePWA } from "./hooks/usePWA";
 import { withReactContext } from "./hooks/useReactContext.jsx";
+import { useContext } from 'react';
 
 // モバイル最適化テーマの作成
 const theme = createTheme({
@@ -250,6 +251,7 @@ function AppBottomNav() {
 function AppRoutes() {
   const location = useLocation();
   const { user } = useAuth();
+  const { setGlobalError } = useContext(ErrorDialogContext);
 
   const hideBottomNav = (
     location.pathname.startsWith('/login') ||
@@ -264,6 +266,31 @@ function AppRoutes() {
       scrollContainer.scrollTo(0, 0);
     }
   }, [location.pathname]);
+
+  // グローバルエラーハンドラーを設定
+  useEffect(() => {
+    const handleError = (event) => {
+      console.error('Global error caught:', event.error);
+      if (setGlobalError) {
+        setGlobalError('予期しないエラーが発生しました。ページを再読み込みしてください。');
+      }
+    };
+
+    const handleUnhandledRejection = (event) => {
+      console.error('Unhandled promise rejection:', event.reason);
+      if (setGlobalError) {
+        setGlobalError('ネットワークエラーが発生しました。接続を確認してください。');
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, [setGlobalError]);
 
   return (
     <>
@@ -306,14 +333,12 @@ function AppRoutes() {
 }
 
 function App() {
-  const [globalError, setGlobalError] = useState("");
-  
   // 環境に応じてbasenameを設定
   const basename = import.meta.env.PROD ? "/project-01-bookmemo" : "";
   
   return (
     <AuthProvider>
-      <ErrorDialogContext.Provider value={{ setGlobalError }}>
+      <ErrorDialogProvider>
         <BrowserRouter basename={basename}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
@@ -323,14 +348,9 @@ function App() {
             {typeof window !== 'undefined' && 'serviceWorker' in navigator && (
               <PWAInstallPrompt />
             )}
-            <CommonErrorDialog
-              open={!!globalError}
-              message={globalError}
-              onClose={() => setGlobalError("")}
-            />
           </ThemeProvider>
         </BrowserRouter>
-      </ErrorDialogContext.Provider>
+      </ErrorDialogProvider>
     </AuthProvider>
   );
 }
