@@ -109,29 +109,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // SPAルーティング処理（シンプル版）
-  if (request.method === 'GET' && !isStaticFile(request) && !isApiRequest(request)) {
-    console.log('Service Worker: SPA routing request:', url.pathname);
-    
-    // すべてのGETリクエストでindex.htmlを返す（シンプルなSPAルーティング）
-    event.respondWith(
-      caches.match('/index.html')
-        .then((response) => {
-          if (response) {
-            console.log('Service Worker: Returning cached index.html for SPA route:', url.pathname);
-            return response;
-          }
-          // index.htmlが見つからない場合は、ネットワークから取得
-          console.log('Service Worker: index.html not in cache, fetching for SPA route:', url.pathname);
-          return fetch('/index.html');
-        })
-        .catch((error) => {
-          console.log('Service Worker: Error handling SPA route:', url.pathname, error);
-          return caches.match('/index.html');
-        })
-    );
-    return;
-  }
+
 
   // その他のリクエストはネットワークファースト
   event.respondWith(
