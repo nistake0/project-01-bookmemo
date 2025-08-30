@@ -25,6 +25,7 @@ import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import { usePWA } from "./hooks/usePWA";
 import { withReactContext } from "./hooks/useReactContext.jsx";
 import { useContext } from 'react';
+import { PATHS } from './config/paths';
 
 // モバイル最適化テーマの作成
 const theme = createTheme({
@@ -271,24 +272,55 @@ function AppRoutes() {
   useEffect(() => {
     const handleError = (event) => {
       console.error('Global error caught:', event.error);
-      if (setGlobalError) {
+      
+      // 404エラーの場合は特別なメッセージを表示
+      if (event.error && event.error.message && event.error.message.includes('404')) {
+        if (setGlobalError) {
+          setGlobalError('リソースが見つかりません。ページを再読み込みしてください。');
+        }
+      } else if (setGlobalError) {
         setGlobalError('予期しないエラーが発生しました。ページを再読み込みしてください。');
       }
     };
 
     const handleUnhandledRejection = (event) => {
       console.error('Unhandled promise rejection:', event.reason);
-      if (setGlobalError) {
+      
+      // ネットワークエラーや404エラーの場合は特別なメッセージを表示
+      if (event.reason && event.reason.message) {
+        if (event.reason.message.includes('404') || event.reason.message.includes('Failed to fetch')) {
+          if (setGlobalError) {
+            setGlobalError('ネットワークエラーが発生しました。接続を確認してください。');
+          }
+        } else if (setGlobalError) {
+          setGlobalError('ネットワークエラーが発生しました。接続を確認してください。');
+        }
+      } else if (setGlobalError) {
         setGlobalError('ネットワークエラーが発生しました。接続を確認してください。');
+      }
+    };
+
+    // リソース読み込みエラーの監視
+    const handleResourceError = (event) => {
+      if (event.target && event.target.src) {
+        console.error('Resource loading error:', event.target.src);
+        // 重要なリソース（Service Worker、manifest等）のエラーのみダイアログ表示
+        if (event.target.src.includes('sw.js') || event.target.src.includes('manifest.webmanifest')) {
+          if (setGlobalError) {
+            setGlobalError('アプリの設定ファイルの読み込みに失敗しました。ページを再読み込みしてください。');
+          }
+        }
       }
     };
 
     window.addEventListener('error', handleError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    window.addEventListener('error', handleResourceError, true); // キャプチャフェーズでリソースエラーを監視
 
     return () => {
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener('error', handleResourceError, true);
     };
   }, [setGlobalError]);
 
@@ -304,7 +336,7 @@ function AppRoutes() {
           pb: hideBottomNav ? 0 : { xs: '64px', sm: '72px' },
           // ページ全体の背景画像設定 - 画像本来の色で表示
           background: `
-            url('/paper-texture.jpg'),
+            url('${PATHS.PAPER_TEXTURE()}'),
             #f5f5dc
           `,
           backgroundSize: '100% auto, cover',
@@ -334,7 +366,7 @@ function AppRoutes() {
 
 function App() {
   // 環境に応じてbasenameを設定
-  const basename = import.meta.env.PROD ? "/project-01-bookmemo" : "";
+  const basename = PATHS.IS_PRODUCTION() ? "/project-01-bookmemo" : "";
   
   return (
     <AuthProvider>

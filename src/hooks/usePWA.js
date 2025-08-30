@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { PATHS } from '../config/paths';
 
 /**
  * PWA機能を管理するカスタムフック
@@ -153,7 +154,8 @@ export const usePWA = () => {
   const registerServiceWorker = useCallback(async () => {
 
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js');
+      const swPath = PATHS.SW_JS();
+      const registration = await navigator.serviceWorker.register(swPath);
       setSwRegistration(registration);
       console.log('Service Worker registered:', registration);
 
@@ -290,9 +292,10 @@ export const usePWA = () => {
     }
     
     try {
+      const iconPath = PATHS.ICON_192();
       return new Notification(title, {
-        icon: '/icons/icon-192x192.png',
-        badge: '/icons/icon-192x192.png',
+        icon: iconPath,
+        badge: iconPath,
         ...options
       });
     } catch (error) {
