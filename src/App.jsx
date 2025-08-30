@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthProvider";
 import Login from "./auth/Login";
 import Signup from "./auth/Signup";
@@ -295,13 +295,9 @@ function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
   
-  // エラーログの保存とデバッグ情報の表示
+  // 認証チェック
   useEffect(() => {
     if (!loading && !user) {
-      ErrorLogger.saveError(
-        new Error('Authentication required'), 
-        `PrivateRoute - ${location.pathname}`
-      );
       console.warn('🔐 Authentication required for:', location.pathname);
     }
   }, [user, loading, location.pathname]);
@@ -428,10 +424,9 @@ function AppRoutes() {
     !user
   );
 
-  // エラーハンドリングとデバッグ機能の初期化
+  // エラーハンドリングの初期化
   useEffect(() => {
     setupGlobalErrorHandling();
-    showDebugInfo();
   }, []);
 
   // ページ変更時のスクロール位置リセット
@@ -563,13 +558,10 @@ function AppRoutes() {
 }
 
 function App() {
-  // 環境に応じてbasenameを設定
-  const basename = PATHS.IS_PRODUCTION() ? "/project-01-bookmemo" : "";
-  
   return (
     <AuthProvider>
       <ErrorDialogProvider>
-        <BrowserRouter basename={basename}>
+        <HashRouter>
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <PWAProvider />
@@ -579,7 +571,7 @@ function App() {
               <PWAInstallPrompt />
             )}
           </ThemeProvider>
-        </BrowserRouter>
+        </HashRouter>
       </ErrorDialogProvider>
     </AuthProvider>
   );
