@@ -17,7 +17,7 @@ import { useState, useEffect } from 'react';
 import TagSearch from "./pages/TagSearch";
 import Stats from "./pages/Stats";
 import MyPage from "./pages/MyPage";
-import CommonErrorDialog, { ErrorDialogContext } from "./components/CommonErrorDialog";
+import CommonErrorDialog, { ErrorDialogContext, ErrorDialogProvider } from "./components/CommonErrorDialog";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
