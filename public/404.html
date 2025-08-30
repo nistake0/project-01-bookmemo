@@ -60,6 +60,14 @@
                 path.includes('/index.html/signup')) {
                 console.log('404.html: Valid SPA routing path, letting React Router handle it');
                 // 正しいSPAルーティングパスの場合は、何もしない（React Routerに処理を委譲）
+                // ただし、Service Workerが処理できない場合のフォールバックとして、
+                // 少し待ってからReact Routerが処理することを確認
+                setTimeout(() => {
+                    if (window.location.pathname === path) {
+                        console.log('404.html: React Router did not handle the route, redirecting to root');
+                        window.location.replace(basePath + '/');
+                    }
+                }, 1000);
                 return;
             }
             

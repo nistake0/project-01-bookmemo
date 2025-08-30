@@ -113,14 +113,21 @@ self.addEventListener('fetch', (event) => {
   if (request.method === 'GET' && !isStaticFile(request) && !isApiRequest(request)) {
     console.log('Service Worker: SPA routing request:', url.pathname);
     
-    // SPAルートかどうかを判定
+    // SPAルートかどうかを判定（改善版）
     const isSPARoute = url.pathname.startsWith('/book/') || 
                       url.pathname.startsWith('/add') || 
                       url.pathname.startsWith('/tags') || 
                       url.pathname.startsWith('/stats') || 
                       url.pathname.startsWith('/mypage') ||
                       url.pathname.startsWith('/login') ||
-                      url.pathname.startsWith('/signup');
+                      url.pathname.startsWith('/signup') ||
+                      url.pathname.includes('/index.html/book/') ||
+                      url.pathname.includes('/index.html/add') ||
+                      url.pathname.includes('/index.html/tags') ||
+                      url.pathname.includes('/index.html/stats') ||
+                      url.pathname.includes('/index.html/mypage') ||
+                      url.pathname.includes('/index.html/login') ||
+                      url.pathname.includes('/index.html/signup');
     
     if (isSPARoute) {
       console.log('Service Worker: SPA route detected:', url.pathname);
@@ -144,7 +151,7 @@ self.addEventListener('fetch', (event) => {
       return;
     }
     
-    // その他のリクエストの処理
+    // その他のリクエストの処理（改善版）
     event.respondWith(
       caches.match('/index.html')
         .then((response) => {
