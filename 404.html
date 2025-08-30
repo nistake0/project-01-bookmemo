@@ -14,8 +14,11 @@
             const search = window.location.search;
             const hash = window.location.hash;
             
+            console.log('404.html processing:', { path, basePath, search, hash });
+            
             // 無限ループを防ぐためのチェック
             if (path.includes('/index.html')) {
+                console.log('404.html: index.html detected, redirecting to root');
                 // 既にindex.htmlが含まれている場合は、ルートにリダイレクト
                 window.location.replace(basePath + '/');
                 return;
@@ -32,16 +35,21 @@
                 cleanPath = '/' + cleanPath;
             }
             
+            console.log('404.html: cleanPath =', cleanPath);
+            
             // 書籍詳細ページの場合は特別な処理
             if (cleanPath.startsWith('/book/')) {
+                console.log('404.html: Book detail page detected:', cleanPath);
                 // 書籍詳細ページの場合は、index.htmlにリダイレクトしてReact Routerに処理させる
                 const redirectUrl = basePath + '/index.html' + cleanPath + search + hash;
+                console.log('404.html: Redirecting to:', redirectUrl);
                 window.location.replace(redirectUrl);
                 return;
             }
             
             // その他のページも同様に処理
             const redirectUrl = basePath + '/index.html' + cleanPath + search + hash;
+            console.log('404.html: Redirecting to:', redirectUrl);
             window.location.replace(redirectUrl);
         })();
     </script>
