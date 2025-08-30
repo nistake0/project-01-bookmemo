@@ -4,9 +4,6 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Alert } from
 export const ErrorDialogContext = React.createContext({ setGlobalError: () => {} });
 
 const CommonErrorDialog = ({ open, message, onClose }) => {
-  // 本番環境でのデバッグ用ログ
-  console.log('CommonErrorDialog render:', { open, message });
-  
   return (
     <Dialog 
       open={open} 
@@ -35,17 +32,12 @@ export const ErrorDialogProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   const setGlobalError = (message) => {
-    console.log('setGlobalError called:', message);
     setError(message);
   };
 
   const handleClose = () => {
-    console.log('ErrorDialog closing');
     setError(null);
   };
-
-  // デバッグ用ログ
-  console.log('ErrorDialogProvider render:', { error, hasError: !!error });
 
   return (
     <ErrorDialogContext.Provider value={{ setGlobalError }}>
