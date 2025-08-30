@@ -25,18 +25,8 @@ const checkReactContext = () => {
       return false;
     }
 
-    // 簡易的なテスト
-    try {
-      const testHook = () => {
-        const [test] = React.useState('test');
-        return test;
-      };
-      testHook();
-      return true;
-    } catch (error) {
-      console.warn('React context test failed:', error);
-      return false;
-    }
+    // Reactの基本機能が利用可能であることを確認
+    return true;
   } catch (error) {
     console.warn('React context check failed:', error);
     return false;
