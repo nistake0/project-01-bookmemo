@@ -111,6 +111,8 @@ self.addEventListener('fetch', (event) => {
 
   // SPAルーティング処理（改善版）
   if (request.method === 'GET' && !isStaticFile(request) && !isApiRequest(request)) {
+    console.log('Service Worker: SPA routing request:', url.pathname);
+    
     event.respondWith(
       caches.match('/index.html')
         .then((response) => {
@@ -120,27 +122,30 @@ self.addEventListener('fetch', (event) => {
             if (url.pathname.startsWith('/book/')) {
               console.log('Service Worker: Handling book detail route:', url.pathname);
             }
+            console.log('Service Worker: Returning cached index.html for:', url.pathname);
             return response;
           }
           // index.htmlが見つからない場合は、ネットワークから取得を試行
+          console.log('Service Worker: index.html not in cache, trying network for:', url.pathname);
           return fetch(request)
             .then((fetchResponse) => {
               if (fetchResponse.status === 200) {
+                console.log('Service Worker: Network response 200 for:', url.pathname);
                 return fetchResponse;
               }
               // 404エラーの場合は、index.htmlを返す
               console.log('Service Worker: 404 error, returning index.html for:', url.pathname);
               return caches.match('/index.html');
             })
-            .catch(() => {
+            .catch((error) => {
               // ネットワークエラーの場合も、index.htmlを返す
-              console.log('Service Worker: Network error, returning index.html for:', url.pathname);
+              console.log('Service Worker: Network error, returning index.html for:', url.pathname, error);
               return caches.match('/index.html');
             });
         })
-        .catch(() => {
+        .catch((error) => {
           // キャッシュエラーの場合も、index.htmlを返す
-          console.log('Service Worker: Cache error, returning index.html for:', url.pathname);
+          console.log('Service Worker: Cache error, returning index.html for:', url.pathname, error);
           return caches.match('/index.html');
         })
     );

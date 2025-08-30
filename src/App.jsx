@@ -129,6 +129,38 @@ const showDebugInfo = () => {
       console.log('- Base Path:', PATHS.IS_PRODUCTION() ? '/project-01-bookmemo' : '');
       console.log('- Current URL:', window.location.href);
       console.log('- User Agent:', navigator.userAgent);
+    },
+    getCurrentRoute: () => {
+      const info = {
+        pathname: window.location.pathname,
+        href: window.location.href,
+        search: window.location.search,
+        hash: window.location.hash,
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString()
+      };
+      console.log('📍 Current Route Info:', info);
+      return info;
+    },
+    getLocalStorage: () => {
+      const data = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) {
+          try {
+            data[key] = JSON.parse(localStorage.getItem(key) || '');
+          } catch {
+            data[key] = localStorage.getItem(key);
+          }
+        }
+      }
+      console.log('💾 LocalStorage Data:', data);
+      return data;
+    },
+    testErrorLogging: () => {
+      console.log('🧪 Testing error logging...');
+      ErrorLogger.saveError(new Error('Test error from debug command'), 'Debug Test');
+      console.log('✅ Test error logged');
     }
   };
   
@@ -136,6 +168,9 @@ const showDebugInfo = () => {
   console.log('- bookmemoDebug.getErrors() - Show error logs');
   console.log('- bookmemoDebug.clearErrors() - Clear error logs');
   console.log('- bookmemoDebug.showDebugInfo() - Show debug info');
+  console.log('- bookmemoDebug.getCurrentRoute() - Show current route info');
+  console.log('- bookmemoDebug.getLocalStorage() - Show localStorage data');
+  console.log('- bookmemoDebug.testErrorLogging() - Test error logging');
 };
 
 // モバイル最適化テーマの作成
@@ -262,6 +297,13 @@ function PrivateRoute({ children }) {
   
   // エラーログの保存とデバッグ情報の表示
   useEffect(() => {
+    console.log('🔍 PrivateRoute effect:', { 
+      pathname: location.pathname, 
+      user: !!user, 
+      loading, 
+      href: window.location.href 
+    });
+    
     if (!loading) {
       if (!user) {
         ErrorLogger.saveError(
@@ -271,6 +313,14 @@ function PrivateRoute({ children }) {
         console.warn('🔐 Authentication required for:', location.pathname);
       } else {
         console.log('✅ Authenticated user accessing:', location.pathname);
+        // 書籍詳細ページの場合は特別なログ
+        if (location.pathname.startsWith('/book/')) {
+          console.log('📖 Book detail page accessed:', location.pathname);
+          ErrorLogger.saveError(
+            new Error(`Book detail page accessed: ${location.pathname}`),
+            'PrivateRoute Book Detail'
+          );
+        }
       }
     }
   }, [user, loading, location.pathname]);
@@ -403,8 +453,24 @@ function AppRoutes() {
     showDebugInfo();
   }, []);
 
-  // ページ変更時にスクロール位置を最上部にリセット
+  // ページ変更時のログとスクロール位置リセット
   useEffect(() => {
+    console.log('🔄 Page changed:', { 
+      pathname: location.pathname, 
+      href: window.location.href,
+      search: window.location.search,
+      hash: window.location.hash
+    });
+    
+    // 書籍詳細ページの場合は特別なログ
+    if (location.pathname.startsWith('/book/')) {
+      console.log('📖 Book detail page route change detected');
+      ErrorLogger.saveError(
+        new Error(`Book detail page route change: ${location.pathname}`),
+        'AppRoutes Book Detail Route Change'
+      );
+    }
+    
     const scrollContainer = document.getElementById('app-scroll-container');
     if (scrollContainer) {
       scrollContainer.scrollTo(0, 0);
