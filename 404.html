@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookMemo App</title>
+    <script>
+        // GitHub PagesでのSPAルーティング問題を解決
+        // すべてのルートをindex.htmlにリダイレクト
+        const path = window.location.pathname;
+        const basePath = '/project-01-bookmemo';
+        
+        // ベースパスが含まれている場合は除去
+        const cleanPath = path.startsWith(basePath) ? path.substring(basePath.length) : path;
+        
+        // index.htmlにリダイレクト（クエリパラメータとハッシュを保持）
+        const redirectUrl = basePath + '/index.html' + cleanPath + window.location.search + window.location.hash;
+        
+        // 即座にリダイレクト
+        window.location.replace(redirectUrl);
+    </script>
+</head>
+<body>
+    <p>リダイレクト中...</p>
+    <script>
+        // JavaScriptが無効な場合のフォールバック
+        setTimeout(() => {
+            window.location.href = '/project-01-bookmemo/';
+        }, 1000);
+    </script>
+</body>
+</html>
