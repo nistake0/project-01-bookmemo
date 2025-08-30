@@ -109,7 +109,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // SPAルーティング処理（改善版）
+  // SPAルーティング処理（完全版）
   if (request.method === 'GET' && !isStaticFile(request) && !isApiRequest(request)) {
     console.log('Service Worker: SPA routing request:', url.pathname);
     
@@ -124,16 +124,31 @@ self.addEventListener('fetch', (event) => {
     
     if (isSPARoute) {
       console.log('Service Worker: SPA route detected:', url.pathname);
+      // SPAルートの場合は、即座にindex.htmlを返す
+      event.respondWith(
+        caches.match('/index.html')
+          .then((response) => {
+            if (response) {
+              console.log('Service Worker: Returning cached index.html for SPA route:', url.pathname);
+              return response;
+            }
+            // index.htmlが見つからない場合は、ネットワークから取得
+            console.log('Service Worker: index.html not in cache, fetching for SPA route:', url.pathname);
+            return fetch('/index.html');
+          })
+          .catch((error) => {
+            console.log('Service Worker: Error handling SPA route:', url.pathname, error);
+            return caches.match('/index.html');
+          })
+      );
+      return;
     }
     
+    // その他のリクエストの処理
     event.respondWith(
       caches.match('/index.html')
         .then((response) => {
           if (response) {
-            // index.htmlが見つかった場合は、それを返す
-            if (url.pathname.startsWith('/book/')) {
-              console.log('Service Worker: Handling book detail route:', url.pathname);
-            }
             console.log('Service Worker: Returning cached index.html for:', url.pathname);
             return response;
           }

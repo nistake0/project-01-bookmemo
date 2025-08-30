@@ -16,9 +16,9 @@
             
             console.log('404.html processing:', { path, basePath, search, hash });
             
-            // 無限ループを防ぐためのチェック（改善版）
-            // /index.html で終わる場合のみ無限ループと判定
-            if (path.endsWith('/index.html') || path === basePath + '/index.html') {
+            // 無限ループを防ぐためのチェック（完全版）
+            // index.htmlが含まれている場合は無限ループと判定
+            if (path.includes('/index.html')) {
                 console.log('404.html: index.html detected, redirecting to root');
                 // 既にindex.htmlが含まれている場合は、ルートにリダイレクト
                 window.location.replace(basePath + '/');
@@ -38,7 +38,7 @@
             
             console.log('404.html: cleanPath =', cleanPath);
             
-            // SPAルーティング処理（改善版）
+            // SPAルーティング処理（安全版）
             // 書籍詳細ページの場合は特別な処理
             if (cleanPath.startsWith('/book/')) {
                 console.log('404.html: Book detail page detected:', cleanPath);
