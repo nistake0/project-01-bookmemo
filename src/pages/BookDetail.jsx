@@ -17,15 +17,7 @@ const BookDetail = () => {
 
   // 書籍詳細ページのデバッグ情報を記録
   useEffect(() => {
-    console.log('📖 BookDetail mounted:', { id, pathname: location.pathname, href: window.location.href });
-    
-    // エラーログに書籍詳細ページのアクセスを記録
-    if (window.ErrorLogger) {
-      window.ErrorLogger.saveError(
-        new Error(`BookDetail page accessed: ${id}`),
-        'BookDetail Page Access'
-      );
-    }
+    console.log('📖 BookDetail mounted:', { id, pathname: location.pathname });
   }, [id, location.pathname]);
 
   const handleStatusChange = (newStatus) => {
@@ -56,25 +48,16 @@ const BookDetail = () => {
   };
 
   if (loading) {
-    console.log('📖 BookDetail loading...');
     return <div data-testid="book-detail-loading">Loading...</div>;
   }
   
   if (error) {
     console.error('📖 BookDetail error:', error);
-    // エラーログに記録
-    if (window.ErrorLogger) {
-      window.ErrorLogger.saveError(new Error(`BookDetail error: ${error}`), 'BookDetail Error');
-    }
     return <div data-testid="book-detail-error">エラーが発生しました: {error}</div>;
   }
   
   if (!book) {
     console.warn('📖 BookDetail: Book not found for ID:', id);
-    // エラーログに記録
-    if (window.ErrorLogger) {
-      window.ErrorLogger.saveError(new Error(`Book not found: ${id}`), 'BookDetail Not Found');
-    }
     return <div data-testid="book-detail-not-found">本が見つかりません。</div>;
   }
 

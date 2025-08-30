@@ -297,31 +297,12 @@ function PrivateRoute({ children }) {
   
   // エラーログの保存とデバッグ情報の表示
   useEffect(() => {
-    console.log('🔍 PrivateRoute effect:', { 
-      pathname: location.pathname, 
-      user: !!user, 
-      loading, 
-      href: window.location.href 
-    });
-    
-    if (!loading) {
-      if (!user) {
-        ErrorLogger.saveError(
-          new Error('Authentication required'), 
-          `PrivateRoute - ${location.pathname}`
-        );
-        console.warn('🔐 Authentication required for:', location.pathname);
-      } else {
-        console.log('✅ Authenticated user accessing:', location.pathname);
-        // 書籍詳細ページの場合は特別なログ
-        if (location.pathname.startsWith('/book/')) {
-          console.log('📖 Book detail page accessed:', location.pathname);
-          ErrorLogger.saveError(
-            new Error(`Book detail page accessed: ${location.pathname}`),
-            'PrivateRoute Book Detail'
-          );
-        }
-      }
+    if (!loading && !user) {
+      ErrorLogger.saveError(
+        new Error('Authentication required'), 
+        `PrivateRoute - ${location.pathname}`
+      );
+      console.warn('🔐 Authentication required for:', location.pathname);
     }
   }, [user, loading, location.pathname]);
   
@@ -453,24 +434,8 @@ function AppRoutes() {
     showDebugInfo();
   }, []);
 
-  // ページ変更時のログとスクロール位置リセット
+  // ページ変更時のスクロール位置リセット
   useEffect(() => {
-    console.log('🔄 Page changed:', { 
-      pathname: location.pathname, 
-      href: window.location.href,
-      search: window.location.search,
-      hash: window.location.hash
-    });
-    
-    // 書籍詳細ページの場合は特別なログ
-    if (location.pathname.startsWith('/book/')) {
-      console.log('📖 Book detail page route change detected');
-      ErrorLogger.saveError(
-        new Error(`Book detail page route change: ${location.pathname}`),
-        'AppRoutes Book Detail Route Change'
-      );
-    }
-    
     const scrollContainer = document.getElementById('app-scroll-container');
     if (scrollContainer) {
       scrollContainer.scrollTo(0, 0);
