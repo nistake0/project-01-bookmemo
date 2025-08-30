@@ -58,11 +58,12 @@ export const usePWA = () => {
     };
   }
 
-  // PWA機能がサポートされているかチェック
+  // 開発環境ではPWA機能を無効化
   const isPWASupported = typeof window !== 'undefined' && 
     typeof navigator !== 'undefined' && 
     'serviceWorker' in navigator && 
-    'PushManager' in window;
+    'PushManager' in window &&
+    !PATHS.IS_DEVELOPMENT();
   
   // PWAがサポートされていない場合は最小限の状態を返す
   if (!isPWASupported) {
@@ -152,6 +153,11 @@ export const usePWA = () => {
 
   // Service Workerの登録
   const registerServiceWorker = useCallback(async () => {
+    // 開発環境でのHTTPSエラーを防ぐため、開発環境ではService Workerを登録しない
+    if (PATHS.IS_DEVELOPMENT()) {
+      console.log('Service Worker registration skipped in development environment');
+      return null;
+    }
 
     try {
       const swPath = PATHS.SW_JS();
@@ -175,12 +181,7 @@ export const usePWA = () => {
       return registration;
     } catch (error) {
       console.error('Service Worker registration failed:', error);
-      // 開発環境でのHTTPSエラーは無視する（Service Workerは本番環境で動作）
-      if (process.env.NODE_ENV === 'development' && error.name === 'SecurityError') {
-        console.log('Service Worker registration skipped in development (HTTPS required)');
-        return null;
-      }
-      // その他のエラーはログに記録するが、アプリの動作は継続
+      // エラーはログに記録するが、アプリの動作は継続
       console.warn('Service Worker registration failed, but app will continue without PWA features');
       return null;
     }

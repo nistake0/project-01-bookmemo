@@ -27,6 +27,117 @@ import { withReactContext } from "./hooks/useReactContext.jsx";
 import { useContext } from 'react';
 import { PATHS } from './config/paths';
 
+// エラーログの永続化機能
+const ErrorLogger = {
+  // エラーログをlocalStorageに保存
+  saveError: (error, context = '') => {
+    try {
+      const errorLog = {
+        timestamp: new Date().toISOString(),
+        error: error?.message || error?.toString() || 'Unknown error',
+        stack: error?.stack || '',
+        context,
+        url: window.location.href,
+        userAgent: navigator.userAgent
+      };
+      
+      const existingLogs = JSON.parse(localStorage.getItem('bookmemo_error_logs') || '[]');
+      existingLogs.push(errorLog);
+      
+      // 最新の10件のみ保持
+      if (existingLogs.length > 10) {
+        existingLogs.splice(0, existingLogs.length - 10);
+      }
+      
+      localStorage.setItem('bookmemo_error_logs', JSON.stringify(existingLogs));
+      
+      // コンソールにも出力（リダイレクト後も確認可能）
+      console.error('🔴 PERSISTENT ERROR LOG:', errorLog);
+      
+      return errorLog;
+    } catch (e) {
+      console.error('Error saving error log:', e);
+    }
+  },
+  
+  // エラーログを取得
+  getErrors: () => {
+    try {
+      return JSON.parse(localStorage.getItem('bookmemo_error_logs') || '[]');
+    } catch (e) {
+      return [];
+    }
+  },
+  
+  // エラーログをクリア
+  clearErrors: () => {
+    localStorage.removeItem('bookmemo_error_logs');
+  }
+};
+
+// グローバルエラーハンドラー
+const setupGlobalErrorHandling = () => {
+  // 未処理のエラーをキャッチ
+  window.addEventListener('error', (event) => {
+    ErrorLogger.saveError(event.error, 'Global Error Handler');
+  });
+  
+  // 未処理のPromise拒否をキャッチ
+  window.addEventListener('unhandledrejection', (event) => {
+    ErrorLogger.saveError(event.reason, 'Unhandled Promise Rejection');
+  });
+  
+  // ページ離脱時のエラーログ保存
+  window.addEventListener('beforeunload', () => {
+    const errors = ErrorLogger.getErrors();
+    if (errors.length > 0) {
+      console.log('📋 Error logs available in localStorage: bookmemo_error_logs');
+    }
+  });
+};
+
+// 開発環境でのデバッグ情報表示
+const showDebugInfo = () => {
+  if (PATHS.IS_DEVELOPMENT()) {
+    console.log('🔧 Debug Info:');
+    console.log('- Environment:', PATHS.IS_PRODUCTION() ? 'Production' : 'Development');
+    console.log('- Base Path:', PATHS.IS_PRODUCTION() ? '/project-01-bookmemo' : '');
+    console.log('- Current URL:', window.location.href);
+    console.log('- User Agent:', navigator.userAgent);
+    
+    // エラーログがある場合は表示
+    const errors = ErrorLogger.getErrors();
+    if (errors.length > 0) {
+      console.log('📋 Previous Error Logs:', errors);
+    }
+  }
+  
+  // グローバルデバッグコマンドを追加
+  window.bookmemoDebug = {
+    getErrors: () => {
+      const errors = ErrorLogger.getErrors();
+      console.table(errors);
+      return errors;
+    },
+    clearErrors: () => {
+      ErrorLogger.clearErrors();
+      console.log('✅ Error logs cleared');
+    },
+    showDebugInfo: () => {
+      console.log('🔧 Current Debug Info:');
+      console.log('- Environment:', PATHS.IS_PRODUCTION() ? 'Production' : 'Development');
+      console.log('- Base Path:', PATHS.IS_PRODUCTION() ? '/project-01-bookmemo' : '');
+      console.log('- Current URL:', window.location.href);
+      console.log('- User Agent:', navigator.userAgent);
+    }
+  };
+  
+  console.log('🔧 Debug commands available:');
+  console.log('- bookmemoDebug.getErrors() - Show error logs');
+  console.log('- bookmemoDebug.clearErrors() - Clear error logs');
+  console.log('- bookmemoDebug.showDebugInfo() - Show debug info');
+};
+
 // モバイル最適化テーマの作成
 const theme = createTheme({
   palette: {
@@ -147,8 +258,34 @@ const theme = createTheme({
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
-  if (loading) return <div>Loading...</div>;
-  return user ? children : <Navigate to="/login" />;
+  const location = useLocation();
+  
+  // エラーログの保存とデバッグ情報の表示
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        ErrorLogger.saveError(
+          new Error('Authentication required'), 
+          `PrivateRoute - ${location.pathname}`
+        );
+        console.warn('🔐 Authentication required for:', location.pathname);
+      } else {
+        console.log('✅ Authenticated user accessing:', location.pathname);
+      }
+    }
+  }, [user, loading, location.pathname]);
+  
+  if (loading) {
+    console.log('⏳ Loading authentication state...');
+    return <div>Loading...</div>;
+  }
+  
+  if (!user) {
+    console.warn('🚫 Unauthenticated access attempt, redirecting to login');
+    return <Navigate to="/login" />;
+  }
+  
+  return children;
 }
 
 function AppBottomNav() {
@@ -260,6 +397,12 @@ function AppRoutes() {
     !user
   );
 
+  // エラーハンドリングとデバッグ機能の初期化
+  useEffect(() => {
+    setupGlobalErrorHandling();
+    showDebugInfo();
+  }, []);
+
   // ページ変更時にスクロール位置を最上部にリセット
   useEffect(() => {
     const scrollContainer = document.getElementById('app-scroll-container');
@@ -272,6 +415,7 @@ function AppRoutes() {
   useEffect(() => {
     const handleError = (event) => {
       console.error('Global error caught:', event.error);
+      ErrorLogger.saveError(event.error, 'AppRoutes Global Error');
       
       // 404エラーの場合は特別なメッセージを表示
       if (event.error && event.error.message && event.error.message.includes('404')) {
@@ -285,6 +429,7 @@ function AppRoutes() {
 
     const handleUnhandledRejection = (event) => {
       console.error('Unhandled promise rejection:', event.reason);
+      ErrorLogger.saveError(event.reason, 'AppRoutes Unhandled Promise Rejection');
       
       // ネットワークエラーや404エラーの場合は特別なメッセージを表示
       if (event.reason && event.reason.message) {
@@ -304,6 +449,10 @@ function AppRoutes() {
     const handleResourceError = (event) => {
       if (event.target && event.target.src) {
         console.error('Resource loading error:', event.target.src);
+        ErrorLogger.saveError(
+          new Error(`Resource loading failed: ${event.target.src}`),
+          'AppRoutes Resource Error'
+        );
         // 重要なリソース（Service Worker、manifest等）のエラーのみダイアログ表示
         if (event.target.src.includes('sw.js') || event.target.src.includes('manifest.webmanifest')) {
           if (setGlobalError) {
@@ -376,8 +525,8 @@ function App() {
             <CssBaseline />
             <PWAProvider />
             <AppRoutes />
-            {/* PWA機能がサポートされている場合のみPWAInstallPromptを表示 */}
-            {typeof window !== 'undefined' && 'serviceWorker' in navigator && (
+            {/* PWA機能がサポートされている場合のみPWAInstallPromptを表示（開発環境では非表示） */}
+            {typeof window !== 'undefined' && 'serviceWorker' in navigator && !PATHS.IS_DEVELOPMENT() && (
               <PWAInstallPrompt />
             )}
           </ThemeProvider>
@@ -389,6 +538,11 @@ function App() {
 
 // PWA機能を初期化するコンポーネント
 function PWAProvider() {
+  // 開発環境ではPWA機能を初期化しない
+  if (PATHS.IS_DEVELOPMENT()) {
+    return null;
+  }
+
   // PWA機能がサポートされているかチェック
   const isPWASupported = 'serviceWorker' in navigator && 'PushManager' in window;
   
@@ -404,6 +558,7 @@ function PWAProvider() {
       registerServiceWorker().catch(error => {
         // Service Worker登録エラーはアプリの動作に影響しないため、ログのみ記録
         console.warn('Service Worker registration failed in PWAProvider:', error);
+        ErrorLogger.saveError(error, 'PWAProvider Service Worker Registration');
       });
     }, [registerServiceWorker]);
 
@@ -411,6 +566,7 @@ function PWAProvider() {
   } catch (error) {
     // usePWAフックでエラーが発生した場合は何も表示しない
     console.warn('PWA hook error, skipping PWA initialization:', error);
+    ErrorLogger.saveError(error, 'PWAProvider Hook Error');
     return null;
   }
 }
