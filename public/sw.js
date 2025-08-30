@@ -113,12 +113,24 @@ self.addEventListener('fetch', (event) => {
   if (request.method === 'GET' && !isStaticFile(request) && !isApiRequest(request)) {
     console.log('Service Worker: SPA routing request:', url.pathname);
     
+    // SPAルートかどうかを判定
+    const isSPARoute = url.pathname.startsWith('/book/') || 
+                      url.pathname.startsWith('/add') || 
+                      url.pathname.startsWith('/tags') || 
+                      url.pathname.startsWith('/stats') || 
+                      url.pathname.startsWith('/mypage') ||
+                      url.pathname.startsWith('/login') ||
+                      url.pathname.startsWith('/signup');
+    
+    if (isSPARoute) {
+      console.log('Service Worker: SPA route detected:', url.pathname);
+    }
+    
     event.respondWith(
       caches.match('/index.html')
         .then((response) => {
           if (response) {
             // index.htmlが見つかった場合は、それを返す
-            // 書籍詳細ページの場合は特別な処理
             if (url.pathname.startsWith('/book/')) {
               console.log('Service Worker: Handling book detail route:', url.pathname);
             }
