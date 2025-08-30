@@ -116,6 +116,10 @@ self.addEventListener('fetch', (event) => {
         .then((response) => {
           if (response) {
             // index.htmlが見つかった場合は、それを返す
+            // 書籍詳細ページの場合は特別な処理
+            if (url.pathname.startsWith('/book/')) {
+              console.log('Service Worker: Handling book detail route:', url.pathname);
+            }
             return response;
           }
           // index.htmlが見つからない場合は、ネットワークから取得を試行
@@ -125,15 +129,18 @@ self.addEventListener('fetch', (event) => {
                 return fetchResponse;
               }
               // 404エラーの場合は、index.htmlを返す
+              console.log('Service Worker: 404 error, returning index.html for:', url.pathname);
               return caches.match('/index.html');
             })
             .catch(() => {
               // ネットワークエラーの場合も、index.htmlを返す
+              console.log('Service Worker: Network error, returning index.html for:', url.pathname);
               return caches.match('/index.html');
             });
         })
         .catch(() => {
           // キャッシュエラーの場合も、index.htmlを返す
+          console.log('Service Worker: Cache error, returning index.html for:', url.pathname);
           return caches.match('/index.html');
         })
     );

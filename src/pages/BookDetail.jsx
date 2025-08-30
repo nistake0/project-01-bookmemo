@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import { Box, Paper, Divider, Typography, Fab, Dialog } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MemoList from '../components/MemoList';
@@ -10,9 +10,23 @@ import { useBook } from '../hooks/useBook';
 
 const BookDetail = () => {
   const { id } = useParams();
+  const location = useLocation();
   const { book, loading, error, updateBookStatus, updateBookTags } = useBook(id);
   const [memoListKey, setMemoListKey] = useState(0); // MemoListの再レンダリング用
   const [memoAddDialogOpen, setMemoAddDialogOpen] = useState(false);
+
+  // 書籍詳細ページのデバッグ情報を記録
+  useEffect(() => {
+    console.log('📖 BookDetail mounted:', { id, pathname: location.pathname, href: window.location.href });
+    
+    // エラーログに書籍詳細ページのアクセスを記録
+    if (window.ErrorLogger) {
+      window.ErrorLogger.saveError(
+        new Error(`BookDetail page accessed: ${id}`),
+        'BookDetail Page Access'
+      );
+    }
+  }, [id, location.pathname]);
 
   const handleStatusChange = (newStatus) => {
     updateBookStatus(newStatus);
@@ -41,9 +55,28 @@ const BookDetail = () => {
     setMemoAddDialogOpen(false);
   };
 
-  if (loading) return <div data-testid="book-detail-loading">Loading...</div>;
-  if (error) return <div data-testid="book-detail-error">エラーが発生しました: {error}</div>;
-  if (!book) return <div data-testid="book-detail-not-found">本が見つかりません。</div>;
+  if (loading) {
+    console.log('📖 BookDetail loading...');
+    return <div data-testid="book-detail-loading">Loading...</div>;
+  }
+  
+  if (error) {
+    console.error('📖 BookDetail error:', error);
+    // エラーログに記録
+    if (window.ErrorLogger) {
+      window.ErrorLogger.saveError(new Error(`BookDetail error: ${error}`), 'BookDetail Error');
+    }
+    return <div data-testid="book-detail-error">エラーが発生しました: {error}</div>;
+  }
+  
+  if (!book) {
+    console.warn('📖 BookDetail: Book not found for ID:', id);
+    // エラーログに記録
+    if (window.ErrorLogger) {
+      window.ErrorLogger.saveError(new Error(`Book not found: ${id}`), 'BookDetail Not Found');
+    }
+    return <div data-testid="book-detail-not-found">本が見つかりません。</div>;
+  }
 
   return (
     <Box sx={{ 
