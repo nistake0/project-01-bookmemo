@@ -16,8 +16,9 @@
             
             console.log('404.html processing:', { path, basePath, search, hash });
             
-            // 無限ループを防ぐためのチェック
-            if (path.includes('/index.html')) {
+            // 無限ループを防ぐためのチェック（改善版）
+            // /index.html で終わる場合のみ無限ループと判定
+            if (path.endsWith('/index.html') || path === basePath + '/index.html') {
                 console.log('404.html: index.html detected, redirecting to root');
                 // 既にindex.htmlが含まれている場合は、ルートにリダイレクト
                 window.location.replace(basePath + '/');
@@ -37,10 +38,25 @@
             
             console.log('404.html: cleanPath =', cleanPath);
             
+            // SPAルーティング処理（改善版）
             // 書籍詳細ページの場合は特別な処理
             if (cleanPath.startsWith('/book/')) {
                 console.log('404.html: Book detail page detected:', cleanPath);
                 // 書籍詳細ページの場合は、index.htmlにリダイレクトしてReact Routerに処理させる
+                const redirectUrl = basePath + '/index.html' + cleanPath + search + hash;
+                console.log('404.html: Redirecting to:', redirectUrl);
+                window.location.replace(redirectUrl);
+                return;
+            }
+            
+            // その他のSPAルートも処理
+            if (cleanPath.startsWith('/add') || 
+                cleanPath.startsWith('/tags') || 
+                cleanPath.startsWith('/stats') || 
+                cleanPath.startsWith('/mypage') ||
+                cleanPath.startsWith('/login') ||
+                cleanPath.startsWith('/signup')) {
+                console.log('404.html: SPA route detected:', cleanPath);
                 const redirectUrl = basePath + '/index.html' + cleanPath + search + hash;
                 console.log('404.html: Redirecting to:', redirectUrl);
                 window.location.replace(redirectUrl);
