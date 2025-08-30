@@ -109,17 +109,31 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // SPAルーティング処理
+  // SPAルーティング処理（改善版）
   if (request.method === 'GET' && !isStaticFile(request) && !isApiRequest(request)) {
     event.respondWith(
       caches.match('/index.html')
         .then((response) => {
           if (response) {
+            // index.htmlが見つかった場合は、それを返す
             return response;
           }
-          return fetch(request);
+          // index.htmlが見つからない場合は、ネットワークから取得を試行
+          return fetch(request)
+            .then((fetchResponse) => {
+              if (fetchResponse.status === 200) {
+                return fetchResponse;
+              }
+              // 404エラーの場合は、index.htmlを返す
+              return caches.match('/index.html');
+            })
+            .catch(() => {
+              // ネットワークエラーの場合も、index.htmlを返す
+              return caches.match('/index.html');
+            });
         })
         .catch(() => {
+          // キャッシュエラーの場合も、index.htmlを返す
           return caches.match('/index.html');
         })
     );

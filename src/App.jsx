@@ -462,6 +462,24 @@ function AppRoutes() {
       }
     };
 
+    // 404エラーの特別な処理
+    const handle404Error = (event) => {
+      if (event.target && event.target.src && event.target.src.includes('404')) {
+        console.error('404 Error detected:', event.target.src);
+        ErrorLogger.saveError(
+          new Error(`404 Error: ${event.target.src} - SPA routing issue detected`),
+          'AppRoutes 404 Error'
+        );
+        
+        // 404エラーの場合は特別なメッセージを表示
+        if (setGlobalError) {
+          setGlobalError('ページが見つかりません。SPAルーティングの問題の可能性があります。ページを再読み込みしてください。');
+        }
+      }
+    };
+
+    window.addEventListener('error', handle404Error, true);
+
     window.addEventListener('error', handleError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
     window.addEventListener('error', handleResourceError, true); // キャプチャフェーズでリソースエラーを監視
