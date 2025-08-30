@@ -16,6 +16,7 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
   const [page, setPage] = useState('');
   const [tags, setTags] = useState([]); // タグ配列
   const [inputTagValue, setInputTagValue] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false); // 送信中の状態管理
 
   // 共通フックを使用してタグ履歴を管理
   const { tagOptions, fetchTagHistory, saveTagsToHistory } = useTagHistory('memo', user);
@@ -33,7 +34,9 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!text.trim()) return;
+    if (!text.trim() || isSubmitting) return; // 送信中は重複送信を防止
+    
+    setIsSubmitting(true); // 送信開始
     console.log('MemoAdd - handleSubmit開始:', { text, comment, page, tags });
     
     // 未確定のタグ入力があればtagsに追加
@@ -69,6 +72,8 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
     } catch (error) {
       console.error("Error adding memo: ", error);
       setGlobalError("メモの追加に失敗しました。");
+    } finally {
+      setIsSubmitting(false); // 送信完了（成功・失敗に関わらず）
     }
   };
 
@@ -157,8 +162,10 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel} data-testid="memo-add-cancel">キャンセル</Button>
-          <Button onClick={handleSubmit} variant="contained" data-testid="memo-add-submit">メモを追加</Button>
+          <Button onClick={handleCancel} data-testid="memo-add-cancel" disabled={isSubmitting}>キャンセル</Button>
+          <Button onClick={handleSubmit} variant="contained" data-testid="memo-add-submit" disabled={isSubmitting}>
+            {isSubmitting ? '追加中...' : 'メモを追加'}
+          </Button>
         </DialogActions>
       </>
     );
@@ -231,14 +238,15 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
       <Button 
         type="submit" 
         variant="contained" 
+        disabled={isSubmitting}
         sx={{ 
           mt: 2, 
-          mb: { xs: 8, sm: 2 }, // モバイルではフッターメニューの上に余白を追加
+          mb: { xs: 8, sm: 2 }, // モバイルでは全幅
           width: { xs: '100%', sm: 'auto' } // モバイルでは全幅
         }} 
         data-testid="memo-add-submit"
       >
-        メモを追加
+        {isSubmitting ? '追加中...' : 'メモを追加'}
       </Button>
     </Box>
   );

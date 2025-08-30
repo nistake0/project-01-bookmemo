@@ -8,16 +8,22 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return; // 送信中は重複送信を防止
+    
+    setIsSubmitting(true);
     setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
       navigate("/"); // ログイン成功時に本一覧ページへ遷移
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -45,7 +51,9 @@ export default function Login() {
         inputProps={{ 'data-testid': 'login-password-input' }}
       />
       {error && <Typography color="error">{error}</Typography>}
-      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} data-testid="login-submit">ログイン</Button>
+      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} data-testid="login-submit" disabled={isSubmitting}>
+        {isSubmitting ? 'ログイン中...' : 'ログイン'}
+      </Button>
     </Box>
   );
 } 

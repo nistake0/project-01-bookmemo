@@ -7,15 +7,21 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return; // 送信中は重複送信を防止
+    
+    setIsSubmitting(true);
     setError("");
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       // 新規登録成功時の処理（画面遷移など）
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -41,7 +47,9 @@ export default function Signup() {
         required
       />
       {error && <Typography color="error">{error}</Typography>}
-      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>新規登録</Button>
+      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} disabled={isSubmitting}>
+        {isSubmitting ? '登録中...' : '新規登録'}
+      </Button>
     </Box>
   );
 } 
