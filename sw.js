@@ -109,77 +109,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // SPAルーティング処理（完全版）
+  // SPAルーティング処理（シンプル版）
   if (request.method === 'GET' && !isStaticFile(request) && !isApiRequest(request)) {
     console.log('Service Worker: SPA routing request:', url.pathname);
     
-    // SPAルートかどうかを判定（改善版）
-    const isSPARoute = url.pathname.startsWith('/book/') || 
-                      url.pathname.startsWith('/add') || 
-                      url.pathname.startsWith('/tags') || 
-                      url.pathname.startsWith('/stats') || 
-                      url.pathname.startsWith('/mypage') ||
-                      url.pathname.startsWith('/login') ||
-                      url.pathname.startsWith('/signup') ||
-                      url.pathname.includes('/index.html/book/') ||
-                      url.pathname.includes('/index.html/add') ||
-                      url.pathname.includes('/index.html/tags') ||
-                      url.pathname.includes('/index.html/stats') ||
-                      url.pathname.includes('/index.html/mypage') ||
-                      url.pathname.includes('/index.html/login') ||
-                      url.pathname.includes('/index.html/signup');
-    
-    if (isSPARoute) {
-      console.log('Service Worker: SPA route detected:', url.pathname);
-      // SPAルートの場合は、即座にindex.htmlを返す
-      event.respondWith(
-        caches.match('/index.html')
-          .then((response) => {
-            if (response) {
-              console.log('Service Worker: Returning cached index.html for SPA route:', url.pathname);
-              return response;
-            }
-            // index.htmlが見つからない場合は、ネットワークから取得
-            console.log('Service Worker: index.html not in cache, fetching for SPA route:', url.pathname);
-            return fetch('/index.html');
-          })
-          .catch((error) => {
-            console.log('Service Worker: Error handling SPA route:', url.pathname, error);
-            return caches.match('/index.html');
-          })
-      );
-      return;
-    }
-    
-    // その他のリクエストの処理（改善版）
+    // すべてのGETリクエストでindex.htmlを返す（シンプルなSPAルーティング）
     event.respondWith(
       caches.match('/index.html')
         .then((response) => {
           if (response) {
-            console.log('Service Worker: Returning cached index.html for:', url.pathname);
+            console.log('Service Worker: Returning cached index.html for SPA route:', url.pathname);
             return response;
           }
-          // index.htmlが見つからない場合は、ネットワークから取得を試行
-          console.log('Service Worker: index.html not in cache, trying network for:', url.pathname);
-          return fetch(request)
-            .then((fetchResponse) => {
-              if (fetchResponse.status === 200) {
-                console.log('Service Worker: Network response 200 for:', url.pathname);
-                return fetchResponse;
-              }
-              // 404エラーの場合は、index.htmlを返す
-              console.log('Service Worker: 404 error, returning index.html for:', url.pathname);
-              return caches.match('/index.html');
-            })
-            .catch((error) => {
-              // ネットワークエラーの場合も、index.htmlを返す
-              console.log('Service Worker: Network error, returning index.html for:', url.pathname, error);
-              return caches.match('/index.html');
-            });
+          // index.htmlが見つからない場合は、ネットワークから取得
+          console.log('Service Worker: index.html not in cache, fetching for SPA route:', url.pathname);
+          return fetch('/index.html');
         })
         .catch((error) => {
-          // キャッシュエラーの場合も、index.htmlを返す
-          console.log('Service Worker: Cache error, returning index.html for:', url.pathname, error);
+          console.log('Service Worker: Error handling SPA route:', url.pathname, error);
           return caches.match('/index.html');
         })
     );

@@ -6,7 +6,7 @@
     <title>BookMemo App</title>
     <script>
         // GitHub PagesでのSPAルーティング問題を解決
-        // 書籍詳細ページのまま表示するための処理
+        // シンプルなリダイレクト処理
         
         (function() {
             const path = window.location.pathname;
@@ -16,24 +16,10 @@
             
             console.log('404.html processing:', { path, basePath, search, hash });
             
-            // 無限ループを防ぐためのチェック（修正版）
-            // 正しいSPAルーティングパスと無限ループを区別
+            // 無限ループを防ぐためのチェック
             if (path.includes('/index.html')) {
-                // 正しいSPAルーティングパスの場合は処理を続行
-                if (path.includes('/index.html/book/') || 
-                    path.includes('/index.html/add') || 
-                    path.includes('/index.html/tags') || 
-                    path.includes('/index.html/stats') || 
-                    path.includes('/index.html/mypage') ||
-                    path.includes('/index.html/login') ||
-                    path.includes('/index.html/signup')) {
-                    console.log('404.html: Valid SPA routing path detected, continuing...');
-                } else {
-                    console.log('404.html: Invalid index.html path detected, redirecting to root');
-                    // 不正なindex.htmlパスの場合は、ルートにリダイレクト
-                    window.location.replace(basePath + '/');
-                    return;
-                }
+                console.log('404.html: index.html already in path, letting React Router handle it');
+                return;
             }
             
             // ベースパスを除去してクリーンなパスを取得
@@ -49,53 +35,7 @@
             
             console.log('404.html: cleanPath =', cleanPath);
             
-            // SPAルーティング処理（修正版）
-            // 正しいSPAルーティングパスの場合は、React Routerに処理を委譲
-            if (path.includes('/index.html/book/') || 
-                path.includes('/index.html/add') || 
-                path.includes('/index.html/tags') || 
-                path.includes('/index.html/stats') || 
-                path.includes('/index.html/mypage') ||
-                path.includes('/index.html/login') ||
-                path.includes('/index.html/signup')) {
-                console.log('404.html: Valid SPA routing path, letting React Router handle it');
-                // 正しいSPAルーティングパスの場合は、何もしない（React Routerに処理を委譲）
-                // ただし、Service Workerが処理できない場合のフォールバックとして、
-                // 少し待ってからReact Routerが処理することを確認
-                setTimeout(() => {
-                    if (window.location.pathname === path) {
-                        console.log('404.html: React Router did not handle the route, redirecting to root');
-                        window.location.replace(basePath + '/');
-                    }
-                }, 1000);
-                return;
-            }
-            
-            // 書籍詳細ページの場合は特別な処理
-            if (cleanPath.startsWith('/book/')) {
-                console.log('404.html: Book detail page detected:', cleanPath);
-                // 書籍詳細ページの場合は、index.htmlにリダイレクトしてReact Routerに処理させる
-                const redirectUrl = basePath + '/index.html' + cleanPath + search + hash;
-                console.log('404.html: Redirecting to:', redirectUrl);
-                window.location.replace(redirectUrl);
-                return;
-            }
-            
-            // その他のSPAルートも処理
-            if (cleanPath.startsWith('/add') || 
-                cleanPath.startsWith('/tags') || 
-                cleanPath.startsWith('/stats') || 
-                cleanPath.startsWith('/mypage') ||
-                cleanPath.startsWith('/login') ||
-                cleanPath.startsWith('/signup')) {
-                console.log('404.html: SPA route detected:', cleanPath);
-                const redirectUrl = basePath + '/index.html' + cleanPath + search + hash;
-                console.log('404.html: Redirecting to:', redirectUrl);
-                window.location.replace(redirectUrl);
-                return;
-            }
-            
-            // その他のページも同様に処理
+            // シンプルなリダイレクト処理
             const redirectUrl = basePath + '/index.html' + cleanPath + search + hash;
             console.log('404.html: Redirecting to:', redirectUrl);
             window.location.replace(redirectUrl);
