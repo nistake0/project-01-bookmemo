@@ -5,6 +5,7 @@ import BookCard from "../components/BookCard";
 import PageHeader from "../components/common/PageHeader";
 import { useBookList } from "../hooks/useBookList";
 import { usePWA } from "../hooks/usePWA";
+import { FILTER_STATUSES, FILTER_LABELS } from "../constants/bookStatus";
 
 export default function BookList() {
   const navigate = useNavigate();
@@ -165,17 +166,29 @@ export default function BookList() {
           <Tabs 
             value={filter} 
             onChange={handleFilterChange} 
-            centered
+            variant={{ xs: "scrollable", sm: "standard" }}
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+            centered={{ sm: true }}
             sx={{
               '& .MuiTab-root': {
                 fontSize: { xs: '0.8rem', sm: '0.9rem' },
-                minHeight: { xs: '40px', sm: '48px' }
+                minHeight: { xs: '40px', sm: '48px' },
+                minWidth: { xs: '60px', sm: 'auto' },
+                px: { xs: 1, sm: 2 }
+              },
+              '& .MuiTabs-scrollButtons': {
+                '&.Mui-disabled': {
+                  opacity: 0.3
+                }
               }
             }}
           >
-            <Tab label="すべて" value="all" />
-            <Tab label="読書中" value="reading" />
-            <Tab label="読了" value="finished" />
+            <Tab label={FILTER_LABELS[FILTER_STATUSES.ALL]} value={FILTER_STATUSES.ALL} />
+            <Tab label={FILTER_LABELS[FILTER_STATUSES.TSUNDOKU]} value={FILTER_STATUSES.TSUNDOKU} />
+            <Tab label={FILTER_LABELS[FILTER_STATUSES.READING]} value={FILTER_STATUSES.READING} />
+            <Tab label={FILTER_LABELS[FILTER_STATUSES.RE_READING]} value={FILTER_STATUSES.RE_READING} />
+            <Tab label={FILTER_LABELS[FILTER_STATUSES.FINISHED]} value={FILTER_STATUSES.FINISHED} />
           </Tabs>
         </Box>
 
