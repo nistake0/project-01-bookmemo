@@ -67,7 +67,7 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
           <CardContent sx={{ 
             pb: 1, 
             minHeight: 48, 
-            maxHeight: 56, 
+            maxHeight: 72, // ランク表示分の高さを追加
             overflow: 'hidden' 
           }}>
             <Typography
@@ -155,7 +155,7 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
       <CardContent sx={{ 
         pb: 1, 
         minHeight: { xs: 48, sm: 64 }, 
-        maxHeight: { xs: 56, sm: 72 }, 
+        maxHeight: { xs: 72, sm: 88 }, // ランク表示分の高さを追加
         overflow: 'hidden' 
       }}>
         <Typography
