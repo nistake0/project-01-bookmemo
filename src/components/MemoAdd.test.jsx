@@ -2,6 +2,7 @@ import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithProviders, mockSetGlobalError, resetMocks } from '../test-utils';
 import MemoAdd from './MemoAdd';
+import { MEMO_RATING } from '../constants/memoRating';
 
 /**
  * MemoAdd コンポーネントのユニットテスト
@@ -89,4 +90,50 @@ describe('MemoAdd', () => {
     
     expect(mockOnClose).toHaveBeenCalled();
   }, 10000);
+
+  // ランク機能のテスト
+  it('renders rating input field', async () => {
+    renderWithProviders(<MemoAdd bookId="test-book-id" />);
+    
+    await waitFor(() => {
+      const ratingInput = screen.getByTestId('memo-rating-input');
+      expect(ratingInput).toBeInTheDocument();
+    });
+  });
+
+  it('submits memo with rating', async () => {
+    const mockOnMemoAdded = jest.fn();
+    renderWithProviders(<MemoAdd bookId="test-book-id" onMemoAdded={mockOnMemoAdded} />);
+    
+    // テキスト入力
+    const textInput = screen.getByTestId('memo-text-input');
+    fireEvent.change(textInput, { target: { value: 'テストメモ' } });
+    
+    // ランクを5に設定（Ratingコンポーネントの星をクリック）
+    const stars = screen.getAllByRole('button');
+    const fifthStar = stars[4]; // 5つ目の星
+    fireEvent.click(fifthStar);
+    
+    // 送信ボタンをクリック
+    const submitButton = screen.getByTestId('memo-add-submit');
+    fireEvent.click(submitButton);
+    
+    await waitFor(() => {
+      expect(mockOnMemoAdded).toHaveBeenCalled();
+    });
+  });
+
+  it('shows rating description when rating is set', async () => {
+    renderWithProviders(<MemoAdd bookId="test-book-id" />);
+    
+    // ランクを3に設定（Ratingコンポーネントの星をクリック）
+    const stars = screen.getAllByRole('button');
+    const thirdStar = stars[2]; // 3つ目の星
+    fireEvent.click(thirdStar);
+    
+    // ランクの説明文が表示されることを確認
+    await waitFor(() => {
+      expect(screen.getByText('まあまあ面白かった')).toBeInTheDocument();
+    });
+  });
 }); 

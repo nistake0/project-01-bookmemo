@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardActions, Typography, IconButton, Box, Stack, Chip, useMediaQuery } from '@mui/material';
+import { Card, CardContent, CardActions, Typography, IconButton, Box, Stack, Chip, useMediaQuery, Rating } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useSwipeable } from 'react-swipeable';
+import { getMemoRatingValue } from '../constants/memoRating';
 
 // CI環境でも安定する固定フォーマットで日付を表示（yyyy/M/d）
 const formatDateYMD = (createdAt) => {
@@ -92,6 +93,16 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
                 {memo.comment}
               </Typography>
             )}
+            
+            {/* ランク表示（モバイル） */}
+            {getMemoRatingValue(memo) > 0 && (
+              <Rating 
+                value={getMemoRatingValue(memo)} 
+                readOnly 
+                size="small"
+                sx={{ mt: 0.5 }}
+              />
+            )}
           </CardContent>
           <CardActions sx={{ justifyContent: 'space-between', alignItems: 'center', py: 0 }}>
             <Stack direction="row" spacing={1} alignItems="center">
@@ -169,6 +180,16 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
           >
             {memo.comment}
           </Typography>
+        )}
+        
+        {/* ランク表示（PC） */}
+        {getMemoRatingValue(memo) > 0 && (
+          <Rating 
+            value={getMemoRatingValue(memo)} 
+            readOnly 
+            size="small"
+            sx={{ mt: 0.5 }}
+          />
         )}
       </CardContent>
       <CardActions sx={{ justifyContent: 'space-between', alignItems: 'center', py: 0 }}>

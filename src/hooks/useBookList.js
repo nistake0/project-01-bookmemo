@@ -3,6 +3,12 @@ import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../auth/AuthProvider';
 import { ErrorDialogContext } from '../components/CommonErrorDialog';
+import { 
+  BOOK_STATUS, 
+  DEFAULT_BOOK_STATUS,
+  FILTER_STATUSES,
+  FILTER_LABELS
+} from '../constants/bookStatus';
 
 // タグ正規化関数（小文字化＋全角英数字→半角）
 function normalizeTag(tag) {
@@ -21,10 +27,10 @@ export const useBookList = () => {
       return {
         allBooks: [],
         filteredBooks: [],
-        stats: { total: 0, reading: 0, finished: 0, filtered: 0 },
+        stats: { total: 0, tsundoku: 0, reading: 0, reReading: 0, finished: 0, filtered: 0 },
         loading: false,
         error: null,
-        filter: 'reading',
+        filter: FILTER_STATUSES.READING,
         searchText: '',
         fetchBooks: async () => {},
         handleFilterChange: () => {},
@@ -60,7 +66,7 @@ export const useBookList = () => {
   const [allBooks, setAllBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('reading');
+  const [filter, setFilter] = useState(FILTER_STATUSES.READING);
   const [searchText, setSearchText] = useState('');
 
   const fetchBooks = useCallback(async () => {
@@ -112,14 +118,14 @@ export const useBookList = () => {
   }, []);
 
   const clearFilter = useCallback(() => {
-    setFilter('reading');
+    setFilter(FILTER_STATUSES.READING);
   }, []);
 
   // フィルタリング・検索ロジック
   const filteredBooks = allBooks.filter(book => {
     // ステータスフィルター
-    if (filter !== 'all') {
-      const status = book.status || 'reading';
+    if (filter !== FILTER_STATUSES.ALL) {
+      const status = book.status || DEFAULT_BOOK_STATUS;
       if (status !== filter) return false;
     }
     
@@ -138,8 +144,10 @@ export const useBookList = () => {
   // 統計情報
   const stats = {
     total: allBooks.length,
-    reading: allBooks.filter(book => (book.status || 'reading') === 'reading').length,
-    finished: allBooks.filter(book => book.status === 'finished').length,
+    tsundoku: allBooks.filter(book => (book.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.TSUNDOKU).length,
+    reading: allBooks.filter(book => (book.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.READING).length,
+    reReading: allBooks.filter(book => (book.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.RE_READING).length,
+    finished: allBooks.filter(book => (book.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.FINISHED).length,
     filtered: filteredBooks.length,
   };
 

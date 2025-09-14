@@ -9,11 +9,19 @@ import {
   Typography, 
   Stack, 
   Chip,
-  Box 
+  Box,
+  Rating,
+  FormControl,
+  FormLabel
 } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ErrorDialogContext } from './CommonErrorDialog';
 import { useMemo } from '../hooks/useMemo';
+import { 
+  getMemoRatingValue,
+  getMemoRatingDescription,
+  DEFAULT_MEMO_RATING
+} from '../constants/memoRating';
 
 // CI環境でも安定する固定フォーマットで日時を表示（yyyy/M/d H:mm:ss）
 const formatDateTime = (createdAt) => {
@@ -43,7 +51,10 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode 
   // メモやeditModeが変更されたときに編集状態をリセット
   React.useEffect(() => {
     if (memo) {
-      setEditingMemo(memo);
+      setEditingMemo({
+        ...memo,
+        rating: getMemoRatingValue(memo)
+      });
       setDialogMode(editMode ? 'edit' : 'view');
       setShowDeleteConfirm(false);
       setInputTagValue("");
@@ -74,6 +85,7 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode 
         comment: editingMemo.comment,
         page: Number(editingMemo.page) || null,
         tags: tagsToSave,
+        rating: editingMemo.rating || DEFAULT_MEMO_RATING,
       });
       handleClose();
       if (onUpdate) {
@@ -109,6 +121,22 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode 
             <>
               <Typography variant="body1" sx={{ whiteSpace: 'pre-line', mb: 2 }}>{editingMemo?.text}</Typography>
               {editingMemo?.comment && <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{editingMemo.comment}</Typography>}
+              
+              {/* ランク表示 */}
+              {editingMemo?.rating && editingMemo.rating > 0 && (
+                <Box sx={{ mb: 1 }}>
+                  <Rating 
+                    value={editingMemo.rating} 
+                    readOnly 
+                    size="small"
+                    sx={{ mb: 0.5 }}
+                  />
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                    {getMemoRatingDescription(editingMemo.rating)}
+                  </Typography>
+                </Box>
+              )}
+              
               <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
                 {Array.isArray(editingMemo?.tags) && editingMemo.tags.map((tag, idx) => (
                   <Chip key={idx} label={tag} size="small" color="secondary" />
@@ -153,6 +181,26 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode 
                 sx={{ mr: 2 }}
                 inputProps={{ 'data-testid': 'memo-page-input' }}
               />
+              
+              {/* ランク入力 */}
+              <FormControl margin="normal" fullWidth>
+                <FormLabel component="legend">ランク評価</FormLabel>
+                <Rating
+                  value={editingMemo?.rating || DEFAULT_MEMO_RATING}
+                  onChange={(event, newValue) => {
+                    setEditingMemo({ ...editingMemo, rating: newValue || DEFAULT_MEMO_RATING });
+                  }}
+                  size="large"
+                  sx={{ mt: 1 }}
+                  data-testid="memo-rating-input"
+                />
+                {editingMemo?.rating && editingMemo.rating > 0 && (
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    {getMemoRatingDescription(editingMemo.rating)}
+                  </Typography>
+                )}
+              </FormControl>
+              
               <Autocomplete
                 multiple
                 freeSolo

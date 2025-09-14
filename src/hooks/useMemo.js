@@ -3,6 +3,7 @@ import { collection, query, orderBy, getDocs, addDoc, updateDoc, deleteDoc, doc,
 import { db } from '../firebase';
 import { useAuth } from '../auth/AuthProvider';
 import { ErrorDialogContext } from '../components/CommonErrorDialog';
+import { getMemoRatingSortOrder, DEFAULT_MEMO_RATING } from '../constants/memoRating';
 
 export const useMemo = (bookId) => {
   const { user } = useAuth();
@@ -24,8 +25,24 @@ export const useMemo = (bookId) => {
       const memosRef = collection(db, 'books', bookId, 'memos');
       const q = query(memosRef, orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(q);
-      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setMemos(data);
+      const data = querySnapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data(),
+        rating: doc.data().rating || DEFAULT_MEMO_RATING // 後方互換性
+      }));
+      
+      // ランク順でソート（高いランクが先に来る）
+      const sortedData = data.sort((a, b) => {
+        const ratingA = getMemoRatingSortOrder(a.rating);
+        const ratingB = getMemoRatingSortOrder(b.rating);
+        if (ratingA !== ratingB) {
+          return ratingB - ratingA; // 高いランクが先
+        }
+        // ランクが同じ場合は作成日時の降順
+        return new Date(b.createdAt?.toDate?.() || b.createdAt || 0) - new Date(a.createdAt?.toDate?.() || a.createdAt || 0);
+      });
+      
+      setMemos(sortedData);
     } catch (err) {
       console.error('Error fetching memos:', err);
       setGlobalError('メモ一覧の取得に失敗しました。');

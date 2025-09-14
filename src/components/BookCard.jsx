@@ -7,6 +7,11 @@ import {
   Chip,
   Box
 } from '@mui/material';
+import { 
+  getBookStatusLabel,
+  getBookStatusColor,
+  DEFAULT_BOOK_STATUS
+} from '../constants/bookStatus';
 
 /**
  * 書籍カードコンポーネント
@@ -19,16 +24,7 @@ import {
  * @param {string} props.testId - テスト用ID
  */
 function BookCard({ book, onClick, testId }) {
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'reading':
-        return '読書中';
-      case 'finished':
-        return '読了';
-      default:
-        return '読書中';
-    }
-  };
+  // ステータス表示は定数定義を使用
 
   return (
     <Card 
@@ -108,6 +104,23 @@ function BookCard({ book, onClick, testId }) {
             >
               {book.author || "著者未設定"}
             </Typography>
+            
+            {/* ステータスチップ */}
+            <Box sx={{ mb: 1 }}>
+              <Chip
+                label={getBookStatusLabel(book.status || DEFAULT_BOOK_STATUS)}
+                color={getBookStatusColor(book.status || DEFAULT_BOOK_STATUS)}
+                size="small"
+                sx={{ 
+                  fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' },
+                  height: { xs: '18px', sm: '20px', md: '22px' },
+                  '& .MuiChip-label': {
+                    px: { xs: 0.5, sm: 0.75 }
+                  }
+                }}
+              />
+            </Box>
+            
             {(book.publisher || book.publishedDate) && (
               <Typography 
                 variant="body2" 
@@ -172,7 +185,7 @@ function BookCard({ book, onClick, testId }) {
                 fontWeight: 500
               }}
             >
-              ステータス: {getStatusText(book.status)}
+              ステータス: {getBookStatusLabel(book.status || DEFAULT_BOOK_STATUS)}
             </Typography>
           </Box>
         </Box>

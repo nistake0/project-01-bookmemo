@@ -101,7 +101,9 @@ describe('useBookList', () => {
       expect(result.current.searchText).toBe('');
       expect(result.current.stats).toEqual({
         total: 0,
+        tsundoku: 0,
         reading: 0,
+        reReading: 0,
         finished: 0,
         filtered: 0,
       });
@@ -127,7 +129,9 @@ describe('useBookList', () => {
       expect(result.current.filteredBooks).toEqual([mockBooks[0], mockBooks[2]]); // readingのみ
       expect(result.current.stats).toEqual({
         total: 3,
+        tsundoku: 0,
         reading: 2,
+        reReading: 0,
         finished: 1,
         filtered: 2,
       });
@@ -317,7 +321,9 @@ describe('useBookList', () => {
 
       expect(result.current.stats).toEqual({
         total: 3,
+        tsundoku: 0,
         reading: 2,
+        reReading: 0,
         finished: 1,
         filtered: 2, // readingのみ表示
       });
