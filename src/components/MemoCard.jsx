@@ -63,15 +63,18 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
           }}
           onClick={onClick ? () => onClick(memo, false) : undefined} // editMode=false
         >
-          <CardContent sx={{ pb: 1, minHeight: 48, maxHeight: 56, overflow: 'hidden' }}>
+          <CardContent sx={{ 
+            pb: 1, 
+            minHeight: 48, 
+            maxHeight: 56, 
+            overflow: 'hidden' 
+          }}>
             <Typography
               variant="body1"
               sx={{
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                wordBreak: 'break-all',
-                overflowWrap: 'break-word',
               }}
             >
               {shortText}
@@ -84,8 +87,6 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  wordBreak: 'break-all',
-                  overflowWrap: 'break-word',
                 }}
               >
                 {memo.comment}
@@ -140,15 +141,18 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
       }}
       onClick={onClick ? () => onClick(memo, false) : undefined} // editMode=false
     >
-      <CardContent sx={{ pb: 1, minHeight: 48, maxHeight: 56, overflow: 'hidden' }}>
+      <CardContent sx={{ 
+        pb: 1, 
+        minHeight: { xs: 48, sm: 64 }, 
+        maxHeight: { xs: 56, sm: 72 }, 
+        overflow: 'hidden' 
+      }}>
         <Typography
           variant="body1"
           sx={{
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            wordBreak: 'break-all',
-            overflowWrap: 'break-word',
           }}
         >
           {shortText}
@@ -161,8 +165,6 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              wordBreak: 'break-all',
-              overflowWrap: 'break-word',
             }}
           >
             {memo.comment}
