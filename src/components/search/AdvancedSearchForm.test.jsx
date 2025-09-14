@@ -37,10 +37,11 @@ describe('AdvancedSearchForm', () => {
       expect(screen.getByText('検索条件')).toBeInTheDocument();
       expect(screen.getByLabelText('テキスト検索（タイトル・著者・メモ内容・タグ）')).toBeInTheDocument();
       expect(screen.getByText('ステータス')).toBeInTheDocument();
-      expect(screen.getByText('全て')).toBeInTheDocument();
+      expect(screen.getByText('すべて')).toBeInTheDocument();
       expect(screen.getByText('読書中')).toBeInTheDocument();
       expect(screen.getByText('読了')).toBeInTheDocument();
-      expect(screen.getByText('読みたい')).toBeInTheDocument();
+      expect(screen.getByText('積読')).toBeInTheDocument();
+      expect(screen.getByText('再読中')).toBeInTheDocument();
       expect(screen.getByText('検索実行')).toBeInTheDocument();
     });
 
@@ -96,7 +97,8 @@ describe('AdvancedSearchForm', () => {
       expect(screen.getByTestId('status-filter-all')).toBeInTheDocument();
       expect(screen.getByTestId('status-filter-reading')).toBeInTheDocument();
       expect(screen.getByTestId('status-filter-finished')).toBeInTheDocument();
-      expect(screen.getByTestId('status-filter-wish')).toBeInTheDocument();
+      expect(screen.getByTestId('status-filter-tsundoku')).toBeInTheDocument();
+      expect(screen.getByTestId('status-filter-re-reading')).toBeInTheDocument();
     });
 
     test('ステータスフィルターが正しく動作する', () => {
