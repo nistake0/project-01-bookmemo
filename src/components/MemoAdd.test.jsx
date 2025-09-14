@@ -110,8 +110,13 @@ describe('MemoAdd', () => {
     fireEvent.change(textInput, { target: { value: 'テストメモ' } });
     
     // ランクを5に設定（Ratingコンポーネントの星をクリック）
-    const stars = screen.getAllByRole('button');
-    const fifthStar = stars[4]; // 5つ目の星
+    const ratingInput = screen.getByTestId('memo-rating-input');
+    const stars = ratingInput.querySelectorAll('input[type="radio"]');
+    expect(stars.length).toBeGreaterThan(0);
+    
+    // 5つ目の星（value=5）をクリック
+    const fifthStar = Array.from(stars).find(star => star.value === '5');
+    expect(fifthStar).toBeTruthy();
     fireEvent.click(fifthStar);
     
     // 送信ボタンをクリック
@@ -127,8 +132,13 @@ describe('MemoAdd', () => {
     renderWithProviders(<MemoAdd bookId="test-book-id" />);
     
     // ランクを3に設定（Ratingコンポーネントの星をクリック）
-    const stars = screen.getAllByRole('button');
-    const thirdStar = stars[2]; // 3つ目の星
+    const ratingInput = screen.getByTestId('memo-rating-input');
+    const stars = ratingInput.querySelectorAll('input[type="radio"]');
+    expect(stars.length).toBeGreaterThan(0);
+    
+    // 3つ目の星（value=3）をクリック
+    const thirdStar = Array.from(stars).find(star => star.value === '3');
+    expect(thirdStar).toBeTruthy();
     fireEvent.click(thirdStar);
     
     // ランクの説明文が表示されることを確認

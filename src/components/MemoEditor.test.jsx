@@ -420,8 +420,13 @@ describe('MemoEditor', () => {
     const ratingInput = screen.getByTestId('memo-rating-input');
     
     // ランクを4に変更（Ratingコンポーネントの星をクリック）
-    const stars = screen.getAllByRole('button');
-    const fourthStar = stars[3]; // 4つ目の星
+    // Ratingコンポーネント内の星ボタンを探す
+    const stars = ratingInput.querySelectorAll('input[type="radio"]');
+    expect(stars.length).toBeGreaterThan(0);
+    
+    // 4つ目の星（value=4）をクリック
+    const fourthStar = Array.from(stars).find(star => star.value === '4');
+    expect(fourthStar).toBeTruthy();
     fireEvent.click(fourthStar);
 
     // 更新ボタンをクリック
