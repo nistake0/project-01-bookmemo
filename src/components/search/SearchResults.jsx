@@ -1,6 +1,10 @@
 import { Typography, Box, Card, CardContent, Chip, Alert, CircularProgress } from "@mui/material";
 import { useAuth } from '../../auth/AuthProvider';
 import BookCard from '../BookCard';
+import { 
+  getBookStatusLabel,
+  getBookStatusColor
+} from '../../constants/bookStatus';
 
 /**
  * 検索結果表示コンポーネント（アプローチ2：完全統合検索）
@@ -152,17 +156,9 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
             {book.author || '著者不明'}
           </Typography>
           <Chip 
-            label={
-              book.status === 'reading' ? '読書中' :
-              book.status === 'finished' ? '読了' :
-              book.status === 'wish' ? '読みたい' : '未設定'
-            }
+            label={getBookStatusLabel(book.status)}
             size="small"
-            color={
-              book.status === 'reading' ? 'primary' :
-              book.status === 'finished' ? 'success' :
-              book.status === 'wish' ? 'warning' : 'default'
-            }
+            color={getBookStatusColor(book.status)}
             sx={{ fontSize: '0.75rem' }}
           />
         </Box>

@@ -5,12 +5,13 @@ import { updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { BrowserRouter } from 'react-router-dom';
 import BookStatusChanger from './BookStatusChanger';
 import { ErrorDialogContext } from './CommonErrorDialog';
+import { BOOK_STATUS } from '../constants/bookStatus';
 
 /**
  * BookStatusChanger コンポーネントのユニットテスト
  * 
  * テスト対象の機能:
- * - 読書状態に応じたボタン表示（読書中→読了、読了→読書中）
+ * - ステータスメニューの表示
  * - 状態変更時のFirestore更新処理
  * - 更新中のローディング状態表示
  * - エラーハンドリング
@@ -53,7 +54,7 @@ describe('BookStatusChanger', () => {
   const mockBook = {
     id: 'book-1',
     title: 'テストブック',
-    status: 'reading',
+    status: BOOK_STATUS.READING,
   };
 
   const mockOnStatusChange = jest.fn();
@@ -63,43 +64,50 @@ describe('BookStatusChanger', () => {
   });
 
   /**
-   * テストケース: 読書状態ボタンの表示確認
-   * 
-   * 目的: 書籍の読書状態に応じて適切なボタンが表示されることを確認
-   * 
-   * テストステップ:
-   * 1. 読書中の書籍でBookStatusChangerをレンダリング
-   * 2. 「読了」ボタンが表示されることを確認
-   * 3. 読了済みの書籍でBookStatusChangerをレンダリング
-   * 4. 「読書中」ボタンが表示されることを確認
+   * テストケース: ステータス表示とメニュー
    */
-  it('displays correct status button based on book status', () => {
-    const readingBook = { ...mockBook, status: 'reading' };
-    const completedBook = { ...mockBook, status: 'completed' };
-
-    // 読書中の書籍
-    const { rerender } = renderWithProviders(
-      <BookStatusChanger book={readingBook} onStatusChange={mockOnStatusChange} />
+  it('displays correct status chip and change button', () => {
+    renderWithProviders(
+      <BookStatusChanger book={mockBook} onStatusChange={mockOnStatusChange} />
     );
-    expect(screen.getByTestId('status-complete-button')).toBeInTheDocument();
 
-    // 読了済みの書籍
-    rerender(<BookStatusChanger book={completedBook} onStatusChange={mockOnStatusChange} />);
-    expect(screen.getByTestId('status-reading-button')).toBeInTheDocument();
+    // ステータスチップが表示される
+    expect(screen.getByTestId('book-status-chip')).toBeInTheDocument();
+    expect(screen.getByText('読書中')).toBeInTheDocument();
+
+    // ステータス変更ボタンが表示される
+    expect(screen.getByTestId('book-status-change-button')).toBeInTheDocument();
+    expect(screen.getByText('ステータス変更')).toBeInTheDocument();
   });
 
   /**
-   * テストケース: 読書状態変更時のFirestore更新
-   * 
-   * 目的: 読書状態ボタンをクリックした場合、FirestoreのupdateDocが正しいデータで呼ばれることを確認
-   * 
-   * テストステップ:
-   * 1. FirestoreのupdateDocモックを設定
-   * 2. 読書状態ボタンをクリック
-   * 3. updateDocが正しいデータで呼ばれることを確認
-   * 4. onStatusChangeコールバックが呼ばれることを確認
+   * テストケース: ステータスメニューの表示
    */
-  it('updates Firestore when status button is clicked', async () => {
+  it('opens status menu when button is clicked', async () => {
+    renderWithProviders(
+      <BookStatusChanger book={mockBook} onStatusChange={mockOnStatusChange} />
+    );
+
+    // ステータス変更ボタンをクリック
+    const statusButton = screen.getByTestId('book-status-change-button');
+    fireEvent.click(statusButton);
+
+    // メニューが表示される
+    await waitFor(() => {
+      expect(screen.getByTestId('book-status-menu')).toBeInTheDocument();
+    });
+
+    // 全ステータスのメニューアイテムが表示される
+    expect(screen.getByTestId('status-menu-item-tsundoku')).toBeInTheDocument();
+    expect(screen.getByTestId('status-menu-item-reading')).toBeInTheDocument();
+    expect(screen.getByTestId('status-menu-item-re-reading')).toBeInTheDocument();
+    expect(screen.getByTestId('status-menu-item-finished')).toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: ステータス変更時のFirestore更新
+   */
+  it('updates Firestore when status is changed', async () => {
     const { updateDoc } = require('firebase/firestore');
     updateDoc.mockResolvedValue();
 
@@ -107,41 +115,123 @@ describe('BookStatusChanger', () => {
       <BookStatusChanger book={mockBook} onStatusChange={mockOnStatusChange} />
     );
 
-    // 読書状態ボタンをクリック
-    const statusButton = screen.getByTestId('status-complete-button');
+    // ステータス変更ボタンをクリック
+    const statusButton = screen.getByTestId('book-status-change-button');
     fireEvent.click(statusButton);
+
+    // メニューが表示されるまで待つ
+    await waitFor(() => {
+      expect(screen.getByTestId('book-status-menu')).toBeInTheDocument();
+    });
+
+    // 積読ステータスを選択
+    const tsundokuItem = screen.getByTestId('status-menu-item-tsundoku');
+    fireEvent.click(tsundokuItem);
 
     // FirestoreのupdateDocが正しいデータで呼ばれることを確認
     await waitFor(() => {
       expect(updateDoc).toHaveBeenCalledWith(
         undefined,
         expect.objectContaining({
-          status: 'finished',
+          status: BOOK_STATUS.TSUNDOKU,
         })
       );
     }, { timeout: 3000 });
 
     // onStatusChangeコールバックが呼ばれることを確認
-    expect(mockOnStatusChange).toHaveBeenCalledWith('finished');
+    expect(mockOnStatusChange).toHaveBeenCalledWith(BOOK_STATUS.TSUNDOKU);
+  });
+
+  /**
+   * テストケース: 読了時のfinishedAtフィールド設定
+   */
+  it('sets finishedAt when status is changed to finished', async () => {
+    const { updateDoc, serverTimestamp } = require('firebase/firestore');
+    updateDoc.mockResolvedValue();
+
+    renderWithProviders(
+      <BookStatusChanger book={mockBook} onStatusChange={mockOnStatusChange} />
+    );
+
+    // ステータス変更ボタンをクリック
+    const statusButton = screen.getByTestId('book-status-change-button');
+    fireEvent.click(statusButton);
+
+    // メニューが表示されるまで待つ
+    await waitFor(() => {
+      expect(screen.getByTestId('book-status-menu')).toBeInTheDocument();
+    });
+
+    // 読了ステータスを選択
+    const finishedItem = screen.getByTestId('status-menu-item-finished');
+    fireEvent.click(finishedItem);
+
+    // FirestoreのupdateDocがfinishedAtフィールド付きで呼ばれることを確認
+    await waitFor(() => {
+      expect(updateDoc).toHaveBeenCalledWith(
+        undefined,
+        expect.objectContaining({
+          status: BOOK_STATUS.FINISHED,
+          finishedAt: 'mock-timestamp',
+        })
+      );
+    }, { timeout: 3000 });
+  });
+
+  /**
+   * テストケース: ローディング状態の表示
+   */
+  it('displays loading state during update', async () => {
+    const { updateDoc } = require('firebase/firestore');
+    // 更新を遅延させる
+    updateDoc.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+
+    renderWithProviders(
+      <BookStatusChanger book={mockBook} onStatusChange={mockOnStatusChange} />
+    );
+
+    // ステータス変更ボタンをクリック
+    const statusButton = screen.getByTestId('book-status-change-button');
+    fireEvent.click(statusButton);
+
+    // メニューが表示されるまで待つ
+    await waitFor(() => {
+      expect(screen.getByTestId('book-status-menu')).toBeInTheDocument();
+    });
+
+    // ステータスを変更
+    const tsundokuItem = screen.getByTestId('status-menu-item-tsundoku');
+    fireEvent.click(tsundokuItem);
+
+    // ローディング状態が表示される
+    expect(screen.getByText('更新中...')).toBeInTheDocument();
   });
 
   /**
    * テストケース: null書籍の処理
-   * 
-   * 目的: 書籍データがnullの場合、コンポーネントが適切に処理されることを確認
-   * 
-   * テストステップ:
-   * 1. 書籍データをnullにしてBookStatusChangerをレンダリング
-   * 2. コンポーネントが正常にレンダリングされることを確認
-   * 3. ボタンが表示されないことを確認
    */
   it('handles null book gracefully', () => {
     renderWithProviders(
       <BookStatusChanger book={null} onStatusChange={mockOnStatusChange} />
     );
 
-    // コンポーネントが正常にレンダリングされることを確認
-    expect(screen.queryByTestId('status-complete-button')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('status-reading-button')).not.toBeInTheDocument();
+    // コンポーネントが表示されないことを確認
+    expect(screen.queryByTestId('book-status-chip')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('book-status-change-button')).not.toBeInTheDocument();
   });
-}); 
+
+  /**
+   * テストケース: デフォルトステータスの処理
+   */
+  it('uses default status when book status is undefined', () => {
+    const bookWithoutStatus = { ...mockBook };
+    delete bookWithoutStatus.status;
+
+    renderWithProviders(
+      <BookStatusChanger book={bookWithoutStatus} onStatusChange={mockOnStatusChange} />
+    );
+
+    // デフォルトステータス（読書中）が表示される
+    expect(screen.getByText('読書中')).toBeInTheDocument();
+  });
+});

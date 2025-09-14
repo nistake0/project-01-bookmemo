@@ -1,49 +1,18 @@
 import React from 'react';
-import { Typography, Box, Chip, Button } from '@mui/material';
-import { updateDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase';
-import { useContext } from 'react';
-import { ErrorDialogContext } from './CommonErrorDialog';
+import { Typography, Box } from '@mui/material';
+import BookStatusChanger from './BookStatusChanger';
 
 const BookInfo = ({ book, bookId, onStatusChange }) => {
-  const errorContext = useContext(ErrorDialogContext);
-  const setGlobalError = errorContext?.setGlobalError || (() => {});
-  const [updating, setUpdating] = React.useState(false);
-
   if (!book) return null;
-
-  const currentStatus = book.status || 'reading';
-
-  const handleStatusChange = async () => {
-    if (!book) return;
-    setUpdating(true);
-    const newStatus = book.status === 'reading' ? 'finished' : 'reading';
-    const docRef = doc(db, 'books', bookId);
-    try {
-      await updateDoc(docRef, {
-        status: newStatus,
-        updatedAt: serverTimestamp(),
-      });
-      onStatusChange(newStatus);
-    } catch (error) {
-      console.error("Error updating status:", error);
-      setGlobalError("ステータスの更新に失敗しました。");
-    } finally {
-      setUpdating(false);
-    }
-  };
 
   return (
     <Box data-testid="book-info">
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mb: 2 }}>
-        <Chip 
-          label={currentStatus === 'reading' ? '読書中' : '読了'} 
-          color={currentStatus === 'reading' ? 'primary' : 'success'} 
-          data-testid="book-status-chip"
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
+        <BookStatusChanger 
+          book={book} 
+          bookId={bookId} 
+          onStatusChange={onStatusChange}
         />
-        <Button onClick={handleStatusChange} variant="outlined" disabled={updating} data-testid="book-status-change-button">
-          {updating ? '更新中...' : (currentStatus === 'reading' ? '読了にする' : '読書中にする')}
-        </Button>
       </Box>
 
       <Box sx={{ textAlign: 'left', mb: 2 }} data-testid="book-cover-section">
@@ -86,4 +55,4 @@ const BookInfo = ({ book, bookId, onStatusChange }) => {
   );
 };
 
-export default BookInfo; 
+export default BookInfo;

@@ -3,6 +3,10 @@ import { collection, collectionGroup, getDocs, query, where } from 'firebase/fir
 import { db } from '../firebase';
 import { useAuth } from '../auth/AuthProvider';
 import { ErrorDialogContext } from '../components/CommonErrorDialog';
+import { 
+  BOOK_STATUS, 
+  DEFAULT_BOOK_STATUS
+} from '../constants/bookStatus';
 
 /**
  * 集計用ユーティリティ
@@ -76,15 +80,19 @@ export default function useStats() {
 
   const summary = useMemo(() => {
     const totalBooks = books.length;
-    const finishedBooks = books.filter(b => (b.status || 'reading') === 'finished').length;
-    const readingBooks = books.filter(b => (b.status || 'reading') === 'reading').length;
-    return { totalBooks, finishedBooks, readingBooks };
+    const tsundokuBooks = books.filter(b => (b.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.TSUNDOKU).length;
+    const readingBooks = books.filter(b => (b.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.READING).length;
+    const reReadingBooks = books.filter(b => (b.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.RE_READING).length;
+    const finishedBooks = books.filter(b => (b.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.FINISHED).length;
+    return { totalBooks, tsundokuBooks, readingBooks, reReadingBooks, finishedBooks };
   }, [books]);
 
   const statusDistribution = useMemo(() => {
-    const finished = books.filter(b => (b.status || 'reading') === 'finished').length;
-    const reading = books.filter(b => (b.status || 'reading') === 'reading').length;
-    return { finished, reading };
+    const tsundoku = books.filter(b => (b.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.TSUNDOKU).length;
+    const reading = books.filter(b => (b.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.READING).length;
+    const reReading = books.filter(b => (b.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.RE_READING).length;
+    const finished = books.filter(b => (b.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.FINISHED).length;
+    return { tsundoku, reading, reReading, finished };
   }, [books]);
 
   const tagStats = useMemo(() => {

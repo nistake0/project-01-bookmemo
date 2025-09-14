@@ -3,6 +3,7 @@ import { screen, fireEvent, waitFor } from '@testing-library/react';
 import MemoEditor from './MemoEditor';
 import { renderWithProviders, resetMocks, setupCommonMocks } from '../test-utils';
 import { createMockMemo, createMockFunctions } from '../test-factories';
+import { MEMO_RATING } from '../constants/memoRating';
 
 /**
  * MemoEditor コンポーネントのユニットテスト
@@ -253,7 +254,8 @@ describe('MemoEditor', () => {
       text: '更新されたメモ内容',
       comment: '元のコメント',
       page: 123,
-      tags: ['テスト', 'サンプル']
+      tags: ['テスト', 'サンプル'],
+      rating: 0 // デフォルトランク
     });
     
     // 非同期処理の完了を待つ
@@ -330,5 +332,110 @@ describe('MemoEditor', () => {
     // タグ入力フィールドが表示されることを確認
     const tagsInput = screen.getByTestId('memo-tags-input');
     expect(tagsInput).toBeInTheDocument();
+  });
+
+  // ランク機能のテスト
+  test('ランクが設定されているメモでランクが表示される', () => {
+    const mockMemo = createMockMemo({
+      rating: MEMO_RATING.FOUR
+    });
+    const mockFunctions = createMockFunctions();
+
+    renderWithProviders(
+      <MemoEditor
+        open={true}
+        memo={mockMemo}
+        bookId="test-book-id"
+        onClose={mockFunctions.onClose}
+        onUpdate={mockFunctions.onUpdate}
+        onDelete={mockFunctions.onDelete}
+      />
+    );
+
+    // ランクが表示されることを確認
+    const ratingElement = screen.getByRole('img', { name: /4 Stars/i });
+    expect(ratingElement).toBeInTheDocument();
+  });
+
+  test('ランクが未設定のメモでランクが表示されない', () => {
+    const mockMemo = createMockMemo({
+      rating: MEMO_RATING.NONE
+    });
+    const mockFunctions = createMockFunctions();
+
+    renderWithProviders(
+      <MemoEditor
+        open={true}
+        memo={mockMemo}
+        bookId="test-book-id"
+        onClose={mockFunctions.onClose}
+        onUpdate={mockFunctions.onUpdate}
+        onDelete={mockFunctions.onDelete}
+      />
+    );
+
+    // ランクが表示されないことを確認
+    const ratingElement = screen.queryByRole('img', { name: /Stars/i });
+    expect(ratingElement).not.toBeInTheDocument();
+  });
+
+  test('編集モードでランク入力フィールドが表示される', async () => {
+    const mockMemo = createMockMemo();
+    const mockFunctions = createMockFunctions();
+
+    renderWithProviders(
+      <MemoEditor
+        open={true}
+        memo={mockMemo}
+        bookId="test-book-id"
+        onClose={mockFunctions.onClose}
+        onUpdate={mockFunctions.onUpdate}
+        onDelete={mockFunctions.onDelete}
+        editMode={true}
+      />
+    );
+
+    // ランク入力フィールドが表示されることを確認
+    const ratingInput = screen.getByTestId('memo-rating-input');
+    expect(ratingInput).toBeInTheDocument();
+  });
+
+  test('ランクを変更してメモを更新できる', async () => {
+    const mockMemo = createMockMemo();
+    const mockFunctions = createMockFunctions();
+
+    renderWithProviders(
+      <MemoEditor
+        open={true}
+        memo={mockMemo}
+        bookId="test-book-id"
+        onClose={mockFunctions.onClose}
+        onUpdate={mockFunctions.onUpdate}
+        onDelete={mockFunctions.onDelete}
+        editMode={true}
+      />
+    );
+
+    // ランク入力フィールドを取得（editMode=trueなので直接表示される）
+    const ratingInput = screen.getByTestId('memo-rating-input');
+    
+    // ランクを4に変更（Ratingコンポーネントの星をクリック）
+    const stars = screen.getAllByRole('button');
+    const fourthStar = stars[3]; // 4つ目の星
+    fireEvent.click(fourthStar);
+
+    // 更新ボタンをクリック
+    const updateButton = screen.getByTestId('memo-update-button');
+    fireEvent.click(updateButton);
+
+    // updateMemoが正しいパラメータで呼ばれることを確認
+    await waitFor(() => {
+      expect(mockUpdateMemo).toHaveBeenCalledWith(
+        mockMemo.id,
+        expect.objectContaining({
+          rating: MEMO_RATING.FOUR
+        })
+      );
+    });
   });
 }); 

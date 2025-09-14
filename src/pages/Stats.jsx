@@ -8,7 +8,7 @@ export default function Stats() {
   const { loading, error, summary, tagStats, monthlyFinished, monthlyAddedBooks, monthlyMemos, topAuthors, topPublishers, statusDistribution } = useStats();
 
   // データが空かどうかを判定
-  const hasData = summary && (summary.totalBooks > 0 || summary.finishedBooks > 0 || summary.readingBooks > 0);
+  const hasData = summary && (summary.totalBooks > 0 || summary.finishedBooks > 0 || summary.readingBooks > 0 || summary.tsundokuBooks > 0 || summary.reReadingBooks > 0);
 
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', mb: 10 }}>
@@ -55,16 +55,28 @@ export default function Stats() {
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{summary?.totalBooks ?? '-'}</Typography>
                 </CardContent>
               </Card>
-                             <Card data-testid="stats-finished-books" className="stats-summary-card">
+              <Card data-testid="stats-tsundoku-books" className="stats-summary-card">
                 <CardContent>
-                  <Typography variant="h6">読了冊数</Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{summary?.finishedBooks ?? '-'}</Typography>
+                  <Typography variant="h6">積読冊数</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{summary?.tsundokuBooks ?? '-'}</Typography>
                 </CardContent>
               </Card>
-                             <Card data-testid="stats-reading-books" className="stats-summary-card">
+              <Card data-testid="stats-reading-books" className="stats-summary-card">
                 <CardContent>
                   <Typography variant="h6">読書中冊数</Typography>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{summary?.readingBooks ?? '-'}</Typography>
+                </CardContent>
+              </Card>
+              <Card data-testid="stats-rereading-books" className="stats-summary-card">
+                <CardContent>
+                  <Typography variant="h6">再読中冊数</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{summary?.reReadingBooks ?? '-'}</Typography>
+                </CardContent>
+              </Card>
+              <Card data-testid="stats-finished-books" className="stats-summary-card">
+                <CardContent>
+                  <Typography variant="h6">読了冊数</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{summary?.finishedBooks ?? '-'}</Typography>
                 </CardContent>
               </Card>
             </Box>
@@ -77,8 +89,10 @@ export default function Stats() {
                     height={220}
                     series={[{
                       data: [
-                        { id: 'finished', label: '読了', value: statusDistribution?.finished ?? 0 },
+                        { id: 'tsundoku', label: '積読', value: statusDistribution?.tsundoku ?? 0 },
                         { id: 'reading', label: '読書中', value: statusDistribution?.reading ?? 0 },
+                        { id: 'reReading', label: '再読中', value: statusDistribution?.reReading ?? 0 },
+                        { id: 'finished', label: '読了', value: statusDistribution?.finished ?? 0 },
                       ],
                       innerRadius: 30,
                       paddingAngle: 2,

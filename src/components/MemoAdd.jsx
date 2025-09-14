@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { Button, TextField, Box, Typography, Chip, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Button, TextField, Box, Typography, Chip, DialogTitle, DialogContent, DialogActions, Rating, FormControl, FormLabel } from '@mui/material';
 import { useAuth } from '../auth/AuthProvider';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ErrorDialogContext } from './CommonErrorDialog';
 import { useTagHistory } from '../hooks/useTagHistory';
 import { useMemo } from '../hooks/useMemo';
 import CameraPasteOCR from './CameraPasteOCR';
+import { 
+  getMemoRatingDescription,
+  DEFAULT_MEMO_RATING
+} from '../constants/memoRating';
 
 const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
   const { user } = useAuth();
@@ -16,6 +20,7 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
   const [page, setPage] = useState('');
   const [tags, setTags] = useState([]); // タグ配列
   const [inputTagValue, setInputTagValue] = useState("");
+  const [rating, setRating] = useState(DEFAULT_MEMO_RATING); // ランク
   const [isSubmitting, setIsSubmitting] = useState(false); // 送信中の状態管理
 
   // 共通フックを使用してタグ履歴を管理
@@ -53,6 +58,7 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
         comment,
         page: Number(page) || null,
         tags: tagsToSave,
+        rating: rating || DEFAULT_MEMO_RATING,
       });
       console.log('MemoAdd - addMemo呼び出し完了, memoId:', memoId);
       await saveTagsToHistory(tagsToSave);
@@ -62,6 +68,7 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
       setPage('');
       setTags([]);
       setInputTagValue('');
+      setRating(DEFAULT_MEMO_RATING);
       console.log('MemoAdd - フォームリセット完了');
       
       // メモ追加完了を親コンポーネントに通知
@@ -126,6 +133,26 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
               sx={{ mr: 2, width: { xs: '100%', sm: 'auto' } }}
               inputProps={{ 'data-testid': 'memo-page-input' }}
             />
+            
+            {/* ランク入力（ダイアログ） */}
+            <FormControl margin="normal" fullWidth>
+              <FormLabel component="legend">ランク評価</FormLabel>
+              <Rating
+                value={rating}
+                onChange={(event, newValue) => {
+                  setRating(newValue || DEFAULT_MEMO_RATING);
+                }}
+                size="large"
+                sx={{ mt: 1 }}
+                data-testid="memo-rating-input"
+              />
+              {rating > 0 && (
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                  {getMemoRatingDescription(rating)}
+                </Typography>
+              )}
+            </FormControl>
+            
             <Autocomplete
               multiple
               freeSolo
@@ -202,6 +229,26 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
         sx={{ mr: 2, width: { xs: '100%', sm: 'auto' } }}
         inputProps={{ 'data-testid': 'memo-page-input' }}
       />
+      
+      {/* ランク入力 */}
+      <FormControl margin="normal" fullWidth>
+        <FormLabel component="legend">ランク評価</FormLabel>
+        <Rating
+          value={rating}
+          onChange={(event, newValue) => {
+            setRating(newValue || DEFAULT_MEMO_RATING);
+          }}
+          size="large"
+          sx={{ mt: 1 }}
+          data-testid="memo-rating-input"
+        />
+        {rating > 0 && (
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+            {getMemoRatingDescription(rating)}
+          </Typography>
+        )}
+      </FormControl>
+      
       <Autocomplete
         multiple
         freeSolo

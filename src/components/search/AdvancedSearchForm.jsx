@@ -8,6 +8,10 @@ import {
 } from '@mui/material';
 import DateRangeSelector from './DateRangeSelector';
 import TagSearchField from './TagSearchField';
+import { 
+  FILTER_STATUSES,
+  FILTER_LABELS
+} from '../../constants/bookStatus';
 
 /**
  * 高度な検索フォームコンポーネント（アプローチ2：完全統合検索）
@@ -18,7 +22,7 @@ import TagSearchField from './TagSearchField';
  * @param {Function} props.onSearch - 検索実行時のコールバック
  */
 function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSearch }) {
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState(FILTER_STATUSES.ALL);
 
   const handleTextChange = (event) => {
     onSearchConditionsChange?.({
@@ -75,7 +79,7 @@ function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSear
             ステータス
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            {['all', 'reading', 'finished', 'wish'].map((status) => (
+            {Object.values(FILTER_STATUSES).map((status) => (
               <Button
                 key={status}
                 variant={statusFilter === status ? 'contained' : 'outlined'}
@@ -83,10 +87,7 @@ function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSear
                 onClick={() => handleStatusChange(null, status)}
                 data-testid={`status-filter-${status}`}
               >
-                {status === 'all' && '全て'}
-                {status === 'reading' && '読書中'}
-                {status === 'finished' && '読了'}
-                {status === 'wish' && '読みたい'}
+                {FILTER_LABELS[status]}
               </Button>
             ))}
           </Box>

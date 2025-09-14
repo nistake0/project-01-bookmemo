@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { ErrorDialogProvider } from './CommonErrorDialog';
 import MemoCard from './MemoCard';
+import { MEMO_RATING } from '../constants/memoRating';
 
 // react-swipeableライブラリのuseSwipeableフックをモック
 jest.mock('react-swipeable', () => ({
@@ -350,5 +351,78 @@ describe('MemoCard', () => {
     
     expect(editButton).toBeInTheDocument();
     expect(deleteButton).toBeInTheDocument();
+  });
+
+  // ランク表示のテスト
+  test('ランクが設定されているメモでランクが表示される', () => {
+    const mockMemo = {
+      id: 'test-memo-id',
+      text: 'テストメモテキスト',
+      rating: MEMO_RATING.FIVE
+    };
+
+    render(
+      <ThemeProvider theme={createTheme()}>
+        <ErrorDialogProvider>
+          <MemoCard 
+            memo={mockMemo} 
+            onEdit={mockOnEdit} 
+            onDelete={mockOnDelete}
+          />
+        </ErrorDialogProvider>
+      </ThemeProvider>
+    );
+
+    // ランクが表示されることを確認（Material-UI Ratingの星アイコン）
+    const ratingElement = screen.getByRole('img', { name: /5 Stars/i });
+    expect(ratingElement).toBeInTheDocument();
+  });
+
+  test('ランクが未設定のメモでランクが表示されない', () => {
+    const mockMemo = {
+      id: 'test-memo-id',
+      text: 'テストメモテキスト',
+      rating: MEMO_RATING.NONE
+    };
+
+    render(
+      <ThemeProvider theme={createTheme()}>
+        <ErrorDialogProvider>
+          <MemoCard 
+            memo={mockMemo} 
+            onEdit={mockOnEdit} 
+            onDelete={mockOnDelete}
+          />
+        </ErrorDialogProvider>
+      </ThemeProvider>
+    );
+
+    // ランクが表示されないことを確認
+    const ratingElement = screen.queryByRole('img', { name: /Stars/i });
+    expect(ratingElement).not.toBeInTheDocument();
+  });
+
+  test('ランクフィールドがない既存メモでランクが表示されない（後方互換性）', () => {
+    const mockMemo = {
+      id: 'test-memo-id',
+      text: 'テストメモテキスト'
+      // ratingフィールドなし
+    };
+
+    render(
+      <ThemeProvider theme={createTheme()}>
+        <ErrorDialogProvider>
+          <MemoCard 
+            memo={mockMemo} 
+            onEdit={mockOnEdit} 
+            onDelete={mockOnDelete}
+          />
+        </ErrorDialogProvider>
+      </ThemeProvider>
+    );
+
+    // ランクが表示されないことを確認
+    const ratingElement = screen.queryByRole('img', { name: /Stars/i });
+    expect(ratingElement).not.toBeInTheDocument();
   });
 }); 
