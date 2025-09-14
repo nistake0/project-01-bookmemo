@@ -65,9 +65,9 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
           onClick={onClick ? () => onClick(memo, false) : undefined} // editMode=false
         >
           <CardContent sx={{ 
-            pb: 1, 
+            pb: 0.5, // パディングを少し減らす
             minHeight: 48, 
-            maxHeight: 72, // ランク表示分の高さを追加
+            maxHeight: 80, // ランク表示分をさらに追加
             overflow: 'hidden' 
           }}>
             <Typography
@@ -76,6 +76,7 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
+                lineHeight: 1.2, // 行間を調整
               }}
             >
               {shortText}
@@ -88,6 +89,8 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
+                  lineHeight: 1.2, // 行間を調整
+                  mt: 0.25, // 上マージンを最小限に
                 }}
               >
                 {memo.comment}
@@ -100,7 +103,7 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
                 value={getMemoRatingValue(memo)} 
                 readOnly 
                 size="small"
-                sx={{ mt: 0.5 }}
+                sx={{ mt: 0.25, mb: 0.25 }} // マージンを調整
               />
             )}
           </CardContent>
