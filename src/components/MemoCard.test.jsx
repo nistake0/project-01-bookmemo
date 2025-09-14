@@ -425,4 +425,206 @@ describe('MemoCard', () => {
     const ratingElement = screen.queryByRole('img', { name: /Stars/i });
     expect(ratingElement).not.toBeInTheDocument();
   });
+
+  // レイアウト崩れ検出テスト
+  test('長いテキストでレイアウトが崩れない（モバイル）', () => {
+    const longTextMemo = {
+      id: 'test-memo-id',
+      text: 'これは非常に長いメモテキストです。このテキストは省略されるべきですが、レイアウトが崩れないことを確認します。' + 'x'.repeat(100),
+      comment: 'これは長い感想コメントです。' + 'x'.repeat(50),
+      rating: MEMO_RATING.FIVE,
+      page: 123,
+      tags: ['長いタグ名', 'テストタグ'],
+      createdAt: new Date()
+    };
+
+    // useMediaQueryをモバイル用にモック
+    require('@mui/material').useMediaQuery.mockReturnValue(true);
+
+    render(
+      <ThemeProvider theme={createTheme()}>
+        <ErrorDialogProvider>
+          <MemoCard 
+            memo={longTextMemo} 
+            onEdit={mockOnEdit} 
+            onDelete={mockOnDelete}
+          />
+        </ErrorDialogProvider>
+      </ThemeProvider>
+    );
+
+    // テキストが省略されて表示されることを確認
+    const textElement = screen.getByText(/これは非常に長いメモテキストです/);
+    expect(textElement).toBeInTheDocument();
+    
+    // ランクが表示されることを確認
+    const ratingElement = screen.getByRole('img', { name: /5 Stars/i });
+    expect(ratingElement).toBeInTheDocument();
+
+    // 感想テキストが表示されることを確認
+    const commentElement = screen.getByText(/これは長い感想コメントです/);
+    expect(commentElement).toBeInTheDocument();
+  });
+
+  test('長いテキストでレイアウトが崩れない（PC）', () => {
+    const longTextMemo = {
+      id: 'test-memo-id',
+      text: 'これは非常に長いメモテキストです。このテキストは省略されるべきですが、レイアウトが崩れないことを確認します。' + 'x'.repeat(100),
+      comment: 'これは長い感想コメントです。' + 'x'.repeat(50),
+      rating: MEMO_RATING.FOUR,
+      page: 123,
+      tags: ['長いタグ名', 'テストタグ'],
+      createdAt: new Date()
+    };
+
+    // useMediaQueryをPC用にモック
+    require('@mui/material').useMediaQuery.mockReturnValue(false);
+
+    render(
+      <ThemeProvider theme={createTheme()}>
+        <ErrorDialogProvider>
+          <MemoCard 
+            memo={longTextMemo} 
+            onEdit={mockOnEdit} 
+            onDelete={mockOnDelete}
+          />
+        </ErrorDialogProvider>
+      </ThemeProvider>
+    );
+
+    // テキストが省略されて表示されることを確認
+    const textElement = screen.getByText(/これは非常に長いメモテキストです/);
+    expect(textElement).toBeInTheDocument();
+    
+    // ランクが表示されることを確認
+    const ratingElement = screen.getByRole('img', { name: /4 Stars/i });
+    expect(ratingElement).toBeInTheDocument();
+
+    // 感想テキストが表示されることを確認
+    const commentElement = screen.getByText(/これは長い感想コメントです/);
+    expect(commentElement).toBeInTheDocument();
+  });
+
+  test('ランク表示ありのメモでテキストが適切に表示される', () => {
+    const memoWithRating = {
+      id: 'test-memo-id',
+      text: 'ランク表示ありのメモテキスト',
+      comment: '感想コメント',
+      rating: MEMO_RATING.THREE,
+      page: 456,
+      tags: ['タグ1', 'タグ2'],
+      createdAt: new Date()
+    };
+
+    render(
+      <ThemeProvider theme={createTheme()}>
+        <ErrorDialogProvider>
+          <MemoCard 
+            memo={memoWithRating} 
+            onEdit={mockOnEdit} 
+            onDelete={mockOnDelete}
+          />
+        </ErrorDialogProvider>
+      </ThemeProvider>
+    );
+
+    // メインテキストが表示されることを確認
+    const textElement = screen.getByText('ランク表示ありのメモテキスト');
+    expect(textElement).toBeInTheDocument();
+
+    // 感想テキストが表示されることを確認
+    const commentElement = screen.getByText('感想コメント');
+    expect(commentElement).toBeInTheDocument();
+
+    // ランクが表示されることを確認
+    const ratingElement = screen.getByRole('img', { name: /3 Stars/i });
+    expect(ratingElement).toBeInTheDocument();
+
+    // ページ番号が表示されることを確認
+    const pageElement = screen.getByText('p.456');
+    expect(pageElement).toBeInTheDocument();
+
+    // タグが表示されることを確認
+    expect(screen.getByText('タグ1')).toBeInTheDocument();
+    expect(screen.getByText('タグ2')).toBeInTheDocument();
+  });
+
+  test('ランク表示なしのメモでテキストが適切に表示される', () => {
+    const memoWithoutRating = {
+      id: 'test-memo-id',
+      text: 'ランク表示なしのメモテキスト',
+      comment: '感想コメント',
+      rating: MEMO_RATING.NONE,
+      page: 789,
+      tags: ['タグA'],
+      createdAt: new Date()
+    };
+
+    render(
+      <ThemeProvider theme={createTheme()}>
+        <ErrorDialogProvider>
+          <MemoCard 
+            memo={memoWithoutRating} 
+            onEdit={mockOnEdit} 
+            onDelete={mockOnDelete}
+          />
+        </ErrorDialogProvider>
+      </ThemeProvider>
+    );
+
+    // メインテキストが表示されることを確認
+    const textElement = screen.getByText('ランク表示なしのメモテキスト');
+    expect(textElement).toBeInTheDocument();
+
+    // 感想テキストが表示されることを確認
+    const commentElement = screen.getByText('感想コメント');
+    expect(commentElement).toBeInTheDocument();
+
+    // ランクが表示されないことを確認
+    const ratingElement = screen.queryByRole('img', { name: /Stars/i });
+    expect(ratingElement).not.toBeInTheDocument();
+
+    // ページ番号が表示されることを確認
+    const pageElement = screen.getByText('p.789');
+    expect(pageElement).toBeInTheDocument();
+
+    // タグが表示されることを確認
+    expect(screen.getByText('タグA')).toBeInTheDocument();
+  });
+
+  test('最小限の情報でもレイアウトが崩れない', () => {
+    const minimalMemo = {
+      id: 'test-memo-id',
+      text: '最小限のメモ',
+      rating: MEMO_RATING.NONE
+    };
+
+    render(
+      <ThemeProvider theme={createTheme()}>
+        <ErrorDialogProvider>
+          <MemoCard 
+            memo={minimalMemo} 
+            onEdit={mockOnEdit} 
+            onDelete={mockOnDelete}
+          />
+        </ErrorDialogProvider>
+      </ThemeProvider>
+    );
+
+    // メインテキストが表示されることを確認
+    const textElement = screen.getByText('最小限のメモ');
+    expect(textElement).toBeInTheDocument();
+
+    // ランクが表示されないことを確認
+    const ratingElement = screen.queryByRole('img', { name: /Stars/i });
+    expect(ratingElement).not.toBeInTheDocument();
+
+    // 編集・削除ボタンが表示されることを確認（PCの場合）
+    require('@mui/material').useMediaQuery.mockReturnValue(false);
+    
+    const editButton = screen.getByTestId('memo-edit-button');
+    const deleteButton = screen.getByTestId('memo-delete-button');
+    expect(editButton).toBeInTheDocument();
+    expect(deleteButton).toBeInTheDocument();
+  });
 }); 
