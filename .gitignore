@@ -39,3 +39,6 @@ serviceAccountKey.json
 # Cypress出力ファイル
 cypress/screenshots/
 cypress/videos/
+
+# テストカバレッジレポート
+coverage/

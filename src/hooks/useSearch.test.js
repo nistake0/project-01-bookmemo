@@ -428,6 +428,62 @@ describe('useSearch', () => {
       // モックを元に戻す
       require('../auth/AuthProvider').useAuth = originalUseAuth;
     });
+
+    test('メモフォールバック処理が正しく動作する', async () => {
+      // メモクエリでエラーを発生させ、フォールバック処理をテスト
+      const { getDocs } = require('firebase/firestore');
+      
+      let callCount = 0;
+      getDocs.mockImplementation((query) => {
+        callCount++;
+        const queryString = query.toString();
+        
+        // メモクエリの最初の呼び出しでエラーを発生
+        if (queryString.includes('memos') && callCount === 2) {
+          throw new Error('Index error for memos');
+        }
+        
+        // 書籍クエリとフォールバッククエリは成功
+        return Promise.resolve({
+          size: 2,
+          docs: [
+            { 
+              id: 'book1', 
+              data: () => ({ title: 'Book 1', tags: ['小説'] }),
+              ref: { parent: { parent: { id: 'book1' } } }
+            },
+            { 
+              id: 'book2', 
+              data: () => ({ title: 'Book 2', tags: ['技術書'] }),
+              ref: { parent: { parent: { id: 'book2' } } }
+            }
+          ],
+          forEach: function(callback) {
+            this.docs.forEach(callback);
+          }
+        });
+      });
+
+      const { result } = renderHook(() => useSearch());
+
+      const searchConditions = {
+        text: '',
+        status: 'all',
+        dateRange: { type: 'none' },
+        memoContent: '',
+        selectedTags: [],
+        sortBy: 'updatedAt',
+        sortOrder: 'desc'
+      };
+
+      await act(async () => {
+        await result.current.executeSearch(searchConditions);
+      });
+
+      expect(result.current.loading).toBe(false);
+      expect(result.current.error).toBeNull();
+      expect(result.current.results).toHaveLength(2);
+    });
   });
 
   describe('clearResults', () => {
