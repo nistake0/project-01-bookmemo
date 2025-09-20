@@ -13,10 +13,12 @@ import {
   getStatusChangeButtonText,
   isValidBookStatus
 } from '../constants/bookStatus';
+import { useBookStatusHistory } from '../hooks/useBookStatusHistory';
 
 const BookStatusChanger = ({ book, bookId, onStatusChange }) => {
   const errorContext = useContext(ErrorDialogContext);
   const setGlobalError = errorContext?.setGlobalError || (() => {});
+  const { addStatusHistory } = useBookStatusHistory(bookId);
   const [updating, setUpdating] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -27,6 +29,8 @@ const BookStatusChanger = ({ book, bookId, onStatusChange }) => {
     setAnchorEl(null);
     
     const docRef = doc(db, 'books', bookId);
+    const currentStatus = book.status || DEFAULT_BOOK_STATUS;
+    
     try {
       const updateData = {
         status: newStatus,
@@ -39,6 +43,15 @@ const BookStatusChanger = ({ book, bookId, onStatusChange }) => {
       }
 
       await updateDoc(docRef, updateData);
+      
+      // ステータス変更履歴を追加
+      try {
+        await addStatusHistory(newStatus, currentStatus);
+      } catch (historyError) {
+        console.error("Error adding status history:", historyError);
+        // 履歴の追加に失敗してもメインの処理は続行
+      }
+      
       onStatusChange(newStatus);
     } catch (error) {
       console.error("Error updating status:", error);

@@ -6,6 +6,7 @@ import { renderWithProviders, resetMocks } from '../test-utils';
 
 // useBookフックをモック
 jest.mock('../hooks/useBook');
+jest.mock('../hooks/useBookStatusHistory');
 jest.mock('../components/BookInfo', () => {
   return function MockBookInfo({ book, onStatusChange }) {
     return (
@@ -45,6 +46,21 @@ jest.mock('../components/MemoAdd', () => {
     );
   };
 });
+jest.mock('../components/StatusHistoryTimeline', () => {
+  return function MockStatusHistoryTimeline({ history, loading, error }) {
+    return (
+      <div data-testid="status-history-timeline">
+        {loading && <div data-testid="status-history-loading">読み込み中...</div>}
+        {error && <div data-testid="status-history-error">エラー: {error}</div>}
+        {history && history.length > 0 && (
+          <div data-testid="status-history-content">
+            履歴件数: {history.length}
+          </div>
+        )}
+      </div>
+    );
+  };
+});
 
 describe('BookDetail', () => {
   const mockBook = {
@@ -53,6 +69,14 @@ describe('BookDetail', () => {
     author: 'テスト著者',
     status: 'unread',
     tags: ['test'],
+  };
+
+  const mockStatusHistory = {
+    history: [],
+    loading: false,
+    error: null,
+    getImportantDates: jest.fn(() => ({})),
+    getReadingDuration: jest.fn(() => null)
   };
 
   beforeEach(() => {
@@ -68,6 +92,10 @@ describe('BookDetail', () => {
       updateBookStatus: jest.fn(),
       updateBookTags: jest.fn(),
     });
+    
+    // useBookStatusHistoryのデフォルトモック設定
+    const { useBookStatusHistory } = require('../hooks/useBookStatusHistory');
+    useBookStatusHistory.mockReturnValue(mockStatusHistory);
   });
 
   afterEach(() => {
@@ -231,6 +259,98 @@ describe('BookDetail', () => {
         expect(screen.getByTestId('memo-list')).toBeInTheDocument();
         expect(screen.getByTestId('memo-add-fab')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('タブ機能', () => {
+    test('タブが正しく表示される', () => {
+      renderWithProviders(<BookDetail />);
+      
+      expect(screen.getByTestId('book-detail-tabs')).toBeInTheDocument();
+      expect(screen.getByTestId('memo-list-tab')).toBeInTheDocument();
+      expect(screen.getByTestId('status-history-tab')).toBeInTheDocument();
+    });
+
+    test('デフォルトでメモ一覧タブが選択される', () => {
+      renderWithProviders(<BookDetail />);
+      
+      expect(screen.getByTestId('memo-list-title')).toBeInTheDocument();
+      expect(screen.getByTestId('memo-list')).toBeInTheDocument();
+    });
+
+    test('ステータス履歴タブに切り替えできる', () => {
+      renderWithProviders(<BookDetail />);
+      
+      // ステータス履歴タブをクリック
+      fireEvent.click(screen.getByTestId('status-history-tab'));
+      
+      // ステータス履歴が表示される
+      expect(screen.getByTestId('status-history-timeline')).toBeInTheDocument();
+      
+      // メモ一覧は非表示になる
+      expect(screen.queryByTestId('memo-list-title')).not.toBeInTheDocument();
+    });
+
+    test('メモ一覧タブに戻ることができる', () => {
+      renderWithProviders(<BookDetail />);
+      
+      // ステータス履歴タブに切り替え
+      fireEvent.click(screen.getByTestId('status-history-tab'));
+      expect(screen.getByTestId('status-history-timeline')).toBeInTheDocument();
+      
+      // メモ一覧タブに戻る
+      fireEvent.click(screen.getByTestId('memo-list-tab'));
+      expect(screen.getByTestId('memo-list-title')).toBeInTheDocument();
+      expect(screen.getByTestId('memo-list')).toBeInTheDocument();
+    });
+
+    test('ステータス履歴のローディング状態が表示される', () => {
+      const { useBookStatusHistory } = require('../hooks/useBookStatusHistory');
+      useBookStatusHistory.mockReturnValue({
+        ...mockStatusHistory,
+        loading: true
+      });
+
+      renderWithProviders(<BookDetail />);
+      
+      // ステータス履歴タブをクリック
+      fireEvent.click(screen.getByTestId('status-history-tab'));
+      
+      expect(screen.getByTestId('status-history-loading')).toBeInTheDocument();
+    });
+
+    test('ステータス履歴のエラー状態が表示される', () => {
+      const { useBookStatusHistory } = require('../hooks/useBookStatusHistory');
+      useBookStatusHistory.mockReturnValue({
+        ...mockStatusHistory,
+        error: 'テストエラー'
+      });
+
+      renderWithProviders(<BookDetail />);
+      
+      // ステータス履歴タブをクリック
+      fireEvent.click(screen.getByTestId('status-history-tab'));
+      
+      expect(screen.getByTestId('status-history-error')).toBeInTheDocument();
+    });
+
+    test('ステータス履歴が正しく表示される', () => {
+      const mockHistory = [
+        { id: '1', status: 'reading', changedAt: new Date() }
+      ];
+      const { useBookStatusHistory } = require('../hooks/useBookStatusHistory');
+      useBookStatusHistory.mockReturnValue({
+        ...mockStatusHistory,
+        history: mockHistory
+      });
+
+      renderWithProviders(<BookDetail />);
+      
+      // ステータス履歴タブをクリック
+      fireEvent.click(screen.getByTestId('status-history-tab'));
+      
+      expect(screen.getByTestId('status-history-content')).toBeInTheDocument();
+      expect(screen.getByText('履歴件数: 1')).toBeInTheDocument();
     });
   });
 }); 

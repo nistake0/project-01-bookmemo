@@ -1,19 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { Box, Paper, Divider, Typography, Fab, Dialog } from '@mui/material';
+import { 
+  Box, 
+  Paper, 
+  Divider, 
+  Typography, 
+  Fab, 
+  Dialog, 
+  Tabs, 
+  Tab,
+  Alert
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MemoList from '../components/MemoList';
 import MemoAdd from '../components/MemoAdd';
 import BookInfo from '../components/BookInfo';
 import BookTagEditor from '../components/BookTagEditor';
+import StatusHistoryTimeline from '../components/StatusHistoryTimeline';
 import { useBook } from '../hooks/useBook';
+import { useBookStatusHistory } from '../hooks/useBookStatusHistory';
 
 const BookDetail = () => {
   const { id } = useParams();
   const location = useLocation();
   const { book, loading, error, updateBookStatus, updateBookTags } = useBook(id);
+  const { 
+    history, 
+    loading: historyLoading, 
+    error: historyError, 
+    getImportantDates, 
+    getReadingDuration 
+  } = useBookStatusHistory(id);
   const [memoListKey, setMemoListKey] = useState(0); // MemoListの再レンダリング用
   const [memoAddDialogOpen, setMemoAddDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(0); // タブ切り替え用
 
   // 書籍詳細ページのデバッグ情報を記録
   useEffect(() => {
@@ -47,6 +67,42 @@ const BookDetail = () => {
     setMemoAddDialogOpen(false);
   };
 
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
+
+  // タブの内容をレンダリング
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 0:
+        return (
+          <>
+            <Typography 
+              variant="h5" 
+              gutterBottom 
+              sx={{ mb: { xs: 1, sm: 2 } }}
+              data-testid="memo-list-title"
+            >
+              メモ一覧
+            </Typography>
+            <MemoList key={memoListKey} bookId={book.id} onMemoUpdated={handleMemoUpdated} />
+          </>
+        );
+      case 1:
+        return (
+          <StatusHistoryTimeline
+            history={history}
+            loading={historyLoading}
+            error={historyError}
+            importantDates={getImportantDates()}
+            readingDuration={getReadingDuration()}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   if (loading) {
     return <div data-testid="book-detail-loading">Loading...</div>;
   }
@@ -75,15 +131,28 @@ const BookDetail = () => {
         <BookTagEditor book={book} bookId={id} onTagsChange={handleTagsChange} />
         
         <Divider sx={{ my: { xs: 1, sm: 2 } }} />
-        <Typography 
-          variant="h5" 
-          gutterBottom 
-          sx={{ mb: { xs: 1, sm: 2 } }}
-          data-testid="memo-list-title"
-        >
-          メモ一覧
-        </Typography>
-        <MemoList key={memoListKey} bookId={book.id} onMemoUpdated={handleMemoUpdated} />
+        
+        {/* タブ切り替え */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+          <Tabs 
+            value={activeTab} 
+            onChange={handleTabChange} 
+            aria-label="book detail tabs"
+            data-testid="book-detail-tabs"
+          >
+            <Tab 
+              label="メモ一覧" 
+              data-testid="memo-list-tab"
+            />
+            <Tab 
+              label="ステータス履歴" 
+              data-testid="status-history-tab"
+            />
+          </Tabs>
+        </Box>
+        
+        {/* タブの内容 */}
+        {renderTabContent()}
       </Paper>
 
       {/* FAB - メモ追加ボタン */}
