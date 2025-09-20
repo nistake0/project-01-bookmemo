@@ -1,0 +1,197 @@
+import { useState, useEffect, useCallback, useContext } from 'react';
+import { 
+  collection, 
+  addDoc, 
+  query, 
+  orderBy, 
+  onSnapshot, 
+  serverTimestamp 
+} from 'firebase/firestore';
+import { db } from '../firebase';
+import { useAuth } from '../auth/AuthProvider';
+import { ErrorDialogContext } from '../components/CommonErrorDialog';
+import { 
+  BOOK_STATUS, 
+  getBookStatusLabel, 
+  isValidBookStatus 
+} from '../constants/bookStatus';
+
+/**
+ * 書籍ステータス変更履歴管理フック
+ * @param {string} bookId - 書籍ID
+ * @returns {Object} ステータス履歴の状態と操作関数
+ */
+export const useBookStatusHistory = (bookId) => {
+  const { user } = useAuth();
+  const errorContext = useContext(ErrorDialogContext);
+  const setGlobalError = errorContext?.setGlobalError || (() => {});
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // ステータス履歴を取得
+  const fetchStatusHistory = useCallback(() => {
+    if (!user || !bookId) {
+      console.log('useBookStatusHistory: No user or bookId', { user: !!user, bookId });
+      setLoading(false);
+      return () => {};
+    }
+
+    try {
+      console.log('useBookStatusHistory: Setting up listener for bookId:', bookId);
+      setLoading(true);
+      setError(null);
+      
+      const historyRef = collection(db, 'books', bookId, 'statusHistory');
+      // orderByを一時的に削除して権限問題を回避
+      const q = query(historyRef);
+      
+      const unsubscribe = onSnapshot(q, 
+        (snapshot) => {
+          console.log('useBookStatusHistory: Snapshot received', { 
+            size: snapshot.size, 
+            empty: snapshot.empty,
+            bookId 
+          });
+          const historyData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          
+          // クライアント側でソート（changedAtの降順）
+          historyData.sort((a, b) => {
+            const aTime = a.changedAt?.toDate ? a.changedAt.toDate() : new Date(a.changedAt || 0);
+            const bTime = b.changedAt?.toDate ? b.changedAt.toDate() : new Date(b.changedAt || 0);
+            return bTime - aTime;
+          });
+          
+          setHistory(historyData);
+          setLoading(false);
+        },
+        (error) => {
+          console.error('Error fetching status history:', error);
+          console.error('Error details:', { 
+            code: error.code, 
+            message: error.message, 
+            bookId,
+            userId: user.uid 
+          });
+          
+          // 権限エラーの場合は空の履歴として扱う（既存データとの互換性）
+          if (error.code === 'permission-denied') {
+            console.log('Permission denied for statusHistory, treating as empty history');
+            setHistory([]);
+            setLoading(false);
+            return;
+          }
+          
+          setGlobalError('ステータス履歴の取得に失敗しました。');
+          setError('ステータス履歴の取得に失敗しました。');
+          setLoading(false);
+        }
+      );
+
+      return unsubscribe;
+    } catch (error) {
+      console.error('Error setting up status history listener:', error);
+      setGlobalError('ステータス履歴の取得に失敗しました。');
+      setError('ステータス履歴の取得に失敗しました。');
+      setLoading(false);
+      return () => {};
+    }
+  }, [bookId, user, setGlobalError]);
+
+  // ステータス変更履歴を追加
+  const addStatusHistory = useCallback(async (newStatus, previousStatus, notes = null) => {
+    if (!user || !bookId || !isValidBookStatus(newStatus)) {
+      throw new Error('無効なパラメータです。');
+    }
+
+    try {
+      const historyRef = collection(db, 'books', bookId, 'statusHistory');
+      
+      const historyData = {
+        status: newStatus,
+        previousStatus: previousStatus || null,
+        changedAt: serverTimestamp(),
+        changedBy: user.uid,
+        notes: notes || null,
+        createdAt: serverTimestamp()
+      };
+
+      const docRef = await addDoc(historyRef, historyData);
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding status history:', error);
+      setGlobalError('ステータス履歴の保存に失敗しました。');
+      throw error;
+    }
+  }, [bookId, user, setGlobalError]);
+
+  // 重要な日付を取得
+  const getImportantDates = useCallback(() => {
+    if (!history.length) return {};
+
+    const dates = {};
+    
+    // 読書開始日（reading または re-reading の最初の記録）
+    const readingStart = history.find(h => 
+      h.status === BOOK_STATUS.READING || h.status === BOOK_STATUS.RE_READING
+    );
+    if (readingStart) {
+      dates.readingStartedAt = readingStart.changedAt;
+    }
+
+    // 読了日（finished の最初の記録）
+    const finished = history.find(h => h.status === BOOK_STATUS.FINISHED);
+    if (finished) {
+      dates.finishedAt = finished.changedAt;
+    }
+
+    // 再読開始日（re-reading の最初の記録）
+    const reReadingStart = history.find(h => h.status === BOOK_STATUS.RE_READING);
+    if (reReadingStart) {
+      dates.reReadingStartedAt = reReadingStart.changedAt;
+    }
+
+    return dates;
+  }, [history]);
+
+  // 現在のステータスを取得
+  const getCurrentStatus = useCallback(() => {
+    if (!history.length) return null;
+    return history[0]?.status || null;
+  }, [history]);
+
+  // 読書期間を計算
+  const getReadingDuration = useCallback(() => {
+    const dates = getImportantDates();
+    if (!dates.readingStartedAt || !dates.finishedAt) return null;
+
+    const start = dates.readingStartedAt.toDate ? dates.readingStartedAt.toDate() : new Date(dates.readingStartedAt);
+    const end = dates.finishedAt.toDate ? dates.finishedAt.toDate() : new Date(dates.finishedAt);
+    
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays;
+  }, [getImportantDates]);
+
+  useEffect(() => {
+    const unsubscribe = fetchStatusHistory();
+    return unsubscribe;
+  }, [fetchStatusHistory]);
+
+  return {
+    history,
+    loading,
+    error,
+    addStatusHistory,
+    getImportantDates,
+    getCurrentStatus,
+    getReadingDuration,
+    refetch: fetchStatusHistory
+  };
+};
+
+export default useBookStatusHistory;

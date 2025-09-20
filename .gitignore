@@ -33,6 +33,9 @@ dist-ssr
 # Firebaseサービスアカウント鍵（絶対にGit管理しない）
 serviceAccountKey.json
 
+# Firebase CLIキャッシュファイル
+.firebase/
+
 # Cypress出力ファイル
 cypress/screenshots/
 cypress/videos/
