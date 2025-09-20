@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { convertToDate } from '../utils/dateUtils';
+import { logger } from '../utils/logger';
 
 /**
  * 書籍ステータス管理フック
@@ -17,7 +18,7 @@ export const useBookStatusManager = (book, addManualStatusHistory, updateBookSta
     try {
       // 手動履歴を追加
       await addManualStatusHistory(date, status, previousStatus);
-      console.log('Manual history added successfully');
+      logger.status.info('Manual history added successfully');
 
       // 追加した履歴が最新かどうかを判定
       const allHistories = [...existingHistory];
@@ -43,7 +44,7 @@ export const useBookStatusManager = (book, addManualStatusHistory, updateBookSta
         await updateBookStatus(status);
       }
     } catch (error) {
-      console.error('Failed to add manual history:', error);
+      logger.status.error('Failed to add manual history', error);
       throw error; // エラーを再スローしてUIで処理できるようにする
     }
   }, [book, addManualStatusHistory, updateBookStatus]);

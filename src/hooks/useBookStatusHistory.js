@@ -15,6 +15,7 @@ import {
   getBookStatusLabel, 
   isValidBookStatus 
 } from '../constants/bookStatus';
+import { logger } from '../utils/logger';
 
 /**
  * 書籍ステータス変更履歴管理フック
@@ -32,13 +33,13 @@ export const useBookStatusHistory = (bookId) => {
   // ステータス履歴を取得
   const fetchStatusHistory = useCallback(() => {
     if (!user || !bookId) {
-      console.log('useBookStatusHistory: No user or bookId', { user: !!user, bookId });
+      logger.status.debug('No user or bookId', { user: !!user, bookId });
       setLoading(false);
       return () => {};
     }
 
     try {
-      console.log('useBookStatusHistory: Setting up listener for bookId:', bookId);
+      logger.status.debug('Setting up listener for bookId', { bookId });
       setLoading(true);
       setError(null);
       
@@ -48,7 +49,7 @@ export const useBookStatusHistory = (bookId) => {
       
       const unsubscribe = onSnapshot(q, 
         (snapshot) => {
-          console.log('useBookStatusHistory: Snapshot received', { 
+          logger.status.debug('Snapshot received', { 
             size: snapshot.size, 
             empty: snapshot.empty,
             bookId 
@@ -69,8 +70,8 @@ export const useBookStatusHistory = (bookId) => {
           setLoading(false);
         },
         (error) => {
-          console.error('Error fetching status history:', error);
-          console.error('Error details:', { 
+          logger.status.error('Error fetching status history', error);
+          logger.status.error('Error details', { 
             code: error.code, 
             message: error.message, 
             bookId,
@@ -79,7 +80,7 @@ export const useBookStatusHistory = (bookId) => {
           
           // 権限エラーの場合は空の履歴として扱う（既存データとの互換性）
           if (error.code === 'permission-denied') {
-            console.log('Permission denied for statusHistory, treating as empty history');
+            logger.status.warn('Permission denied for statusHistory, treating as empty history');
             setHistory([]);
             setLoading(false);
             return;
@@ -93,7 +94,7 @@ export const useBookStatusHistory = (bookId) => {
 
       return unsubscribe;
     } catch (error) {
-      console.error('Error setting up status history listener:', error);
+      logger.status.error('Error setting up status history listener', error);
       setGlobalError('ステータス履歴の取得に失敗しました。');
       setError('ステータス履歴の取得に失敗しました。');
       setLoading(false);
@@ -122,7 +123,7 @@ export const useBookStatusHistory = (bookId) => {
       const docRef = await addDoc(historyRef, historyData);
       return docRef.id;
     } catch (error) {
-      console.error('Error adding status history:', error);
+      logger.status.error('Error adding status history', error);
       setGlobalError('ステータス履歴の保存に失敗しました。');
       throw error;
     }
@@ -180,7 +181,7 @@ export const useBookStatusHistory = (bookId) => {
   // 手動履歴追加機能
   const addManualStatusHistory = useCallback(async (date, status, previousStatus) => {
     if (!user || !bookId) {
-      console.log('useBookStatusHistory: No user or bookId for manual history addition', { user: !!user, bookId });
+      logger.status.debug('No user or bookId for manual history addition', { user: !!user, bookId });
       return;
     }
 
@@ -189,11 +190,11 @@ export const useBookStatusHistory = (bookId) => {
     }
 
     try {
-      console.log('useBookStatusHistory: Adding manual status history', { 
+      logger.status.info('Adding manual status history', { 
         bookId, 
         date, 
         status, 
-        previousStatus,
+        previousStatus, 
         userId: user.uid 
       });
 
@@ -206,9 +207,9 @@ export const useBookStatusHistory = (bookId) => {
       };
 
       await addDoc(historyRef, historyData);
-      console.log('useBookStatusHistory: Manual status history added successfully');
+      logger.status.info('Manual status history added successfully');
     } catch (error) {
-      console.error('Error adding manual status history:', error);
+      logger.status.error('Error adding manual status history', error);
       setGlobalError('手動履歴の追加に失敗しました。');
       throw error;
     }
@@ -220,7 +221,7 @@ export const useBookStatusHistory = (bookId) => {
   useEffect(() => {
     const unsubscribe = fetchStatusHistory();
     return unsubscribe;
-  }, [fetchStatusHistory]);
+  }, [bookId, user]); // fetchStatusHistoryの依存配列と一致させる
 
   return {
     history,

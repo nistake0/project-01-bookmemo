@@ -80,27 +80,20 @@ export const useBookList = () => {
       setLoading(true);
       setError(null);
       
-      console.log('=== useBookList fetchBooks START ===');
       const q = query(
         collection(db, "books"),
         where("userId", "==", user.uid),
         orderBy("updatedAt", "desc")
       );
       
-      console.log('=== useBookList getDocs START ===');
       const querySnapshot = await getDocs(q);
-      console.log('=== useBookList getDocs END ===');
-      
       const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      console.log('=== useBookList setAllBooks START ===');
       setAllBooks(data);
-      console.log('=== useBookList setAllBooks END ===');
     } catch (error) {
       console.error("Error fetching books:", error);
       setGlobalError("書籍一覧の取得に失敗しました。");
       setError("書籍一覧の取得に失敗しました。");
     } finally {
-      console.log('=== useBookList setLoading false ===');
       setLoading(false);
     }
   }, [user, setGlobalError]);

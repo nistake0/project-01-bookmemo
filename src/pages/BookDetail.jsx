@@ -47,10 +47,7 @@ const BookDetail = () => {
   const [memoAddDialogOpen, setMemoAddDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0); // タブ切り替え用
 
-  // 書籍詳細ページのデバッグ情報を記録
-  useEffect(() => {
-    console.log('📖 BookDetail mounted:', { id, pathname: location.pathname });
-  }, [id, location.pathname]);
+  // 書籍詳細ページのデバッグ情報を記録（削除: 開発用ログ）
 
   const handleStatusChange = (newStatus) => {
     updateBookStatus(newStatus);
@@ -62,13 +59,11 @@ const BookDetail = () => {
 
 
   const handleMemoAdded = () => {
-    console.log('BookDetail - handleMemoAdded: MemoListを再レンダリング');
     setMemoListKey(prev => prev + 1); // MemoListを強制的に再レンダリング
     setMemoAddDialogOpen(false); // ダイアログを閉じる
   };
 
   const handleMemoUpdated = () => {
-    console.log('BookDetail - handleMemoUpdated: MemoListを再レンダリング');
     setMemoListKey(prev => prev + 1); // MemoListを強制的に再レンダリング
   };
 
