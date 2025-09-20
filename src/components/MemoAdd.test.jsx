@@ -4,6 +4,11 @@ import { renderWithProviders, mockSetGlobalError, resetMocks } from '../test-uti
 import MemoAdd from './MemoAdd';
 import { MEMO_RATING } from '../constants/memoRating';
 
+// useMemoフックのモック
+jest.mock('../hooks/useMemo', () => ({
+  useMemo: jest.fn()
+}));
+
 /**
  * MemoAdd コンポーネントのユニットテスト
  * 
@@ -15,10 +20,22 @@ import { MEMO_RATING } from '../constants/memoRating';
 
 // AuthProviderのモックを共通化
 describe('MemoAdd', () => {
+  let mockAddMemo;
+
   beforeEach(() => {
     // 完全なモックリセット
     jest.clearAllMocks();
     resetMocks();
+    
+    // mockAddMemoの定義
+    mockAddMemo = jest.fn();
+    const { useMemo } = require('../hooks/useMemo');
+    useMemo.mockReturnValue({
+      addMemo: mockAddMemo,
+      memos: [],
+      loading: false,
+      error: null
+    });
   });
 
   afterEach(() => {
@@ -38,8 +55,7 @@ describe('MemoAdd', () => {
   }, 10000);
 
   it('submits form and saves to Firestore', async () => {
-    const { addDoc } = require('firebase/firestore');
-    addDoc.mockResolvedValue({ id: 'test-memo-id' });
+    mockAddMemo.mockResolvedValue('test-memo-id');
     renderWithProviders(<MemoAdd bookId="test-book-id" />);
     await waitFor(() => {
       expect(screen.getByTestId('memo-text-input')).toBeInTheDocument();
@@ -53,15 +69,13 @@ describe('MemoAdd', () => {
     fireEvent.change(pageInput, { target: { value: '123' } });
     fireEvent.click(submitButton);
     await waitFor(() => {
-      expect(addDoc).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          text: 'テスト引用文',
-          comment: 'テストコメント',
-          page: 123,
-          tags: [],
-        })
-      );
+      expect(mockAddMemo).toHaveBeenCalledWith({
+        text: 'テスト引用文',
+        comment: 'テストコメント',
+        page: 123,
+        tags: [],
+        rating: MEMO_RATING.NONE,
+      });
     }, { timeout: 10000 });
   }, 15000);
 
@@ -102,6 +116,7 @@ describe('MemoAdd', () => {
   });
 
   it('submits memo with rating', async () => {
+    mockAddMemo.mockResolvedValue('test-memo-id');
     const mockOnMemoAdded = jest.fn();
     renderWithProviders(<MemoAdd bookId="test-book-id" onMemoAdded={mockOnMemoAdded} />);
     
@@ -144,6 +159,57 @@ describe('MemoAdd', () => {
     // ランクの説明文が表示されることを確認
     await waitFor(() => {
       expect(screen.getByText('まあまあ面白かった')).toBeInTheDocument();
+    });
+  });
+
+  // エラーハンドリングのテスト
+  it('should handle addMemo error and show error message', async () => {
+    const mockError = new Error('Firestore error');
+    mockAddMemo.mockRejectedValue(mockError);
+
+    renderWithProviders(<MemoAdd bookId="test-book-id" />);
+
+    // フォームに入力
+    const textInput = screen.getByTestId('memo-text-input');
+    fireEvent.change(textInput, { target: { value: 'テスト引用文' } });
+
+    // 送信ボタンをクリック
+    const submitButton = screen.getByTestId('memo-add-submit');
+    fireEvent.click(submitButton);
+
+    // エラーメッセージが表示されることを確認
+    await waitFor(() => {
+      expect(mockSetGlobalError).toHaveBeenCalledWith('メモの追加に失敗しました。');
+    });
+  });
+
+  it('should handle tag input with inputTagValue', async () => {
+    mockAddMemo.mockResolvedValue('test-memo-id');
+    
+    renderWithProviders(<MemoAdd bookId="test-book-id" />);
+
+    // タグ入力フィールドを取得
+    const tagInput = screen.getByTestId('memo-tags-input');
+    expect(tagInput).toBeInTheDocument();
+
+    // タグを入力
+    fireEvent.change(tagInput, { target: { value: '新規タグ' } });
+
+    // テキスト入力
+    const textInput = screen.getByTestId('memo-text-input');
+    fireEvent.change(textInput, { target: { value: 'テストメモ' } });
+
+    // 送信ボタンをクリック
+    const submitButton = screen.getByTestId('memo-add-submit');
+    fireEvent.click(submitButton);
+
+    // タグが含まれてメモが追加されることを確認
+    await waitFor(() => {
+      expect(mockAddMemo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.arrayContaining(['新規タグ'])
+        })
+      );
     });
   });
 }); 

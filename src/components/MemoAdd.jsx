@@ -10,6 +10,7 @@ import {
   getMemoRatingDescription,
   DEFAULT_MEMO_RATING
 } from '../constants/memoRating';
+import { logger } from '../utils/logger';
 
 const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
   const { user } = useAuth();
@@ -42,17 +43,17 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
     if (!text.trim() || isSubmitting) return; // 送信中は重複送信を防止
     
     setIsSubmitting(true); // 送信開始
-    console.log('MemoAdd - handleSubmit開始:', { text, comment, page, tags });
+    logger.memo.debug('handleSubmit開始', { text, comment, page, tags });
     
     // 未確定のタグ入力があればtagsに追加
     let tagsToSave = tags;
     if (inputTagValue && !tags.includes(inputTagValue)) {
       tagsToSave = [...tags, inputTagValue];
     }
-    console.log('MemoAdd - 保存するタグ:', tagsToSave);
+    logger.memo.debug('保存するタグ', tagsToSave);
     
     try {
-      console.log('MemoAdd - addMemo呼び出し前');
+      logger.memo.debug('addMemo呼び出し前');
       const memoId = await addMemo({
         text,
         comment,
@@ -60,24 +61,24 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
         tags: tagsToSave,
         rating: rating || DEFAULT_MEMO_RATING,
       });
-      console.log('MemoAdd - addMemo呼び出し完了, memoId:', memoId);
+      logger.memo.info('addMemo呼び出し完了', { memoId });
       await saveTagsToHistory(tagsToSave);
-      console.log('MemoAdd - フォームリセット前');
+      logger.memo.debug('フォームリセット前');
       setText('');
       setComment('');
       setPage('');
       setTags([]);
       setInputTagValue('');
       setRating(DEFAULT_MEMO_RATING);
-      console.log('MemoAdd - フォームリセット完了');
+      logger.memo.debug('フォームリセット完了');
       
       // メモ追加完了を親コンポーネントに通知
       if (onMemoAdded) {
-        console.log('MemoAdd - onMemoAddedコールバック呼び出し');
+        logger.memo.debug('onMemoAddedコールバック呼び出し');
         onMemoAdded();
       }
     } catch (error) {
-      console.error("Error adding memo: ", error);
+      logger.memo.error("Error adding memo", error);
       setGlobalError("メモの追加に失敗しました。");
     } finally {
       setIsSubmitting(false); // 送信完了（成功・失敗に関わらず）
@@ -92,7 +93,7 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
 
   // OCR機能のコールバック
   const handleTextDetected = (detectedText) => {
-    console.log('[MemoAdd] OCRで検出されたテキスト:', detectedText);
+    logger.memo.info('OCRで検出されたテキスト', { detectedText });
     setText(detectedText);
   };
 

@@ -71,13 +71,11 @@ export function useSearch(options = {}) {
     if (selectedTags && selectedTags.length > 0) {
       // インデックスエラーを避けるため、クライアントサイドフィルタリングにフォールバック
       // 複合インデックスが不足している場合があるため
-      console.log('タグフィルター適用:', selectedTags);
-      console.log('タグフィルターの型:', typeof selectedTags, Array.isArray(selectedTags));
-      console.log('タグフィルターの内容:', JSON.stringify(selectedTags));
+      // タグフィルター適用（デバッグログ削除）
       
       // タグが配列でない場合やネストした配列の場合は、クライアントサイドフィルタリングのみ使用
       if (!Array.isArray(selectedTags) || selectedTags.some(tag => Array.isArray(tag))) {
-        console.log('ネストした配列または無効なタグ形式を検出、クライアントサイドフィルタリングのみ使用');
+        // ネストした配列または無効なタグ形式を検出、クライアントサイドフィルタリングのみ使用
       } else {
         bookQueryConstraints.push(where('tags', 'array-contains-any', selectedTags));
       }
