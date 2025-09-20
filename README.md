@@ -1,87 +1,87 @@
-# BookMemo App（読書メモアプリ）— 100% Cursor自動生成プロジェクト
+# BookMemo App — 100% Cursor AI Generated Project
 
-## 目次
+## Table of Contents
 
-* [プロジェクトについて](#プロジェクトについて)
-* [アプリ概要・特徴](#アプリ概要・特徴)
-* [技術スタック](#技術スタック)
-* [セットアップ手順](#セットアップ手順)
-* [テスト](#テスト)
-* [プロジェクト構造](#プロジェクト構造)
-* [プロジェクトドキュメント](#プロジェクトドキュメント)
-* [運用・セキュリティ](#運用・セキュリティ)
-* [本番デプロイ](#本番デプロイ)
-* [ライセンス](#ライセンス)
+* [About the Project](#about-the-project)
+* [App Overview & Features](#app-overview--features)
+* [Tech Stack](#tech-stack)
+* [Setup Instructions](#setup-instructions)
+* [Testing](#testing)
+* [Project Structure](#project-structure)
+* [Project Documentation](#project-documentation)
+* [Operations & Security](#operations--security)
+* [Production Deployment](#production-deployment)
+* [License](#license)
 
-React + Firebaseを使用した読書メモ管理Webアプリケーションです。
+A web application for managing reading notes using React + Firebase.
 
-## プロジェクトについて
+## About the Project
 
-このプロジェクトは、**完全にCursor AIによって作成されました**。コーディングはすべてAIによって行われ、人間の手は一切借りていません。Cursor AIは、コードの生成、リファクタリング、テストの作成など、開発の全工程をサポートするAIアシスタントです。このプロジェクトでは、Cursor AIが以下の役割を果たしました：
+This project was **completely created by Cursor AI**. All coding was done by AI without any human assistance. Cursor AI is an AI assistant that supports the entire development process, including code generation, refactoring, and test creation. In this project, Cursor AI played the following roles:
 
-* プロジェクトの初期設定と構造の設計
-* アプリケーションロジックの実装（認証、データ管理、UI/UX）
-* 画面遷移やアニメーションなどの機能の実装
-* テストコードの作成と実行（ユニットテスト・E2Eテスト）
-* コードのリファクタリングと最適化
-* バグの修正とデバッグ
-* ドキュメントの生成（README、ARCHITECTURE.md、日報等）
-* 本番デプロイ環境の構築
+* Initial project setup and structure design
+* Application logic implementation (authentication, data management, UI/UX)
+* Feature implementation including screen transitions and animations
+* Test code creation and execution (unit tests & E2E tests)
+* Code refactoring and optimization
+* Bug fixes and debugging
+* Documentation generation (README, ARCHITECTURE.md, daily reports, etc.)
+* Production deployment environment setup
 
-Cursor AIは、開発者の意図を理解し、適切なコードを提案することで、効率的な開発を実現しました。このプロジェクトは、AIによる完全なコーディングの可能性を示す一例となっています。
+Cursor AI achieved efficient development by understanding developer intentions and proposing appropriate code. This project serves as an example of the possibilities of complete AI-driven coding.
 
-### 開発の記録
+### Development Records
 
-Cursorとの具体的なやり取りや、日々の開発の進捗は以下のドキュメントで確認できます。
+You can check specific interactions with Cursor and daily development progress in the following documents:
 
-* `cursor-chats/`: Cursorとの対話ログ（プロンプトとAIの応答）が格納されています。
-* `doc/`: 日々の開発内容をまとめた日報が格納されています。
+* `cursor-chats/`: Contains conversation logs with Cursor (prompts and AI responses)
+* `doc/`: Contains daily development reports
 
-## アプリ概要・特徴
+## App Overview & Features
 
-シンプルな読書メモを管理するWebアプリケーションです。書籍のISBNを元に書誌情報を取得し、メモと一緒に保存・管理することができます。
+A simple web application for managing reading notes. It retrieves bibliographic information based on book ISBNs and saves and manages them together with notes.
 
-**技術的詳細**: プロジェクトの詳細な技術仕様、アーキテクチャ、実装詳細については、[DeepWiki](https://deepwiki.com/nistake0/project-01-bookmemo)で確認できます。
+**Technical Details**: For detailed technical specifications, architecture, and implementation details of the project, check [DeepWiki](https://deepwiki.com/nistake0/project-01-bookmemo).
 
-### 主な機能
+### Main Features
 
-* **書籍管理**: ISBNスキャン・手動入力による書籍登録
-* **メモ機能**: 書籍ごとの読書メモ・感想・タグ管理
-* **検索・フィルタ**: 統合検索、タグフィルタ、ステータスフィルタ
-* **統計ダッシュボード**: 読書データの可視化（グラフ・ランキング）
-* **タグ管理**: タグの編集・削除・統合機能
-* **PWA対応**: オフライン対応、インストール可能
-* **OCR機能**: カメラ・ペーストによるテキスト認識
-* **レスポンシブデザイン**: モバイル・PC両対応
+* **Book Management**: Book registration via ISBN scanning and manual input
+* **Memo Functionality**: Reading notes, impressions, and tag management per book
+* **Search & Filter**: Integrated search, tag filters, status filters
+* **Statistics Dashboard**: Visualization of reading data (graphs & rankings)
+* **Tag Management**: Tag editing, deletion, and consolidation features
+* **PWA Support**: Offline capability, installable
+* **OCR Functionality**: Text recognition via camera and paste
+* **Responsive Design**: Mobile and PC compatible
 
-## 技術スタック
+## Tech Stack
 
-* **フロントエンド**: React 18 + Vite
-* **UI フレームワーク**: Material-UI (MUI)
-* **データベース**: Firebase Firestore
-* **認証**: Firebase Authentication
-* **ホスティング**: Firebase Hosting
-* **テスト**: Jest + React Testing Library + Cypress
+* **Frontend**: React 18 + Vite
+* **UI Framework**: Material-UI (MUI)
+* **Database**: Firebase Firestore
+* **Authentication**: Firebase Authentication
+* **Hosting**: GitHub Pages
+* **Testing**: Jest + React Testing Library + Cypress
 * **PWA**: Service Worker + Web App Manifest
 
-## セットアップ手順
+## Setup Instructions
 
-### 必要条件
+### Prerequisites
 
-* Node.js (v16以上推奨)
-* npm (v7以上推奨)
-* Firebase プロジェクトの作成
+* Node.js (v16+ recommended)
+* npm (v7+ recommended)
+* Firebase project creation
 
-### インストール
+### Installation
 
 ```bash
-# 依存パッケージのインストール
+# Install dependencies
 npm install
 ```
 
-### 環境変数の設定
+### Environment Variables Setup
 
-プロジェクトルートに `.env.local` ファイルを作成し、Firebaseプロジェクトの情報を記述してください。
+Create a `.env.local` file in the project root and add your Firebase project information:
 
 ```
 VITE_FIREBASE_API_KEY=your_api_key
@@ -92,169 +92,163 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 ```
 
-### 開発サーバーの起動
+### Development Server
 
 ```bash
 npm run dev
 ```
 
-開発サーバーが起動し、ブラウザで`http://localhost:5173`にアクセスすることでアプリを利用できます。コードの変更は自動的に反映されます。
+The development server will start, and you can access the app at `http://localhost:5173` in your browser. Code changes will be automatically reflected.
 
-### ビルド
+### Build
 
 ```bash
 npm run build
 ```
 
-プロジェクトをビルドし、`dist`ディレクトリに出力します。
+Builds the project and outputs to the `dist` directory.
 
-### ビルド結果のプレビュー
+### Preview Build
 
 ```bash
 npm run preview
 ```
 
-ビルドされたアプリをローカルでプレビューできます。
+You can preview the built app locally.
 
-## テスト
+## Testing
 
-このプロジェクトではJestとCypressを使用してテストを実行します。
+This project uses Jest and Cypress for testing.
 
-### ユニットテスト
+### Unit Tests
 
 ```bash
-# ユニットテストの実行
+# Run unit tests
 npm run test:unit
 
-# テストの監視モード（ファイル変更時に自動実行）
+# Watch mode (automatically runs on file changes)
 npm run test:unit:watch
 
-# テストカバレッジの確認
+# Check test coverage
 npm run test:coverage
 ```
 
-テストカバレッジレポートは`coverage`ディレクトリに生成されます。
+Test coverage reports are generated in the `coverage` directory.
 
-### E2Eテスト（Cypress）
+### E2E Tests (Cypress)
 
-#### テスト実装方針
+#### Test Implementation Policy
 
-- **data-testid属性による決定的な要素特定**: すべてのテスト対象要素には `data-testid` 属性を付与
-- **テキストベースの要素特定の回避**: UI変更に影響されない安定したテストを実装
-- **一貫性の確保**: テスト要素の命名規則を統一し、保守性を向上
+- **Deterministic element identification via data-testid attributes**: All test target elements have `data-testid` attributes
+- **Avoid text-based element identification**: Implement stable tests that are not affected by UI changes
+- **Ensure consistency**: Unify naming conventions for test elements to improve maintainability
 
-#### 実行方法
+#### Execution Method
 
-1. Firebaseサービスアカウント鍵（`serviceAccountKey.json`）をプロジェクト直下に配置
-2. テスト用ユーザーの自動作成
+1. Place Firebase service account key (`serviceAccountKey.json`) in the project root
+2. Automatically create test users
    ```bash
    npm run test:setup
    ```
-3. **開発サーバーの起動**（E2Eテスト実行に必須）
+3. **Start development server** (required for E2E test execution)
    ```bash
    npm run dev
    ```
-4. Cypressテストの実行
-   - すべて実行: `npm run test:e2e`
-   - GUIモード: `npm run test:e2e:open`
-   - 全テスト実行（ユニット＋E2E）: `npm run test:all`
+4. Run Cypress tests
+   - Run all: `npm run test:e2e`
+   - GUI mode: `npm run test:e2e:open`
+   - Run all tests (unit + E2E): `npm run test:all`
 
-#### 注意事項
+#### Important Notes
 
-- `serviceAccountKey.json`は**絶対にGit管理しないでください**
-- **E2Eテスト実行前には必ず開発サーバー（`npm run dev`）を起動してください**
-- **HTTPS開発環境**: 開発サーバーがHTTPSで起動するため、Cypress設定もHTTPS対応
+- **Never commit `serviceAccountKey.json` to Git**
+- **Always start the development server (`npm run dev`) before running E2E tests**
+- **HTTPS development environment**: Development server runs on HTTPS, so Cypress configuration is also HTTPS-compatible
 
-## プロジェクト構造
+## Project Structure
 
 ```
 src/
-├── components/      # Reactコンポーネント
-│   ├── auth/       # 認証関連
-│   ├── common/     # 共通コンポーネント
-│   ├── search/     # 検索関連
-│   └── tags/       # タグ管理
-├── hooks/          # カスタムフック
-├── pages/          # ページコンポーネント
-├── constants/      # 定数定義
-├── firebase.js     # Firebase設定
-└── utils/          # ユーティリティ関数
+├── components/      # React components
+│   ├── auth/       # Authentication related
+│   ├── common/     # Common components
+│   ├── search/     # Search related
+│   └── tags/       # Tag management
+├── hooks/          # Custom hooks
+├── pages/          # Page components
+├── constants/      # Constant definitions
+├── firebase.js     # Firebase configuration
+└── utils/          # Utility functions
 ```
 
-## プロジェクトドキュメント
+## Project Documentation
 
-このプロジェクトの詳細なドキュメントは以下の場所で確認できます：
+Detailed documentation for this project can be found in the following locations:
 
-* **ARCHITECTURE.md**: 設計・運用方針の詳細
-* **doc/bug-feature-memo.md**: バグ・機能・改善案などの重要メモ
-* **doc/daily/**: 日々の開発日報（進捗・議論・技術的知見の記録）
-* **cursor-chats/**: Cursorとの対話ログ（AI自動生成の全記録）
+* **ARCHITECTURE.md**: Detailed design and operational policies
+* **doc/bug-feature-memo.md**: Important memos about bugs, features, and improvement ideas
+* **doc/daily/**: Daily development reports (progress, discussions, technical insights)
+* **cursor-chats/**: Conversation logs with Cursor (complete record of AI auto-generation)
 
-これらのドキュメントにより、プロジェクトの構造や実装の詳細を効率的に理解することができます。
+These documents allow you to efficiently understand the project structure and implementation details.
 
-## 既知の制約・今後の課題
+## Known Limitations & Future Issues
 
-- 画像添付は現状未対応（Firebase Storage無料枠の制約）
-- スマホのカメラ・バーコード読み取りに一部バグあり
-- Algolia等の全文検索サービス、タグ分析機能なども今後の拡張候補
+- Image attachment is currently not supported (Firebase Storage free tier limitations)
+- Some bugs in smartphone camera/barcode reading
+- Full-text search services like Algolia, tag analysis features, etc. are also future expansion candidates
 
-## 運用・セキュリティ
+## Operations & Security
 
-### セキュリティ対策
-- Firestoreのセキュリティルールを本番用に設定し、認証ユーザーのみ自分のデータにアクセス可能
-- **重要なセキュリティ修正（2025-08-12）**: `.env`ファイルのGitコミット問題を発見・修正
-  - Git履歴から機密情報を完全に除去（`git filter-branch`で163個のコミットをクリーンアップ）
-  - `.gitignore`に環境変数ファイルを追加して再発防止
-  - セキュリティ警告と管理手順をドキュメントに追加
+### Security Measures
+- Firestore security rules are set for production, allowing only authenticated users to access their own data
+- **Important security fix (2025-08-12)**: Discovered and fixed `.env` file Git commit issue
+  - Completely removed confidential information from Git history (cleaned up 163 commits with `git filter-branch`)
+  - Added environment variable files to `.gitignore` to prevent recurrence
+  - Added security warnings and management procedures to documentation
 
-### 本番デプロイ環境
-- **本番デプロイ環境完成（2025-08-13）**: 本番Firebaseプロジェクトの設定完了
-  - 本番環境での動作確認完了
-  - GitHub Actionsによる自動デプロイ準備完了
-  - セキュリティ設定の完全実装
+### Production Deployment Environment
+- **Production deployment environment completed (2025-08-13)**: Production Firebase project setup completed
+  - Operation confirmation completed in production environment
+  - GitHub Actions automatic deployment preparation completed
+  - Complete implementation of security settings
 
-### コミットメッセージ運用ルール
-- すべてのコミットメッセージは日本語で記述
-- 先頭にカテゴリ（例: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`）を付ける
-- 要約は50文字程度に収め、必要なら本文で詳細を記載
+### Commit Message Operation Rules
+- All commit messages are written in Japanese
+- Add category prefix (e.g., `feat`, `fix`, `docs`, `refactor`, `test`, `chore`)
+- Keep summary to about 50 characters, add details in the body if necessary
 
-### 開発開始時の手順
+### Development Startup Procedure
 
-新しい開発セッションを開始する際は、以下の手順を実行してください：
+When starting a new development session, please follow these steps:
 
-1. `doc/development-startup-prompts.md` ファイルを確認
-2. 記載されている3つのプロンプトを順番に実行：
-   - プロジェクト状況確認
-   - テスト状況確認  
-   - 開発方針議論
+1. Check the `doc/development-startup-prompts.md` file
+2. Execute the three prompts listed in order:
+   - Project status confirmation
+   - Test status confirmation
+   - Development policy discussion
 
-## 本番デプロイ
+## Production Deployment
 
-### Firebase Hosting
+### GitHub Pages
 
-本アプリはFirebase Hostingを使用してデプロイされています。
+This app is deployed using GitHub Pages.
 
-#### デプロイ手順
+#### Deployment Steps
 
 ```bash
-# ビルド
+# Build
 npm run build
 
-# Firebase Hostingにデプロイ
-firebase deploy --only hosting
+# Deploy to GitHub Pages
+npm run deploy
 ```
 
-#### 本番環境へのアクセス
+#### Access to Production Environment
 
-- **本番URL**: https://project-01-bookmemo-prod.web.app
-- **Firebase Console**: https://console.firebase.google.com/project/project-01-bookmemo-prod/overview
+- **Production URL**: https://nistake0.github.io/project-01-bookmemo/
+- **GitHub Repository**: https://github.com/nistake0/project-01-bookmemo
 
-### GitHub Pages（旧デプロイ方式）
+## License
 
-過去にはGitHub Pagesを使用していましたが、現在はFirebase Hostingに移行しています。
-
-- **旧URL**: https://nistake0.github.io/project-01-bookmemo/
-
-## ライセンス
-
-このプロジェクトはMITライセンスの下で公開されています。
+This project is released under the MIT License.
