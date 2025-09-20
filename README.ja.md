@@ -1,5 +1,7 @@
 # BookMemo App（読書メモアプリ）— 100% Cursor自動生成プロジェクト
 
+[🇯🇵 日本語](README.ja.md) | [🇺🇸 English](README.md)
+
 ## 目次
 
 * [プロジェクトについて](#プロジェクトについて)
