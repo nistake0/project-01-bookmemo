@@ -51,6 +51,7 @@ A simple web application for managing reading notes. It retrieves bibliographic 
 * **Memo Functionality**: Reading notes, impressions, and tag management per book
 * **Book Status Management**: Track reading progress with status changes (積読/読書中/再読中/読了)
 * **Status History**: View timeline of book status changes with timestamps
+* **Manual Status History**: Add past status changes for existing books with automatic status updates
 * **Search & Filter**: Integrated search, tag filters, status filters
 * **Statistics Dashboard**: Visualization of reading data (graphs & rankings)
 * **Tag Management**: Tag editing, deletion, and consolidation features
