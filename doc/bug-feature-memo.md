@@ -2,6 +2,29 @@
 
 ## 現在の課題・TODOリスト
 
+### 0. コード品質・リファクタリング（2025-01-21追加）
+- [ ] **useSearch.js の責務分離**（優先度：最高）
+  - [ ] 現在：494行の巨大フック（クエリ構築、実行、結果処理、エラーハンドリングが混在）
+  - [ ] 目標：4つのフックに分離（useSearchQuery, useSearchExecution, useSearchResults, useSearch統合）
+  - [ ] 影響：検索機能の保守性向上、単一責任の原則遵守
+- [ ] **useBookList.js の責務分離**（優先度：高）
+  - [ ] 現在：174行（データ取得、フィルタリング、検索、統計計算が混在）
+  - [ ] 目標：4つのフックに分離（useBookData, useBookFiltering, useBookStats, useBookList統合）
+  - [ ] 影響：パフォーマンス向上、保守性向上
+- [ ] **ManualHistoryAddDialog.jsx のバリデーション分離**（優先度：高）
+  - [ ] 現在：バリデーションロジックがコンポーネント内に直接記述
+  - [ ] 目標：useHistoryValidationフックとして分離
+  - [ ] 影響：再利用性向上、テスタビリティ向上
+- [ ] **MemoAdd.jsx の状態管理改善**（優先度：中）
+  - [ ] 現在：8つの状態変数が混在
+  - [ ] 目標：状態変数の整理とフォームロジックの簡素化
+- [ ] **MemoEditor.jsx のモード管理簡素化**（優先度：中）
+  - [ ] 現在：view/edit/delete確認の3つのモード管理が複雑
+  - [ ] 目標：モード管理の簡素化
+- [ ] **useBookStatusHistory.js の計算ロジック分離**（優先度：低）
+  - [ ] 現在：日付計算、期間計算がフック内に混在
+  - [ ] 目標：計算処理の分離
+
 ### 1. テスト関連
 - [x] MemoCard.test.jsxの修正（スワイプアクション対応）
 - [x] MemoList.test.jsxの再作成（FAB・クリック機能対応）
