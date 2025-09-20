@@ -1,5 +1,7 @@
 # BookMemo App — 100% Cursor AI Generated Project
 
+[🇯🇵 日本語](README.ja.md) | [🇺🇸 English](README.md)
+
 ## Table of Contents
 
 * [About the Project](#about-the-project)
