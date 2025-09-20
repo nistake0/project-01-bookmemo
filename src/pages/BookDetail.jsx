@@ -17,8 +17,10 @@ import MemoAdd from '../components/MemoAdd';
 import BookInfo from '../components/BookInfo';
 import BookTagEditor from '../components/BookTagEditor';
 import StatusHistoryTimeline from '../components/StatusHistoryTimeline';
+import LatestStatusHistory from '../components/LatestStatusHistory';
 import { useBook } from '../hooks/useBook';
 import { useBookStatusHistory } from '../hooks/useBookStatusHistory';
+import { convertToDate } from '../utils/dateUtils';
 
 const BookDetail = () => {
   const { id } = useParams();
@@ -28,6 +30,8 @@ const BookDetail = () => {
     history, 
     loading: historyLoading, 
     error: historyError, 
+    addManualStatusHistory,
+    latestHistory,
     getImportantDates, 
     getReadingDuration 
   } = useBookStatusHistory(id);
@@ -46,6 +50,42 @@ const BookDetail = () => {
 
   const handleTagsChange = (newTags) => {
     updateBookTags(newTags);
+  };
+
+  const handleAddManualHistory = async (date, status, previousStatus, existingHistory = []) => {
+    try {
+      // 手動履歴を追加
+      await addManualStatusHistory(date, status, previousStatus);
+      console.log('Manual history added successfully');
+
+
+
+      // 追加した履歴が最新かどうかを判定
+      const allHistories = [...existingHistory];
+      const newHistoryEntry = {
+        status,
+        previousStatus,
+        changedAt: date
+      };
+      
+      // 新しい履歴を追加して日時順にソート
+      allHistories.push(newHistoryEntry);
+      allHistories.sort((a, b) => convertToDate(b.changedAt) - convertToDate(a.changedAt));
+
+      // 最新の履歴が今回追加したものかどうかを判定
+      const isLatestHistory = allHistories.length > 0 && 
+        convertToDate(allHistories[0].changedAt).getTime() === convertToDate(date).getTime();
+      
+      if (!book) {
+        return;
+      }
+
+      if (isLatestHistory && status !== book.status) {
+        await updateBookStatus(status);
+      }
+    } catch (error) {
+      console.error('Failed to add manual history:', error);
+    }
   };
 
   const handleMemoAdded = () => {
@@ -96,6 +136,10 @@ const BookDetail = () => {
             error={historyError}
             importantDates={getImportantDates()}
             readingDuration={getReadingDuration()}
+            showAddButton={true}
+            bookId={id}
+            onAddHistory={handleAddManualHistory}
+            currentBookStatus={book?.status}
           />
         );
       default:
@@ -127,6 +171,9 @@ const BookDetail = () => {
     }} data-testid="book-detail">
       <Paper sx={{ p: { xs: 2, sm: 3 } }}>
         <BookInfo book={book} bookId={id} onStatusChange={handleStatusChange} />
+        
+        {/* 最新ステータス履歴表示 */}
+        <LatestStatusHistory bookId={id} />
         
         <BookTagEditor book={book} bookId={id} onTagsChange={handleTagsChange} />
         

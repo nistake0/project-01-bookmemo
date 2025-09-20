@@ -177,6 +177,46 @@ export const useBookStatusHistory = (bookId) => {
     return diffDays;
   }, [getImportantDates]);
 
+  // 手動履歴追加機能
+  const addManualStatusHistory = useCallback(async (date, status, previousStatus) => {
+    if (!user || !bookId) {
+      console.log('useBookStatusHistory: No user or bookId for manual history addition', { user: !!user, bookId });
+      return;
+    }
+
+    if (!isValidBookStatus(status)) {
+      throw new Error('Invalid status');
+    }
+
+    try {
+      console.log('useBookStatusHistory: Adding manual status history', { 
+        bookId, 
+        date, 
+        status, 
+        previousStatus,
+        userId: user.uid 
+      });
+
+      const historyRef = collection(db, 'books', bookId, 'statusHistory');
+      const historyData = {
+        status,
+        previousStatus: previousStatus || '',
+        changedAt: date,
+        userId: user.uid
+      };
+
+      await addDoc(historyRef, historyData);
+      console.log('useBookStatusHistory: Manual status history added successfully');
+    } catch (error) {
+      console.error('Error adding manual status history:', error);
+      setGlobalError('手動履歴の追加に失敗しました。');
+      throw error;
+    }
+  }, [user, bookId, setGlobalError]);
+
+  // 最新履歴取得
+  const latestHistory = history.length > 0 ? history[0] : null;
+
   useEffect(() => {
     const unsubscribe = fetchStatusHistory();
     return unsubscribe;
@@ -187,6 +227,8 @@ export const useBookStatusHistory = (bookId) => {
     loading,
     error,
     addStatusHistory,
+    addManualStatusHistory,
+    latestHistory,
     getImportantDates,
     getCurrentStatus,
     getReadingDuration,
