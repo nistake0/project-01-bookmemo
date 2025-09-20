@@ -20,7 +20,7 @@ import StatusHistoryTimeline from '../components/StatusHistoryTimeline';
 import LatestStatusHistory from '../components/LatestStatusHistory';
 import { useBook } from '../hooks/useBook';
 import { useBookStatusHistory } from '../hooks/useBookStatusHistory';
-import { convertToDate } from '../utils/dateUtils';
+import { useBookStatusManager } from '../hooks/useBookStatusManager';
 
 const BookDetail = () => {
   const { id } = useParams();
@@ -35,6 +35,14 @@ const BookDetail = () => {
     getImportantDates, 
     getReadingDuration 
   } = useBookStatusHistory(id);
+  
+  // 新しいカスタムフックでステータス管理のビジネスロジックを分離
+  const { handleAddManualHistory } = useBookStatusManager(
+    book, 
+    addManualStatusHistory, 
+    updateBookStatus
+  );
+  
   const [memoListKey, setMemoListKey] = useState(0); // MemoListの再レンダリング用
   const [memoAddDialogOpen, setMemoAddDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0); // タブ切り替え用
@@ -52,41 +60,6 @@ const BookDetail = () => {
     updateBookTags(newTags);
   };
 
-  const handleAddManualHistory = async (date, status, previousStatus, existingHistory = []) => {
-    try {
-      // 手動履歴を追加
-      await addManualStatusHistory(date, status, previousStatus);
-      console.log('Manual history added successfully');
-
-
-
-      // 追加した履歴が最新かどうかを判定
-      const allHistories = [...existingHistory];
-      const newHistoryEntry = {
-        status,
-        previousStatus,
-        changedAt: date
-      };
-      
-      // 新しい履歴を追加して日時順にソート
-      allHistories.push(newHistoryEntry);
-      allHistories.sort((a, b) => convertToDate(b.changedAt) - convertToDate(a.changedAt));
-
-      // 最新の履歴が今回追加したものかどうかを判定
-      const isLatestHistory = allHistories.length > 0 && 
-        convertToDate(allHistories[0].changedAt).getTime() === convertToDate(date).getTime();
-      
-      if (!book) {
-        return;
-      }
-
-      if (isLatestHistory && status !== book.status) {
-        await updateBookStatus(status);
-      }
-    } catch (error) {
-      console.error('Failed to add manual history:', error);
-    }
-  };
 
   const handleMemoAdded = () => {
     console.log('BookDetail - handleMemoAdded: MemoListを再レンダリング');
