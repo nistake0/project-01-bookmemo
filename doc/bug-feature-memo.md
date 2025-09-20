@@ -3,14 +3,16 @@
 ## 現在の課題・TODOリスト
 
 ### 0. コード品質・リファクタリング（2025-01-21追加）
-- [ ] **useSearch.js の責務分離**（優先度：最高）
+- [ ] **useSearch.js の責務分離**（優先度：最高・最重要）
   - [ ] 現在：494行の巨大フック（クエリ構築、実行、結果処理、エラーハンドリングが混在）
   - [ ] 目標：4つのフックに分離（useSearchQuery, useSearchExecution, useSearchResults, useSearch統合）
   - [ ] 影響：検索機能の保守性向上、単一責任の原則遵守
+  - [ ] 課題：モジュールエクスポート問題により一旦保留、段階的アプローチで再実装予定
 - [ ] **useBookList.js の責務分離**（優先度：高）
   - [ ] 現在：174行（データ取得、フィルタリング、検索、統計計算が混在）
   - [ ] 目標：4つのフックに分離（useBookData, useBookFiltering, useBookStats, useBookList統合）
   - [ ] 影響：パフォーマンス向上、保守性向上
+  - [ ] 状況：useSearch.jsのリファクタリング完了後に着手予定
 - [ ] **ManualHistoryAddDialog.jsx のバリデーション分離**（優先度：高）
   - [ ] 現在：バリデーションロジックがコンポーネント内に直接記述
   - [ ] 目標：useHistoryValidationフックとして分離
