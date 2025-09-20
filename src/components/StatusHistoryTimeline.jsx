@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Paper,
   Typography,
@@ -9,14 +9,17 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  Avatar
+  Avatar,
+  Button
 } from '@mui/material';
 import {
   BookmarkAdded,
   PlayArrow,
   Refresh,
-  CheckCircle
+  CheckCircle,
+  Add
 } from '@mui/icons-material';
+import ManualHistoryAddDialog from './ManualHistoryAddDialog';
 import { 
   BOOK_STATUS, 
   getBookStatusLabel, 
@@ -30,14 +33,28 @@ import {
  * @param {string} error - エラーメッセージ
  * @param {Object} importantDates - 重要な日付情報
  * @param {number} readingDuration - 読書期間（日数）
+ * @param {boolean} showAddButton - 履歴追加ボタンを表示するか
+ * @param {string} bookId - 書籍ID（履歴追加時に必要）
+ * @param {function} onAddHistory - 履歴追加時のコールバック
  */
 const StatusHistoryTimeline = ({ 
   history = [], 
   loading = false, 
   error = null,
   importantDates = {},
-  readingDuration = null 
+  readingDuration = null,
+  showAddButton = false,
+  bookId = null,
+  onAddHistory = null,
+  currentBookStatus = null
 }) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleAddHistory = async (date, status, previousStatus, existingHistory) => {
+    if (onAddHistory) {
+      await onAddHistory(date, status, previousStatus, existingHistory);
+    }
+  };
   
   // ステータスアイコンを取得
   const getStatusIcon = (status) => {
@@ -145,26 +162,40 @@ const StatusHistoryTimeline = ({
     );
   }
 
-  if (!history || history.length === 0) {
-    return (
-      <Box sx={{ p: 2 }}>
-        <Typography color="text.secondary">
-          ステータス変更履歴がありません。
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
     <Box sx={{ p: 2 }}>
       {renderImportantDates()}
       
-      <Typography variant="h6" gutterBottom>
-        ステータス変更履歴
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">
+          ステータス変更履歴
+        </Typography>
+        {showAddButton && (
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<Add />}
+            onClick={() => setDialogOpen(true)}
+            data-testid="add-history-button"
+          >
+            履歴追加
+          </Button>
+        )}
+      </Box>
+      
+      {(!history || history.length === 0) && (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <Typography variant="body1" color="text.secondary" gutterBottom>
+            履歴がありません
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            過去のステータス変更履歴を追加できます
+          </Typography>
+        </Box>
+      )}
       
       <List>
-        {history.map((item, index) => (
+        {(history || []).map((item, index) => (
           <ListItem key={item.id} sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, width: '100%' }}>
               <ListItemIcon sx={{ minWidth: 'auto' }}>
@@ -219,6 +250,18 @@ const StatusHistoryTimeline = ({
           </ListItem>
         ))}
       </List>
+
+      {/* 履歴追加ダイアログ */}
+      {showAddButton && (
+        <ManualHistoryAddDialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          onAdd={handleAddHistory}
+          bookId={bookId}
+          existingHistory={history}
+          currentBookStatus={currentBookStatus}
+        />
+      )}
     </Box>
   );
 };
