@@ -111,6 +111,26 @@ self.addEventListener('fetch', (event) => {
 
 
 
+  // SPAルーティングのフォールバック処理
+  // ページリクエスト（HTML）の場合はindex.htmlを返す
+  if (request.method === 'GET' && request.headers.get('accept').includes('text/html')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // 404エラーの場合はindex.htmlを返す（SPAルーティング用）
+          if (response.status === 404) {
+            return caches.match('/index.html') || fetch('/index.html');
+          }
+          return response;
+        })
+        .catch(() => {
+          // ネットワークエラーの場合もindex.htmlを返す
+          return caches.match('/index.html') || fetch('/index.html');
+        })
+    );
+    return;
+  }
+
   // その他のリクエストはネットワークファースト
   event.respondWith(
     fetch(request)
