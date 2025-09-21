@@ -16,7 +16,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="BookMemo" />
     <title>BookMemo - 読書メモ管理アプリ</title>
-    <script type="module" crossorigin src="/project-01-bookmemo/assets/index-DvGb_6vt.js"></script>
+    <script type="module" crossorigin src="/project-01-bookmemo/assets/index-BpbEcojE.js"></script>
     <link rel="modulepreload" crossorigin href="/project-01-bookmemo/assets/react-vendor-DJG_os-6.js">
     <link rel="modulepreload" crossorigin href="/project-01-bookmemo/assets/mui-vendor-CWN2u8l0.js">
     <link rel="modulepreload" crossorigin href="/project-01-bookmemo/assets/utils-vendor-BKcajzmI.js">
@@ -24,5 +24,16 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- GitHub Pages SPA routing fix -->
+    <script>
+      // GitHub PagesでSPAルーティングを正しく処理するためのスクリプト
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+    </script>
   </body>
 </html>
