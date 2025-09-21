@@ -1,6 +1,6 @@
-const CACHE_NAME = 'bookmemo-v2';
-const STATIC_CACHE = 'bookmemo-static-v2';
-const DYNAMIC_CACHE = 'bookmemo-dynamic-v2';
+const CACHE_NAME = 'bookmemo-v3';
+const STATIC_CACHE = 'bookmemo-static-v3';
+const DYNAMIC_CACHE = 'bookmemo-dynamic-v3';
 
 // キャッシュする静的ファイル
 const STATIC_FILES = [
