@@ -35,7 +35,7 @@
       "name": "本を追加",
       "short_name": "追加",
       "description": "新しい本を追加",
-      "url": "/add",
+      "url": "/project-01-bookmemo/add",
       "icons": [
         {
           "src": "/icons/icon-192x192.png",
@@ -47,7 +47,7 @@
       "name": "検索・タグ",
       "short_name": "検索",
       "description": "本やメモを検索",
-      "url": "/search",
+      "url": "/project-01-bookmemo/search",
       "icons": [
         {
           "src": "/icons/icon-192x192.png",
