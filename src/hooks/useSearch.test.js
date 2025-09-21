@@ -482,7 +482,7 @@ describe('useSearch', () => {
 
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBeNull();
-      expect(result.current.results).toHaveLength(2);
+      expect(result.current.results).toHaveLength(4); // 書籍2件 + メモ2件（フォールバック）
     });
   });
 
