@@ -1,6 +1,6 @@
-const CACHE_NAME = 'bookmemo-v1';
-const STATIC_CACHE = 'bookmemo-static-v1';
-const DYNAMIC_CACHE = 'bookmemo-dynamic-v1';
+const CACHE_NAME = 'bookmemo-v2';
+const STATIC_CACHE = 'bookmemo-static-v2';
+const DYNAMIC_CACHE = 'bookmemo-dynamic-v2';
 
 // キャッシュする静的ファイル
 const STATIC_FILES = [
@@ -119,13 +119,18 @@ self.addEventListener('fetch', (event) => {
         .then((response) => {
           // 404エラーの場合はindex.htmlを返す（SPAルーティング用）
           if (response.status === 404) {
-            return caches.match('/index.html') || fetch('/index.html');
+            // ベースパスを考慮したindex.htmlのパス
+            const basePath = '/project-01-bookmemo/';
+            const indexPath = url.pathname.startsWith(basePath) ? basePath + 'index.html' : '/index.html';
+            return caches.match(indexPath) || fetch(indexPath);
           }
           return response;
         })
         .catch(() => {
           // ネットワークエラーの場合もindex.htmlを返す
-          return caches.match('/index.html') || fetch('/index.html');
+          const basePath = '/project-01-bookmemo/';
+          const indexPath = url.pathname.startsWith(basePath) ? basePath + 'index.html' : '/index.html';
+          return caches.match(indexPath) || fetch(indexPath);
         })
     );
     return;
