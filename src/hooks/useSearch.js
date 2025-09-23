@@ -13,6 +13,7 @@ import { useAuth } from '../auth/AuthProvider';
 import { filterByText, filterByTags, filterByMemoContent, sortResults } from '../utils/searchFilters';
 import { getDateRangeFilter } from '../utils/searchDateRange';
 import { buildSearchQueries } from './useSearchQuery';
+import { executeSearchQueries } from './useSearchExecution';
 
 /**
  * 検索機能のカスタムフック
@@ -90,144 +91,7 @@ export function useSearch(options = {}) {
     try {
       console.log('検索条件:', conditions);
       const queries = buildQueries(conditions);
-      console.log('構築されたクエリ:', queries);
-      const allResults = [];
-
-      // 各クエリを実行
-      for (const { type, query: firestoreQuery } of queries) {
-        console.log(`${type}クエリ実行開始`);
-        try {
-          const querySnapshot = await getDocs(firestoreQuery);
-          console.log(`${type}クエリ実行成功, 結果数:`, querySnapshot.size);
-          
-          if (type === 'memo') {
-            // メモの場合は親の本の情報も取得
-            console.log('メモクエリの結果を処理中...');
-            for (const doc of querySnapshot.docs) {
-              const data = doc.data();
-              const bookId = doc.ref.parent.parent?.id; // 親の本のID
-              
-              console.log('メモデータ:', {
-                id: doc.id,
-                bookId,
-                tags: data.tags,
-                userId: data.userId,
-                text: data.text?.substring(0, 50) + '...'
-              });
-              
-              // 親の本の情報を取得
-              let bookTitle = 'メモ';
-              if (bookId) {
-                try {
-                  const bookDoc = await getDocs(query(
-                    collection(db, 'books'),
-                    where('__name__', '==', bookId),
-                    where('userId', '==', user.uid)
-                  ));
-                  if (!bookDoc.empty) {
-                    bookTitle = bookDoc.docs[0].data().title || 'メモ';
-                  }
-                } catch (bookError) {
-                  console.warn('親の本の情報取得に失敗:', bookError);
-                }
-              }
-              
-              allResults.push({
-                id: doc.id,
-                type,
-                bookId,
-                bookTitle,
-                ...data
-              });
-            }
-            console.log('メモ処理完了, 追加されたメモ数:', querySnapshot.size);
-          } else {
-            // 本の場合は通常通り処理
-            querySnapshot.forEach(doc => {
-              const data = doc.data();
-              allResults.push({
-                id: doc.id,
-                type,
-                ...data
-              });
-            });
-          }
-        } catch (queryError) {
-          console.error(`${type}クエリエラー:`, queryError);
-          
-          // インデックスエラーの場合、クライアントサイドフィルタリングにフォールバック
-          if (queryError.code === 'failed-precondition' || 
-              queryError.message.includes('index') || 
-              queryError.message.includes('array-contains-any')) {
-            console.log('インデックスエラー検出、クライアントサイドフィルタリングにフォールバック');
-            
-            if (type === 'memo') {
-              // メモの場合はcollectionGroupクエリでフォールバック
-              const fallbackQuery = query(
-                collectionGroup(db, 'memos'),
-                where('userId', '==', user.uid),
-                limit(resultLimit * 2) // より多くのデータを取得
-              );
-              
-              const fallbackSnapshot = await getDocs(fallbackQuery);
-              console.log('メモフォールバッククエリ実行成功, 結果数:', fallbackSnapshot.size);
-              
-              // メモの場合は親の本の情報も取得
-              for (const doc of fallbackSnapshot.docs) {
-                const data = doc.data();
-                const bookId = doc.ref.parent.parent?.id; // 親の本のID
-                
-                // 親の本の情報を取得
-                let bookTitle = 'メモ';
-                if (bookId) {
-                  try {
-                    const bookDoc = await getDocs(query(
-                      collection(db, 'books'),
-                      where('__name__', '==', bookId),
-                      where('userId', '==', user.uid)
-                    ));
-                    if (!bookDoc.empty) {
-                      bookTitle = bookDoc.docs[0].data().title || 'メモ';
-                    }
-                  } catch (bookError) {
-                    console.warn('親の本の情報取得に失敗:', bookError);
-                  }
-                }
-                
-                allResults.push({
-                  id: doc.id,
-                  type,
-                  bookId,
-                  bookTitle,
-                  ...data
-                });
-              }
-            } else {
-              // 本の場合は通常のフォールバック
-              const fallbackQuery = query(
-                collection(db, 'books'),
-                where('userId', '==', user.uid),
-                orderBy('updatedAt', 'desc'),
-                limit(resultLimit * 2) // より多くのデータを取得
-              );
-              
-              const fallbackSnapshot = await getDocs(fallbackQuery);
-              console.log('本フォールバッククエリ実行成功, 結果数:', fallbackSnapshot.size);
-              
-              fallbackSnapshot.forEach(doc => {
-                const data = doc.data();
-                allResults.push({
-                  id: doc.id,
-                  type,
-                  ...data
-                });
-              });
-            }
-          } else {
-            throw queryError;
-          }
-        }
-      }
+      const allResults = await executeSearchQueries({ db, user, queries, resultLimit });
 
       console.log('全クエリ実行完了, 総結果数:', allResults.length);
       console.log('結果の内訳:', {
