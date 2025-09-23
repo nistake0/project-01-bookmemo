@@ -5,6 +5,7 @@ import { useBookActions } from '../hooks/useBookActions';
 import { useBookSearch } from '../hooks/useBookSearch';
 import { useAuth } from '../auth/AuthProvider';
 import { BOOK_STATUS, ALL_BOOK_STATUSES, getBookStatusLabel, ACQUISITION_TYPE, ALL_ACQUISITION_TYPES, getAcquisitionTypeLabel } from '../constants/bookStatus';
+import ExternalBookSearch from './ExternalBookSearch';
 
 export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   const [isbn, setIsbn] = useState(isbnProp);
@@ -17,6 +18,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   const [inputTagValue, setInputTagValue] = useState("");
   const [status, setStatus] = useState(BOOK_STATUS.TSUNDOKU);
   const [acquisitionType, setAcquisitionType] = useState(ACQUISITION_TYPE.UNKNOWN);
+  const [isExternalSearchMode, setIsExternalSearchMode] = useState(false);
 
   // 共通フックを使用
   const { user } = useAuth();
@@ -80,6 +82,37 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
     }
   };
 
+  // 外部検索ボタンの表示条件
+  const shouldShowExternalSearch = () => {
+    return (
+      title && // タイトルが入力されている
+      !isbn && // ISBNが未入力
+      !coverImageUrl && // 表紙画像が未取得
+      !isExternalSearchMode // 既に外部検索モードでない
+    );
+  };
+
+  // 外部検索モードの切り替え
+  const handleExternalSearchToggle = () => {
+    setIsExternalSearchMode(!isExternalSearchMode);
+  };
+
+  // 外部検索で書籍選択された時の処理
+  const handleExternalBookSelect = (book) => {
+    setTitle(book.title);
+    setAuthor(book.author);
+    setPublisher(book.publisher);
+    setPublishedDate(book.publishedDate);
+    setCoverImageUrl(book.coverImageUrl);
+    setIsbn(book.isbn);
+    setIsExternalSearchMode(false);
+  };
+
+  // 外部検索キャンセル時の処理
+  const handleExternalSearchCancel = () => {
+    setIsExternalSearchMode(false);
+  };
+
   return (
     <Box component="form" onSubmit={handleAdd} sx={{ mt: { xs: 1, sm: 2 } }} role="form" data-testid="book-form">
       {/* ISBN入力エリア */}
@@ -121,6 +154,32 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
           </Button>
         </Box>
       </Box>
+
+      {/* 外部検索ボタン（条件付き表示） */}
+      {shouldShowExternalSearch() && (
+        <Box sx={{ mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            💡 書籍情報が見つからない場合
+          </Typography>
+          <Button
+            variant="outlined"
+            onClick={handleExternalSearchToggle}
+            startIcon={<span>🔍</span>}
+            data-testid="external-search-button"
+            sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' } }}
+          >
+            外部検索で探す
+          </Button>
+        </Box>
+      )}
+
+      {/* 外部検索モード時のUI */}
+      {isExternalSearchMode && (
+        <ExternalBookSearch
+          onBookSelect={handleExternalBookSelect}
+          onCancel={handleExternalSearchCancel}
+        />
+      )}
 
       {/* 表紙画像表示 */}
       {coverImageUrl && (
