@@ -10,10 +10,10 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../auth/AuthProvider';
-import { filterByText, filterByTags, filterByMemoContent, sortResults } from '../utils/searchFilters';
 import { getDateRangeFilter } from '../utils/searchDateRange';
 import { buildSearchQueries } from './useSearchQuery';
 import { executeSearchQueries } from './useSearchExecution';
+import { processSearchResults } from './useSearchResults';
 
 /**
  * 検索機能のカスタムフック
@@ -99,33 +99,8 @@ export function useSearch(options = {}) {
         memos: allResults.filter(r => r.type === 'memo').length
       });
 
-      // テキスト検索によるフィルタリング
-      let filteredResults = filterByText(allResults, conditions.text);
-
-      // タグフィルタリング（クライアントサイド）
-      if (conditions.selectedTags && conditions.selectedTags.length > 0) {
-        console.log('クライアントサイドタグフィルタリング実行:', conditions.selectedTags);
-        filteredResults = filterByTags(filteredResults, conditions.selectedTags);
-        console.log('タグフィルタリング後の結果数:', filteredResults.length);
-      }
-
-      // メモ内容検索によるフィルタリング
-      if (conditions.memoContent) {
-        const books = filteredResults.filter(result => result.type === 'book');
-        const memos = filterByMemoContent(
-          filteredResults.filter(result => result.type === 'memo'),
-          conditions.memoContent
-        );
-        filteredResults = [...books, ...memos];
-      }
-
-      // 結果をソート（utils）
-      const sortBy = conditions.sortBy || 'updatedAt';
-      const sortOrder = conditions.sortOrder || 'desc';
-      const sorted = sortResults(filteredResults, sortBy, sortOrder);
-      filteredResults = sorted;
-
-      setResults(filteredResults);
+      const processed = processSearchResults(allResults, conditions);
+      setResults(processed);
     } catch (err) {
       console.error('検索エラー:', err);
       setError('検索中にエラーが発生しました');
