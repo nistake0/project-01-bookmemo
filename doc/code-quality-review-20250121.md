@@ -84,33 +84,39 @@ ManualHistoryAddDialog.jsx →
 ## 📈 ファイルサイズ分析結果
 
 ### 最も複雑なファイル（行数順）
-1. **App.jsx** - 617行
-2. **useSearch.js** - 495行 ⚠️
-3. **MemoCard.test.jsx** - 630行
-4. **BookDetail.test.jsx** - 604行
-5. **useBookList.js** - 175行 ⚠️
+1. **useSearch.js** - 495行 ⚠️
+2. **MemoCard.test.jsx** - 630行
+3. **BookDetail.test.jsx** - 604行
+4. **App.jsx** - 357行（分離後）
+5. **useBookList.js** - 143行（分離後）
 
 （注）行数は 2025-09-23 時点の実ファイルを基に補正。
 
 ## 🎯 改善優先度
 
 ### 優先度1（最優先）
-- **useSearch.js の責務分離** - 494行の巨大フックを4つに分離
-- **useBookList.js の責務分離** - 複数の責務を分離
+- **useSearch.js の責務分離** - 494行の巨大フックを4つに分離（未着手）
+- **useBookList.js の責務分離** - 進捗: フィルタ/統計の分離完了（2025-09-23）。残: データ取得の切り出し検討
 
 ### 優先度2（重要）
-- **ManualHistoryAddDialog.jsx のバリデーション分離** - ビジネスロジックの分離
-- **MemoAdd.jsx の状態管理改善** - 8つの状態変数の整理
+- **ManualHistoryAddDialog.jsx のバリデーション分離** - 完了（2025-09-23）
+- **MemoAdd.jsx の状態管理改善** - 8つの状態変数の整理（未着手）
 
 ### 優先度2-追加（UI/ロジック分離の強化）
-- **App.jsx の責務分離**
+- **App.jsx の責務分離** - 完了（2025-09-23）
   - テーマ定義を `src/theme/appTheme.js` に分離
   - グローバルエラーハンドリング/デバッグユーティリティを `src/utils/errorLogger.js` に分離
   - 目的: ルーティング/レイアウトと設定・ユーティリティの分離による可読性向上
 
 ### 優先度3（改善）
-- **MemoEditor.jsx のモード管理簡素化** - 3つのモード管理の改善
-- **useBookStatusHistory.js の計算ロジック分離** - 計算処理の分離
+- **MemoEditor.jsx のモード管理簡素化** - 3つのモード管理の改善（未着手）
+- **useBookStatusHistory.js の計算ロジック分離** - 完了（2025-09-23）
+
+## ✅ 進捗更新（2025-09-23）
+- App.jsx の責務分離を実施し、テーマ/エラーロガーを外部化
+- ManualHistoryAddDialog のバリデーションをフックへ分離
+- useBookList のフィルタ/統計ロジックを分離（`useBookFiltering`/`useBookStats`）
+- useBookStatusHistory の計算ロジックをユーティリティへ分離
 
 ## 🔄 次のステップ
 
