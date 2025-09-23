@@ -54,7 +54,7 @@ describe('BookStatusChanger', () => {
   const mockBook = {
     id: 'book-1',
     title: 'テストブック',
-    status: BOOK_STATUS.READING,
+    status: BOOK_STATUS.TSUNDOKU,
   };
 
   const mockOnStatusChange = jest.fn();
@@ -73,7 +73,7 @@ describe('BookStatusChanger', () => {
 
     // ステータスチップが表示される
     expect(screen.getByTestId('book-status-chip')).toBeInTheDocument();
-    expect(screen.getByText('読書中')).toBeInTheDocument();
+    expect(screen.getByText('積読')).toBeInTheDocument();
 
     // ステータス変更ボタンが表示される
     expect(screen.getByTestId('book-status-change-button')).toBeInTheDocument();
@@ -232,6 +232,6 @@ describe('BookStatusChanger', () => {
     );
 
     // デフォルトステータス（読書中）が表示される
-    expect(screen.getByText('読書中')).toBeInTheDocument();
+    expect(screen.getByText('積読')).toBeInTheDocument();
   });
 });

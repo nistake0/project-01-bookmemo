@@ -100,7 +100,7 @@ describe('useBookActions', () => {
         publishedDate: '2024-01-01',
         coverImageUrl: 'https://example.com/cover.jpg',
         tags: ['小説', '名作'],
-        status: 'reading',
+        status: 'tsundoku',
         createdAt: 'mock-timestamp',
         updatedAt: 'mock-timestamp',
       });
