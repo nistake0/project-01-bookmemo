@@ -4,6 +4,35 @@ import BookForm from './BookForm';
 import { renderWithProviders, resetMocks } from '../test-utils';
 import { createMockBook } from '../test-factories';
 
+// ExternalBookSearchコンポーネントのモック
+jest.mock('./ExternalBookSearch', () => {
+  return function MockExternalBookSearch({ onBookSelect, onCancel }) {
+    return (
+      <div data-testid="external-book-search">
+        <button 
+          onClick={() => onBookSelect({
+            title: 'テスト本',
+            author: 'テスト著者',
+            publisher: 'テスト出版社',
+            publishedDate: '2023-01-01',
+            isbn: '978-4-1234567890',
+            coverImageUrl: 'https://example.com/cover.jpg'
+          })}
+          data-testid="mock-select-book"
+        >
+          書籍を選択
+        </button>
+        <button 
+          onClick={onCancel}
+          data-testid="mock-cancel-search"
+        >
+          キャンセル
+        </button>
+      </div>
+    );
+  };
+});
+
 /**
  * BookForm コンポーネントのユニットテスト
  * 
@@ -338,5 +367,252 @@ describe('BookForm', () => {
         })
       );
     });
+  });
+
+  /**
+   * テストケース: 外部検索ボタンの表示条件
+   * 
+   * 目的: 外部検索ボタンが適切な条件でのみ表示されることを確認
+   */
+  it('shows external search button when conditions are met', async () => {
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    });
+
+    // タイトルを入力（ISBNは空のまま）
+    fireEvent.change(screen.getByTestId('book-title-input'), { 
+      target: { value: 'テスト本' } 
+    });
+
+    // 外部検索ボタンが表示されることを確認
+    expect(screen.getByTestId('external-search-button')).toBeInTheDocument();
+    expect(screen.getByText('💡 書籍情報が見つからない場合')).toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: 外部検索ボタンが表示されない条件
+   * 
+   * 目的: 条件が満たされない場合は外部検索ボタンが表示されないことを確認
+   */
+  it('does not show external search button when conditions are not met', async () => {
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    });
+
+    // タイトルを入力せずにISBNを入力
+    fireEvent.change(screen.getByTestId('book-isbn-input'), { 
+      target: { value: '9784123456789' } 
+    });
+
+    // 外部検索ボタンが表示されないことを確認
+    expect(screen.queryByTestId('external-search-button')).not.toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: 外部検索モードの切り替え
+   * 
+   * 目的: 外部検索ボタンをクリックして外部検索モードに切り替わることを確認
+   */
+  it('switches to external search mode when button is clicked', async () => {
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    });
+
+    // タイトルを入力
+    fireEvent.change(screen.getByTestId('book-title-input'), { 
+      target: { value: 'テスト本' } 
+    });
+
+    // 外部検索ボタンをクリック
+    fireEvent.click(screen.getByTestId('external-search-button'));
+
+    // 外部検索コンポーネントが表示されることを確認
+    expect(screen.getByTestId('external-book-search')).toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: 外部検索での書籍選択
+   * 
+   * 目的: 外部検索で書籍を選択した時に自動入力されることを確認
+   */
+  it('auto-fills form when book is selected from external search', async () => {
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    });
+
+    // タイトルを入力
+    fireEvent.change(screen.getByTestId('book-title-input'), { 
+      target: { value: 'テスト本' } 
+    });
+
+    // 外部検索ボタンをクリック
+    fireEvent.click(screen.getByTestId('external-search-button'));
+
+    // 外部検索で書籍を選択
+    fireEvent.click(screen.getByTestId('mock-select-book'));
+
+    // フォームが自動入力されることを確認
+    expect(screen.getByTestId('book-title-input')).toHaveValue('テスト本');
+    expect(screen.getByTestId('book-author-input')).toHaveValue('テスト著者');
+    expect(screen.getByTestId('book-publisher-input')).toHaveValue('テスト出版社');
+    expect(screen.getByTestId('book-publishdate-input')).toHaveValue('2023-01-01');
+    expect(screen.getByTestId('book-isbn-input')).toHaveValue('978-4-1234567890');
+  });
+
+  /**
+   * テストケース: 外部検索のキャンセル
+   * 
+   * 目的: 外部検索をキャンセルした時に元のモードに戻ることを確認
+   */
+  it('returns to normal mode when external search is cancelled', async () => {
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    });
+
+    // タイトルを入力
+    fireEvent.change(screen.getByTestId('book-title-input'), { 
+      target: { value: 'テスト本' } 
+    });
+
+    // 外部検索ボタンをクリック
+    fireEvent.click(screen.getByTestId('external-search-button'));
+
+    // 外部検索コンポーネントが表示されることを確認
+    expect(screen.getByTestId('external-book-search')).toBeInTheDocument();
+
+    // キャンセルボタンをクリック
+    fireEvent.click(screen.getByTestId('mock-cancel-search'));
+
+    // 外部検索コンポーネントが非表示になることを確認
+    expect(screen.queryByTestId('external-book-search')).not.toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: 外部検索ボタンの表示条件（表紙画像がある場合）
+   * 
+   * 目的: 表紙画像が取得されている場合は外部検索ボタンが表示されないことを確認
+   */
+  it('does not show external search button when cover image is present', async () => {
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    });
+
+    // タイトルを入力
+    fireEvent.change(screen.getByTestId('book-title-input'), { 
+      target: { value: 'テスト本' } 
+    });
+
+    // 表紙画像URLを設定（モック）
+    const mockBookData = {
+      title: 'テスト本',
+      author: 'テスト著者',
+      publisher: 'テスト出版社',
+      publishedDate: '2023-01-01',
+      coverImageUrl: 'https://example.com/cover.jpg',
+      tags: []
+    };
+
+    // ISBN検索を実行して表紙画像を取得
+    mockSearchBookByIsbn.mockResolvedValue(mockBookData);
+    fireEvent.change(screen.getByTestId('book-isbn-input'), { 
+      target: { value: '9784123456789' } 
+    });
+    fireEvent.click(screen.getByTestId('book-fetch-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-cover-image')).toBeInTheDocument();
+    });
+
+    // 外部検索ボタンが表示されないことを確認
+    expect(screen.queryByTestId('external-search-button')).not.toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: 外部検索ボタンの表示条件（ISBNが入力されている場合）
+   * 
+   * 目的: ISBNが入力されている場合は外部検索ボタンが表示されないことを確認
+   */
+  it('does not show external search button when ISBN is present', async () => {
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    });
+
+    // タイトルを入力
+    fireEvent.change(screen.getByTestId('book-title-input'), { 
+      target: { value: 'テスト本' } 
+    });
+
+    // ISBNを入力
+    fireEvent.change(screen.getByTestId('book-isbn-input'), { 
+      target: { value: '9784123456789' } 
+    });
+
+    // 外部検索ボタンが表示されないことを確認
+    expect(screen.queryByTestId('external-search-button')).not.toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: 外部検索ボタンの表示条件（外部検索モード中）
+   * 
+   * 目的: 外部検索モード中は外部検索ボタンが表示されないことを確認
+   */
+  it('does not show external search button when in external search mode', async () => {
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    });
+
+    // タイトルを入力
+    fireEvent.change(screen.getByTestId('book-title-input'), { 
+      target: { value: 'テスト本' } 
+    });
+
+    // 外部検索ボタンをクリック
+    fireEvent.click(screen.getByTestId('external-search-button'));
+
+    // 外部検索モード中は外部検索ボタンが表示されないことを確認
+    expect(screen.queryByTestId('external-search-button')).not.toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: 外部検索での書籍選択後の状態
+   * 
+   * 目的: 外部検索で書籍選択後、外部検索ボタンが再表示されないことを確認
+   */
+  it('does not show external search button after book selection', async () => {
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    });
+
+    // タイトルを入力
+    fireEvent.change(screen.getByTestId('book-title-input'), { 
+      target: { value: 'テスト本' } 
+    });
+
+    // 外部検索ボタンをクリック
+    fireEvent.click(screen.getByTestId('external-search-button'));
+
+    // 外部検索で書籍を選択
+    fireEvent.click(screen.getByTestId('mock-select-book'));
+
+    // 外部検索ボタンが再表示されないことを確認
+    expect(screen.queryByTestId('external-search-button')).not.toBeInTheDocument();
   });
 }); 
