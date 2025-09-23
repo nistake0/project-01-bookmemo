@@ -4,7 +4,7 @@ import { useTagHistory } from '../hooks/useTagHistory';
 import { useBookActions } from '../hooks/useBookActions';
 import { useBookSearch } from '../hooks/useBookSearch';
 import { useAuth } from '../auth/AuthProvider';
-import { BOOK_STATUS, ALL_BOOK_STATUSES, getBookStatusLabel } from '../constants/bookStatus';
+import { BOOK_STATUS, ALL_BOOK_STATUSES, getBookStatusLabel, ACQUISITION_TYPE, ALL_ACQUISITION_TYPES, getAcquisitionTypeLabel } from '../constants/bookStatus';
 
 export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   const [isbn, setIsbn] = useState(isbnProp);
@@ -16,6 +16,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   const [tags, setTags] = useState([]);
   const [inputTagValue, setInputTagValue] = useState("");
   const [status, setStatus] = useState(BOOK_STATUS.TSUNDOKU);
+  const [acquisitionType, setAcquisitionType] = useState(ACQUISITION_TYPE.UNKNOWN);
 
   // 共通フックを使用
   const { user } = useAuth();
@@ -70,6 +71,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
       tags,
       inputTagValue,
       status,
+      acquisitionType,
     };
 
     const bookId = await addBook(bookData);
@@ -279,6 +281,31 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             {ALL_BOOK_STATUSES.map((statusValue) => (
               <MenuItem key={statusValue} value={statusValue}>
                 {getBookStatusLabel(statusValue)}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+      {/* 取得方法選択エリア */}
+      <Box sx={{ mt: { xs: 1.5, sm: 2 } }}>
+        <FormControl fullWidth size="small">
+          <InputLabel id="book-acquisition-type-label">取得方法</InputLabel>
+          <Select
+            labelId="book-acquisition-type-label"
+            value={acquisitionType}
+            label="取得方法"
+            onChange={(e) => setAcquisitionType(e.target.value)}
+            data-testid="book-acquisition-type-select"
+            sx={{
+              '& .MuiSelect-select': {
+                fontSize: { xs: '0.9rem', sm: '1rem' }
+              }
+            }}
+          >
+            {ALL_ACQUISITION_TYPES.map((typeValue) => (
+              <MenuItem key={typeValue} value={typeValue}>
+                {getAcquisitionTypeLabel(typeValue)}
               </MenuItem>
             ))}
           </Select>

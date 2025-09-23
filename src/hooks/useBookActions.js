@@ -48,6 +48,7 @@ export const useBookActions = () => {
         coverImageUrl: bookData.coverImageUrl || '',
         tags: tagsToSave,
         status: bookData.status || DEFAULT_BOOK_STATUS,
+        acquisitionType: bookData.acquisitionType || 'unknown',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });

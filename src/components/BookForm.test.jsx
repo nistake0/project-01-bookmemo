@@ -290,4 +290,53 @@ describe('BookForm', () => {
       );
     });
   });
+
+  /**
+   * テストケース: 取得方法選択UI
+   * 
+   * 目的: 取得方法選択UIが正しく表示されることを確認
+   */
+  it('displays acquisition type selection UI', async () => {
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-acquisition-type-select')).toBeInTheDocument();
+    });
+
+    // 取得方法選択UIが表示されていることを確認（data-testidで確認）
+    expect(screen.getByTestId('book-acquisition-type-select')).toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: 取得方法選択と書籍保存
+   * 
+   * 目的: 選択した取得方法が書籍データに含まれて保存されることを確認
+   */
+  it('saves book with default acquisition type', async () => {
+    mockAddBook.mockResolvedValue('new-book-id');
+
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    });
+
+    // 書籍情報を入力
+    fireEvent.change(screen.getByTestId('book-title-input'), { 
+      target: { value: 'テスト本' } 
+    });
+
+    // 書籍を保存
+    fireEvent.click(screen.getByTestId('book-add-submit'));
+
+    // デフォルト取得方法（不明）が含まれて保存されることを確認
+    await waitFor(() => {
+      expect(mockAddBook).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'テスト本',
+          acquisitionType: 'unknown'
+        })
+      );
+    });
+  });
 }); 
