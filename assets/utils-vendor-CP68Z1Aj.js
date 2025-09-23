@@ -1,4 +1,4 @@
-import{r as h}from"./mui-vendor-CWN2u8l0.js";/**
+import{r as h}from"./mui-vendor-vuFX6v7P.js";/**
  * react-router v7.7.0
  *
  * Copyright (c) Remix Software Inc.
