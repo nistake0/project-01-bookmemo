@@ -13,7 +13,7 @@ BookMemoプロジェクトのコード品質と抽象化粒度について詳細
 
 ## 🚨 重大な問題（優先度：高）
 
-### 1. useSearch.js - 最も複雑なファイル（494行）
+### 1. useSearch.js - 最も複雑なファイル（495行）
 
 **問題点:**
 - **単一責任の原則違反**: クエリ構築、実行、結果処理、エラーハンドリングが全て混在
@@ -29,7 +29,7 @@ useSearch.js (494行) →
 └── useSearch.js (状態管理統合)
 ```
 
-### 2. useBookList.js - 複雑な状態管理（174行）
+### 2. useBookList.js - 複雑な状態管理（175行）
 
 **問題点:**
 - **責務過多**: データ取得、フィルタリング、検索、統計計算が混在
@@ -84,11 +84,13 @@ ManualHistoryAddDialog.jsx →
 ## 📈 ファイルサイズ分析結果
 
 ### 最も複雑なファイル（行数順）
-1. **App.jsx** - 616行
-2. **useSearch.js** - 494行 ⚠️
-3. **MemoCard.test.jsx** - 629行
-4. **BookDetail.test.jsx** - 603行
-5. **useBookList.js** - 174行 ⚠️
+1. **App.jsx** - 617行
+2. **useSearch.js** - 495行 ⚠️
+3. **MemoCard.test.jsx** - 630行
+4. **BookDetail.test.jsx** - 604行
+5. **useBookList.js** - 175行 ⚠️
+
+（注）行数は 2025-09-23 時点の実ファイルを基に補正。
 
 ## 🎯 改善優先度
 
@@ -100,6 +102,12 @@ ManualHistoryAddDialog.jsx →
 - **ManualHistoryAddDialog.jsx のバリデーション分離** - ビジネスロジックの分離
 - **MemoAdd.jsx の状態管理改善** - 8つの状態変数の整理
 
+### 優先度2-追加（UI/ロジック分離の強化）
+- **App.jsx の責務分離**
+  - テーマ定義を `src/theme/appTheme.js` に分離
+  - グローバルエラーハンドリング/デバッグユーティリティを `src/utils/errorLogger.js` に分離
+  - 目的: ルーティング/レイアウトと設定・ユーティリティの分離による可読性向上
+
 ### 優先度3（改善）
 - **MemoEditor.jsx のモード管理簡素化** - 3つのモード管理の改善
 - **useBookStatusHistory.js の計算ロジック分離** - 計算処理の分離
@@ -110,6 +118,39 @@ ManualHistoryAddDialog.jsx →
 2. **各改善前に詳細な設計検討**
 3. **テストカバレッジの維持**
 4. **段階的なリファクタリング実施**
+
+---
+
+## 🎨 ロジックとUIデザインの分離性レビュー（2025-09-23追記）
+
+### 現状評価（主要ホットスポット）
+- **useSearch.js**（495行）: クエリ構築・Firestore実行・クライアントフィルタ・ソート・結果整形が同居。UIは持たないが、ロジック責務が過多。
+- **useBookList.js**（175行）: データ取得とフィルタ/検索/統計計算が同居。フィルタと統計を分離可能。
+- **ManualHistoryAddDialog.jsx**: バリデーション（未来日時、重複、ステータス妥当性）がUIコンポーネント内に存在。
+- **MemoAdd.jsx / MemoEditor.jsx**: 入力状態・送信ロジックとUIが同居（許容範囲だが、フォームロジックを薄くするとテスト容易性が向上）。
+- **App.jsx**（617行）: テーマ設定、グローバルエラーハンドリング、デバッグ関数、PWA初期化、ルーティング/レイアウトが同居。
+
+### 分離ガイドライン（推奨）
+- **Hooks分割**: データ取得/更新（副作用）と純粋ロジック（フィルタ/ソート/集計）を分離。
+  - 例: `useSearchQuery`（クエリ構築）, `useSearchExecution`（取得/フォールバック）, `useSearchResults`（テキスト/タグ/メモ内容フィルタ＋ソート）。
+  - 例: `useBookData`（取得）, `useBookFiltering`（検索/タグ/ステータス）, `useBookStats`（統計）。
+- **UIコンポーネント**は入出力（props, callbacks）に集中し、フォームのバリデーション・正規化はフックへ委譲。
+- **テーマ/スタイル**は MUI Theme と `sx` で統一。色/余白/フォント等はテーマトークンに集約し、インライン数値の重複を排除。
+- **エラーハンドリング**は共通ダイアログ（`CommonErrorDialog`）経由に統一。各フックはユーザー向け文言を返すか、エラー型を共通化。
+- **ユーティリティ**（日付/タグ正規化/デバッグログ）は `src/utils/` に移し副作用を限定。
+
+### 具体アクション（小さく刻む）
+1. `App.jsx` の分離
+   - `src/utils/errorLogger.js`（ErrorLogger, setupGlobalErrorHandling, debugコマンド）
+   - `src/theme/appTheme.js`（createTheme の切り出し）
+2. `ManualHistoryAddDialog.jsx`
+   - `src/hooks/useHistoryValidation.js` 新設（未来日/重複/ステータス妥当性）
+3. `useBookList.js`
+   - `useBookFiltering`, `useBookStats` を切り出し。既存インポート先に合わせて段階導入。
+4. `useSearch.js`
+   - 上記3分割＋統合フック構成に段階移行（テストを先行作成）。
+
+補足: `useBookStatusHistory.js` は、履歴取得（副作用）と期間計算（純粋ロジック）が同居しているため、`getImportantDates`/`getReadingDuration` を `utils/date` 系へ移管すると単体テストが簡潔になります。
 
 ## 📚 参考資料
 
