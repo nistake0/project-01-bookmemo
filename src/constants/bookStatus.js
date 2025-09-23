@@ -11,12 +11,28 @@ export const BOOK_STATUS = {
   FINISHED: 'finished'       // 読了
 };
 
+// 取得方法定数
+export const ACQUISITION_TYPE = {
+  BOUGHT: 'bought',          // 購入
+  BORROWED: 'borrowed',      // 借り物
+  GIFT: 'gift',              // プレゼント
+  UNKNOWN: 'unknown'         // 不明
+};
+
 // ステータス表示名
 export const BOOK_STATUS_LABELS = {
   [BOOK_STATUS.TSUNDOKU]: '積読',
   [BOOK_STATUS.READING]: '読書中',
   [BOOK_STATUS.RE_READING]: '再読中',
   [BOOK_STATUS.FINISHED]: '読了'
+};
+
+// 取得方法表示名
+export const ACQUISITION_TYPE_LABELS = {
+  [ACQUISITION_TYPE.BOUGHT]: '購入',
+  [ACQUISITION_TYPE.BORROWED]: '借り物',
+  [ACQUISITION_TYPE.GIFT]: 'プレゼント',
+  [ACQUISITION_TYPE.UNKNOWN]: '不明'
 };
 
 // ステータス色設定（Material-UIのcolor prop）
@@ -36,6 +52,14 @@ export const ALL_BOOK_STATUSES = [
   BOOK_STATUS.READING,
   BOOK_STATUS.RE_READING,
   BOOK_STATUS.FINISHED
+];
+
+// 全取得方法の配列
+export const ALL_ACQUISITION_TYPES = [
+  ACQUISITION_TYPE.BOUGHT,
+  ACQUISITION_TYPE.BORROWED,
+  ACQUISITION_TYPE.GIFT,
+  ACQUISITION_TYPE.UNKNOWN
 ];
 
 // フィルター用ステータス（統計表示用）
@@ -94,6 +118,15 @@ export const getNextBookStatus = (currentStatus) => {
   
   const nextIndex = (currentIndex + 1) % ALL_BOOK_STATUSES.length;
   return ALL_BOOK_STATUSES[nextIndex];
+};
+
+/**
+ * 取得方法のラベルを取得
+ * @param {string} acquisitionType - 取得方法
+ * @returns {string} 表示名
+ */
+export const getAcquisitionTypeLabel = (acquisitionType) => {
+  return ACQUISITION_TYPE_LABELS[acquisitionType] || ACQUISITION_TYPE_LABELS[ACQUISITION_TYPE.UNKNOWN];
 };
 
 /**

@@ -175,4 +175,53 @@ describe('BookInfo', () => {
     const { container } = render(<BookInfo book={null} />);
     expect(container.firstChild).toBeNull();
   });
+
+  /**
+   * テストケース: 取得方法の表示
+   * 
+   * 目的: 取得方法が「不明」以外の場合にChipで表示されることを確認
+   */
+  test('displays acquisition type when not unknown', () => {
+    const bookWithAcquisitionType = {
+      ...mockBook,
+      acquisitionType: 'bought'
+    };
+
+    render(<BookInfo book={bookWithAcquisitionType} />);
+    
+    expect(screen.getByTestId('book-acquisition-type')).toBeInTheDocument();
+    expect(screen.getByText('取得方法: 購入')).toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: 取得方法が不明の場合は表示しない
+   * 
+   * 目的: 取得方法が「不明」の場合はChipが表示されないことを確認
+   */
+  test('does not display acquisition type when unknown', () => {
+    const bookWithUnknownAcquisitionType = {
+      ...mockBook,
+      acquisitionType: 'unknown'
+    };
+
+    render(<BookInfo book={bookWithUnknownAcquisitionType} />);
+    
+    expect(screen.queryByTestId('book-acquisition-type')).not.toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: 取得方法が未設定の場合は表示しない
+   * 
+   * 目的: 取得方法が未設定の場合はChipが表示されないことを確認
+   */
+  test('does not display acquisition type when not set', () => {
+    const bookWithoutAcquisitionType = {
+      ...mockBook
+      // acquisitionType is undefined
+    };
+
+    render(<BookInfo book={bookWithoutAcquisitionType} />);
+    
+    expect(screen.queryByTestId('book-acquisition-type')).not.toBeInTheDocument();
+  });
 }); 

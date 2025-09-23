@@ -1,6 +1,7 @@
 import React from 'react';
-import { Typography, Box } from '@mui/material';
+import { Typography, Box, Chip } from '@mui/material';
 import BookStatusChanger from './BookStatusChanger';
+import { getAcquisitionTypeLabel, ACQUISITION_TYPE } from '../constants/bookStatus';
 
 const BookInfo = ({ book, bookId, onStatusChange }) => {
   if (!book) return null;
@@ -46,9 +47,20 @@ const BookInfo = ({ book, bookId, onStatusChange }) => {
           </Typography>
         )}
         {book.publishedDate && (
-          <Typography variant="body1" color="text.secondary" data-testid="book-published-date">
+          <Typography variant="body1" color="text.secondary" gutterBottom data-testid="book-published-date">
             出版日: {book.publishedDate}
           </Typography>
+        )}
+        {book.acquisitionType && book.acquisitionType !== ACQUISITION_TYPE.UNKNOWN && (
+          <Box sx={{ mb: 1 }}>
+            <Chip 
+              label={`取得方法: ${getAcquisitionTypeLabel(book.acquisitionType)}`}
+              color="primary"
+              variant="outlined"
+              size="small"
+              data-testid="book-acquisition-type"
+            />
+          </Box>
         )}
       </Box>
     </Box>

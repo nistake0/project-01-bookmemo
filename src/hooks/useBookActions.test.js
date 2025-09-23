@@ -101,6 +101,7 @@ describe('useBookActions', () => {
         coverImageUrl: 'https://example.com/cover.jpg',
         tags: ['小説', '名作'],
         status: 'tsundoku',
+        acquisitionType: 'unknown',
         createdAt: 'mock-timestamp',
         updatedAt: 'mock-timestamp',
       });
