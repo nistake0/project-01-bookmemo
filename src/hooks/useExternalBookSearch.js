@@ -183,14 +183,27 @@ export const useExternalBookSearch = () => {
   // 環境変数アクセス方法（ViteとJestの両方に対応）
   let apiKey;
   try {
-    // Vite環境では import.meta.env を使用
-    if (typeof import.meta !== 'undefined' && import.meta.env) {
-      apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY;
-    } else if (typeof process !== 'undefined' && process.env) {
+    // Jest環境の検出（process.env.NODE_ENV === 'test' または jest が存在）
+    const isJestEnvironment = typeof process !== 'undefined' && 
+      (process.env.NODE_ENV === 'test' || typeof jest !== 'undefined');
+    
+    if (isJestEnvironment) {
       // Jest環境では process.env を使用
       apiKey = process.env.VITE_GOOGLE_BOOKS_API_KEY;
     } else {
-      apiKey = undefined;
+      // ブラウザ環境では import.meta.env を使用（Jest環境でない場合のみ）
+      try {
+        // 動的に import.meta をチェック（Jest環境では実行されない）
+        const importMeta = eval('import.meta');
+        if (importMeta && importMeta.env) {
+          apiKey = importMeta.env.VITE_GOOGLE_BOOKS_API_KEY;
+        } else {
+          apiKey = undefined;
+        }
+      } catch (metaError) {
+        // import.meta が使用できない環境
+        apiKey = undefined;
+      }
     }
   } catch (error) {
     // 環境変数へのアクセスでエラーが発生した場合
