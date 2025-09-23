@@ -12,6 +12,7 @@ import { db } from '../firebase';
 import { useAuth } from '../auth/AuthProvider';
 import { filterByText, filterByTags, filterByMemoContent, sortResults } from '../utils/searchFilters';
 import { getDateRangeFilter } from '../utils/searchDateRange';
+import { buildSearchQueries } from './useSearchQuery';
 
 /**
  * 検索機能のカスタムフック
@@ -34,79 +35,7 @@ export function useSearch(options = {}) {
    * @returns {Array} クエリの配列
    */
   const buildQueries = useCallback((conditions) => {
-    // ユーザーが未認証の場合は空の配列を返す
-    if (!user) {
-      return [];
-    }
-
-    const { 
-      text, 
-      status, 
-      dateRange, 
-      selectedTags
-    } = conditions;
-
-    const queries = [];
-
-    // 書籍の検索クエリ（常に実行）
-    const bookQueryConstraints = [
-      where('userId', '==', user.uid)
-    ];
-
-    // ステータスフィルター
-    if (status && status !== 'all') {
-      bookQueryConstraints.push(where('status', '==', status));
-    }
-
-    // 日時フィルター
-    if (dateRange && dateRange.type !== 'none') {
-      const { startDate, endDate } = getDateRangeFilter(dateRange);
-      if (startDate) {
-        bookQueryConstraints.push(where('updatedAt', '>=', startDate));
-      }
-      if (endDate) {
-        bookQueryConstraints.push(where('updatedAt', '<=', endDate));
-      }
-    }
-
-    // タグフィルター
-    if (selectedTags && selectedTags.length > 0) {
-      // インデックスエラーを避けるため、クライアントサイドフィルタリングにフォールバック
-      // 複合インデックスが不足している場合があるため
-      // タグフィルター適用（デバッグログ削除）
-      
-      // タグが配列でない場合やネストした配列の場合は、クライアントサイドフィルタリングのみ使用
-      if (!Array.isArray(selectedTags) || selectedTags.some(tag => Array.isArray(tag))) {
-        // ネストした配列または無効なタグ形式を検出、クライアントサイドフィルタリングのみ使用
-      } else {
-        bookQueryConstraints.push(where('tags', 'array-contains-any', selectedTags));
-      }
-    }
-
-    const bookQuery = query(
-      collection(db, 'books'),
-      ...bookQueryConstraints,
-      orderBy('updatedAt', 'desc'),
-      limit(resultLimit)
-    );
-    queries.push({ type: 'book', query: bookQuery });
-
-    // メモの検索クエリ（常に実行）
-    // メモ検索はクライアントサイド全文検索で実装
-    // Firestoreの全文検索制限とインデックス問題を回避
-    const memoQueryConstraints = [
-      where('userId', '==', user.uid)
-    ];
-
-    const memoQuery = query(
-      collectionGroup(db, 'memos'),
-      ...memoQueryConstraints,
-      // orderBy('updatedAt', 'desc'), // Removed to avoid index requirement
-      limit(resultLimit * 3) // Increased limit for client-side filtering
-    );
-    queries.push({ type: 'memo', query: memoQuery });
-
-    return queries;
+    return buildSearchQueries(db, user, conditions, resultLimit);
   }, [user, resultLimit]);
 
   /**
