@@ -50,12 +50,11 @@
   - [x] useBookSearch.js - ISBN検索と外部API呼び出し
   - [x] useBook.js - 書籍詳細・編集・削除（既に実装済み）
   - [x] useMemo.js - メモ関連ロジック（既に実装済み）
- - [ ] useSearch.js の責務分割（可読性・保守性向上）
-   - [ ] クエリ構築処理を分離: `buildBookQuery` / `buildMemoQuery`
-   - [ ] 結果整形/加工を分離: `hydrateMemoWithBookTitle` / `sortResults`
-   - [ ] フィルタ関数を専用モジュールへ抽出: `searchFilters.js`（text/tags/memoContent）
-   - [ ] 親書籍タイトル取得のキャッシュ（Map）導入（I/O削減）
-   - [ ] デバッグログの制御（`debug`フラグで出力抑制）
+- [x] useSearch.js の責務分割（可読性・保守性向上）— 完了（2025-09-23）
+  - [x] クエリ構築分離: `useSearchQuery`
+  - [x] 実行/フォールバック分離: `useSearchExecution`（親書籍タイトル解決＋キャッシュ）
+  - [x] 結果処理分離: `useSearchResults`（`searchFilters.js`再利用、ソート含む）
+  - [x] API不変/ユニットテスト回帰なし（38/38）
 
 ### 3. UI/UX・アクセシビリティ
 - [ ] アクセシビリティ改善（ARIA属性、キーボードナビ等）
@@ -291,7 +290,8 @@
 - [ ] **優先度2: Phase 15 機能改善プロジェクトの残項目（タグ）**（優先度を下げる）
   - [ ] タグ正規化の高度化（ひらがな/カタカナ、長音、記号揺れ等）
   - [ ] 一括操作（統合/削除）の専用画面化
-  - [ ] `useSearch.js` の責務分割・UI分割（構造改善）
+  - [x] `useSearch.js` の責務分割（構造改善）— 完了（2025-09-23）
+    - 備考: UI分割は別タスク「検索UIの再構成（シンプル/詳細分離）」へ統合
 
 ### 9. パフォーマンス・最適化
 - [ ] コンポーネントの最適化
