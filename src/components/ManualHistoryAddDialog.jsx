@@ -22,6 +22,7 @@ import {
   BOOK_STATUS_LABELS, 
   isValidBookStatus 
 } from '../constants/bookStatus';
+import { useHistoryValidation } from '../hooks/useHistoryValidation';
 
 /**
  * 手動ステータス履歴追加ダイアログ
@@ -39,6 +40,7 @@ const ManualHistoryAddDialog = ({
   const [previousStatus, setPreviousStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { validate } = useHistoryValidation();
 
   // 前のステータス候補を取得（既存履歴から）
   const getPreviousStatusOptions = () => {
@@ -71,29 +73,8 @@ const ManualHistoryAddDialog = ({
     setLoading(true);
 
     try {
-      // バリデーション
-      if (!date) {
-        throw new Error('日時を選択してください');
-      }
-      
-      if (!isValidBookStatus(status)) {
-        throw new Error('無効なステータスです');
-      }
-
-      // 未来日時のチェック
-      if (date > new Date()) {
-        throw new Error('未来の日時は設定できません');
-      }
-
-      // 重複チェック（同じ日時の履歴がある場合）
-      const hasDuplicate = existingHistory.some(h => {
-        const existingDate = h.changedAt.toDate ? h.changedAt.toDate() : new Date(h.changedAt);
-        return Math.abs(existingDate - date) < 60000; // 1分以内
-      });
-
-      if (hasDuplicate) {
-        throw new Error('同じ日時の履歴が既に存在します');
-      }
+      // バリデーション（フックへ委譲）
+      validate(date, status, previousStatus, existingHistory);
 
       await onAdd(date, status, previousStatus, existingHistory);
       
