@@ -10,17 +10,16 @@
   - [ ] 目標：4つのフックに分離（useSearchQuery, useSearchExecution, useSearchResults, useSearch統合）
   - [ ] 影響：検索機能の保守性向上、単一責任の原則遵守
   - [ ] 課題：モジュールエクスポート問題により一旦保留、段階的アプローチで再実装予定
-- [ ] **useBookList.js の責務分離**（優先度：高）
-  - [ ] 現在：174行（データ取得、フィルタリング、検索、統計計算が混在）
-  - [ ] 目標：4つのフックに分離（useBookData, useBookFiltering, useBookStats, useBookList統合）
-  - [ ] 影響：パフォーマンス向上、保守性向上
-  - [ ] 状況：useSearch.jsのリファクタリング完了後に着手予定
+- [x] **useBookList.js の責務分離**（優先度：高）
+  - [x] 現在：174行（データ取得、フィルタリング、検索、統計計算が混在）
+  - [x] 目標：4つのフックに分離（useBookData, useBookFiltering, useBookStats, useBookList統合）
+  - [x] 進捗：フィルタ/統計の分離完了（2025-09-23）
+  - [ ] 残課題：データ取得の切り出し検討
 
 #### 優先度2（重要）
-- [ ] **ManualHistoryAddDialog.jsx のバリデーション分離**（優先度：高）
-  - [ ] 現在：バリデーションロジックがコンポーネント内に直接記述
-  - [ ] 目標：useHistoryValidationフックとして分離
-  - [ ] 影響：再利用性向上、テスタビリティ向上
+- [x] **ManualHistoryAddDialog.jsx のバリデーション分離**（優先度：高）
+  - [x] 現在：バリデーションロジックがコンポーネント内に直接記述
+  - [x] 目標：useHistoryValidationフックとして分離（2025-09-23 完了）
 - [ ] **MemoAdd.jsx の状態管理改善**（優先度：中）
   - [ ] 現在：8つの状態変数が混在
   - [ ] 目標：状態変数の整理とフォームロジックの簡素化
@@ -29,53 +28,19 @@
 - [ ] **MemoEditor.jsx のモード管理簡素化**（優先度：中）
   - [ ] 現在：view/edit/delete確認の3つのモード管理が複雑
   - [ ] 目標：モード管理の簡素化
-- [ ] **useBookStatusHistory.js の計算ロジック分離**（優先度：低）
-  - [ ] 現在：日付計算、期間計算がフック内に混在
-  - [ ] 目標：計算処理の分離
+- [x] **useBookStatusHistory.js の計算ロジック分離**（優先度：低）
+  - [x] 現在：日付計算、期間計算がフック内に混在
+  - [x] 目標：計算処理の分離（2025-09-23 完了）
 
 #### 検討項目
-- [ ] **App.jsx の複雑性改善**（検討）
-  - [ ] 現在：616行（ルーティングとレイアウトが混在）
-  - [ ] 目標：ルーティングとレイアウトの分離検討
-  - [ ] 影響：アプリケーション全体の構造改善
+- [x] **App.jsx の複雑性改善**（検討→実施）
+  - [x] 現在：616行（ルーティングとレイアウトが混在）
+  - [x] 結果：テーマ/エラーロガー分離後 357行に減少（2025-09-23）
+  - [x] 影響：アプリケーション全体の構造改善
 
 ### 1. テスト関連
-- [x] MemoCard.test.jsxの修正（スワイプアクション対応）
-- [x] MemoList.test.jsxの再作成（FAB・クリック機能対応）
-- [x] E2Eテストの最低限化（メンテナンスコスト削減）
-- [x] 検索・タグ機能のテスト修正（AdvancedSearchForm、TagSearchField、SearchResults、DateRangeSelector）
-- [x] ユニットテストのカバレッジ向上
-- [x] スキップされたテストの復活（4つのテスト）✅ **Phase 14完了**
-- [x] E2EテストのURLパス問題修正 ✅ **2025-08-15完了**
-  - [x] Cypress設定の修正（`cypress.config.js`）
-  - [x] テストファイルのパス修正（`book_add.cy.js`, `book_login.cy.js`）
-- [x] **E2Eテストのdata-testid対応と安定性向上** ✅ **2025-08-24完了**
-  - [x] PageHeaderコンポーネントにdata-testid属性追加（`page-header`, `page-header-title`, `page-header-subtitle`）
-  - [x] 各ページのPageHeaderにdata-testid追加（`book-list-header`, `book-add-header`）
-  - [x] E2Eテストの`cy.contains`を`data-testid`ベースの検証に置き換え
-  - [x] テストの安定性と保守性の大幅向上
-  - [x] UI変更に対する耐性強化
-  - [x] 修正したファイル:
-    - `src/components/common/PageHeader.jsx`: data-testid属性追加
-    - `src/pages/BookList.jsx`: PageHeaderにdata-testid追加
-    - `src/pages/BookAdd.jsx`: PageHeaderにdata-testid追加
-    - `cypress/e2e/book_add.cy.js`: containsをdata-testidに置き換え
-    - `cypress/e2e/book_login.cy.js`: containsをdata-testidに置き換え
-    - `cypress/support/commands.js`: containsをdata-testidに置き換え
-  - [x] 技術的改善点:
-    - テストの安定性向上: UIテキスト変更に影響されない
-    - 保守性向上: 要素の特定が明確で、意図しない要素とのマッチングを防止
-    - デバッグの容易さ: テスト失敗時の原因特定が容易
-  - [x] テスト結果: 2つのテストが成功、1つのテストは問題特定のためスキップ
-- [x] **Hash Router移行によるルーティング問題解決** ✅ **2024-07-20完了**
-  - [x] 書籍詳細ページのリロード問題解決
-  - [x] 直接URLアクセス問題解決
-  - [x] 本番環境での動作確認完了
-  - [x] 技術的負債の解消（108行削除、6行追加）
-- [x] **Firebase Firestoreインデックス不足エラー修正** ✅ **2024-07-20完了**
-  - [x] 統計ページでのcollectionGroup('memos')クエリエラー解決
-  - [x] firestore.indexes.jsonにインデックス定義追加
-  - [x] 本番環境での動作確認完了
+- [x] 追加: useBookFiltering / useBookStats の小規模ユニットテスト（2025-09-23）
+- [x] 既存ユニットテスト回帰確認（38/38 成功）
 
 ### 2. 共通ロジック・リファクタ
 - [x] 共通フック（useBook, useMemo）の作成・適用 ✅ **完了済み**
