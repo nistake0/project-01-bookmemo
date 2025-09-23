@@ -103,18 +103,18 @@ ManualHistoryAddDialog.jsx →
 ## 📈 ファイルサイズ分析結果
 
 ### 最も複雑なファイル（行数順）
-1. **useSearch.js** - 495行 ⚠️
-2. **MemoCard.test.jsx** - 630行
-3. **BookDetail.test.jsx** - 604行
-4. **App.jsx** - 357行（分離後）
-5. **useBookList.js** - 143行（分離後）
+1. **MemoCard.test.jsx** - 630行
+2. **BookDetail.test.jsx** - 604行
+3. **App.jsx** - 357行（分離後）
+4. **useBookList.js** - 143行（分離後）
+5. **useSearch.js** - 127行（分離後）
 
 （注）行数は 2025-09-23 時点の実ファイルを基に補正。
 
 ## 🎯 改善優先度
 
 ### 優先度1（最優先）
-- **useSearch.js の責務分離** - 494行の巨大フックを4つに分離（未着手）
+- **useSearch.js の責務分離** - 完了（2025-09-23、Step1-4）。`utils/searchFilters`/`utils/searchDateRange` 切り出し、`useSearchQuery`（クエリ構築）/`useSearchExecution`（実行・フォールバック・親タイトル解決）/`useSearchResults`（結果処理）導入。公開APIは不変。
 - **useBookList.js の責務分離** - 進捗: フィルタ/統計の分離完了（2025-09-23）。残: データ取得の切り出し検討
 
 ### 優先度2（重要）
@@ -136,13 +136,14 @@ ManualHistoryAddDialog.jsx →
 - ManualHistoryAddDialog のバリデーションをフックへ分離
 - useBookList のフィルタ/統計ロジックを分離（`useBookFiltering`/`useBookStats`）
 - useBookStatusHistory の計算ロジックをユーティリティへ分離
+- useSearch の責務分離を段階導入（Step1-4 完了）。`useSearchQuery`/`useSearchExecution`/`useSearchResults` を新設し、ユニットテスト回帰なし（38/38）。
 
 ## 🗂 今後の修正計画とTODO（2025-09-23 追加）
 
 ### 必須（優先対応）
-- useSearch.js の責務分離（Query/Execution/Results）
-  - `useSearchQuery`（クエリ構築）/`useSearchExecution`（取得・フォールバック）/`useSearchResults`（フィルタ・ソート）
-  - メモ結果の親書籍タイトル解決は Map キャッシュ導入でI/O削減
+- useSearch.js の責務分離（Query/Execution/Results）: 完了（2025-09-23）
+  - `useSearchQuery`（クエリ構築）/`useSearchExecution`（取得・フォールバック）/`useSearchResults`（フィルタ・ソート）【導入済】
+  - メモ結果の親書籍タイトル解決は Map キャッシュ導入でI/O削減【導入済】
 - 外部検索フックの整備（未登録書籍の検索）
   - `useExternalBookSearch` を新設（Google Books / openBD）
   - タイトル/著者/出版社検索→候補選択→編集→保存のフローを `BookAdd` に統合
@@ -181,7 +182,7 @@ ManualHistoryAddDialog.jsx →
 ## 🎨 ロジックとUIデザインの分離性レビュー（2025-09-23追記）
 
 ### 現状評価（主要ホットスポット）
-- **useSearch.js**（495行）: クエリ構築・Firestore実行・クライアントフィルタ・ソート・結果整形が同居。UIは持たないが、ロジック責務が過多。
+- **useSearch.js**（分離後127行。以前は495行）: かつてクエリ構築・Firestore実行・クライアントフィルタ・ソート・結果整形が同居していたが、現在は役割を分離済み。
 - **useBookList.js**（175行）: データ取得とフィルタ/検索/統計計算が同居。フィルタと統計を分離可能。
 - **ManualHistoryAddDialog.jsx**: バリデーション（未来日時、重複、ステータス妥当性）がUIコンポーネント内に存在。
 - **MemoAdd.jsx / MemoEditor.jsx**: 入力状態・送信ロジックとUIが同居（許容範囲だが、フォームロジックを薄くするとテスト容易性が向上）。

@@ -5,11 +5,11 @@
 ### 0. コード品質・リファクタリング（2025-01-21追加）
 
 #### 優先度1（最優先）
-- [ ] **useSearch.js の責務分離**（優先度：最高・最重要）
-  - [ ] 現在：494行の巨大フック（クエリ構築、実行、結果処理、エラーハンドリングが混在）
-  - [ ] 目標：4つのフックに分離（useSearchQuery, useSearchExecution, useSearchResults, useSearch統合）
-  - [ ] 影響：検索機能の保守性向上、単一責任の原則遵守
-  - [ ] 課題：モジュールエクスポート問題により一旦保留、段階的アプローチで再実装予定
+- [x] **useSearch.js の責務分離**（優先度：最高・最重要）
+  - [x] 現在：494行→分離後127行（クエリ構築、実行、結果処理を分離）
+  - [x] 目標：4つのモジュール/フックに分離（useSearchQuery, useSearchExecution, useSearchResults, useSearch統合）
+  - [x] 影響：検索機能の保守性向上、単一責任の原則遵守、API不変
+  - [x] 進捗：Step1-4 完了（2025-09-23）。ユニットテスト回帰なし（38/38）
 - [x] **useBookList.js の責務分離**（優先度：高）
   - [x] 現在：174行（データ取得、フィルタリング、検索、統計計算が混在）
   - [x] 目標：4つのフックに分離（useBookData, useBookFiltering, useBookStats, useBookList統合）
@@ -39,8 +39,8 @@
   - [x] 影響：アプリケーション全体の構造改善
 
 ### 1. テスト関連
-- [x] 追加: useBookFiltering / useBookStats の小規模ユニットテスト（2025-09-23）
-- [x] 既存ユニットテスト回帰確認（38/38 成功）
+- [x] 追加: useBookFiltering / useBookStats / useSearchResults の単体確認（呼び出し経路で担保）
+- [x] 既存ユニットテスト回帰確認（38/38 成功、Coverage維持）
 
 ### 2. 共通ロジック・リファクタ
 - [x] 共通フック（useBook, useMemo）の作成・適用 ✅ **完了済み**
