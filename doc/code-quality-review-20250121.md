@@ -140,7 +140,7 @@ ManualHistoryAddDialog.jsx →
 
 ## 🗂 今後の修正計画とTODO（2025-09-23 追加）
 
-### 必須（優先対応）
+-### 必須（優先対応）
 - useSearch.js の責務分離（Query/Execution/Results）: 完了（2025-09-23）
   - `useSearchQuery`（クエリ構築）/`useSearchExecution`（取得・フォールバック）/`useSearchResults`（フィルタ・ソート）【導入済】
   - メモ結果の親書籍タイトル解決は Map キャッシュ導入でI/O削減【導入済】
