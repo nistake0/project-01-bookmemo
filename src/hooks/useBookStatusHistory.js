@@ -16,6 +16,7 @@ import {
   isValidBookStatus 
 } from '../constants/bookStatus';
 import { logger } from '../utils/logger';
+import { extractImportantDates, getCurrentStatusFromHistory, calculateReadingDuration } from '../utils/statusHistoryUtils';
 
 /**
  * 書籍ステータス変更履歴管理フック
@@ -129,53 +130,20 @@ export const useBookStatusHistory = (bookId) => {
     }
   }, [bookId, user, setGlobalError]);
 
-  // 重要な日付を取得
+  // 重要な日付を取得（utilsへ委譲）
   const getImportantDates = useCallback(() => {
     if (!history.length) return {};
-
-    const dates = {};
-    
-    // 読書開始日（reading または re-reading の最初の記録）
-    const readingStart = history.find(h => 
-      h.status === BOOK_STATUS.READING || h.status === BOOK_STATUS.RE_READING
-    );
-    if (readingStart) {
-      dates.readingStartedAt = readingStart.changedAt;
-    }
-
-    // 読了日（finished の最初の記録）
-    const finished = history.find(h => h.status === BOOK_STATUS.FINISHED);
-    if (finished) {
-      dates.finishedAt = finished.changedAt;
-    }
-
-    // 再読開始日（re-reading の最初の記録）
-    const reReadingStart = history.find(h => h.status === BOOK_STATUS.RE_READING);
-    if (reReadingStart) {
-      dates.reReadingStartedAt = reReadingStart.changedAt;
-    }
-
-    return dates;
+    return extractImportantDates(history);
   }, [history]);
 
-  // 現在のステータスを取得
+  // 現在のステータスを取得（utilsへ委譲）
   const getCurrentStatus = useCallback(() => {
-    if (!history.length) return null;
-    return history[0]?.status || null;
+    return getCurrentStatusFromHistory(history);
   }, [history]);
 
-  // 読書期間を計算
+  // 読書期間を計算（utilsへ委譲）
   const getReadingDuration = useCallback(() => {
-    const dates = getImportantDates();
-    if (!dates.readingStartedAt || !dates.finishedAt) return null;
-
-    const start = dates.readingStartedAt.toDate ? dates.readingStartedAt.toDate() : new Date(dates.readingStartedAt);
-    const end = dates.finishedAt.toDate ? dates.finishedAt.toDate() : new Date(dates.finishedAt);
-    
-    const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    return diffDays;
+    return calculateReadingDuration(getImportantDates());
   }, [getImportantDates]);
 
   // 手動履歴追加機能
