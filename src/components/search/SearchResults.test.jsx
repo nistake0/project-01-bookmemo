@@ -90,7 +90,7 @@ describe('SearchResults', () => {
         type: 'book',
         title: 'テスト本1',
         author: 'テスト著者1',
-        status: 'reading',
+        status: 'tsundoku',
         tags: ['タグ1', 'タグ2'],
         updatedAt: { toDate: () => new Date('2024-01-01') }
       },
@@ -194,7 +194,7 @@ describe('SearchResults', () => {
         type: 'book',
         title: 'テスト本',
         author: 'テスト著者',
-        status: 'reading',
+        status: 'tsundoku',
         tags: [],
         updatedAt: { toDate: () => new Date('2024-01-01') }
       };
@@ -245,7 +245,7 @@ describe('SearchResults', () => {
         type: 'book',
         title: 'テスト本',
         author: 'テスト著者',
-        status: 'reading',
+        status: 'tsundoku',
         tags: [],
         updatedAt: { toDate: () => new Date('2024-01-01') }
       };
@@ -281,7 +281,7 @@ describe('SearchResults', () => {
         type: 'book',
         title: 'テスト本',
         author: 'テスト著者',
-        status: 'reading',
+        status: 'tsundoku',
         tags: [],
         updatedAt: { toDate: () => new Date('2024-01-01') }
       };

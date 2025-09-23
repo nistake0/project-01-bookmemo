@@ -241,4 +241,53 @@ describe('BookForm', () => {
     // searchBookByIsbnが正しいISBNで呼ばれることを確認
     expect(mockSearchBookByIsbn).toHaveBeenCalledWith('9784873119485');
   }, 15000);
+
+  /**
+   * テストケース: ステータス選択機能
+   * 
+   * 目的: ステータス選択UIが正しく表示されることを確認
+   */
+  it('displays status selection UI', async () => {
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-status-select')).toBeInTheDocument();
+    });
+
+    // ステータス選択UIが表示されていることを確認（data-testidで確認）
+    expect(screen.getByTestId('book-status-select')).toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: ステータス選択と書籍保存
+   * 
+   * 目的: 選択したステータスが書籍データに含まれて保存されることを確認
+   */
+  it('saves book with default status', async () => {
+    mockAddBook.mockResolvedValue('new-book-id');
+
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    });
+
+    // 書籍情報を入力
+    fireEvent.change(screen.getByTestId('book-title-input'), { 
+      target: { value: 'テスト本' } 
+    });
+
+    // 書籍を保存（フォーム送信ボタンをクリック）
+    fireEvent.click(screen.getByTestId('book-add-submit'));
+
+    // デフォルトステータス（積読）が含まれて保存されることを確認
+    await waitFor(() => {
+      expect(mockAddBook).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'テスト本',
+          status: 'tsundoku'
+        })
+      );
+    });
+  });
 }); 

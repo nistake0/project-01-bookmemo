@@ -23,7 +23,7 @@ describe('BookInfo', () => {
     publisher: 'テスト出版社',
     publishedDate: '2024-01-01',
     coverImageUrl: 'http://example.com/cover.jpg',
-    status: 'reading',
+    status: 'tsundoku',
     tags: ['小説', '名作']
   };
 
@@ -57,7 +57,7 @@ describe('BookInfo', () => {
     expect(screen.getByTestId('book-author')).toHaveTextContent('著者A');
     expect(screen.getByTestId('book-publisher')).toHaveTextContent('出版社: テスト出版社');
     expect(screen.getByTestId('book-published-date')).toHaveTextContent('出版日: 2024-01-01');
-    expect(screen.getByTestId('book-status-chip')).toHaveTextContent('読書中');
+    expect(screen.getByTestId('book-status-chip')).toHaveTextContent('積読');
   });
 
   /**
@@ -131,7 +131,7 @@ describe('BookInfo', () => {
     delete bookWithoutStatus.status;
     render(<BookInfo book={bookWithoutStatus} />);
     
-    expect(screen.getByTestId('book-status-chip')).toHaveTextContent('読書中');
+    expect(screen.getByTestId('book-status-chip')).toHaveTextContent('積読');
   });
 
   /**

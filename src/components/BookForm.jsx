@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Box, Button, TextField, Autocomplete, Chip, Alert, CircularProgress } from "@mui/material";
+import { Typography, Box, Button, TextField, Autocomplete, Chip, Alert, CircularProgress, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { useTagHistory } from '../hooks/useTagHistory';
 import { useBookActions } from '../hooks/useBookActions';
 import { useBookSearch } from '../hooks/useBookSearch';
 import { useAuth } from '../auth/AuthProvider';
+import { BOOK_STATUS, ALL_BOOK_STATUSES, getBookStatusLabel } from '../constants/bookStatus';
 
 export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   const [isbn, setIsbn] = useState(isbnProp);
@@ -14,6 +15,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [tags, setTags] = useState([]);
   const [inputTagValue, setInputTagValue] = useState("");
+  const [status, setStatus] = useState(BOOK_STATUS.TSUNDOKU);
 
   // 共通フックを使用
   const { user } = useAuth();
@@ -67,6 +69,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
       coverImageUrl,
       tags,
       inputTagValue,
+      status,
     };
 
     const bookId = await addBook(bookData);
@@ -255,6 +258,31 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             }
           }}
         />
+      </Box>
+
+      {/* ステータス選択エリア */}
+      <Box sx={{ mt: { xs: 1.5, sm: 2 } }}>
+        <FormControl fullWidth size="small">
+          <InputLabel id="book-status-label">ステータス</InputLabel>
+          <Select
+            labelId="book-status-label"
+            value={status}
+            label="ステータス"
+            onChange={(e) => setStatus(e.target.value)}
+            data-testid="book-status-select"
+            sx={{
+              '& .MuiSelect-select': {
+                fontSize: { xs: '0.9rem', sm: '1rem' }
+              }
+            }}
+          >
+            {ALL_BOOK_STATUSES.map((statusValue) => (
+              <MenuItem key={statusValue} value={statusValue}>
+                {getBookStatusLabel(statusValue)}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Box>
 
       {/* エラーメッセージ */}

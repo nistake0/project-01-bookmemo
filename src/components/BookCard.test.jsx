@@ -22,7 +22,7 @@ describe('BookCard', () => {
     publishedDate: '2024-01-01',
     coverImageUrl: 'https://example.com/cover.jpg',
     tags: ['小説', '名作'],
-    status: 'reading'
+    status: 'tsundoku'
   };
 
   const mockOnClick = jest.fn();
@@ -41,7 +41,7 @@ describe('BookCard', () => {
     expect(screen.getByText('テスト出版社 • 2024-01-01')).toBeInTheDocument();
     expect(screen.getByText('小説')).toBeInTheDocument();
     expect(screen.getByText('名作')).toBeInTheDocument();
-    expect(screen.getByText('ステータス: 読書中')).toBeInTheDocument();
+    expect(screen.getByText('ステータス: 積読')).toBeInTheDocument();
   });
 
   test('表紙画像が表示される', () => {
@@ -121,7 +121,7 @@ describe('BookCard', () => {
     expect(screen.getByText('タイトル未設定')).toBeInTheDocument();
     expect(screen.getByText('著者未設定')).toBeInTheDocument();
     expect(screen.getByText('タグなし')).toBeInTheDocument();
-    expect(screen.getByText('ステータス: 読書中')).toBeInTheDocument();
+    expect(screen.getByText('ステータス: 積読')).toBeInTheDocument();
   });
 
   test('クリック時にonClickが呼ばれる', () => {

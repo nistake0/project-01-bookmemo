@@ -28,7 +28,7 @@ export const BOOK_STATUS_COLORS = {
 };
 
 // デフォルトステータス
-export const DEFAULT_BOOK_STATUS = BOOK_STATUS.READING;
+export const DEFAULT_BOOK_STATUS = BOOK_STATUS.TSUNDOKU;
 
 // 全ステータス配列
 export const ALL_BOOK_STATUSES = [

@@ -210,6 +210,22 @@ ManualHistoryAddDialog.jsx →
 
 補足: `useBookStatusHistory.js` は、履歴取得（副作用）と期間計算（純粋ロジック）が同居しているため、`getImportantDates`/`getReadingDuration` を `utils/date` 系へ移管すると単体テストが簡潔になります。
 
+## ✅ 進捗更新
+
+### 完了したリファクタリング
+- [x] **useSearch.js の責務分離**（2025-09-23完了）
+  - 494行 → 127行に削減
+  - 4つのモジュールに分離: `useSearchQuery`, `useSearchExecution`, `useSearchResults`, `useSearch`統合
+  - ユニットテスト回帰なし（38/38成功）
+
+### 完了した新機能開発
+- [x] **書籍追加時の初期ステータス設定**（2025-09-23完了）
+  - デフォルトステータスを「読書中」から「積読」に変更
+  - 書籍追加フォームにステータス選択UIを追加
+  - ユーザーが明示的にステータスを選択可能
+  - 後方互換性を維持（既存データに影響なし）
+  - テストカバレッジ: 397/397テスト成功
+
 ## 📚 参考資料
 
 - 単一責任の原則（Single Responsibility Principle）

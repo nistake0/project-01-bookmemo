@@ -4,6 +4,7 @@ import { db } from '../firebase';
 import { useAuth } from '../auth/AuthProvider';
 import { ErrorDialogContext } from '../components/CommonErrorDialog';
 import { useTagHistory } from './useTagHistory';
+import { DEFAULT_BOOK_STATUS } from '../constants/bookStatus';
 
 export const useBookActions = () => {
   const { user } = useAuth();
@@ -46,7 +47,7 @@ export const useBookActions = () => {
         publishedDate: bookData.publishedDate || '',
         coverImageUrl: bookData.coverImageUrl || '',
         tags: tagsToSave,
-        status: 'reading',
+        status: bookData.status || DEFAULT_BOOK_STATUS,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
