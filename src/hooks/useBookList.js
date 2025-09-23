@@ -9,16 +9,8 @@ import {
   FILTER_STATUSES,
   FILTER_LABELS
 } from '../constants/bookStatus';
-
-// タグ正規化関数（小文字化＋全角英数字→半角）
-function normalizeTag(tag) {
-  if (!tag) return '';
-  // 全角英数字→半角
-  const zenkakuToHankaku = s => s.replace(/[Ａ-Ｚａ-ｚ０-９]/g, ch =>
-    String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)
-  );
-  return zenkakuToHankaku(tag).toLowerCase();
-}
+import { filterBooks, normalizeTag as normalizeTagUtil } from './useBookFiltering';
+import { computeBookStats } from './useBookStats';
 
 export const useBookList = () => {
   // Reactコンテキストの安全性チェック
@@ -114,35 +106,11 @@ export const useBookList = () => {
     setFilter(FILTER_STATUSES.READING);
   }, []);
 
-  // フィルタリング・検索ロジック
-  const filteredBooks = allBooks.filter(book => {
-    // ステータスフィルター
-    if (filter !== FILTER_STATUSES.ALL) {
-      const status = book.status || DEFAULT_BOOK_STATUS;
-      if (status !== filter) return false;
-    }
-    
-    // 検索テキストフィルター
-    if (!searchText.trim()) return true;
-    const normalizedQuery = normalizeTag(searchText);
-    
-    // タイトル・著者・タグで部分一致（正規化）
-    return (
-      (book.title && normalizeTag(book.title).includes(normalizedQuery)) ||
-      (book.author && normalizeTag(book.author).includes(normalizedQuery)) ||
-      (Array.isArray(book.tags) && book.tags.some(tag => normalizeTag(tag).includes(normalizedQuery)))
-    );
-  });
+  // フィルタリング・検索ロジック（外部関数に委譲）
+  const filteredBooks = filterBooks(allBooks, filter, searchText);
 
-  // 統計情報
-  const stats = {
-    total: allBooks.length,
-    tsundoku: allBooks.filter(book => (book.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.TSUNDOKU).length,
-    reading: allBooks.filter(book => (book.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.READING).length,
-    reReading: allBooks.filter(book => (book.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.RE_READING).length,
-    finished: allBooks.filter(book => (book.status || DEFAULT_BOOK_STATUS) === BOOK_STATUS.FINISHED).length,
-    filtered: filteredBooks.length,
-  };
+  // 統計情報（外部関数に委譲）
+  const stats = computeBookStats(allBooks, filteredBooks);
 
   // ユーザーが変更されたときに書籍を再取得
   useEffect(() => {
@@ -169,6 +137,6 @@ export const useBookList = () => {
     clearFilter,
     
     // ユーティリティ
-    normalizeTag,
+    normalizeTag: normalizeTagUtil,
   };
 };
