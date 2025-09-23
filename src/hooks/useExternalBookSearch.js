@@ -183,32 +183,18 @@ export const useExternalBookSearch = () => {
   // 環境変数アクセス方法（ViteとJestの両方に対応）
   let apiKey;
   try {
-    // まず process.env を試行（Jest環境）
-    if (typeof process !== 'undefined' && process.env && process.env.VITE_GOOGLE_BOOKS_API_KEY) {
+    // Vite環境では import.meta.env を使用
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY;
+    } else if (typeof process !== 'undefined' && process.env) {
+      // Jest環境では process.env を使用
       apiKey = process.env.VITE_GOOGLE_BOOKS_API_KEY;
-      console.log('Google Books API key found in process.env:', apiKey ? 'Yes' : 'No');
     } else {
-      // Vite環境では import.meta.env を使用
-      try {
-        // 動的に import.meta をチェック
-        const importMeta = eval('import.meta');
-        if (importMeta && importMeta.env && importMeta.env.VITE_GOOGLE_BOOKS_API_KEY) {
-          apiKey = importMeta.env.VITE_GOOGLE_BOOKS_API_KEY;
-          console.log('Google Books API key found in import.meta.env:', apiKey ? 'Yes' : 'No');
-        } else {
-          apiKey = undefined;
-          console.log('Google Books API key not found in any environment');
-        }
-      } catch (metaError) {
-        // import.meta が使用できない環境（Jestなど）
-        apiKey = undefined;
-        console.log('import.meta not available, using process.env only');
-      }
+      apiKey = undefined;
     }
   } catch (error) {
     // 環境変数へのアクセスでエラーが発生した場合
     apiKey = undefined;
-    console.log('Error accessing environment variables:', error.message);
   }
   
   if (!apiKey) {
