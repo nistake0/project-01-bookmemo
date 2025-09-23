@@ -118,6 +118,38 @@ ManualHistoryAddDialog.jsx →
 - useBookList のフィルタ/統計ロジックを分離（`useBookFiltering`/`useBookStats`）
 - useBookStatusHistory の計算ロジックをユーティリティへ分離
 
+## 🗂 今後の修正計画とTODO（2025-09-23 追加）
+
+### 必須（優先対応）
+- useSearch.js の責務分離（Query/Execution/Results）
+  - `useSearchQuery`（クエリ構築）/`useSearchExecution`（取得・フォールバック）/`useSearchResults`（フィルタ・ソート）
+  - メモ結果の親書籍タイトル解決は Map キャッシュ導入でI/O削減
+- 外部検索フックの整備（未登録書籍の検索）
+  - `useExternalBookSearch` を新設（Google Books / openBD）
+  - タイトル/著者/出版社検索→候補選択→編集→保存のフローを `BookAdd` に統合
+  - 既存のISBN検索フロー（`useBookSearch`）と並列運用
+- データモデル拡張（書籍）
+  - 初期ステータスの既定を「積読」化、または `BookAdd` で選択可能に（保存時フォールバックも実装）
+  - `acquisitionType` を追加（`bought`/`borrowed` など）。既存データは未設定許容（後方互換）
+- 検索UIの再構成（シンプル/詳細の分離）
+  - シンプル検索: 1入力（タイトル/著者/タグ）を上部固定、即時反映 or Enter実行
+  - 詳細検索: 別コンポーネント（アコーディオン/別ページ）に分離。下部の「検索開始」ボタン依存を解消
+- エラーハンドリングの統一
+  - すべて共通ダイアログ（`CommonErrorDialog`）に統一（外部API失敗・保存失敗・検索エラー等）
+
+### 推奨（品質・保守性向上）
+- `useBookList` の取得ロジックを `useBookData` へ切り出し
+- 検索フィルタ関数を純粋モジュール化（`searchFilters.js`）
+- シンプル検索入力のデバウンス（約300ms）とキャンセル可能実行
+- テスト強化（ユニット）
+  - 外部検索のモック（成功/0件/ネットワークエラー）
+  - 追加項目の保存（`acquisitionType`/初期ステータス）の検証
+  - シンプル/詳細検索分離UIの単体テスト（submit有無、Enter、デバウンス）
+
+### 参考改善（段階導入）
+- Stats（統計ページ）: データ空時のメッセージ・空グラフの扱い・エラーダイアログ抑制
+- タグ正規化強化: ひらがな/カタカナ・長音・記号揺れの吸収（段階的導入）
+
 ## 🔄 次のステップ
 
 1. **優先度1の問題から順次対応**
