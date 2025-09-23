@@ -20,14 +20,33 @@ BookMemoプロジェクトのコード品質と抽象化粒度について詳細
 - **複雑性**: 5つの異なる責務が1つのフックに集約
 - **保守性**: 修正時の影響範囲が広すぎる
 
-**改善案:**
+**改善案（詳細）:**
 ```
-useSearch.js (494行) → 
-├── useSearchQuery.js (クエリ構築)
-├── useSearchExecution.js (Firestore実行)  
-├── useSearchResults.js (結果処理)
-└── useSearch.js (状態管理統合)
+useSearch.js (495行) → 
+├── utils/searchFilters.js      （純粋関数: text/tags/memoContentフィルタ、sortResults）
+├── utils/searchDateRange.js    （純粋関数: getDateRangeFilter）
+├── useSearchQuery.js           （クエリ構築: books/memos）
+├── useSearchExecution.js       （実行とフォールバック: インデックス不足時の代替、親書籍タイトルキャッシュ）
+├── useSearchResults.js         （結果処理: フィルタ・ソート・整形）
+└── useSearch.js                （状態管理統合: API不変）
 ```
+
+リファクタリング手順（段階）:
+1) 純粋関数の切り出し（低リスク）
+   - `searchFilters.js`: `filterByText`/`filterByTags`/`filterByMemoContent`/`sortResults`
+   - `searchDateRange.js`: `getDateRangeFilter`
+   - 既存テストの一部を純粋関数テストに移管
+2) クエリ構築の分離
+   - `useSearchQuery.js`: 条件→Firestoreクエリ（books/memos）。タグ`array-contains-any`のネスト配列検出→クライアント側へ委譲は踏襲
+3) 実行とフォールバックの分離
+   - `useSearchExecution.js`: 実行＋インデックスエラー時フォールバック。メモ親書籍タイトル解決はMapキャッシュでI/O削減
+4) 結果処理の分離
+   - `useSearchResults.js`: テキスト/タグ/メモ内容フィルタ、ソート、整形（現行仕様維持）
+5) 統合フック
+   - `useSearch.js`: 公開API（`results, loading, error, executeSearch, clearResults`）を不変で提供
+
+テスト方針:
+- 日付範囲（year/month/quarter/custom/recent）、タグ正規化・ネスト配列、親タイトル解決（キャッシュ適用）、フォールバック時の件数/型、並び替えの安定性をユニットで担保。
 
 ### 2. useBookList.js - 複雑な状態管理（175行）
 

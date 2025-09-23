@@ -10,6 +10,8 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../auth/AuthProvider';
+import { filterByText, filterByTags, filterByMemoContent, sortResults } from '../utils/searchFilters';
+import { getDateRangeFilter } from '../utils/searchDateRange';
 
 /**
  * 検索機能のカスタムフック
@@ -113,50 +115,7 @@ export function useSearch(options = {}) {
    * @param {Object} dateRange - 日時範囲設定
    * @returns {Object} 開始日と終了日
    */
-  const getDateRangeFilter = useCallback((dateRange) => {
-    const now = new Date();
-    let startDate = null;
-    let endDate = null;
-
-    switch (dateRange.type) {
-      case 'year':
-        if (dateRange.year) {
-          startDate = new Date(dateRange.year, 0, 1);
-          endDate = new Date(dateRange.year, 11, 31, 23, 59, 59);
-        }
-        break;
-      case 'month':
-        if (dateRange.year && dateRange.month) {
-          startDate = new Date(dateRange.year, dateRange.month - 1, 1);
-          endDate = new Date(dateRange.year, dateRange.month, 0, 23, 59, 59);
-        }
-        break;
-      case 'quarter':
-        if (dateRange.year && dateRange.quarter) {
-          const quarterStart = (dateRange.quarter - 1) * 3;
-          startDate = new Date(dateRange.year, quarterStart, 1);
-          endDate = new Date(dateRange.year, quarterStart + 3, 0, 23, 59, 59);
-        }
-        break;
-      case 'custom':
-        if (dateRange.startDate) {
-          startDate = new Date(dateRange.startDate);
-        }
-        if (dateRange.endDate) {
-          endDate = new Date(dateRange.endDate);
-          endDate.setHours(23, 59, 59);
-        }
-        break;
-      case 'recent':
-        if (dateRange.months) {
-          startDate = new Date(now.getFullYear(), now.getMonth() - dateRange.months, now.getDate());
-          endDate = now;
-        }
-        break;
-    }
-
-    return { startDate, endDate };
-  }, []);
+  // getDateRangeFilter は utils へ移動
 
   /**
    * テキスト検索によるフィルタリング
@@ -165,33 +124,7 @@ export function useSearch(options = {}) {
    * @param {string} searchText - 検索テキスト
    * @returns {Array} フィルタリングされたアイテム
    */
-  const filterByText = useCallback((items, searchText) => {
-    if (!searchText) return items;
-
-    const normalizedSearchText = searchText.toLowerCase();
-    
-    return items.filter(item => {
-      // 本の場合
-      if (item.type === 'book') {
-        return (
-          (item.title && item.title.toLowerCase().includes(normalizedSearchText)) ||
-          (item.author && item.author.toLowerCase().includes(normalizedSearchText)) ||
-          (item.tags && item.tags.some(tag => tag.toLowerCase().includes(normalizedSearchText)))
-        );
-      }
-      
-      // メモの場合
-      if (item.type === 'memo') {
-        return (
-          (item.text && item.text.toLowerCase().includes(normalizedSearchText)) ||
-          (item.comment && item.comment.toLowerCase().includes(normalizedSearchText)) ||
-          (item.tags && item.tags.some(tag => tag.toLowerCase().includes(normalizedSearchText)))
-        );
-      }
-      
-      return false;
-    });
-  }, []);
+  // filterByText は utils へ移動
 
   /**
    * タグによるフィルタリング
@@ -200,44 +133,7 @@ export function useSearch(options = {}) {
    * @param {Array} selectedTags - 選択されたタグの配列
    * @returns {Array} フィルタリングされたアイテム
    */
-  const filterByTags = useCallback((items, selectedTags) => {
-    if (!selectedTags || selectedTags.length === 0) return items;
-
-    // タグをフラット化して正規化
-    const flattenAndNormalizeTags = (tags) => {
-      if (!Array.isArray(tags)) return [];
-      
-      const flattened = [];
-      const processTag = (tag) => {
-        if (Array.isArray(tag)) {
-          tag.forEach(processTag);
-        } else if (typeof tag === 'string' && tag.trim()) {
-          flattened.push(tag.toLowerCase().trim());
-        }
-      };
-      
-      tags.forEach(processTag);
-      return flattened;
-    };
-
-    const normalizedSelectedTags = flattenAndNormalizeTags(selectedTags);
-    console.log('正規化された選択タグ:', normalizedSelectedTags);
-    
-    return items.filter(item => {
-      if (!item.tags || !Array.isArray(item.tags)) return false;
-      
-      const itemTags = flattenAndNormalizeTags(item.tags);
-      console.log(`アイテム ${item.id} のタグ:`, itemTags);
-      
-      // 選択されたタグのいずれかが含まれているかチェック
-      const hasMatchingTag = itemTags.some(tag => 
-        normalizedSelectedTags.includes(tag)
-      );
-      
-      console.log(`アイテム ${item.id} のマッチ結果:`, hasMatchingTag);
-      return hasMatchingTag;
-    });
-  }, []);
+  // filterByTags は utils へ移動
 
   /**
    * メモ内容によるフィルタリング
@@ -246,18 +142,7 @@ export function useSearch(options = {}) {
    * @param {string} memoContent - メモ内容検索テキスト
    * @returns {Array} フィルタリングされたメモ
    */
-  const filterByMemoContent = useCallback((memos, memoContent) => {
-    if (!memoContent) return memos;
-
-    const normalizedMemoContent = memoContent.toLowerCase();
-    
-    return memos.filter(memo => {
-      return (
-        (memo.text && memo.text.toLowerCase().includes(normalizedMemoContent)) ||
-        (memo.comment && memo.comment.toLowerCase().includes(normalizedMemoContent))
-      );
-    });
-  }, []);
+  // filterByMemoContent は utils へ移動
 
   /**
    * 検索実行
@@ -441,32 +326,11 @@ export function useSearch(options = {}) {
         filteredResults = [...books, ...memos];
       }
 
-      // 結果をソート
-      filteredResults.sort((a, b) => {
-        const sortBy = conditions.sortBy || 'updatedAt';
-        const sortOrder = conditions.sortOrder || 'desc';
-        
-        let aValue = a[sortBy];
-        let bValue = b[sortBy];
-        
-        // 日付の場合はDate型に変換
-        if (sortBy === 'updatedAt' || sortBy === 'createdAt') {
-          aValue = aValue?.toDate ? aValue.toDate() : new Date(aValue);
-          bValue = bValue?.toDate ? bValue.toDate() : new Date(bValue);
-        }
-        
-        // 文字列の場合は小文字化
-        if (typeof aValue === 'string' && typeof bValue === 'string') {
-          aValue = aValue.toLowerCase();
-          bValue = bValue.toLowerCase();
-        }
-        
-        if (sortOrder === 'asc') {
-          return aValue > bValue ? 1 : -1;
-        } else {
-          return aValue < bValue ? 1 : -1;
-        }
-      });
+      // 結果をソート（utils）
+      const sortBy = conditions.sortBy || 'updatedAt';
+      const sortOrder = conditions.sortOrder || 'desc';
+      const sorted = sortResults(filteredResults, sortBy, sortOrder);
+      filteredResults = sorted;
 
       setResults(filteredResults);
     } catch (err) {
@@ -475,7 +339,7 @@ export function useSearch(options = {}) {
     } finally {
       setLoading(false);
     }
-  }, [user, buildQueries, filterByText, filterByTags, filterByMemoContent]);
+  }, [user, buildQueries]);
 
   /**
    * 検索結果をクリア
