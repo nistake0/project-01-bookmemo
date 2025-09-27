@@ -214,8 +214,7 @@ export const useExternalBookSearch = () => {
         apiKeyLength: apiKey ? apiKey.length : 0,
         isJestEnvironment: typeof process !== 'undefined' && 
           (process.env.NODE_ENV === 'test' || typeof jest !== 'undefined'),
-        environment: typeof process !== 'undefined' ? process.env.NODE_ENV : 'browser',
-        importMetaEnv: typeof import.meta !== 'undefined' ? import.meta.env : 'undefined'
+        environment: typeof process !== 'undefined' ? process.env.NODE_ENV : 'browser'
       });
       
       if (!apiKey) {
