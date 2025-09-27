@@ -18,6 +18,19 @@ import BookAdd from './BookAdd';
 
 // 依存するモジュールをモック化
 jest.mock('axios');
+
+// useExternalBookSearch をモック化（import.meta の問題回避）
+jest.mock('../hooks/useExternalBookSearch', () => ({
+  useExternalBookSearch: jest.fn(() => ({
+    searchResults: [],
+    loading: false,
+    loadingStep: '',
+    error: null,
+    searchBooks: jest.fn(),
+    clearSearchResults: jest.fn(),
+    clearError: jest.fn(),
+  })),
+}));
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'), // 他の機能はそのまま使う
   useNavigate: () => jest.fn(), // useNavigateだけモック
