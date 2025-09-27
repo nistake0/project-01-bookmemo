@@ -94,7 +94,18 @@ jobs:
         grep VITE_GOOGLE_BOOKS_API_KEY .env.production
     
     - name: Build
-      run: npm run build
+      run: |
+        echo "=== Build step started ==="
+        echo "Checking .env.production file before build:"
+        if [ -f .env.production ]; then
+          echo "File exists"
+          echo "VITE_GOOGLE_BOOKS_API_KEY line:"
+          grep VITE_GOOGLE_BOOKS_API_KEY .env.production || echo "Line not found"
+        else
+          echo "File does not exist"
+        fi
+        npm run build
+        echo "=== Build completed ==="
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
