@@ -82,15 +82,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
     }
   };
 
-  // 外部検索ボタンの表示条件
-  const shouldShowExternalSearch = () => {
-    return (
-      title && // タイトルが入力されている
-      !isbn && // ISBNが未入力
-      !coverImageUrl && // 表紙画像が未取得
-      !isExternalSearchMode // 既に外部検索モードでない
-    );
-  };
 
   // 外部検索モードの切り替え
   const handleExternalSearchToggle = () => {
@@ -155,23 +146,26 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
         </Box>
       </Box>
 
-      {/* 外部検索ボタン（条件付き表示） */}
-      {shouldShowExternalSearch() && (
-        <Box sx={{ mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            💡 書籍情報が見つからない場合
-          </Typography>
-          <Button
-            variant="outlined"
-            onClick={handleExternalSearchToggle}
-            startIcon={<span>🔍</span>}
-            data-testid="external-search-button"
-            sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' } }}
-          >
-            外部検索で探す
-          </Button>
-        </Box>
-      )}
+      {/* 外部検索ボタン（常時表示） */}
+      <Box sx={{ mt: 1.5, textAlign: 'center' }}>
+        <Button
+          variant="outlined"
+          onClick={handleExternalSearchToggle}
+          startIcon={<span>🔍</span>}
+          data-testid="external-search-button"
+          sx={{ 
+            fontSize: { xs: '0.8rem', sm: '0.9rem' },
+            px: 3,
+            py: 1
+          }}
+        >
+          外部検索で書籍を探す
+        </Button>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+          ISBNが分からない場合や、より詳細な情報を探す場合にご利用ください
+        </Typography>
+      </Box>
+
 
       {/* 外部検索モード時のUI */}
       {isExternalSearchMode && (

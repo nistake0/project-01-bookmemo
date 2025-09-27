@@ -17,8 +17,8 @@ describe('本追加E2Eテスト', () => {
       cy.log('Current URL:', url);
     });
 
-    // 「本を追加」ボタンをクリック
-    cy.get('[data-testid="book-add-button"]').click();
+    // フッターメニューの「本を追加」をクリック
+    cy.get('[data-testid="bottom-nav-add"]').click();
 
     // デバッグ: 遷移後のURLを確認
     cy.url().then((url) => {
