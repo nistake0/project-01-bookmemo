@@ -58,6 +58,25 @@ export const useBookActions = () => {
         await saveTagsToHistory(tagsToSave);
       }
 
+      // 初期ステータスを履歴に記録
+      const initialStatus = bookData.status || DEFAULT_BOOK_STATUS;
+      if (initialStatus) {
+        try {
+          const historyRef = collection(db, 'books', docRef.id, 'statusHistory');
+          await addDoc(historyRef, {
+            status: initialStatus,
+            previousStatus: null, // 初期ステータスなので前のステータスは無し
+            changedAt: serverTimestamp(),
+            changedBy: user.uid,
+            notes: '書籍追加時の初期ステータス',
+            createdAt: serverTimestamp()
+          });
+        } catch (historyError) {
+          console.error("Error adding initial status history:", historyError);
+          // 履歴の追加に失敗してもメインの処理は続行
+        }
+      }
+
       return docRef.id;
     } catch (err) {
       console.error("Error adding book:", err);

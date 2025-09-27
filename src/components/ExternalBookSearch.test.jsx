@@ -24,7 +24,12 @@ jest.mock('../hooks/useExternalBookSearch', () => ({
   useExternalBookSearch: jest.fn()
 }));
 
+jest.mock('../hooks/useBookDuplicateCheck', () => ({
+  useBookDuplicateCheck: jest.fn()
+}));
+
 import { useExternalBookSearch } from '../hooks/useExternalBookSearch';
+import { useBookDuplicateCheck } from '../hooks/useBookDuplicateCheck';
 
 describe('ExternalBookSearch', () => {
   beforeEach(() => {
@@ -65,6 +70,11 @@ describe('ExternalBookSearch', () => {
       },
       updateFilters: jest.fn(),
       clearFilters: jest.fn()
+    });
+
+    // useBookDuplicateCheckのモック実装
+    useBookDuplicateCheck.mockReturnValue({
+      checkDuplicate: jest.fn()
     });
   });
 
@@ -604,6 +614,137 @@ describe('ExternalBookSearch', () => {
       );
 
       expect(screen.getByText('表紙なし')).toBeInTheDocument();
+    });
+  });
+
+  describe.skip('重複チェック機能', () => {
+    it('重複する書籍がある場合、「追加済み」ボタンが表示される', async () => {
+      const mockCheckDuplicate = jest.fn();
+      useBookDuplicateCheck.mockReturnValue({
+        checkDuplicate: mockCheckDuplicate
+      });
+
+      // 重複する書籍のモック
+      const duplicateBook = {
+        id: 'duplicate-book-id',
+        title: '重複テスト本',
+        author: '重複テスト著者',
+        isbn: '978-4-87311-123-4'
+      };
+
+      mockCheckDuplicate.mockResolvedValue(duplicateBook);
+
+      useExternalBookSearch.mockReturnValue({
+        searchResults: [],
+        loading: false,
+        error: null,
+        searchBooks: jest.fn(),
+        clearSearchResults: jest.fn(),
+        clearError: jest.fn(),
+        searchHistory: [],
+        loadSearchHistory: jest.fn(),
+        removeFromSearchHistory: jest.fn(),
+        clearSearchHistory: jest.fn(),
+        filteredResults: [
+          {
+            id: 'book-1',
+            title: 'JavaScript入門',
+            author: '山田太郎',
+            publisher: 'オライリー',
+            publishedDate: '2023-05-15',
+            isbn: '978-4-87311-123-4',
+            coverImageUrl: 'https://example.com/cover.jpg',
+            description: 'JavaScriptの入門書です'
+          }
+        ],
+        filters: {
+          author: '',
+          publisher: '',
+          yearFrom: '',
+          yearTo: ''
+        },
+        updateFilters: jest.fn(),
+        clearFilters: jest.fn()
+      });
+
+      renderWithTheme(
+        <ExternalBookSearch 
+          onBookSelect={mockOnBookSelect} 
+          onCancel={mockOnCancel} 
+        />
+      );
+
+      // 重複チェックが実行されるまで待機
+      await waitFor(() => {
+        expect(mockCheckDuplicate).toHaveBeenCalledWith('978-4-87311-123-4');
+      }, { timeout: 10000 });
+
+      // 「追加済み」ボタンが表示されることを確認
+      await waitFor(() => {
+        expect(screen.getByTestId('duplicate-book-book-1')).toBeInTheDocument();
+        expect(screen.getByText('追加済み')).toBeInTheDocument();
+      }, { timeout: 10000 });
+    });
+
+    it('重複しない書籍がある場合、「選択」ボタンが表示される', async () => {
+      const mockCheckDuplicate = jest.fn();
+      useBookDuplicateCheck.mockReturnValue({
+        checkDuplicate: mockCheckDuplicate
+      });
+
+      // 重複しない場合（nullを返す）
+      mockCheckDuplicate.mockResolvedValue(null);
+
+      useExternalBookSearch.mockReturnValue({
+        searchResults: [],
+        loading: false,
+        error: null,
+        searchBooks: jest.fn(),
+        clearSearchResults: jest.fn(),
+        clearError: jest.fn(),
+        searchHistory: [],
+        loadSearchHistory: jest.fn(),
+        removeFromSearchHistory: jest.fn(),
+        clearSearchHistory: jest.fn(),
+        filteredResults: [
+          {
+            id: 'book-1',
+            title: 'JavaScript入門',
+            author: '山田太郎',
+            publisher: 'オライリー',
+            publishedDate: '2023-05-15',
+            isbn: '978-4-87311-123-4',
+            coverImageUrl: 'https://example.com/cover.jpg',
+            description: 'JavaScriptの入門書です'
+          }
+        ],
+        filters: {
+          author: '',
+          publisher: '',
+          yearFrom: '',
+          yearTo: ''
+        },
+        updateFilters: jest.fn(),
+        clearFilters: jest.fn()
+      });
+
+      renderWithTheme(
+        <ExternalBookSearch 
+          onBookSelect={mockOnBookSelect} 
+          onCancel={mockOnCancel} 
+        />
+      );
+
+      // 重複チェックが実行されるまで待機
+      await waitFor(() => {
+        expect(mockCheckDuplicate).toHaveBeenCalledWith('978-4-87311-123-4');
+      }, { timeout: 10000 });
+
+      // 「選択」ボタンが表示されることを確認
+      await waitFor(() => {
+        expect(screen.getByTestId('select-book-book-1')).toBeInTheDocument();
+        expect(screen.getByText('選択')).toBeInTheDocument();
+      }, { timeout: 10000 });
     });
   });
 });

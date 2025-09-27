@@ -51,6 +51,11 @@ const BookInfo = ({ book, bookId, onStatusChange }) => {
             出版日: {book.publishedDate}
           </Typography>
         )}
+        {book.isbn && (
+          <Typography variant="body1" color="text.secondary" gutterBottom data-testid="book-isbn">
+            ISBN: {book.isbn}
+          </Typography>
+        )}
         {book.acquisitionType && book.acquisitionType !== ACQUISITION_TYPE.UNKNOWN && (
           <Box sx={{ mb: 1 }}>
             <Chip 

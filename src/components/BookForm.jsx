@@ -3,6 +3,7 @@ import { Typography, Box, Button, TextField, Autocomplete, Chip, Alert, Circular
 import { useTagHistory } from '../hooks/useTagHistory';
 import { useBookActions } from '../hooks/useBookActions';
 import { useBookSearch } from '../hooks/useBookSearch';
+import { useBookDuplicateCheck } from '../hooks/useBookDuplicateCheck';
 import { useAuth } from '../auth/AuthProvider';
 import { BOOK_STATUS, ALL_BOOK_STATUSES, getBookStatusLabel, ACQUISITION_TYPE, ALL_ACQUISITION_TYPES, getAcquisitionTypeLabel } from '../constants/bookStatus';
 import ExternalBookSearch from './ExternalBookSearch';
@@ -25,6 +26,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   const { tagOptions, fetchTagHistory } = useTagHistory('book', user);
   const { addBook, loading: addBookLoading, error: addBookError } = useBookActions();
   const { searchBookByIsbn, loading: searchLoading, error: searchError, searchPerformed } = useBookSearch();
+  const { isChecking: isDuplicateChecking, duplicateBook, checkDuplicate, resetDuplicateCheck } = useBookDuplicateCheck();
 
   useEffect(() => {
     fetchTagHistory();
@@ -48,6 +50,9 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
     const targetIsbn = overrideIsbn !== undefined ? overrideIsbn : isbn;
     if (!targetIsbn || !targetIsbn.trim()) return;
 
+    // 重複チェックをリセット
+    resetDuplicateCheck();
+
     const bookData = await searchBookByIsbn(targetIsbn);
     if (bookData) {
       setTitle(bookData.title);
@@ -56,6 +61,9 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
       setPublishedDate(bookData.publishedDate);
       setCoverImageUrl(bookData.coverImageUrl);
       setTags(bookData.tags);
+      
+      // 書籍情報取得後に重複チェックを実行
+      await checkDuplicate(targetIsbn);
     }
   };
 
@@ -89,7 +97,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   };
 
   // 外部検索で書籍選択された時の処理
-  const handleExternalBookSelect = (book) => {
+  const handleExternalBookSelect = async (book) => {
     setTitle(book.title);
     setAuthor(book.author);
     setPublisher(book.publisher);
@@ -97,6 +105,11 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
     setCoverImageUrl(book.coverImageUrl);
     setIsbn(book.isbn);
     setIsExternalSearchMode(false);
+    
+    // 外部検索で選択された書籍の重複チェック
+    if (book.isbn) {
+      await checkDuplicate(book.isbn);
+    }
   };
 
   // 外部検索キャンセル時の処理
@@ -365,6 +378,20 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
         </FormControl>
       </Box>
 
+      {/* 重複チェック結果表示 */}
+      {duplicateBook && (
+        <Alert 
+          severity="info" 
+          sx={{ 
+            mt: { xs: 1.5, sm: 2 },
+            fontSize: { xs: '0.8rem', sm: '0.9rem' }
+          }}
+          data-testid="duplicate-book-alert"
+        >
+          この書籍は既に追加済みです: {duplicateBook.title}
+        </Alert>
+      )}
+
       {/* エラーメッセージ */}
       {(searchError || addBookError) && (
         <Typography 
@@ -383,7 +410,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
       <Button 
         type="submit" 
         variant="contained" 
-        disabled={addBookLoading}
+        disabled={addBookLoading || duplicateBook}
         sx={{ 
           mt: { xs: 2, sm: 3 }, 
           mb: { xs: "72px", sm: 2 }, // モバイルではフッターメニューの上に余白を追加
@@ -393,7 +420,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
         }} 
         data-testid="book-add-submit"
       >
-        {addBookLoading ? '追加中...' : '本を追加'}
+{addBookLoading ? '追加中...' : duplicateBook ? '追加済みです' : '本を追加'}
       </Button>
     </Box>
   );

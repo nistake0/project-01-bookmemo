@@ -29,6 +29,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useExternalBookSearch } from '../hooks/useExternalBookSearch';
+import { useBookDuplicateCheck } from '../hooks/useBookDuplicateCheck';
 
 /**
  * 外部書籍検索コンポーネント
@@ -39,6 +40,7 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('relevance');
   const [showHistory, setShowHistory] = useState(false); // 履歴表示状態
+  const [duplicateCheckResults, setDuplicateCheckResults] = useState({}); // 重複チェック結果
   
   const {
     searchResults,
@@ -59,6 +61,8 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
     updateFilters,
     clearFilters
   } = useExternalBookSearch();
+
+  const { checkDuplicate } = useBookDuplicateCheck();
 
   /**
    * 検索タイプの変更ハンドラー
@@ -90,13 +94,43 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
       return;
     }
     
+    // 重複チェック結果をリセット
+    setDuplicateCheckResults({});
+    
     await searchBooks(searchQuery.trim(), searchType);
   }, [searchQuery, searchType, searchBooks]);
+
+  /**
+   * 検索結果の重複チェック
+   */
+  const checkSearchResultsDuplicates = useCallback(async (results) => {
+    if (!results || results.length === 0) return;
+
+    const duplicateResults = {};
+    
+    // 各検索結果に対して重複チェックを実行
+    for (const book of results) {
+      if (book.isbn) {
+        try {
+          const duplicateBook = await checkDuplicate(book.isbn);
+          if (duplicateBook) {
+            duplicateResults[book.id] = duplicateBook;
+          }
+        } catch (error) {
+          console.error('Error checking duplicate for book:', book.title, error);
+        }
+      }
+    }
+    
+    setDuplicateCheckResults(duplicateResults);
+  }, [checkDuplicate]);
 
   /**
    * 書籍選択ハンドラー
    */
   const handleBookSelect = useCallback((book) => {
+    // 重複チェック結果をクリア
+    setDuplicateCheckResults({});
     onBookSelect(book);
   }, [onBookSelect]);
 
@@ -106,6 +140,7 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
   const handleCancel = useCallback(() => {
     clearSearchResults();
     setSearchQuery('');
+    setDuplicateCheckResults({});
     onCancel();
   }, [clearSearchResults, onCancel]);
 
@@ -116,6 +151,7 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
     setSearchQuery(query);
     setSearchType(type);
     setShowHistory(false);
+    setDuplicateCheckResults({});
     searchBooks(query, type);
   }, [searchBooks]);
 
@@ -168,10 +204,18 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
     }
   }, [sortBy]);
 
+  // 検索結果が取得されたら重複チェックを実行
+  React.useEffect(() => {
+    if (filteredResults && filteredResults.length > 0 && !loading) {
+      checkSearchResultsDuplicates(filteredResults);
+    }
+  }, [filteredResults, loading]);
+
   /**
    * 検索結果のレンダリング
    */
   const renderSearchResults = () => {
+
     if (loading) {
       return (
         <Box sx={{ mt: 2 }}>
@@ -401,21 +445,38 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
                   alignSelf: 'center',
                   mt: { xs: 1, sm: 0 }
                 }}>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleBookSelect(book);
-                    }}
-                    data-testid={`select-book-${book.id}`}
-                    sx={{ 
-                      fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                      minWidth: { xs: '100%', sm: 'auto' }
-                    }}
-                  >
-                    選択
-                  </Button>
+                  {duplicateCheckResults[book.id] ? (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      disabled
+                      data-testid={`duplicate-book-${book.id}`}
+                      sx={{ 
+                        fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                        minWidth: { xs: '100%', sm: 'auto' },
+                        color: 'text.secondary',
+                        borderColor: 'text.secondary'
+                      }}
+                    >
+                      追加済み
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBookSelect(book);
+                      }}
+                      data-testid={`select-book-${book.id}`}
+                      sx={{ 
+                        fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                        minWidth: { xs: '100%', sm: 'auto' }
+                      }}
+                    >
+                      選択
+                    </Button>
+                  )}
                 </Box>
               </Box>
             </CardContent>

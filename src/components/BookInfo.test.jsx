@@ -22,6 +22,7 @@ describe('BookInfo', () => {
     author: '著者A',
     publisher: 'テスト出版社',
     publishedDate: '2024-01-01',
+    isbn: '978-4-87311-9485',
     coverImageUrl: 'http://example.com/cover.jpg',
     status: 'tsundoku',
     tags: ['小説', '名作']
@@ -57,6 +58,7 @@ describe('BookInfo', () => {
     expect(screen.getByTestId('book-author')).toHaveTextContent('著者A');
     expect(screen.getByTestId('book-publisher')).toHaveTextContent('出版社: テスト出版社');
     expect(screen.getByTestId('book-published-date')).toHaveTextContent('出版日: 2024-01-01');
+    expect(screen.getByTestId('book-isbn')).toHaveTextContent('ISBN: 978-4-87311-9485');
     expect(screen.getByTestId('book-status-chip')).toHaveTextContent('積読');
   });
 
@@ -160,6 +162,7 @@ describe('BookInfo', () => {
     // オプションフィールドが表示されないことを確認
     expect(screen.queryByTestId('book-publisher')).not.toBeInTheDocument();
     expect(screen.queryByTestId('book-published-date')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('book-isbn')).not.toBeInTheDocument();
   });
 
   /**
@@ -223,5 +226,33 @@ describe('BookInfo', () => {
     render(<BookInfo book={bookWithoutAcquisitionType} />);
     
     expect(screen.queryByTestId('book-acquisition-type')).not.toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: ISBNの表示
+   * 
+   * 目的: ISBNが設定されている場合に正しく表示されることを確認
+   */
+  test('displays ISBN when available', () => {
+    render(<BookInfo book={mockBook} />);
+    
+    expect(screen.getByTestId('book-isbn')).toBeInTheDocument();
+    expect(screen.getByTestId('book-isbn')).toHaveTextContent('ISBN: 978-4-87311-9485');
+  });
+
+  /**
+   * テストケース: ISBNが未設定の場合は表示しない
+   * 
+   * 目的: ISBNが未設定の場合は表示されないことを確認
+   */
+  test('does not display ISBN when not set', () => {
+    const bookWithoutIsbn = {
+      ...mockBook
+    };
+    delete bookWithoutIsbn.isbn;
+
+    render(<BookInfo book={bookWithoutIsbn} />);
+    
+    expect(screen.queryByTestId('book-isbn')).not.toBeInTheDocument();
   });
 }); 
