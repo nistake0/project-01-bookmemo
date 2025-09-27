@@ -107,6 +107,7 @@ function AppBottomNav() {
       <BottomNavigationAction 
         label="本一覧" 
         icon={<LibraryBooksIcon />} 
+        data-testid="bottom-nav-list"
         sx={{ 
           '&.Mui-selected': {
             color: 'primary.main'
@@ -116,6 +117,7 @@ function AppBottomNav() {
       <BottomNavigationAction 
         label="本を追加" 
         icon={<AddCircleIcon />} 
+        data-testid="bottom-nav-add"
         sx={{ 
           '&.Mui-selected': {
             color: 'primary.main'
@@ -125,6 +127,7 @@ function AppBottomNav() {
       <BottomNavigationAction 
         label="検索・タグ" 
         icon={<SearchIcon />} 
+        data-testid="bottom-nav-search"
         sx={{ 
           '&.Mui-selected': {
             color: 'primary.main'
@@ -134,6 +137,7 @@ function AppBottomNav() {
       <BottomNavigationAction 
         label="統計" 
         icon={<BarChartIcon />} 
+        data-testid="bottom-nav-stats"
         sx={{ 
           '&.Mui-selected': {
             color: 'primary.main'
@@ -143,6 +147,7 @@ function AppBottomNav() {
       <BottomNavigationAction 
         label="マイページ" 
         icon={<PersonIcon />} 
+        data-testid="bottom-nav-mypage"
         sx={{ 
           '&.Mui-selected': {
             color: 'primary.main'

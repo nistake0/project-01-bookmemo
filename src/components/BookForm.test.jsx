@@ -370,46 +370,42 @@ describe('BookForm', () => {
   });
 
   /**
-   * テストケース: 外部検索ボタンの表示条件
+   * テストケース: 外部検索ボタンの常時表示
    * 
-   * 目的: 外部検索ボタンが適切な条件でのみ表示されることを確認
+   * 目的: 外部検索ボタンが常に表示されることを確認
    */
-  it('shows external search button when conditions are met', async () => {
+  it('shows external search button always', async () => {
     renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
     });
 
-    // タイトルを入力（ISBNは空のまま）
-    fireEvent.change(screen.getByTestId('book-title-input'), { 
-      target: { value: 'テスト本' } 
-    });
-
-    // 外部検索ボタンが表示されることを確認
+    // 外部検索ボタンが常に表示されることを確認
     expect(screen.getByTestId('external-search-button')).toBeInTheDocument();
-    expect(screen.getByText('💡 書籍情報が見つからない場合')).toBeInTheDocument();
+    expect(screen.getByText('外部検索で書籍を探す')).toBeInTheDocument();
+    expect(screen.getByText('ISBNが分からない場合や、より詳細な情報を探す場合にご利用ください')).toBeInTheDocument();
   });
 
   /**
-   * テストケース: 外部検索ボタンが表示されない条件
+   * テストケース: 外部検索ボタンの常時表示（ISBN入力後も表示）
    * 
-   * 目的: 条件が満たされない場合は外部検索ボタンが表示されないことを確認
+   * 目的: ISBNを入力しても外部検索ボタンが表示され続けることを確認
    */
-  it('does not show external search button when conditions are not met', async () => {
+  it('shows external search button even when ISBN is entered', async () => {
     renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
     });
 
-    // タイトルを入力せずにISBNを入力
+    // ISBNを入力
     fireEvent.change(screen.getByTestId('book-isbn-input'), { 
       target: { value: '9784123456789' } 
     });
 
-    // 外部検索ボタンが表示されないことを確認
-    expect(screen.queryByTestId('external-search-button')).not.toBeInTheDocument();
+    // 外部検索ボタンが表示され続けることを確認
+    expect(screen.getByTestId('external-search-button')).toBeInTheDocument();
   });
 
   /**
@@ -498,11 +494,11 @@ describe('BookForm', () => {
   });
 
   /**
-   * テストケース: 外部検索ボタンの表示条件（表紙画像がある場合）
+   * テストケース: 外部検索ボタンの常時表示（表紙画像取得後も表示）
    * 
-   * 目的: 表紙画像が取得されている場合は外部検索ボタンが表示されないことを確認
+   * 目的: 表紙画像が取得されても外部検索ボタンが表示され続けることを確認
    */
-  it('does not show external search button when cover image is present', async () => {
+  it('shows external search button even when cover image is present', async () => {
     renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
 
     await waitFor(() => {
@@ -535,16 +531,16 @@ describe('BookForm', () => {
       expect(screen.getByTestId('book-cover-image')).toBeInTheDocument();
     });
 
-    // 外部検索ボタンが表示されないことを確認
-    expect(screen.queryByTestId('external-search-button')).not.toBeInTheDocument();
+    // 外部検索ボタンが表示され続けることを確認
+    expect(screen.getByTestId('external-search-button')).toBeInTheDocument();
   });
 
   /**
-   * テストケース: 外部検索ボタンの表示条件（ISBNが入力されている場合）
+   * テストケース: 外部検索ボタンの常時表示（ISBN入力後も表示）
    * 
-   * 目的: ISBNが入力されている場合は外部検索ボタンが表示されないことを確認
+   * 目的: ISBNが入力されても外部検索ボタンが表示され続けることを確認
    */
-  it('does not show external search button when ISBN is present', async () => {
+  it('shows external search button even when ISBN is present', async () => {
     renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
 
     await waitFor(() => {
@@ -561,16 +557,16 @@ describe('BookForm', () => {
       target: { value: '9784123456789' } 
     });
 
-    // 外部検索ボタンが表示されないことを確認
-    expect(screen.queryByTestId('external-search-button')).not.toBeInTheDocument();
+    // 外部検索ボタンが表示され続けることを確認
+    expect(screen.getByTestId('external-search-button')).toBeInTheDocument();
   });
 
   /**
-   * テストケース: 外部検索ボタンの表示条件（外部検索モード中）
+   * テストケース: 外部検索ボタンの常時表示（外部検索モード中も表示）
    * 
-   * 目的: 外部検索モード中は外部検索ボタンが表示されないことを確認
+   * 目的: 外部検索モード中でも外部検索ボタンが表示され続けることを確認
    */
-  it('does not show external search button when in external search mode', async () => {
+  it('shows external search button even when in external search mode', async () => {
     renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
 
     await waitFor(() => {
@@ -585,16 +581,16 @@ describe('BookForm', () => {
     // 外部検索ボタンをクリック
     fireEvent.click(screen.getByTestId('external-search-button'));
 
-    // 外部検索モード中は外部検索ボタンが表示されないことを確認
-    expect(screen.queryByTestId('external-search-button')).not.toBeInTheDocument();
+    // 外部検索モード中でも外部検索ボタンが表示され続けることを確認
+    expect(screen.getByTestId('external-search-button')).toBeInTheDocument();
   });
 
   /**
-   * テストケース: 外部検索での書籍選択後の状態
+   * テストケース: 外部検索ボタンの常時表示（書籍選択後も表示）
    * 
-   * 目的: 外部検索で書籍選択後、外部検索ボタンが再表示されないことを確認
+   * 目的: 外部検索で書籍選択後でも外部検索ボタンが表示され続けることを確認
    */
-  it('does not show external search button after book selection', async () => {
+  it('shows external search button even after book selection', async () => {
     renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
 
     await waitFor(() => {
@@ -612,7 +608,7 @@ describe('BookForm', () => {
     // 外部検索で書籍を選択
     fireEvent.click(screen.getByTestId('mock-select-book'));
 
-    // 外部検索ボタンが再表示されないことを確認
-    expect(screen.queryByTestId('external-search-button')).not.toBeInTheDocument();
+    // 外部検索ボタンが表示され続けることを確認
+    expect(screen.getByTestId('external-search-button')).toBeInTheDocument();
   });
 }); 

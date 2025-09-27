@@ -180,41 +180,39 @@ export const useExternalBookSearch = () => {
    */
   const searchGoogleBooks = useCallback(async (query, searchType) => {
     try {
-  // 環境変数アクセス方法（ViteとJestの両方に対応）
-  let apiKey;
-  try {
-    // Jest環境の検出（process.env.NODE_ENV === 'test' または jest が存在）
-    const isJestEnvironment = typeof process !== 'undefined' && 
-      (process.env.NODE_ENV === 'test' || typeof jest !== 'undefined');
-    
-    if (isJestEnvironment) {
-      // Jest環境では process.env を使用
-      apiKey = process.env.VITE_GOOGLE_BOOKS_API_KEY;
-    } else {
-      // ブラウザ環境では import.meta.env を使用（Jest環境でない場合のみ）
+      // 環境変数アクセス方法（ViteとJestの両方に対応）
+      let apiKey;
       try {
-        // 動的に import.meta をチェック（Jest環境では実行されない）
-        const importMeta = eval('import.meta');
-        if (importMeta && importMeta.env) {
-          apiKey = importMeta.env.VITE_GOOGLE_BOOKS_API_KEY;
+        // Jest環境の検出（process.env.NODE_ENV === 'test' または jest が存在）
+        const isJestEnvironment = typeof process !== 'undefined' && 
+          (process.env.NODE_ENV === 'test' || typeof jest !== 'undefined');
+        
+        if (isJestEnvironment) {
+          // Jest環境では process.env を使用
+          apiKey = process.env.VITE_GOOGLE_BOOKS_API_KEY;
         } else {
-          apiKey = undefined;
+          // ブラウザ環境では import.meta.env を使用
+          apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY;
         }
-      } catch (metaError) {
-        // import.meta が使用できない環境
+      } catch (error) {
+        // 環境変数へのアクセスでエラーが発生した場合
+        console.error('Error accessing environment variables:', error);
         apiKey = undefined;
       }
-    }
-  } catch (error) {
-    // 環境変数へのアクセスでエラーが発生した場合
-    apiKey = undefined;
-  }
-  
-  if (!apiKey) {
-    // APIキーがない場合は、エラーを投げずに空の結果を返す
-    console.warn('Google Books API key is not configured, skipping Google Books search');
-    return [];
-  }
+      
+      // デバッグ情報を出力
+      console.log('Google Books API Key check:', {
+        hasApiKey: !!apiKey,
+        apiKeyLength: apiKey ? apiKey.length : 0,
+        isJestEnvironment: typeof process !== 'undefined' && 
+          (process.env.NODE_ENV === 'test' || typeof jest !== 'undefined')
+      });
+      
+      if (!apiKey) {
+        // APIキーがない場合は、エラーを投げずに空の結果を返す
+        console.warn('Google Books API key is not configured, skipping Google Books search');
+        return [];
+      }
 
       // 検索タイプに応じてクエリを構築
       let searchQuery = query;
