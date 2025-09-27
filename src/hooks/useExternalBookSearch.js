@@ -1,5 +1,20 @@
 import { useState, useCallback } from 'react';
 
+// 環境変数アクセス関数（テストでモック可能）
+export const getGoogleBooksApiKey = () => {
+  // Jest環境の検出（jest が存在する場合のみ）
+  const isJestEnvironment = typeof jest !== 'undefined';
+  
+  if (isJestEnvironment) {
+    // Jest環境では process.env を使用
+    return process.env.VITE_GOOGLE_BOOKS_API_KEY;
+  } else {
+    // ブラウザ環境では import.meta.env を直接使用
+    // このファイルはESモジュールとして実行されるため、import.meta は利用可能
+    return import.meta.env.VITE_GOOGLE_BOOKS_API_KEY;
+  }
+};
+
 /**
  * 外部書籍検索フック
  * Google Books APIを使用して書籍検索を提供
@@ -183,25 +198,7 @@ export const useExternalBookSearch = () => {
       // 環境変数アクセス方法（ViteとJestの両方に対応）
       let apiKey;
       try {
-        // Jest環境の検出（process.env.NODE_ENV === 'test' または jest が存在）
-        const isJestEnvironment = typeof process !== 'undefined' && 
-          (process.env.NODE_ENV === 'test' || typeof jest !== 'undefined');
-        
-        if (isJestEnvironment) {
-          // Jest環境では process.env を使用
-          apiKey = process.env.VITE_GOOGLE_BOOKS_API_KEY;
-        } else {
-          // ブラウザ環境では import.meta.env を使用
-          // 文字列として評価してエラーを回避
-          try {
-            // eslint-disable-next-line no-eval
-            const importMeta = eval('import.meta');
-            apiKey = importMeta.env.VITE_GOOGLE_BOOKS_API_KEY;
-          } catch (evalError) {
-            // eval が失敗した場合は process.env にフォールバック
-            apiKey = process.env.VITE_GOOGLE_BOOKS_API_KEY;
-          }
-        }
+        apiKey = getGoogleBooksApiKey();
       } catch (error) {
         // 環境変数へのアクセスでエラーが発生した場合
         console.error('Error accessing environment variables:', error);
@@ -212,9 +209,8 @@ export const useExternalBookSearch = () => {
       console.log('Google Books API Key check:', {
         hasApiKey: !!apiKey,
         apiKeyLength: apiKey ? apiKey.length : 0,
-        isJestEnvironment: typeof process !== 'undefined' && 
-          (process.env.NODE_ENV === 'test' || typeof jest !== 'undefined'),
-        environment: typeof process !== 'undefined' ? process.env.NODE_ENV : 'browser'
+        isJestEnvironment: typeof jest !== 'undefined',
+        environment: typeof jest !== 'undefined' ? 'test' : 'browser'
       });
       
       if (!apiKey) {
