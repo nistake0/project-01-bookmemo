@@ -192,7 +192,15 @@ export const useExternalBookSearch = () => {
           apiKey = process.env.VITE_GOOGLE_BOOKS_API_KEY;
         } else {
           // ブラウザ環境では import.meta.env を使用
-          apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY;
+          // 文字列として評価してエラーを回避
+          try {
+            // eslint-disable-next-line no-eval
+            const importMeta = eval('import.meta');
+            apiKey = importMeta.env.VITE_GOOGLE_BOOKS_API_KEY;
+          } catch (evalError) {
+            // eval が失敗した場合は process.env にフォールバック
+            apiKey = process.env.VITE_GOOGLE_BOOKS_API_KEY;
+          }
         }
       } catch (error) {
         // 環境変数へのアクセスでエラーが発生した場合
