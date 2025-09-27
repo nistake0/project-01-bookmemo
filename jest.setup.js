@@ -165,4 +165,6 @@ const fetch = require('node-fetch');
 global.fetch = fetch;
 global.Headers = fetch.Headers;
 global.Request = fetch.Request;
-global.Response = fetch.Response; 
+global.Response = fetch.Response;
+
+// import.meta のモック化は削除（Jestでは動作しないため） 
