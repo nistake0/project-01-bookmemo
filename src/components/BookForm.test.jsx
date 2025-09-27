@@ -683,6 +683,37 @@ describe('BookForm', () => {
       isbn: '9784873119485'
     });
 
+    // 全フックのモックを再設定
+    const { useBookActions } = require('../hooks/useBookActions');
+    const { useBookSearch } = require('../hooks/useBookSearch');
+    const { useBookDuplicateCheck } = require('../hooks/useBookDuplicateCheck');
+    const { useTagHistory } = require('../hooks/useTagHistory');
+    
+    useBookActions.mockReturnValue({
+      addBook: mockAddBook,
+      loading: false,
+      error: null,
+    });
+    
+    useBookSearch.mockReturnValue({
+      searchBookByIsbn: mockSearchBookByIsbn,
+      loading: false,
+      error: null,
+      searchPerformed: false,
+    });
+
+    useBookDuplicateCheck.mockReturnValue({
+      isChecking: false,
+      duplicateBook: null,
+      checkDuplicate: mockCheckDuplicate,
+      resetDuplicateCheck: mockResetDuplicateCheck,
+    });
+
+    useTagHistory.mockReturnValue({
+      tagOptions: [],
+      fetchTagHistory: jest.fn(),
+    });
+
     renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
     await waitFor(() => {
       expect(screen.getByTestId('book-isbn-input')).toBeInTheDocument();
