@@ -110,6 +110,10 @@ describe('useBookActions', () => {
       expect(mockSaveTagsToHistory).toHaveBeenCalledWith(['小説', '名作']);
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBe(null);
+      
+      // 初期ステータス履歴が追加されることを確認
+      expect(addDoc).toHaveBeenCalledTimes(2); // 書籍追加 + 履歴追加
+      expect(collection).toHaveBeenCalledWith({}, 'books', 'new-book-id', 'statusHistory');
     });
 
     it('タグが空の場合はタグ履歴に保存しない', async () => {
@@ -126,6 +130,9 @@ describe('useBookActions', () => {
       });
 
       expect(mockSaveTagsToHistory).not.toHaveBeenCalled();
+      
+      // 初期ステータス履歴は追加される
+      expect(addDoc).toHaveBeenCalledTimes(2); // 書籍追加 + 履歴追加
     });
 
     it('inputTagValueが設定されている場合はタグに追加する', async () => {
@@ -294,6 +301,30 @@ describe('useBookActions', () => {
       expect(addDoc).toHaveBeenCalled();
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBe('書籍の追加に失敗しました: Tag history error');
+    });
+
+    it('初期ステータス履歴の追加でエラーが発生しても書籍追加は成功する', async () => {
+      // 2回目のaddDoc呼び出し（履歴追加）でエラーを発生させる
+      addDoc
+        .mockResolvedValueOnce({ id: 'new-book-id' }) // 書籍追加は成功
+        .mockRejectedValueOnce(new Error('History error')); // 履歴追加でエラー
+
+      const { result } = renderUseBookActions();
+
+      const bookData = {
+        title: 'テスト本',
+        tags: [],
+      };
+
+      let bookId;
+      await act(async () => {
+        bookId = await result.current.addBook(bookData);
+      });
+
+      // 書籍追加は成功する
+      expect(bookId).toBe('new-book-id');
+      expect(result.current.loading).toBe(false);
+      expect(result.current.error).toBe(null);
     });
   });
 });

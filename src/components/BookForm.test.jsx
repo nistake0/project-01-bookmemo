@@ -53,10 +53,20 @@ jest.mock('../hooks/useBookSearch', () => ({
   useBookSearch: jest.fn(),
 }));
 
+jest.mock('../hooks/useBookDuplicateCheck', () => ({
+  useBookDuplicateCheck: jest.fn(),
+}));
+
+jest.mock('../hooks/useTagHistory', () => ({
+  useTagHistory: jest.fn(),
+}));
+
 describe('BookForm', () => {
   const mockOnBookAdded = jest.fn();
   const mockAddBook = jest.fn();
   const mockSearchBookByIsbn = jest.fn();
+  const mockCheckDuplicate = jest.fn();
+  const mockResetDuplicateCheck = jest.fn();
 
   beforeEach(() => {
     // 完全なモックリセット
@@ -66,18 +76,32 @@ describe('BookForm', () => {
     // フックのモック設定
     const { useBookActions } = require('../hooks/useBookActions');
     const { useBookSearch } = require('../hooks/useBookSearch');
-
+    const { useBookDuplicateCheck } = require('../hooks/useBookDuplicateCheck');
+    const { useTagHistory } = require('../hooks/useTagHistory');
+    
     useBookActions.mockReturnValue({
       addBook: mockAddBook,
       loading: false,
       error: null,
     });
-
+    
     useBookSearch.mockReturnValue({
       searchBookByIsbn: mockSearchBookByIsbn,
       loading: false,
       error: null,
       searchPerformed: false,
+    });
+
+    useBookDuplicateCheck.mockReturnValue({
+      isChecking: false,
+      duplicateBook: null,
+      checkDuplicate: mockCheckDuplicate,
+      resetDuplicateCheck: mockResetDuplicateCheck,
+    });
+
+    useTagHistory.mockReturnValue({
+      tagOptions: [],
+      fetchTagHistory: jest.fn(),
     });
   });
 
@@ -610,5 +634,98 @@ describe('BookForm', () => {
 
     // 外部検索ボタンが表示され続けることを確認
     expect(screen.getByTestId('external-search-button')).toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: 重複書籍の検出と表示
+   * 
+   * 目的: 重複する書籍が見つかった場合、アラートが表示され、送信ボタンが無効化されることを確認
+   */
+  it('shows duplicate book alert when duplicate is found', async () => {
+    const duplicateBook = {
+      id: 'duplicate-book-id',
+      title: '重複テスト本',
+      author: '重複テスト著者',
+      isbn: '9784873119485'
+    };
+
+    const { useBookDuplicateCheck } = require('../hooks/useBookDuplicateCheck');
+    useBookDuplicateCheck.mockReturnValue({
+      isChecking: false,
+      duplicateBook: duplicateBook,
+      checkDuplicate: mockCheckDuplicate,
+      resetDuplicateCheck: mockResetDuplicateCheck,
+    });
+
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    });
+
+    // 重複アラートが表示されることを確認
+    expect(screen.getByTestId('duplicate-book-alert')).toBeInTheDocument();
+    expect(screen.getByText('この書籍は既に追加済みです: 重複テスト本')).toBeInTheDocument();
+    
+    // 送信ボタンが無効化されることを確認
+    expect(screen.getByTestId('book-add-submit')).toBeDisabled();
+    expect(screen.getByText('追加済みです')).toBeInTheDocument();
+  });
+
+  /**
+   * テストケース: ISBN取得時の重複チェック
+   * 
+   * 目的: ISBNで書籍情報を取得した後に重複チェックが実行されることを確認
+   */
+  it('calls checkDuplicate when ISBN is fetched', async () => {
+    mockSearchBookByIsbn.mockResolvedValue({
+      title: 'テスト本',
+      author: 'テスト著者',
+      isbn: '9784873119485'
+    });
+
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+    await waitFor(() => {
+      expect(screen.getByTestId('book-isbn-input')).toBeInTheDocument();
+    });
+
+    // ISBNを入力
+    fireEvent.change(screen.getByTestId('book-isbn-input'), {
+      target: { value: '9784873119485' }
+    });
+
+    // ISBN取得ボタンをクリック
+    fireEvent.click(screen.getByTestId('book-fetch-button'));
+
+    // 書籍情報取得後に重複チェックが呼ばれることを確認
+    await waitFor(() => {
+      expect(mockSearchBookByIsbn).toHaveBeenCalledWith('9784873119485');
+    });
+
+    await waitFor(() => {
+      expect(mockCheckDuplicate).toHaveBeenCalledWith('9784873119485');
+    });
+  });
+
+  /**
+   * テストケース: 外部検索での重複チェック
+   * 
+   * 目的: 外部検索で書籍を選択した後に重複チェックが実行されることを確認
+   */
+  it('calls checkDuplicate when external book is selected', async () => {
+    renderWithProviders(<BookForm onBookAdded={mockOnBookAdded} />);
+    await waitFor(() => {
+      expect(screen.getByTestId('book-title-input')).toBeInTheDocument();
+    });
+
+    // 外部検索モードに切り替え
+    fireEvent.click(screen.getByTestId('external-search-button'));
+    
+    // 書籍を選択
+    fireEvent.click(screen.getByTestId('mock-select-book'));
+
+    // 外部検索で選択された書籍の重複チェックが呼ばれることを確認
+    await waitFor(() => {
+      expect(mockCheckDuplicate).toHaveBeenCalledWith('978-4-1234567890');
+    });
   });
 }); 
