@@ -73,12 +73,10 @@ jobs:
     
     - name: Create production env file
       run: |
-        echo "Checking Google Books API Key..."
-        if [ -n "${{ secrets.VITE_GOOGLE_BOOKS_API_KEY }}" ]; then
-          echo "Google Books API Key is set (length: ${#VITE_GOOGLE_BOOKS_API_KEY})"
-        else
-          echo "Google Books API Key is NOT set"
-        fi
+        echo "=== Debug: Checking all secrets ==="
+        echo "VITE_FIREBASE_API_KEY: $([ -n "${{ secrets.VITE_FIREBASE_API_KEY }}" ] && echo "SET (${#VITE_FIREBASE_API_KEY} chars)" || echo "NOT SET")"
+        echo "VITE_GOOGLE_BOOKS_API_KEY: $([ -n "${{ secrets.VITE_GOOGLE_BOOKS_API_KEY }}" ] && echo "SET (${#VITE_GOOGLE_BOOKS_API_KEY} chars)" || echo "NOT SET")"
+        echo "=== Creating .env.production ==="
         cat > .env.production << EOF
         VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }}
         VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
@@ -88,8 +86,12 @@ jobs:
         VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }}
         VITE_GOOGLE_BOOKS_API_KEY=${{ secrets.VITE_GOOGLE_BOOKS_API_KEY }}
         EOF
-        echo "Created .env.production file"
-        echo "VITE_GOOGLE_BOOKS_API_KEY length in file: $(grep VITE_GOOGLE_BOOKS_API_KEY .env.production | cut -d'=' -f2 | wc -c)"
+        echo "=== .env.production file created ==="
+        echo "File contents (first 200 chars):"
+        head -c 200 .env.production
+        echo ""
+        echo "VITE_GOOGLE_BOOKS_API_KEY line:"
+        grep VITE_GOOGLE_BOOKS_API_KEY .env.production
     
     - name: Build
       run: npm run build
