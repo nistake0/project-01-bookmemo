@@ -13,12 +13,7 @@ dist-ssr
 *.local
 
 # Environment variables (絶対にGit管理しない)
-.env
-.env.local
-.env.development
-.env.production
-.env.production.backup
-.env.test
+.env*
 
 # Editor directories and files
 .vscode/*
