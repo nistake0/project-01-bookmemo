@@ -7,6 +7,7 @@
 export const BOOK_STATUS = {
   TSUNDOKU: 'tsundoku',      // 積読
   READING: 'reading',        // 読書中
+  SUSPENDED: 'suspended',    // 中断
   RE_READING: 're-reading',  // 再読中
   FINISHED: 'finished'       // 読了
 };
@@ -23,6 +24,7 @@ export const ACQUISITION_TYPE = {
 export const BOOK_STATUS_LABELS = {
   [BOOK_STATUS.TSUNDOKU]: '積読',
   [BOOK_STATUS.READING]: '読書中',
+  [BOOK_STATUS.SUSPENDED]: '中断',
   [BOOK_STATUS.RE_READING]: '再読中',
   [BOOK_STATUS.FINISHED]: '読了'
 };
@@ -39,6 +41,7 @@ export const ACQUISITION_TYPE_LABELS = {
 export const BOOK_STATUS_COLORS = {
   [BOOK_STATUS.TSUNDOKU]: 'default',
   [BOOK_STATUS.READING]: 'primary',
+  [BOOK_STATUS.SUSPENDED]: 'warning',
   [BOOK_STATUS.RE_READING]: 'secondary',
   [BOOK_STATUS.FINISHED]: 'success'
 };
@@ -50,6 +53,7 @@ export const DEFAULT_BOOK_STATUS = BOOK_STATUS.TSUNDOKU;
 export const ALL_BOOK_STATUSES = [
   BOOK_STATUS.TSUNDOKU,
   BOOK_STATUS.READING,
+  BOOK_STATUS.SUSPENDED,
   BOOK_STATUS.RE_READING,
   BOOK_STATUS.FINISHED
 ];
@@ -67,6 +71,7 @@ export const FILTER_STATUSES = {
   ALL: 'all',
   TSUNDOKU: BOOK_STATUS.TSUNDOKU,
   READING: BOOK_STATUS.READING,
+  SUSPENDED: BOOK_STATUS.SUSPENDED,
   RE_READING: BOOK_STATUS.RE_READING,
   FINISHED: BOOK_STATUS.FINISHED
 };
@@ -76,6 +81,7 @@ export const FILTER_LABELS = {
   [FILTER_STATUSES.ALL]: 'すべて',
   [FILTER_STATUSES.TSUNDOKU]: '積読',
   [FILTER_STATUSES.READING]: '読書中',
+  [FILTER_STATUSES.SUSPENDED]: '中断',
   [FILTER_STATUSES.RE_READING]: '再読中',
   [FILTER_STATUSES.FINISHED]: '読了'
 };

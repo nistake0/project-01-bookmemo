@@ -17,6 +17,7 @@ describe('bookStatus constants', () => {
     it('should have correct status values', () => {
       expect(BOOK_STATUS.TSUNDOKU).toBe('tsundoku');
       expect(BOOK_STATUS.READING).toBe('reading');
+      expect(BOOK_STATUS.SUSPENDED).toBe('suspended');
       expect(BOOK_STATUS.RE_READING).toBe('re-reading');
       expect(BOOK_STATUS.FINISHED).toBe('finished');
     });
@@ -35,6 +36,7 @@ describe('bookStatus constants', () => {
     it('should have correct status labels', () => {
       expect(BOOK_STATUS_LABELS[BOOK_STATUS.TSUNDOKU]).toBe('積読');
       expect(BOOK_STATUS_LABELS[BOOK_STATUS.READING]).toBe('読書中');
+      expect(BOOK_STATUS_LABELS[BOOK_STATUS.SUSPENDED]).toBe('中断');
       expect(BOOK_STATUS_LABELS[BOOK_STATUS.RE_READING]).toBe('再読中');
       expect(BOOK_STATUS_LABELS[BOOK_STATUS.FINISHED]).toBe('読了');
     });
@@ -54,6 +56,7 @@ describe('bookStatus constants', () => {
       expect(ALL_BOOK_STATUSES).toEqual([
         BOOK_STATUS.TSUNDOKU,
         BOOK_STATUS.READING,
+        BOOK_STATUS.SUSPENDED,
         BOOK_STATUS.RE_READING,
         BOOK_STATUS.FINISHED
       ]);
@@ -103,6 +106,9 @@ describe('bookStatus constants', () => {
     it('should return correct color for valid status', () => {
       expect(getBookStatusColor(BOOK_STATUS.TSUNDOKU)).toBe('default');
       expect(getBookStatusColor(BOOK_STATUS.READING)).toBe('primary');
+      expect(getBookStatusColor(BOOK_STATUS.SUSPENDED)).toBe('warning');
+      expect(getBookStatusColor(BOOK_STATUS.RE_READING)).toBe('secondary');
+      expect(getBookStatusColor(BOOK_STATUS.FINISHED)).toBe('success');
     });
 
     it('should return default color for invalid status', () => {
@@ -113,7 +119,8 @@ describe('bookStatus constants', () => {
   describe('getNextBookStatus', () => {
     it('should return next status in cycle', () => {
       expect(getNextBookStatus(BOOK_STATUS.TSUNDOKU)).toBe(BOOK_STATUS.READING);
-      expect(getNextBookStatus(BOOK_STATUS.READING)).toBe(BOOK_STATUS.RE_READING);
+      expect(getNextBookStatus(BOOK_STATUS.READING)).toBe(BOOK_STATUS.SUSPENDED);
+      expect(getNextBookStatus(BOOK_STATUS.SUSPENDED)).toBe(BOOK_STATUS.RE_READING);
       expect(getNextBookStatus(BOOK_STATUS.RE_READING)).toBe(BOOK_STATUS.FINISHED);
       expect(getNextBookStatus(BOOK_STATUS.FINISHED)).toBe(BOOK_STATUS.TSUNDOKU);
     });
