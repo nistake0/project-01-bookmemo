@@ -97,7 +97,7 @@ describe('useBookList', () => {
       expect(result.current.error).toBe(null);
       expect(result.current.allBooks).toEqual([]);
       expect(result.current.filteredBooks).toEqual([]);
-      expect(result.current.filter).toBe('reading');
+      expect(result.current.filter).toBe('reading-group');
       expect(result.current.searchText).toBe('');
       expect(result.current.stats).toEqual({
         total: 0,
@@ -126,7 +126,7 @@ describe('useBookList', () => {
       expect(getDocs).toHaveBeenCalledWith('mock-query');
 
       expect(result.current.allBooks).toEqual(mockBooks);
-      expect(result.current.filteredBooks).toEqual([mockBooks[0], mockBooks[2]]); // readingのみ
+      expect(result.current.filteredBooks).toEqual([mockBooks[0], mockBooks[2]]); // reading-group (reading含む)
       expect(result.current.stats).toEqual({
         total: 3,
         tsundoku: 0,
@@ -213,7 +213,7 @@ describe('useBookList', () => {
         result.current.clearFilter();
       });
 
-      expect(result.current.filter).toBe('reading');
+      expect(result.current.filter).toBe('reading-group');
     });
   });
 
@@ -307,7 +307,7 @@ describe('useBookList', () => {
       });
 
       expect(result.current.searchText).toBe('');
-      expect(result.current.filteredBooks).toEqual([mockBooks[0], mockBooks[2]]); // readingのみ
+      expect(result.current.filteredBooks).toEqual([mockBooks[0], mockBooks[2]]); // reading-group (reading含む)
     });
   });
 
@@ -325,7 +325,7 @@ describe('useBookList', () => {
         reading: 2,
         reReading: 0,
         finished: 1,
-        filtered: 2, // readingのみ表示
+        filtered: 2, // reading-group (reading含む)表示
       });
     });
 

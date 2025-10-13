@@ -88,9 +88,8 @@ export default function BookList() {
           >
             <Tab label={FILTER_LABELS[FILTER_STATUSES.ALL]} value={FILTER_STATUSES.ALL} />
             <Tab label={FILTER_LABELS[FILTER_STATUSES.TSUNDOKU]} value={FILTER_STATUSES.TSUNDOKU} />
-            <Tab label={FILTER_LABELS[FILTER_STATUSES.READING]} value={FILTER_STATUSES.READING} />
+            <Tab label={FILTER_LABELS[FILTER_STATUSES.READING_GROUP]} value={FILTER_STATUSES.READING_GROUP} />
             <Tab label={FILTER_LABELS[FILTER_STATUSES.SUSPENDED]} value={FILTER_STATUSES.SUSPENDED} />
-            <Tab label={FILTER_LABELS[FILTER_STATUSES.RE_READING]} value={FILTER_STATUSES.RE_READING} />
             <Tab label={FILTER_LABELS[FILTER_STATUSES.FINISHED]} value={FILTER_STATUSES.FINISHED} />
           </Tabs>
         </Box>

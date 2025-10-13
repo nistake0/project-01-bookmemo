@@ -22,16 +22,23 @@ describe('useBookFiltering utilities', () => {
       { id: '2', title: 'Effective TypeScript', author: 'Dan', tags: ['Programming', 'TS'], status: BOOK_STATUS.FINISHED },
       { id: '3', title: 'アルゴリズム図鑑', author: '鈴木', tags: ['コンピュータ'], status: BOOK_STATUS.TSUNDOKU },
       { id: '4', title: 'Reactパターン', author: 'Ｙａｍａｄａ', tags: ['ＪＳ', 'ＵＩ'], status: BOOK_STATUS.RE_READING },
+      { id: '5', title: 'Python入門', author: '佐藤', tags: ['プログラミング'], status: BOOK_STATUS.SUSPENDED },
     ];
 
     it('returns all when filter is ALL and no search text', () => {
       const result = filterBooks(books, FILTER_STATUSES.ALL, '');
-      expect(result.map(b => b.id)).toEqual(['1','2','3','4']);
+      expect(result.map(b => b.id)).toEqual(['1','2','3','4','5']);
     });
 
     it('filters by status', () => {
       const result = filterBooks(books, FILTER_STATUSES.FINISHED, '');
       expect(result.map(b => b.id)).toEqual(['2']);
+    });
+
+    it('filters by reading-group (reading + re-reading)', () => {
+      const result = filterBooks(books, FILTER_STATUSES.READING_GROUP, '');
+      // reading (id:1) + re-reading (id:4)
+      expect(result.map(b => b.id)).toEqual(['1', '4']);
     });
 
     it('filters by title/author/tags with normalization', () => {

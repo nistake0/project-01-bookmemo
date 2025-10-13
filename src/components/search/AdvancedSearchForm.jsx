@@ -79,7 +79,7 @@ function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSear
             ステータス
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            {Object.values(FILTER_STATUSES).map((status) => (
+            {[FILTER_STATUSES.ALL, FILTER_STATUSES.TSUNDOKU, FILTER_STATUSES.READING_GROUP, FILTER_STATUSES.SUSPENDED, FILTER_STATUSES.FINISHED].map((status) => (
               <Button
                 key={status}
                 variant={statusFilter === status ? 'contained' : 'outlined'}

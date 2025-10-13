@@ -58,7 +58,7 @@ export const useBookList = () => {
   const [allBooks, setAllBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState(FILTER_STATUSES.READING);
+  const [filter, setFilter] = useState(FILTER_STATUSES.READING_GROUP);
   const [searchText, setSearchText] = useState('');
 
   const fetchBooks = useCallback(async () => {
@@ -103,7 +103,7 @@ export const useBookList = () => {
   }, []);
 
   const clearFilter = useCallback(() => {
-    setFilter(FILTER_STATUSES.READING);
+    setFilter(FILTER_STATUSES.READING_GROUP);
   }, []);
 
   // フィルタリング・検索ロジック（外部関数に委譲）

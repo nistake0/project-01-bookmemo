@@ -1043,14 +1043,15 @@
   - [x] 実装時間: 約2時間
   - [x] テスト結果: 455/458テスト成功（3 skipped）
   
-- [ ] **トップページで「読書中」「再読中」をまとめる**
-  - [ ] タブ構成変更: すべて / 積読 / **読書中（統合）** / 読了
-  - [ ] 「読書中」タブで reading + re-reading + suspended を表示
-  - [ ] `FILTER_STATUSES.READING_GROUP = 'reading-group'`を追加
-  - [ ] フィルタリングロジック: 複数ステータスのOR条件
-  - [ ] 影響範囲: `src/constants/bookStatus.js`、`useBookFiltering.js`、`BookList.jsx`
-  - [ ] メリット: タブ数削減（5→4）、モバイル表示改善、読書継続性重視
-  - [ ] 実装時間: 約1-2時間
+- [x] **トップページで「読書中」「再読中」をまとめる** ✅ **2025-09-28完了**
+  - [x] タブ構成変更: すべて / 積読 / **読書中（統合）** / 中断 / 読了
+  - [x] 「読書中」タブで reading + re-reading を表示（suspendedは独立）
+  - [x] `FILTER_STATUSES.READING_GROUP = 'reading-group'`を追加
+  - [x] フィルタリングロジック: 複数ステータスのOR条件
+  - [x] 影響範囲: `src/constants/bookStatus.js`、`useBookFiltering.js`、`BookList.jsx`、`AdvancedSearchForm.jsx`
+  - [x] メリット: タブ数削減（6→5）、モバイル表示改善、読書継続性重視
+  - [x] 実装時間: 約1.5時間
+  - [x] テスト結果: 456/459テスト成功（3 skipped）
   
 - [ ] **検索・タグページに「全文検索」タブを追加**
   - [ ] 新タブ構成: **全文検索（デフォルト）** / 高度な検索 / タグ管理
@@ -1090,14 +1091,17 @@ export const BOOK_STATUS_COLORS = {
 export const FILTER_STATUSES = {
   ALL: 'all',
   TSUNDOKU: 'tsundoku',
-  READING_GROUP: 'reading-group',  // NEW: 読書中グループ
+  READING_GROUP: 'reading-group',  // NEW: 読書中グループ（reading + re-reading）
+  SUSPENDED: 'suspended',
   FINISHED: 'finished'
 };
 
 // src/hooks/useBookFiltering.js
 if (filter === 'reading-group') {
-  return ['reading', 're-reading', 'suspended'].includes(status);
+  return ['reading', 're-reading'].includes(status);  // suspendedは含まない
 }
+
+// 最終タブ構成: すべて / 積読 / 読書中 / 中断 / 読了 (5タブ)
 ```
 
 **タスク3: 全文検索タブ追加**

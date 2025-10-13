@@ -38,10 +38,10 @@ describe('AdvancedSearchForm', () => {
       expect(screen.getByLabelText('テキスト検索（タイトル・著者・メモ内容・タグ）')).toBeInTheDocument();
       expect(screen.getByText('ステータス')).toBeInTheDocument();
       expect(screen.getByText('すべて')).toBeInTheDocument();
-      expect(screen.getByText('読書中')).toBeInTheDocument();
-      expect(screen.getByText('読了')).toBeInTheDocument();
       expect(screen.getByText('積読')).toBeInTheDocument();
-      expect(screen.getByText('再読中')).toBeInTheDocument();
+      expect(screen.getAllByText('読書中')).toHaveLength(1);  // reading-group
+      expect(screen.getByText('中断')).toBeInTheDocument();
+      expect(screen.getByText('読了')).toBeInTheDocument();
       expect(screen.getByText('検索実行')).toBeInTheDocument();
     });
 
@@ -95,10 +95,10 @@ describe('AdvancedSearchForm', () => {
       );
 
       expect(screen.getByTestId('status-filter-all')).toBeInTheDocument();
-      expect(screen.getByTestId('status-filter-reading')).toBeInTheDocument();
-      expect(screen.getByTestId('status-filter-finished')).toBeInTheDocument();
       expect(screen.getByTestId('status-filter-tsundoku')).toBeInTheDocument();
-      expect(screen.getByTestId('status-filter-re-reading')).toBeInTheDocument();
+      expect(screen.getByTestId('status-filter-reading-group')).toBeInTheDocument();
+      expect(screen.getByTestId('status-filter-suspended')).toBeInTheDocument();
+      expect(screen.getByTestId('status-filter-finished')).toBeInTheDocument();
     });
 
     test('ステータスフィルターが正しく動作する', () => {
@@ -109,12 +109,12 @@ describe('AdvancedSearchForm', () => {
         />
       );
 
-      const readingButton = screen.getByTestId('status-filter-reading');
+      const readingButton = screen.getByTestId('status-filter-reading-group');
       fireEvent.click(readingButton);
 
       expect(mockOnSearchConditionsChange).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: 'reading'
+          status: 'reading-group'
         })
       );
     });

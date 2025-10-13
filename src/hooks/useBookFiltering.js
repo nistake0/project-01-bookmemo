@@ -1,4 +1,4 @@
-import { FILTER_STATUSES, DEFAULT_BOOK_STATUS } from '../constants/bookStatus';
+import { FILTER_STATUSES, DEFAULT_BOOK_STATUS, BOOK_STATUS } from '../constants/bookStatus';
 
 // タグ・文字列正規化（小文字化＋全角英数字→半角）
 export function normalizeTag(tag) {
@@ -17,7 +17,16 @@ export function filterBooks(allBooks, filter, searchText) {
     // ステータスフィルター
     if (filter !== FILTER_STATUSES.ALL) {
       const status = book.status || DEFAULT_BOOK_STATUS;
-      if (status !== filter) return false;
+      
+      // 読書中グループフィルター（reading + re-reading のみ）
+      if (filter === FILTER_STATUSES.READING_GROUP) {
+        if (![BOOK_STATUS.READING, BOOK_STATUS.RE_READING].includes(status)) {
+          return false;
+        }
+      } else {
+        // 通常の個別ステータスフィルター
+        if (status !== filter) return false;
+      }
     }
 
     // 検索テキストフィルター
