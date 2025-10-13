@@ -52,9 +52,11 @@
   "publishedDate": "2024-01-01",
   "coverImageUrl": "https://...", // 書影URL
   "tags": ["小説", "名作"], // タグ配列
-  "status": "reading" or "finished",
+  "status": "tsundoku" or "reading" or "suspended" or "re-reading" or "finished",
+  "acquisitionType": "bought" or "borrowed" or "gift" or "unknown",
   "createdAt": "...",
-  "updatedAt": "..."
+  "updatedAt": "...",
+  "finishedAt": "..." // 読了時のみ設定
 }
 ```
 
@@ -370,6 +372,11 @@ graph TD
   - `.env`ファイルのGitコミット問題を発見・修正
   - Git履歴から機密情報を完全に除去
   - セキュリティ警告と管理手順をドキュメントに追加
+- [ ] **UI/UX改善の優先タスク（2025-09-28追加）** 🔥 **最優先**
+  - [ ] 書籍ステータスに「中断」を追加（2-3時間）
+  - [ ] トップページで「読書中」「再読中」をまとめる（1-2時間）
+  - [ ] 検索・タグページに「全文検索」タブを追加（2-3時間）
+  - 詳細: `doc/bug-feature-memo.md` 参照
 - [ ] 統計・ダッシュボード機能の設計・技術調査
 - [ ] 全文検索機能の実装
 - [ ] 画像添付機能（Firebase Storage Blazeプラン移行後）

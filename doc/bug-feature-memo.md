@@ -1031,6 +1031,93 @@
   - [ ] ★設定で「ナシ」選択可能化
   - [ ] 定数定義ファイル（`src/constants/memoRating.js`）の更新
 
+### UI/UX改善の優先タスク（2025-09-28追加）
+
+#### 優先度1（最優先）🔥
+- [ ] **書籍ステータスに「中断」を追加**
+  - [ ] `BOOK_STATUS.SUSPENDED = 'suspended'`を追加
+  - [ ] ステータスラベル: '中断'、色: 'warning'（オレンジ色）
+  - [ ] ステータスの並び順: 積読 → 読書中 → **中断** → 再読中 → 読了
+  - [ ] 影響範囲: `src/constants/bookStatus.js`、`BookStatusChanger.jsx`、`BookList.jsx`、テストコード
+  - [ ] データ移行: 不要（既存データに影響なし）
+  - [ ] 実装時間: 約2-3時間
+  
+- [ ] **トップページで「読書中」「再読中」をまとめる**
+  - [ ] タブ構成変更: すべて / 積読 / **読書中（統合）** / 読了
+  - [ ] 「読書中」タブで reading + re-reading + suspended を表示
+  - [ ] `FILTER_STATUSES.READING_GROUP = 'reading-group'`を追加
+  - [ ] フィルタリングロジック: 複数ステータスのOR条件
+  - [ ] 影響範囲: `src/constants/bookStatus.js`、`useBookFiltering.js`、`BookList.jsx`
+  - [ ] メリット: タブ数削減（5→4）、モバイル表示改善、読書継続性重視
+  - [ ] 実装時間: 約1-2時間
+  
+- [ ] **検索・タグページに「全文検索」タブを追加**
+  - [ ] 新タブ構成: **全文検索（デフォルト）** / 高度な検索 / タグ管理
+  - [ ] 全文検索タブ: テキストフィールド1つのみ、シンプルUI
+  - [ ] 検索対象: 書籍タイトル、著者、メモ内容、タグ
+  - [ ] リアルタイム検索（デバウンス付き）
+  - [ ] 新規コンポーネント: `src/components/search/FullTextSearch.jsx`
+  - [ ] 影響範囲: `src/pages/TagSearch.jsx`（タブ追加）
+  - [ ] メリット: 初心者に優しい、すぐに検索開始可能
+  - [ ] 実装時間: 約2-3時間
+
+#### 実装方針の詳細
+
+**タスク1: 「中断」ステータス追加**
+```javascript
+// src/constants/bookStatus.js
+export const BOOK_STATUS = {
+  TSUNDOKU: 'tsundoku',
+  READING: 'reading',
+  SUSPENDED: 'suspended',    // NEW
+  RE_READING: 're-reading',
+  FINISHED: 'finished'
+};
+
+export const BOOK_STATUS_LABELS = {
+  [BOOK_STATUS.SUSPENDED]: '中断',  // NEW
+};
+
+export const BOOK_STATUS_COLORS = {
+  [BOOK_STATUS.SUSPENDED]: 'warning',  // NEW (オレンジ色)
+};
+```
+
+**タスク2: ステータス表示の統合**
+```javascript
+// src/constants/bookStatus.js
+export const FILTER_STATUSES = {
+  ALL: 'all',
+  TSUNDOKU: 'tsundoku',
+  READING_GROUP: 'reading-group',  // NEW: 読書中グループ
+  FINISHED: 'finished'
+};
+
+// src/hooks/useBookFiltering.js
+if (filter === 'reading-group') {
+  return ['reading', 're-reading', 'suspended'].includes(status);
+}
+```
+
+**タスク3: 全文検索タブ追加**
+```javascript
+// src/components/search/FullTextSearch.jsx (NEW)
+<TextField
+  label="検索（書籍・メモ・タグから検索）"
+  value={searchText}
+  onChange={handleSearch}
+  fullWidth
+  autoFocus
+/>
+<SearchResults results={results} />
+```
+
+#### 実装スケジュール案
+- **セッション1**: タスク1実装（中断ステータス追加）+ テスト
+- **セッション2**: タスク2実装（ステータス統合）+ テスト  
+- **セッション3**: タスク3実装（全文検索タブ）+ テスト
+- **セッション4**: 統合テスト + ドキュメント更新
+
 ### 将来のタスク（積み込み）
 - [ ] **書籍詳細画面のさらなる改善**: ISBNのコピー機能、外部リンク等
   - ISBNのクリップボードコピー機能
