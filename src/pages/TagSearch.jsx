@@ -16,12 +16,10 @@ import AdvancedSearchForm from '../components/search/AdvancedSearchForm';
 import SearchResults from '../components/search/SearchResults';
 import FullTextSearch from '../components/search/FullTextSearch';
 import { useSearch } from '../hooks/useSearch';
-import { useNavigate } from 'react-router-dom';
-import MemoEditor from '../components/MemoEditor';
+import { useSearchResultHandler } from '../hooks/useSearchResultHandler.jsx';
 
 export default function TagSearch() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
   
   // 検索条件を親コンポーネントで管理（タブ間で共有）
@@ -36,10 +34,8 @@ export default function TagSearch() {
 
   const { results, loading, error, executeSearch, clearResults } = useSearch();
 
-  // メモ詳細ダイアログ用の状態
-  const [memoDialogOpen, setMemoDialogOpen] = useState(false);
-  const [selectedMemo, setSelectedMemo] = useState(null);
-  const [selectedMemoBookId, setSelectedMemoBookId] = useState(null);
+  // useSearchResultHandlerフックを使用（Phase 3-C）
+  const { handleResultClick, MemoDialog } = useSearchResultHandler(results);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -52,29 +48,6 @@ export default function TagSearch() {
   const handleSearch = (conditions) => {
     console.log('検索実行:', conditions);
     executeSearch(conditions);
-  };
-
-  const handleResultClick = (type, bookId, memoId) => {
-    if (type === 'book') {
-      navigate(`/book/${bookId}`);
-    } else if (type === 'memo') {
-      // 現在の結果から対象メモを特定し、ダイアログを開く
-      const memo = (results || []).find(r => r.type === 'memo' && r.id === memoId);
-      if (memo) {
-        setSelectedMemo(memo);
-        setSelectedMemoBookId(bookId);
-        setMemoDialogOpen(true);
-      } else {
-        // フォールバックとして書籍詳細へ遷移
-        navigate(`/book/${bookId}?memo=${memoId}`);
-      }
-    }
-  };
-
-  const handleCloseMemoDialog = () => {
-    setMemoDialogOpen(false);
-    setSelectedMemo(null);
-    setSelectedMemoBookId(null);
   };
 
   const handleClearSearch = () => {
@@ -178,15 +151,8 @@ export default function TagSearch() {
           <TagManagementTab onTagClick={handleTagClick} />
         </TabPanel>
 
-        {/* メモ詳細ダイアログ */}
-        <MemoEditor 
-          open={memoDialogOpen}
-          memo={selectedMemo}
-          bookId={selectedMemoBookId}
-          onClose={handleCloseMemoDialog}
-          onUpdate={handleCloseMemoDialog}
-          onDelete={handleCloseMemoDialog}
-        />
+        {/* メモ詳細ダイアログ（Phase 3-C: useSearchResultHandlerで管理） */}
+        <MemoDialog />
       </Box>
     </Box>
   );

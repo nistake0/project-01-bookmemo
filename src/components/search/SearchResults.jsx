@@ -1,4 +1,6 @@
+import PropTypes from 'prop-types';
 import { Typography, Box, Card, CardContent, Chip, Alert, CircularProgress } from "@mui/material";
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthProvider';
 import BookCard from '../BookCard';
 import { 
@@ -7,16 +9,80 @@ import {
 } from '../../constants/bookStatus';
 
 /**
- * 検索結果表示コンポーネント（アプローチ2：完全統合検索）
+ * SearchResults - 検索結果表示コンポーネント
+ * 
+ * 書籍とメモの検索結果を統一的に表示します。
+ * 各結果はクリック可能で、onResultClickコールバックを呼び出します。
  * 
  * @param {Object} props
- * @param {Array} props.results - 検索結果の配列
- * @param {boolean} props.loading - 読み込み中かどうか
- * @param {string} props.searchQuery - 検索クエリ
- * @param {Function} props.onResultClick - 結果クリック時のコールバック
+ * @param {Array} props.results - 検索結果の配列（必須）
+ *   - 各要素は { id, type, ... } の形式
+ *   - type は 'book' または 'memo'
+ *   - 書籍: { id, type: 'book', title, author, status, tags, updatedAt }
+ *   - メモ: { id, type: 'memo', bookId, bookTitle, text, comment, page, tags, createdAt }
+ * @param {boolean} props.loading - 読み込み中かどうか（デフォルト: false）
+ * @param {string} props.searchQuery - 検索クエリ文字列（デフォルト: ''）
+ * @param {Function} props.onResultClick - 結果クリック時のコールバック（必須）
+ *   - 型: (type: 'book' | 'memo', bookId: string, memoId?: string) => void
+ *   - typeが'book'の場合、memoIdは不要
+ *   - typeが'memo'の場合、memoIdは必須
+ *   - 提供されない場合、デフォルト動作（navigate）が実行される
+ *   - 開発環境では警告が表示される
+ * 
+ * @example
+ * // 推奨: useSearchResultHandlerフックを使用
+ * import { useSearchResultHandler } from '../../hooks/useSearchResultHandler';
+ * 
+ * function MySearchPage() {
+ *   const { results } = useSearch();
+ *   const { handleResultClick, MemoDialog } = useSearchResultHandler(results);
+ *   
+ *   return (
+ *     <>
+ *       <SearchResults 
+ *         results={results}
+ *         loading={false}
+ *         onResultClick={handleResultClick}
+ *       />
+ *       <MemoDialog />
+ *     </>
+ *   );
+ * }
+ * 
+ * @example
+ * // カスタムハンドラーを使用する場合
+ * <SearchResults 
+ *   results={results}
+ *   loading={false}
+ *   onResultClick={(type, bookId, memoId) => {
+ *     if (type === 'book') navigate(`/book/${bookId}`);
+ *     else openCustomMemoDialog(bookId, memoId);
+ *   }}
+ * />
  */
 function SearchResults({ results = [], loading = false, searchQuery = '', onResultClick }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  // デフォルトのクリックハンドラー (Phase 3-A)
+  const defaultOnResultClick = (type, bookId, memoId) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(
+        '[SearchResults] onResultClick not provided, using default navigation behavior. ' +
+        'Consider providing a custom handler for better control.'
+      );
+    }
+    
+    if (type === 'book') {
+      navigate(`/book/${bookId}`);
+    } else if (type === 'memo') {
+      // メモの場合は、書籍詳細 + クエリパラメータ
+      navigate(`/book/${bookId}?memo=${memoId}`);
+    }
+  };
+  
+  // onResultClickが提供されていればそれを使い、なければデフォルトを使う
+  const handleResultClick = onResultClick || defaultOnResultClick;
 
   if (loading) {
     return (
@@ -55,7 +121,7 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
         borderColor: 'purple.300',
         backgroundColor: 'purple.50'
       }}
-      onClick={() => onResultClick?.('memo', memo.bookId, memo.id)}
+      onClick={() => handleResultClick('memo', memo.bookId, memo.id)}
       data-testid={`memo-result-${memo.id}`}
     >
       <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
@@ -142,7 +208,7 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
         borderColor: 'blue.300',
         backgroundColor: 'blue.50'
       }}
-      onClick={() => onResultClick?.('book', book.id)}
+      onClick={() => handleResultClick('book', book.id)}
       data-testid={`book-result-${book.id}`}
     >
       <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
@@ -221,5 +287,46 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
     </Box>
   );
 }
+
+// PropTypes定義（Phase 5: 最終版）
+SearchResults.propTypes = {
+  results: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      type: PropTypes.oneOf(['book', 'memo']).isRequired,
+      // 書籍の場合
+      title: PropTypes.string,
+      author: PropTypes.string,
+      status: PropTypes.string,
+      tags: PropTypes.arrayOf(PropTypes.string),
+      updatedAt: PropTypes.oneOfType([
+        PropTypes.object,  // Firebase Timestamp
+        PropTypes.string,  // Serialized date
+        PropTypes.instanceOf(Date)
+      ]),
+      // メモの場合
+      bookId: PropTypes.string,
+      bookTitle: PropTypes.string,
+      text: PropTypes.string,
+      comment: PropTypes.string,
+      page: PropTypes.number,
+      createdAt: PropTypes.oneOfType([
+        PropTypes.object,
+        PropTypes.string,
+        PropTypes.instanceOf(Date)
+      ])
+    })
+  ),
+  loading: PropTypes.bool,
+  searchQuery: PropTypes.string,
+  onResultClick: PropTypes.func.isRequired  // Phase 5: 厳しく - 必須
+};
+
+// デフォルト props（onResultClickは必須なので含まない）
+SearchResults.defaultProps = {
+  results: [],
+  loading: false,
+  searchQuery: ''
+};
 
 export default SearchResults; 

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { 
   Box, 
   TextField, 
@@ -12,11 +11,10 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import CachedIcon from '@mui/icons-material/Cached';
-import { useNavigate } from 'react-router-dom';
 import { useFullTextSearch } from '../../hooks/useFullTextSearch';
+import { useSearchResultHandler } from '../../hooks/useSearchResultHandler.jsx';
 import { FULL_TEXT_SEARCH_CONFIG } from '../../config/fullTextSearchConfig';
 import SearchResults from './SearchResults';
-import MemoEditor from '../MemoEditor';
 
 /**
  * 全文検索コンポーネント
@@ -26,15 +24,12 @@ import MemoEditor from '../MemoEditor';
  * - 検索ボタン（Enter押下も可）
  * - キャッシュ機能（自動）
  * - レート制限（自動）
- * - メモ詳細ダイアログ（内部管理）
+ * - メモ詳細ダイアログ（useSearchResultHandlerで管理）
  * 
- * @param {Object} props
- * @param {Function} props.onBookClick - 書籍クリック時のコールバック（省略可）
- * @param {Function} props.onMemoClick - メモクリック時のコールバック（省略可）
+ * Phase 3-C: useSearchResultHandlerフックを使用して
+ * 標準的なクリックハンドラーとメモダイアログ管理を実装
  */
-export default function FullTextSearch({ onBookClick, onMemoClick }) {
-  const navigate = useNavigate();
-  
+export default function FullTextSearch() {
   const {
     searchText,
     error,
@@ -48,45 +43,10 @@ export default function FullTextSearch({ onBookClick, onMemoClick }) {
     canSearch
   } = useFullTextSearch();
   
-  // メモ詳細ダイアログの状態
-  const [memoDialogOpen, setMemoDialogOpen] = useState(false);
-  const [selectedMemo, setSelectedMemo] = useState(null);
-  const [selectedMemoBookId, setSelectedMemoBookId] = useState(null);
+  // useSearchResultHandlerフックを使用（Phase 3-C）
+  const { handleResultClick, MemoDialog } = useSearchResultHandler(results);
   
   const { PLACEHOLDER, DESCRIPTION } = FULL_TEXT_SEARCH_CONFIG;
-  
-  // 検索結果クリックハンドラー
-  const handleResultClick = (type, bookId, memoId) => {
-    if (type === 'book') {
-      // 書籍クリック: コールバックがあれば実行、なければ直接遷移
-      if (onBookClick) {
-        onBookClick(bookId);
-      } else {
-        navigate(`/book/${bookId}`);
-      }
-    } else if (type === 'memo') {
-      // メモクリック: ダイアログを開く
-      const memo = (results || []).find(r => r.type === 'memo' && r.id === memoId);
-      if (memo) {
-        setSelectedMemo(memo);
-        setSelectedMemoBookId(bookId);
-        setMemoDialogOpen(true);
-      } else {
-        // フォールバック: コールバックまたは直接遷移
-        if (onMemoClick) {
-          onMemoClick(bookId, memoId);
-        } else {
-          navigate(`/book/${bookId}?memo=${memoId}`);
-        }
-      }
-    }
-  };
-  
-  const handleCloseMemoDialog = () => {
-    setMemoDialogOpen(false);
-    setSelectedMemo(null);
-    setSelectedMemoBookId(null);
-  };
   
   // Enterキー押下で検索実行
   const handleKeyPress = (e) => {
@@ -204,15 +164,8 @@ export default function FullTextSearch({ onBookClick, onMemoClick }) {
         </Alert>
       )}
       
-      {/* メモ詳細ダイアログ */}
-      <MemoEditor 
-        open={memoDialogOpen}
-        memo={selectedMemo}
-        bookId={selectedMemoBookId}
-        onClose={handleCloseMemoDialog}
-        onUpdate={handleCloseMemoDialog}
-        onDelete={handleCloseMemoDialog}
-      />
+      {/* メモ詳細ダイアログ（Phase 3-C: useSearchResultHandlerで管理） */}
+      <MemoDialog />
     </Box>
   );
 }

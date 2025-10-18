@@ -1,6 +1,14 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { BrowserRouter } from 'react-router-dom';
 import SearchResults from './SearchResults';
+
+// react-router-domのモック
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate
+}));
 
 // Material-UIテーマの設定
 const theme = createTheme();
@@ -305,6 +313,238 @@ describe('SearchResults', () => {
       }).not.toThrow();
 
       expect(screen.getByText('検索条件を設定して検索を実行してください。')).toBeInTheDocument();
+    });
+  });
+
+  describe('props validation (Phase 1 追加)', () => {
+    beforeEach(() => {
+      mockNavigate.mockClear();
+    });
+
+    describe('デフォルト動作 (Phase 3-A 追加)', () => {
+      test('onResultClickが未定義の場合、書籍クリックで書籍詳細に遷移する', () => {
+        const mockResults = [
+          { 
+            id: 'book1', 
+            type: 'book', 
+            title: 'テスト本',
+            author: 'テスト著者',
+            status: 'reading',
+            tags: [],
+            updatedAt: { toDate: () => new Date('2024-01-01') }
+          }
+        ];
+        
+        renderWithTheme(
+          <BrowserRouter>
+            <SearchResults results={mockResults} />
+          </BrowserRouter>
+        );
+        
+        fireEvent.click(screen.getByTestId('book-result-book1'));
+        
+        // デフォルト動作: navigateが呼ばれる
+        expect(mockNavigate).toHaveBeenCalledWith('/book/book1');
+      });
+      
+      test('onResultClickが未定義の場合、メモクリックで書籍詳細+クエリパラメータに遷移する', () => {
+        const mockResults = [
+          { 
+            id: 'memo1', 
+            type: 'memo', 
+            bookId: 'book1',
+            bookTitle: 'テスト本',
+            text: 'テストメモ',
+            tags: [],
+            createdAt: { toDate: () => new Date('2024-01-01') }
+          }
+        ];
+        
+        renderWithTheme(
+          <BrowserRouter>
+            <SearchResults results={mockResults} />
+          </BrowserRouter>
+        );
+        
+        fireEvent.click(screen.getByTestId('memo-result-memo1'));
+        
+        // デフォルト動作: 書籍詳細 + memoクエリパラメータ
+        expect(mockNavigate).toHaveBeenCalledWith('/book/book1?memo=memo1');
+      });
+      
+      test('onResultClickが定義されている場合、デフォルト動作は実行されない', () => {
+        const mockOnResultClickLocal = jest.fn();
+        const mockResults = [
+          { 
+            id: 'book1', 
+            type: 'book', 
+            title: 'テスト本',
+            author: 'テスト著者',
+            status: 'reading',
+            tags: [],
+            updatedAt: { toDate: () => new Date('2024-01-01') }
+          }
+        ];
+        
+        renderWithTheme(
+          <BrowserRouter>
+            <SearchResults 
+              results={mockResults} 
+              onResultClick={mockOnResultClickLocal}
+            />
+          </BrowserRouter>
+        );
+        
+        fireEvent.click(screen.getByTestId('book-result-book1'));
+        
+        // カスタムハンドラーが呼ばれる
+        expect(mockOnResultClickLocal).toHaveBeenCalledWith('book', 'book1');
+        
+        // デフォルト動作（navigate）は呼ばれない
+        expect(mockNavigate).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('onResultClick propの検証', () => {
+      test('onResultClickが渡された場合、クリック時に実行される', () => {
+        const mockOnResultClickLocal = jest.fn();
+        const mockResults = [
+          { 
+            id: 'book1', 
+            type: 'book', 
+            title: 'テスト本',
+            author: 'テスト著者',
+            status: 'reading',
+            tags: [],
+            updatedAt: { toDate: () => new Date('2024-01-01') }
+          }
+        ];
+        
+        renderWithTheme(
+          <SearchResults 
+            results={mockResults}
+            onResultClick={mockOnResultClickLocal}
+          />
+        );
+        
+        fireEvent.click(screen.getByTestId('book-result-book1'));
+        expect(mockOnResultClickLocal).toHaveBeenCalledWith('book', 'book1');
+        expect(mockNavigate).not.toHaveBeenCalled(); // デフォルト動作は実行されない
+      });
+      
+      test('onResultClickが未定義の場合、エラーが出ない（現在の動作）', () => {
+        const mockResults = [
+          { 
+            id: 'book1', 
+            type: 'book', 
+            title: 'テスト本',
+            author: 'テスト著者',
+            status: 'reading',
+            tags: [],
+            updatedAt: { toDate: () => new Date('2024-01-01') }
+          }
+        ];
+        
+        // エラーが出ないことを確認
+        expect(() => {
+          renderWithTheme(
+            <BrowserRouter>
+              <SearchResults 
+                results={mockResults}
+                // onResultClickを渡さない
+              />
+            </BrowserRouter>
+          );
+        }).not.toThrow();
+        
+        // クリックしてもエラーが出ない
+        expect(() => {
+          fireEvent.click(screen.getByTestId('book-result-book1'));
+        }).not.toThrow();
+      });
+      
+      test('メモクリック時、onResultClickが未定義でもエラーが出ない', () => {
+        const mockResults = [
+          { 
+            id: 'memo1', 
+            type: 'memo', 
+            bookId: 'book1',
+            bookTitle: 'テスト本',
+            text: 'テストメモ',
+            tags: [],
+            createdAt: { toDate: () => new Date('2024-01-01') }
+          }
+        ];
+        
+        renderWithTheme(
+          <BrowserRouter>
+            <SearchResults 
+              results={mockResults}
+              // onResultClickを渡さない
+            />
+          </BrowserRouter>
+        );
+        
+        expect(() => {
+          fireEvent.click(screen.getByTestId('memo-result-memo1'));
+        }).not.toThrow();
+      });
+    });
+    
+    describe('results propの検証', () => {
+      test('resultsが空配列の場合、メッセージを表示', () => {
+        renderWithTheme(
+          <SearchResults 
+            results={[]} 
+            onResultClick={jest.fn()} 
+          />
+        );
+        expect(screen.getByText(/検索条件を設定して/)).toBeInTheDocument();
+      });
+      
+      test('resultsがundefinedの場合、エラーが出ない', () => {
+        expect(() => {
+          renderWithTheme(
+            <SearchResults 
+              results={undefined} 
+              onResultClick={jest.fn()} 
+            />
+          );
+        }).not.toThrow();
+      });
+      
+      test('resultsが混在している場合、書籍とメモの両方を表示', () => {
+        const mockResults = [
+          { 
+            id: 'book1', 
+            type: 'book', 
+            title: 'テスト本',
+            author: 'テスト著者',
+            status: 'reading',
+            tags: [],
+            updatedAt: { toDate: () => new Date('2024-01-01') }
+          },
+          { 
+            id: 'memo1', 
+            type: 'memo', 
+            bookId: 'book1',
+            bookTitle: 'テスト本',
+            text: 'テストメモ',
+            tags: [],
+            createdAt: { toDate: () => new Date('2024-01-01') }
+          }
+        ];
+        
+        renderWithTheme(
+          <SearchResults 
+            results={mockResults} 
+            onResultClick={jest.fn()} 
+          />
+        );
+        
+        expect(screen.getByText(/書籍: 1件/)).toBeInTheDocument();
+        expect(screen.getByText(/メモ: 1件/)).toBeInTheDocument();
+      });
     });
   });
 }); 
