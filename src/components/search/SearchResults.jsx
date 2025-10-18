@@ -118,7 +118,11 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
         {/* 作成日時 */}
         <Box sx={{ mt: 'auto' }}>
           <Typography variant="caption" color="text.secondary">
-            作成日: {memo.createdAt ? new Date(memo.createdAt.toDate()).toLocaleDateString('ja-JP') : '不明'}
+            作成日: {memo.createdAt 
+              ? (typeof memo.createdAt.toDate === 'function' 
+                  ? new Date(memo.createdAt.toDate()).toLocaleDateString('ja-JP')
+                  : new Date(memo.createdAt).toLocaleDateString('ja-JP'))
+              : '不明'}
           </Typography>
         </Box>
       </CardContent>
@@ -183,7 +187,11 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
         {/* 更新日時 */}
         <Box sx={{ mt: 'auto' }}>
           <Typography variant="caption" color="text.secondary">
-            更新日: {book.updatedAt ? new Date(book.updatedAt.toDate()).toLocaleDateString('ja-JP') : '不明'}
+            更新日: {book.updatedAt 
+              ? (typeof book.updatedAt.toDate === 'function' 
+                  ? new Date(book.updatedAt.toDate()).toLocaleDateString('ja-JP')
+                  : new Date(book.updatedAt).toLocaleDateString('ja-JP'))
+              : '不明'}
           </Typography>
         </Box>
       </CardContent>

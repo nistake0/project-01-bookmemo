@@ -14,6 +14,7 @@ import TagList from '../components/tags/TagList';
 import TagStats from '../components/tags/TagStats';
 import AdvancedSearchForm from '../components/search/AdvancedSearchForm';
 import SearchResults from '../components/search/SearchResults';
+import FullTextSearch from '../components/search/FullTextSearch';
 import { useSearch } from '../hooks/useSearch';
 import { useNavigate } from 'react-router-dom';
 import MemoEditor from '../components/MemoEditor';
@@ -101,8 +102,8 @@ export default function TagSearch() {
     
     setSearchConditions(newSearchConditions);
     
-    // 検索タブに切り替え
-    setActiveTab(0);
+    // 詳細検索タブに切り替え（index 1）
+    setActiveTab(1);
     
     // 検索を実行
     executeSearch(newSearchConditions);
@@ -136,22 +137,32 @@ export default function TagSearch() {
             data-testid="tag-search-tabs"
           >
             <Tab 
-              label="高度な検索" 
+              label="全文検索" 
               id="tag-search-tab-0"
               aria-controls="tag-search-tabpanel-0"
-              data-testid="search-tab"
+              data-testid="full-text-search-tab"
+            />
+            <Tab 
+              label="詳細検索" 
+              id="tag-search-tab-1"
+              aria-controls="tag-search-tabpanel-1"
+              data-testid="advanced-search-tab"
             />
             <Tab 
               label="タグ管理" 
-              id="tag-search-tab-1"
-              aria-controls="tag-search-tabpanel-1"
+              id="tag-search-tab-2"
+              aria-controls="tag-search-tabpanel-2"
               data-testid="tag-management-tab"
             />
           </Tabs>
         </Box>
         
-        <TabPanel value={activeTab} index={0} data-testid="search-tab-panel">
-          <SearchTab 
+        <TabPanel value={activeTab} index={0} data-testid="full-text-search-tab-panel">
+          <FullTextSearchTab />
+        </TabPanel>
+        
+        <TabPanel value={activeTab} index={1} data-testid="advanced-search-tab-panel">
+          <AdvancedSearchTab 
             searchConditions={searchConditions}
             onSearchConditionsChange={handleSearchConditionsChange}
             onSearch={handleSearch}
@@ -163,7 +174,7 @@ export default function TagSearch() {
           />
         </TabPanel>
         
-        <TabPanel value={activeTab} index={1} data-testid="tag-management-tab-panel">
+        <TabPanel value={activeTab} index={2} data-testid="tag-management-tab-panel">
           <TagManagementTab onTagClick={handleTagClick} />
         </TabPanel>
 
@@ -181,8 +192,23 @@ export default function TagSearch() {
   );
 }
 
-// 検索タブのコンテンツ
-function SearchTab({ 
+// 全文検索タブのコンテンツ
+function FullTextSearchTab() {
+  return (
+    <Box>
+      <Typography variant="h5" gutterBottom>全文検索</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        シンプルな検索で書籍・メモを素早く見つけられます。
+      </Typography>
+      
+      {/* FullTextSearchコンポーネントが自己完結（メモダイアログも内部管理） */}
+      <FullTextSearch />
+    </Box>
+  );
+}
+
+// 詳細検索タブのコンテンツ
+function AdvancedSearchTab({ 
   searchConditions, 
   onSearchConditionsChange, 
   onSearch, 
@@ -194,9 +220,9 @@ function SearchTab({
 }) {
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>高度な検索</Typography>
+      <Typography variant="h5" gutterBottom>詳細検索</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        タイトル・著者・タグ・メモ内容で絞り込みできます。
+        タイトル・著者・タグ・メモ内容・日付などで詳細に絞り込みできます。
       </Typography>
       
       <AdvancedSearchForm
