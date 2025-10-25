@@ -360,7 +360,14 @@ describe('FullTextSearch', () => {
     fireEvent.click(screen.getByTestId('result-0'));
     
     // 書籍詳細ページに遷移
-    expect(mockNavigate).toHaveBeenCalledWith('/book/book1');
+    expect(mockNavigate).toHaveBeenCalledWith('/book/book1', expect.objectContaining({
+      state: expect.objectContaining({
+        returnPath: expect.any(String),
+        searchState: expect.objectContaining({
+          results: expect.any(Array)
+        })
+      })
+    }));
   });
 
   test('メモクリック時はメモ詳細ダイアログが開く', () => {

@@ -263,7 +263,14 @@ describe('TagSearch', () => {
       
       // 本の結果をクリック → 書籍詳細へ遷移
       fireEvent.click(screen.getByTestId('result-0'));
-      expect(mockNavigate).toHaveBeenCalledWith('/book/book1');
+      expect(mockNavigate).toHaveBeenCalledWith('/book/book1', expect.objectContaining({
+        state: expect.objectContaining({
+          returnPath: expect.any(String),
+          searchState: expect.objectContaining({
+            results: expect.any(Array)
+          })
+        })
+      }));
 
       // メモの結果をクリック → メモ詳細ダイアログが開く（遷移しない）
       fireEvent.click(screen.getByTestId('result-1'));
