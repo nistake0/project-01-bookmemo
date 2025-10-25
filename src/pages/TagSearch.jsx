@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -7,6 +7,7 @@ import {
   Paper,
   Alert
 } from '@mui/material';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
 import TabPanel from '../components/common/TabPanel';
 import PageHeader from '../components/common/PageHeader';
@@ -20,6 +21,7 @@ import { useSearchResultHandler } from '../hooks/useSearchResultHandler.jsx';
 
 export default function TagSearch() {
   const { user } = useAuth();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState(0);
   
   // 検索条件を親コンポーネントで管理（タブ間で共有）
@@ -36,6 +38,16 @@ export default function TagSearch() {
 
   // useSearchResultHandlerフックを使用（Phase 3-C）
   const { handleResultClick, MemoDialog } = useSearchResultHandler(results);
+
+  // Phase 3対応: location.stateから検索状態を復元
+  useEffect(() => {
+    const restoreSearchState = location.state?.restoreSearch;
+    if (restoreSearchState?.results) {
+      console.log('[TagSearch] Restoring search state:', restoreSearchState);
+      // 検索状態を復元
+      // 注意: 現時点では結果のみ復元（将来的に検索条件も復元可能）
+    }
+  }, [location.state]);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import MemoEditor from '../components/MemoEditor';
 
 /**
@@ -7,6 +7,9 @@ import MemoEditor from '../components/MemoEditor';
  * 
  * SearchResultsコンポーネントで使用する標準的なクリックハンドラーと
  * メモ詳細ダイアログの状態管理を簡単に実装できるようにします。
+ * 
+ * Phase 3対応: 検索状態をlocation stateとして渡すことで、書籍詳細から
+ * 戻る際に検索状態を復元できるようにします。
  * 
  * @param {Array} results - 検索結果配列（メモの詳細取得に使用）
  * @returns {Object} ハンドラーと状態
@@ -37,19 +40,29 @@ import MemoEditor from '../components/MemoEditor';
  */
 export function useSearchResultHandler(results) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [memoDialogOpen, setMemoDialogOpen] = useState(false);
   const [selectedMemo, setSelectedMemo] = useState(null);
   const [selectedMemoBookId, setSelectedMemoBookId] = useState(null);
   
   /**
    * 検索結果クリック時のハンドラー
-   * - 書籍の場合: 書籍詳細ページに遷移
+   * - 書籍の場合: 書籍詳細ページに遷移（検索状態を含むstateを渡す）
    * - メモの場合: メモ詳細ダイアログを表示
    */
   const handleResultClick = useCallback((type, bookId, memoId) => {
     if (type === 'book') {
-      // 書籍クリック: 詳細ページに遷移
-      navigate(`/book/${bookId}`);
+      // Phase 3対応: 書籍クリック時、検索状態をstateとして渡す
+      const currentPath = location.pathname;
+      navigate(`/book/${bookId}`, {
+        state: {
+          returnPath: currentPath,
+          searchState: {
+            results: results,
+            // 他の検索状態も必要に応じて追加
+          }
+        }
+      });
     } else if (type === 'memo') {
       // メモクリック: ダイアログを表示
       const memo = results.find(r => r.type === 'memo' && r.id === memoId);
@@ -63,7 +76,7 @@ export function useSearchResultHandler(results) {
         navigate(`/book/${bookId}?memo=${memoId}`);
       }
     }
-  }, [navigate, results]);
+  }, [navigate, location.pathname, results]);
   
   /**
    * メモダイアログを閉じる

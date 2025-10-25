@@ -24,7 +24,7 @@ describe('useSearchResultHandler', () => {
   });
   
   describe('handleResultClick - 書籍', () => {
-    it('書籍クリック時にnavigateを呼ぶ', () => {
+    it('書籍クリック時にnavigateを呼ぶ（stateを含む）', () => {
       const mockResults = [];
       const { result } = renderHook(() => useSearchResultHandler(mockResults), { wrapper });
       
@@ -32,7 +32,15 @@ describe('useSearchResultHandler', () => {
         result.current.handleResultClick('book', 'book123');
       });
       
-      expect(mockNavigate).toHaveBeenCalledWith('/book/book123');
+      // Phase 3対応: stateを含むnavigate呼び出しを期待
+      expect(mockNavigate).toHaveBeenCalledWith('/book/book123', {
+        state: {
+          returnPath: '/',
+          searchState: {
+            results: []
+          }
+        }
+      });
     });
   });
   

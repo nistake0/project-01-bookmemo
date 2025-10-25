@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { 
   collection, 
   query, 
@@ -14,6 +14,7 @@ import { getDateRangeFilter } from '../utils/searchDateRange';
 import { buildSearchQueries } from './useSearchQuery';
 import { executeSearchQueries } from './useSearchExecution';
 import { processSearchResults } from './useSearchResults';
+import { saveSearchResults, restoreSearchResults, clearSearchResults as clearSearchStorage } from '../utils/searchStorage';
 
 /**
  * 検索機能のカスタムフック
@@ -28,6 +29,16 @@ export function useSearch(options = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { limit: resultLimit = 50 } = options;
+  
+  // フック初期化時にsessionStorageから検索結果を復元
+  useEffect(() => {
+    if (!user) return;
+    
+    const savedResults = restoreSearchResults();
+    if (savedResults) {
+      setResults(savedResults);
+    }
+  }, [user]);
 
   /**
    * 検索条件からクエリを構築
@@ -101,6 +112,9 @@ export function useSearch(options = {}) {
 
       const processed = processSearchResults(allResults, conditions);
       setResults(processed);
+      
+      // 検索結果をsessionStorageに自動保存
+      saveSearchResults(processed);
     } catch (err) {
       console.error('検索エラー:', err);
       setError('検索中にエラーが発生しました');
@@ -115,6 +129,8 @@ export function useSearch(options = {}) {
   const clearResults = useCallback(() => {
     setResults([]);
     setError(null);
+    // sessionStorageもクリア
+    clearSearchStorage();
   }, []);
 
   return {

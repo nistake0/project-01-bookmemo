@@ -21,6 +21,7 @@ import LatestStatusHistory from '../components/LatestStatusHistory';
 import { useBook } from '../hooks/useBook';
 import { useBookStatusHistory } from '../hooks/useBookStatusHistory';
 import { useBookStatusManager } from '../hooks/useBookStatusManager';
+import { useNavigation } from '../hooks/useNavigation';
 
 const BookDetail = () => {
   const { id } = useParams();
@@ -42,6 +43,9 @@ const BookDetail = () => {
     addManualStatusHistory, 
     updateBookStatus
   );
+  
+  // Phase 3対応: ナビゲーションフックを使用
+  const { handleBack } = useNavigation();
   
   const [memoListKey, setMemoListKey] = useState(0); // MemoListの再レンダリング用
   const [memoAddDialogOpen, setMemoAddDialogOpen] = useState(false);
