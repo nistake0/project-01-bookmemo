@@ -59,21 +59,23 @@ const PWAInstallPrompt = () => {
   const [showManualGuide, setShowManualGuide] = useState(false);
 
   // インストール可能になったらプロンプトを表示
-  useEffect(() => {
-    if (isInstallable && !isInstalled && shouldShowInstallPrompt) {
-      // 強化版プロンプトを表示（テスト用に即座に表示）
-      setShowEnhancedPrompt(true);
-    } else if (isInstallable && !isInstalled) {
-      setShowInstallPrompt(true);
-    }
-  }, [isInstallable, isInstalled, shouldShowInstallPrompt]);
+  // タスク1対応: 起動時の自動表示を無効化（実装は残す）
+  // useEffect(() => {
+  //   if (isInstallable && !isInstalled && shouldShowInstallPrompt) {
+  //     // 強化版プロンプトを表示（テスト用に即座に表示）
+  //     setShowEnhancedPrompt(true);
+  //   } else if (isInstallable && !isInstalled) {
+  //     setShowInstallPrompt(true);
+  //   }
+  // }, [isInstallable, isInstalled, shouldShowInstallPrompt]);
 
   // iPhone用の手動インストールガイドを表示
-  useEffect(() => {
-    if (shouldShowManualInstallGuide && !isInstalled) {
-      setShowManualGuide(true);
-    }
-  }, [shouldShowManualInstallGuide, isInstalled]);
+  // タスク1対応: 起動時の自動表示を無効化（実装は残す）
+  // useEffect(() => {
+  //   if (shouldShowManualInstallGuide && !isInstalled) {
+  //     setShowManualGuide(true);
+  //   }
+  // }, [shouldShowManualInstallGuide, isInstalled]);
 
   // オフライン状態の監視
   useEffect(() => {
