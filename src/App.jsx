@@ -16,13 +16,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import TagSearch from "./pages/TagSearch";
 import Stats from "./pages/Stats";
-import MyPage from "./pages/MyPage";
 import CommonErrorDialog, { ErrorDialogContext, ErrorDialogProvider } from "./components/CommonErrorDialog";
 import { ThemeProvider } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import { usePWA } from "./hooks/usePWA";
+import { useNavigation } from "./hooks/useNavigation";
 import { withReactContext } from "./hooks/useReactContext.jsx";
 import { useContext } from 'react';
 import { PATHS } from './config/paths';
@@ -65,7 +65,6 @@ function AppBottomNav() {
     if (location.pathname.startsWith('/add')) setValue(1);
     else if (location.pathname.startsWith('/tags')) setValue(2);
     else if (location.pathname.startsWith('/stats')) setValue(3);
-    else if (location.pathname.startsWith('/mypage')) setValue(4);
     else setValue(0); // デフォルトは本一覧
   }, [location.pathname]);
 
@@ -78,7 +77,6 @@ function AppBottomNav() {
         if (newValue === 1) navigate('/add');
         if (newValue === 2) navigate('/tags');
         if (newValue === 3) navigate('/stats');
-        if (newValue === 4) navigate('/mypage');
       }}
       showLabels
       sx={{ 
@@ -144,16 +142,6 @@ function AppBottomNav() {
           }
         }}
       />
-      <BottomNavigationAction 
-        label="マイページ" 
-        icon={<PersonIcon />} 
-        data-testid="bottom-nav-mypage"
-        sx={{ 
-          '&.Mui-selected': {
-            color: 'primary.main'
-          }
-        }}
-      />
     </BottomNavigation>
   );
 }
@@ -162,12 +150,69 @@ function AppRoutes() {
   const location = useLocation();
   const { user } = useAuth();
   const { setGlobalError } = useContext(ErrorDialogContext);
+  const { isStandalone } = usePWA();
+  const { handleBack, handleForward } = useNavigation();
 
   const hideBottomNav = (
     location.pathname.startsWith('/login') ||
     location.pathname.startsWith('/signup') ||
     !user
   );
+
+  // 全画面共通のスワイプジェスチャ（PWA時のみ）
+  useEffect(() => {
+    if (!isStandalone) return;
+    
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
+    const minSwipeDistance = 100; // 最小スワイプ距離
+    
+    const onTouchStart = (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    };
+    
+    const onTouchEnd = (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
+      handleSwipe();
+    };
+    
+    const handleSwipe = () => {
+      const swipeDiff = touchEndX - touchStartX;
+      const swipeDiffVertical = Math.abs(touchEndY - touchStartY);
+      const minSwipe = minSwipeDistance;
+      
+      // ターゲット要素を確認して競合回避
+      const target = document.elementFromPoint(touchEndX, touchEndY);
+      
+      // スワイプ可能な要素（MemoCard等）を除外
+      if (target?.closest('[data-allow-local-swipe]')) {
+        return; // グローバルスワイプを無視
+      }
+      
+      // 水平スワイプのみ処理（垂直スワイプは無視）
+      if (Math.abs(swipeDiff) > minSwipe && Math.abs(swipeDiff) > swipeDiffVertical) {
+        if (swipeDiff > 0) {
+          // 右スワイプ → 戻る
+          handleBack();
+        } else {
+          // 左スワイプ → 進む
+          handleForward();
+        }
+      }
+    };
+    
+    document.addEventListener('touchstart', onTouchStart, { passive: true });
+    document.addEventListener('touchend', onTouchEnd, { passive: true });
+    
+    return () => {
+      document.removeEventListener('touchstart', onTouchStart);
+      document.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [isStandalone, handleBack, handleForward]);
 
   // エラーハンドリングの初期化
   useEffect(() => {
@@ -293,7 +338,6 @@ function AppRoutes() {
           <Route path="/book/:id" element={<PrivateRoute><BookDetail /></PrivateRoute>} />
           <Route path="/tags" element={<PrivateRoute><TagSearch /></PrivateRoute>} />
           <Route path="/stats" element={<PrivateRoute><Stats /></PrivateRoute>} />
-          <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Box>

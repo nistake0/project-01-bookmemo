@@ -50,7 +50,12 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
   // モバイルのみスワイプUI、PCは従来通り
   if (isMobile) {
     return (
-      <Box position="relative" {...handlers} sx={{ mb: 2 }}>
+      <Box 
+        position="relative" 
+        {...handlers} 
+        data-allow-local-swipe 
+        sx={{ mb: 2 }}
+      >
         <Card
           data-testid="memo-card"
           sx={{

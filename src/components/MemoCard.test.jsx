@@ -307,7 +307,7 @@ describe('MemoCard', () => {
     const { useMediaQuery } = require('@mui/material');
     useMediaQuery.mockReturnValue(true); // モバイル表示
 
-    renderWithProviders(
+    const { container } = renderWithProviders(
       <MemoCard 
         memo={mockMemo} 
         onEdit={mockOnEdit} 
@@ -322,6 +322,10 @@ describe('MemoCard', () => {
     // デスクトップ用ボタンが非表示になることを確認
     expect(screen.queryByTestId('memo-edit-button')).not.toBeInTheDocument();
     expect(screen.queryByTestId('memo-delete-button')).not.toBeInTheDocument();
+
+    // data-allow-local-swipe属性が存在することを確認
+    const swipeableBox = container.querySelector('[data-allow-local-swipe]');
+    expect(swipeableBox).toBeInTheDocument();
   });
 
   /**
