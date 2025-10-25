@@ -17,10 +17,10 @@ export const useNavigation = () => {
     const { returnPath, searchState } = location.state || {};
     
     if (returnPath && searchState) {
-      // 検索状態を復元して戻る
+      // location.stateがあれば検索状態を復元して戻る
       navigate(returnPath, { state: { restoreSearch: searchState } });
     } else {
-      // 通常の戻る
+      // location.stateがない場合は通常の戻る（sessionStorageからの復元はuseSearchが自動で行う）
       navigate(-1);
     }
   }, [navigate, location.state]);

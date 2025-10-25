@@ -34,7 +34,7 @@ export default function TagSearch() {
     sortOrder: 'desc'
   });
 
-  const { results, loading, error, executeSearch, clearResults } = useSearch();
+  const { results, loading, error, executeSearch, clearResults, setResults } = useSearch();
 
   // useSearchResultHandlerフックを使用（Phase 3-C）
   const { handleResultClick, MemoDialog } = useSearchResultHandler(results);
@@ -44,10 +44,10 @@ export default function TagSearch() {
     const restoreSearchState = location.state?.restoreSearch;
     if (restoreSearchState?.results) {
       console.log('[TagSearch] Restoring search state:', restoreSearchState);
-      // 検索状態を復元
-      // 注意: 現時点では結果のみ復元（将来的に検索条件も復元可能）
+      // 検索結果を復元
+      setResults(restoreSearchState.results);
     }
-  }, [location.state]);
+  }, [location.state, setResults]);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);

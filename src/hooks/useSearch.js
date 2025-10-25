@@ -138,6 +138,7 @@ export function useSearch(options = {}) {
     loading,
     error,
     executeSearch,
-    clearResults
+    clearResults,
+    setResults // 外部から検索結果を設定できるようにする
   };
 } 
