@@ -167,11 +167,17 @@ function AppRoutes() {
     let touchEndX = 0;
     let touchStartY = 0;
     let touchEndY = 0;
+    let isLocalSwipeElement = false; // ローカルスワイプ要素のフラグ
     const minSwipeDistance = 100; // 最小スワイプ距離
     
     const onTouchStart = (e) => {
       touchStartX = e.changedTouches[0].screenX;
       touchStartY = e.changedTouches[0].screenY;
+      
+      // タッチ開始位置の要素を確認して競合回避
+      const target = document.elementFromPoint(touchStartX, touchStartY);
+      // ローカルスワイプ要素（MemoCard等）の場合はフラグを立てる
+      isLocalSwipeElement = target?.closest('[data-allow-local-swipe]') !== null;
     };
     
     const onTouchEnd = (e) => {
@@ -185,12 +191,9 @@ function AppRoutes() {
       const swipeDiffVertical = Math.abs(touchEndY - touchStartY);
       const minSwipe = minSwipeDistance;
       
-      // ターゲット要素を確認して競合回避
-      const target = document.elementFromPoint(touchEndX, touchEndY);
-      
-      // スワイプ可能な要素（MemoCard等）を除外
-      if (target?.closest('[data-allow-local-swipe]')) {
-        return; // グローバルスワイプを無視
+      // ローカルスワイプ要素の場合はグローバルスワイプを無視
+      if (isLocalSwipeElement) {
+        return;
       }
       
       // 水平スワイプのみ処理（垂直スワイプは無視）
