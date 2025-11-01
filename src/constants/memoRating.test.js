@@ -177,17 +177,17 @@ describe('memoRating constants and utilities', () => {
 
   describe('getMemoRatingDescription', () => {
     test('should return correct descriptions for all ratings', () => {
-      expect(getMemoRatingDescription(MEMO_RATING.NONE)).toBe('ランク未設定');
-      expect(getMemoRatingDescription(MEMO_RATING.ONE)).toBe('あまり面白くなかった');
-      expect(getMemoRatingDescription(MEMO_RATING.TWO)).toBe('普通');
-      expect(getMemoRatingDescription(MEMO_RATING.THREE)).toBe('まあまあ面白かった');
-      expect(getMemoRatingDescription(MEMO_RATING.FOUR)).toBe('面白かった');
-      expect(getMemoRatingDescription(MEMO_RATING.FIVE)).toBe('とても面白かった');
+      expect(getMemoRatingDescription(MEMO_RATING.NONE)).toBe('ふつう');
+      expect(getMemoRatingDescription(MEMO_RATING.ONE)).toBe('少し面白かった');
+      expect(getMemoRatingDescription(MEMO_RATING.TWO)).toBe('まあまあ面白かった');
+      expect(getMemoRatingDescription(MEMO_RATING.THREE)).toBe('面白かった');
+      expect(getMemoRatingDescription(MEMO_RATING.FOUR)).toBe('とても面白かった');
+      expect(getMemoRatingDescription(MEMO_RATING.FIVE)).toBe('神がかり的に面白い');
     });
 
     test('should return default description for invalid ratings', () => {
-      expect(getMemoRatingDescription(999)).toBe('ランク未設定');
-      expect(getMemoRatingDescription(null)).toBe('ランク未設定');
+      expect(getMemoRatingDescription(999)).toBe('ふつう');
+      expect(getMemoRatingDescription(null)).toBe('ふつう');
     });
   });
 });

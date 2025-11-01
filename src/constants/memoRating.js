@@ -113,12 +113,12 @@ export const getMemoRatingSortOrder = (rating) => {
  */
 export const getMemoRatingDescription = (rating) => {
   const descriptions = {
-    [MEMO_RATING.NONE]: 'ランク未設定',
-    [MEMO_RATING.ONE]: 'あまり面白くなかった',
-    [MEMO_RATING.TWO]: '普通',
-    [MEMO_RATING.THREE]: 'まあまあ面白かった',
-    [MEMO_RATING.FOUR]: '面白かった',
-    [MEMO_RATING.FIVE]: 'とても面白かった'
+    [MEMO_RATING.NONE]: 'ふつう',
+    [MEMO_RATING.ONE]: '少し面白かった',
+    [MEMO_RATING.TWO]: 'まあまあ面白かった',
+    [MEMO_RATING.THREE]: '面白かった',
+    [MEMO_RATING.FOUR]: 'とても面白かった',
+    [MEMO_RATING.FIVE]: '神がかり的に面白い'
   };
   
   return descriptions[rating] || descriptions[DEFAULT_MEMO_RATING];

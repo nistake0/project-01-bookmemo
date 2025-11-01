@@ -156,9 +156,9 @@ describe('MemoAdd', () => {
     expect(thirdStar).toBeTruthy();
     fireEvent.click(thirdStar);
     
-    // ランクの説明文が表示されることを確認
+    // ランクの説明文が表示されることを確認（THREEは「面白かった」）
     await waitFor(() => {
-      expect(screen.getByText('まあまあ面白かった')).toBeInTheDocument();
+      expect(screen.getByText('面白かった')).toBeInTheDocument();
     });
   });
 

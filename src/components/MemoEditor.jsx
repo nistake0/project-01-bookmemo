@@ -123,16 +123,18 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode 
               {editingMemo?.comment && <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{editingMemo.comment}</Typography>}
               
               {/* ランク表示 */}
-              {editingMemo?.rating && editingMemo.rating > 0 && (
+              {editingMemo?.rating != null && (
                 <Box sx={{ mb: 1 }}>
-                  <Rating 
-                    value={editingMemo.rating} 
-                    readOnly 
-                    size="small"
-                    sx={{ mb: 0.5 }}
-                  />
+                  {editingMemo.rating > 0 && (
+                    <Rating 
+                      value={editingMemo.rating} 
+                      readOnly 
+                      size="small"
+                      sx={{ mb: 0.5 }}
+                    />
+                  )}
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                    {getMemoRatingDescription(editingMemo.rating)}
+                    {getMemoRatingDescription(editingMemo.rating || DEFAULT_MEMO_RATING)}
                   </Typography>
                 </Box>
               )}
@@ -194,11 +196,9 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode 
                   sx={{ mt: 1 }}
                   data-testid="memo-rating-input"
                 />
-                {editingMemo?.rating && editingMemo.rating > 0 && (
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                    {getMemoRatingDescription(editingMemo.rating)}
-                  </Typography>
-                )}
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                  {getMemoRatingDescription(editingMemo?.rating || DEFAULT_MEMO_RATING)}
+                </Typography>
               </FormControl>
               
               <Autocomplete

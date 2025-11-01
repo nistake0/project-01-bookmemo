@@ -147,11 +147,9 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
                 sx={{ mt: 1 }}
                 data-testid="memo-rating-input"
               />
-              {rating > 0 && (
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                  {getMemoRatingDescription(rating)}
-                </Typography>
-              )}
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                {getMemoRatingDescription(rating)}
+              </Typography>
             </FormControl>
             
             <Autocomplete
@@ -243,11 +241,9 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
           sx={{ mt: 1 }}
           data-testid="memo-rating-input"
         />
-        {rating > 0 && (
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-            {getMemoRatingDescription(rating)}
-          </Typography>
-        )}
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+          {getMemoRatingDescription(rating)}
+        </Typography>
       </FormControl>
       
       <Autocomplete
