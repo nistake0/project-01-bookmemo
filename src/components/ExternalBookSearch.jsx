@@ -686,11 +686,6 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
           }}
           data-testid="search-query-input"
           size="small"
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              fontSize: { xs: '0.9rem', sm: '1rem' }
-            }
-          }}
         />
         <Button
           variant="contained"

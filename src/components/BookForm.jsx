@@ -134,11 +134,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             size="small"
             placeholder="例: 9784873119485"
             inputProps={{ "data-testid": "book-isbn-input" }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                fontSize: { xs: '0.9rem', sm: '1rem' }
-              }
-            }}
           />
         </Box>
         <Box>
@@ -225,11 +220,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             required
             size="small"
             inputProps={{ "data-testid": "book-title-input" }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                fontSize: { xs: '0.9rem', sm: '1rem' }
-              }
-            }}
           />
         </Box>
         <Box>
@@ -240,11 +230,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             fullWidth
             size="small"
             inputProps={{ "data-testid": "book-author-input" }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                fontSize: { xs: '0.9rem', sm: '1rem' }
-              }
-            }}
           />
         </Box>
         <Box>
@@ -255,11 +240,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             fullWidth
             size="small"
             inputProps={{ "data-testid": "book-publisher-input" }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                fontSize: { xs: '0.9rem', sm: '1rem' }
-              }
-            }}
           />
         </Box>
         <Box>
@@ -270,11 +250,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             fullWidth
             size="small"
             inputProps={{ "data-testid": "book-publishdate-input" }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                fontSize: { xs: '0.9rem', sm: '1rem' }
-              }
-            }}
           />
         </Box>
       </Box>
@@ -312,11 +287,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
                 'data-testid': 'book-tags-input',
                 style: { fontSize: '0.9rem' }
               }} 
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  fontSize: { xs: '0.9rem', sm: '1rem' }
-                }
-              }}
             />
           )}
           sx={{
