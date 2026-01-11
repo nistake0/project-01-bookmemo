@@ -27,6 +27,7 @@ jest.mock('../auth/AuthProvider', () => ({
 // useMemo モック
 const mockUpdateMemo = jest.fn(() => Promise.resolve(true));
 const mockDeleteMemo = jest.fn(() => Promise.resolve(true));
+const mockMoveMemo = jest.fn(() => Promise.resolve('moved-memo-id'));
 
 jest.mock('../hooks/useMemo', () => ({
   useMemo: (bookId) => ({
@@ -36,9 +37,52 @@ jest.mock('../hooks/useMemo', () => ({
     addMemo: jest.fn(() => Promise.resolve('new-memo-id')),
     updateMemo: mockUpdateMemo,
     deleteMemo: mockDeleteMemo,
+    moveMemo: mockMoveMemo,
     fetchMemos: jest.fn(),
   }),
 }));
+
+const mockMemoMoveDialogProps = [];
+jest.mock('./MemoMoveDialog', () => {
+  const React = require('react');
+
+  return (props) => {
+    mockMemoMoveDialogProps.push(props);
+
+    if (!props.open) {
+      return null;
+    }
+
+    const handleMockSubmit = async () => {
+      if (props.onMove) {
+        await props.onMove({
+          memoId: props.memo?.id,
+          targetBookId: 'book-2',
+        });
+      }
+      props.onSuccess?.('book-2');
+    };
+
+    return (
+      <div data-testid="memo-move-dialog-mock">
+        <button
+          type="button"
+          data-testid="memo-move-dialog-mock-submit"
+          onClick={handleMockSubmit}
+        >
+          mock move
+        </button>
+        <button
+          type="button"
+          data-testid="memo-move-dialog-mock-close"
+          onClick={props.onClose}
+        >
+          mock close
+        </button>
+      </div>
+    );
+  };
+});
 
 describe('MemoEditor', () => {
   const { mockOnClose, mockOnUpdate, mockOnDelete } = createMockFunctions();
@@ -49,11 +93,75 @@ describe('MemoEditor', () => {
     resetMocks();
     mockUpdateMemo.mockClear();
     mockDeleteMemo.mockClear();
+    mockMoveMemo.mockClear();
+    mockMemoMoveDialogProps.length = 0;
   });
 
   afterEach(() => {
     // テスト後のクリーンアップ
     jest.clearAllMocks();
+  });
+
+  it('opens move dialog when move button is clicked', () => {
+    const mockMemo = createMockMemo();
+
+    renderWithProviders(
+      <MemoEditor
+        open={true}
+        memo={mockMemo}
+        bookId="book1"
+        onClose={mockOnClose}
+      />
+    );
+
+    expect(screen.queryByTestId('memo-move-dialog-mock')).not.toBeInTheDocument();
+
+    const moveButton = screen.getByTestId('memo-move-button');
+    fireEvent.click(moveButton);
+
+    expect(screen.getByTestId('memo-move-dialog-mock')).toBeInTheDocument();
+  });
+
+  it('moves memo via move dialog and triggers callbacks', async () => {
+    const mockMemo = createMockMemo();
+    const { mockOnClose: onClose, mockOnUpdate: onUpdate } = createMockFunctions();
+    const onMove = jest.fn();
+
+    renderWithProviders(
+      <MemoEditor
+        open={true}
+        memo={mockMemo}
+        bookId="book1"
+        onClose={onClose}
+        onUpdate={onUpdate}
+        onMove={onMove}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('memo-move-button'));
+
+    fireEvent.click(screen.getByTestId('memo-move-dialog-mock-submit'));
+
+    await waitFor(() =>
+      expect(mockMoveMemo).toHaveBeenCalledWith({
+        memoId: mockMemo.id,
+        targetBookId: 'book-2',
+      })
+    );
+
+    expect(onMove).toHaveBeenCalledWith('book-2');
+
+    await waitFor(() => {
+      expect(onUpdate).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('memo-move-dialog-mock')).not.toBeInTheDocument();
+    });
   });
 
   /**

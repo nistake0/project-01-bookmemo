@@ -1,8 +1,23 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useMemo } from './useMemo';
-import { getDocs, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 
-jest.mock('firebase/firestore');
+jest.mock('firebase/firestore', () => ({
+  collection: jest.fn(),
+  query: jest.fn(),
+  orderBy: jest.fn(),
+  getDocs: jest.fn(),
+  addDoc: jest.fn(),
+  updateDoc: jest.fn(),
+  deleteDoc: jest.fn(),
+  doc: jest.fn((...args) => {
+    if (args.length === 1) {
+      return { path: `${args[0]}/generated-id`, id: 'generated-id' };
+    }
+    return { path: args.join('/'), id: args[args.length - 1] };
+  }),
+  serverTimestamp: jest.fn(() => 'mock-timestamp'),
+  runTransaction: jest.fn(),
+}));
 jest.mock('../firebase', () => ({ db: jest.fn() }));
 jest.mock('../auth/AuthProvider', () => ({ useAuth: () => ({ user: { uid: 'test-user-id' } }) }));
 
@@ -12,9 +27,45 @@ jest.mock('../components/CommonErrorDialog', () => ({
   },
 }));
 
+jest.mock('./useTagHistory', () => {
+  const mockSaveTagsToHistory = jest.fn();
+  return {
+    __esModule: true,
+    useTagHistory: () => ({
+      saveTagsToHistory: mockSaveTagsToHistory,
+    }),
+    __mockSaveTagsToHistory: mockSaveTagsToHistory,
+  };
+});
+
+jest.mock('../utils/searchStorage', () => {
+  const mockClearSearchResults = jest.fn();
+  return {
+    __esModule: true,
+    clearSearchResults: mockClearSearchResults,
+    __mockClearSearchResults: mockClearSearchResults,
+  };
+});
+
 describe('useMemo', () => {
+  const {
+    getDocs,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    runTransaction,
+    serverTimestamp,
+    doc,
+    collection,
+  } = require('firebase/firestore');
+  const { __mockSaveTagsToHistory: mockSaveTagsToHistory } = require('./useTagHistory');
+  const { __mockClearSearchResults: mockClearSearchResults } = require('../utils/searchStorage');
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSaveTagsToHistory.mockReset();
+    mockClearSearchResults.mockReset();
+    collection.mockImplementation((...args) => args.join('/'));
   });
 
   const bookId = 'book-1';
@@ -178,6 +229,103 @@ describe('useMemo', () => {
     });
     await expect(result.current.deleteMemo('memo-1')).rejects.toThrow('Delete failed');
     console.log('=== useMemo test: handles delete memo error END ===');
+  });
+
+  test('moves memo successfully', async () => {
+    const memoData = { text: '移動メモ', tags: ['タグ1'], createdAt: { seconds: 100 } };
+    getDocs.mockResolvedValueOnce({
+      docs: [
+        {
+          id: 'memo-1',
+          data: () => memoData,
+        },
+      ],
+    });
+
+    const transactionGet = jest
+      .fn()
+      .mockResolvedValueOnce({ exists: () => true, data: () => memoData })
+      .mockResolvedValueOnce({ exists: () => true });
+    const transactionSet = jest.fn();
+    const transactionDelete = jest.fn();
+    const transactionUpdate = jest.fn();
+
+    runTransaction.mockImplementation(async (_db, updateFn) =>
+      updateFn({
+        get: transactionGet,
+        set: transactionSet,
+        delete: transactionDelete,
+        update: transactionUpdate,
+      })
+    );
+    mockSaveTagsToHistory.mockResolvedValue();
+
+    const { result } = renderHook(() => useMemo(bookId));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    let newMemoId;
+    await act(async () => {
+      newMemoId = await result.current.moveMemo({ memoId: 'memo-1', targetBookId: 'book-2' });
+    });
+
+    expect(runTransaction).toHaveBeenCalledTimes(1);
+    expect(transactionSet).toHaveBeenCalledTimes(1);
+    expect(transactionDelete).toHaveBeenCalledTimes(1);
+    expect(transactionUpdate).toHaveBeenCalledTimes(2);
+    expect(mockSaveTagsToHistory).toHaveBeenCalledWith(['タグ1']);
+    expect(mockClearSearchResults).toHaveBeenCalledTimes(1);
+    expect(newMemoId).toBe('generated-id');
+    expect(result.current.memos).toHaveLength(0);
+  });
+
+  test('moveMemo throws when target book is the same as source', async () => {
+    getDocs.mockResolvedValueOnce({ docs: [] });
+    const { result } = renderHook(() => useMemo(bookId));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await expect(
+      result.current.moveMemo({ memoId: 'memo-1', targetBookId: bookId })
+    ).rejects.toThrow('同じ書籍には移動できません。');
+    expect(runTransaction).not.toHaveBeenCalled();
+  });
+
+  test('moveMemo propagates errors from transaction', async () => {
+    const memoData = { text: '移動メモ', tags: ['タグ1'], createdAt: { seconds: 100 } };
+    getDocs.mockResolvedValueOnce({
+      docs: [
+        {
+          id: 'memo-1',
+          data: () => memoData,
+        },
+      ],
+    });
+
+    const transactionGet = jest
+      .fn()
+      .mockResolvedValueOnce({ exists: () => true, data: () => memoData })
+      .mockResolvedValueOnce({ exists: () => false });
+
+    runTransaction.mockImplementation(async (_db, updateFn) =>
+      updateFn({
+        get: transactionGet,
+        set: jest.fn(),
+        delete: jest.fn(),
+        update: jest.fn(),
+      })
+    );
+
+    const { result } = renderHook(() => useMemo(bookId));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await expect(
+      result.current.moveMemo({ memoId: 'memo-1', targetBookId: 'book-2' })
+    ).rejects.toThrow('移動先の書籍が見つかりませんでした。');
+
+    expect(mockSaveTagsToHistory).not.toHaveBeenCalled();
+    expect(mockClearSearchResults).not.toHaveBeenCalled();
+    expect(result.current.memos).toHaveLength(1);
   });
 
   // 今回の修正に関連するテストケース

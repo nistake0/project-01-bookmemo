@@ -22,6 +22,7 @@ import {
   getMemoRatingDescription,
   DEFAULT_MEMO_RATING
 } from '../constants/memoRating';
+import MemoMoveDialog from './MemoMoveDialog';
 
 // CI環境でも安定する固定フォーマットで日時を表示（yyyy/M/d H:mm:ss）
 const formatDateTime = (createdAt) => {
@@ -40,13 +41,23 @@ const formatDateTime = (createdAt) => {
   }
 };
 
-const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode = false }) => {
+const MemoEditor = ({
+  open,
+  memo,
+  bookId,
+  onClose,
+  onUpdate,
+  onDelete,
+  onMove,
+  editMode = false
+}) => {
   const { setGlobalError } = useContext(ErrorDialogContext);
-  const { updateMemo, deleteMemo } = useMemo(bookId);
+  const { updateMemo, deleteMemo, moveMemo } = useMemo(bookId);
   const [dialogMode, setDialogMode] = useState(editMode ? 'edit' : 'view'); // 'view' or 'edit'
   const [editingMemo, setEditingMemo] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [inputTagValue, setInputTagValue] = useState("");
+  const [showMoveDialog, setShowMoveDialog] = useState(false);
 
   // メモやeditModeが変更されたときに編集状態をリセット
   React.useEffect(() => {
@@ -58,6 +69,7 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode 
       setDialogMode(editMode ? 'edit' : 'view');
       setShowDeleteConfirm(false);
       setInputTagValue("");
+      setShowMoveDialog(false);
     }
   }, [memo, editMode]);
 
@@ -66,7 +78,10 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode 
     setDialogMode('view');
     setShowDeleteConfirm(false);
     setInputTagValue("");
-    onClose();
+    setShowMoveDialog(false);
+    if (typeof onClose === 'function') {
+      onClose();
+    }
   };
 
   const handleUpdate = async (e) => {
@@ -108,6 +123,20 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode 
       console.error("Error deleting memo: ", error);
       setGlobalError("メモの削除に失敗しました。");
     }
+  };
+
+  const handleMove = async ({ memoId, targetBookId }) => {
+    return moveMemo({ memoId, targetBookId });
+  };
+
+  const handleMoveSuccess = (targetBookId) => {
+    if (typeof onMove === 'function') {
+      onMove(targetBookId);
+    }
+    if (typeof onUpdate === 'function') {
+      onUpdate();
+    }
+    handleClose();
   };
 
   if (!memo) return null;
@@ -240,6 +269,9 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode 
         <DialogActions>
           {dialogMode === 'view' ? (
             <>
+              <Button onClick={() => setShowMoveDialog(true)} data-testid="memo-move-button">
+                移動
+              </Button>
               <Button onClick={() => setDialogMode('edit')} data-testid="memo-edit-button">編集</Button>
               <Button onClick={() => setShowDeleteConfirm(true)} color="error" data-testid="memo-delete-button">削除</Button>
               <Button onClick={handleClose} data-testid="memo-close-button">閉じる</Button>
@@ -265,6 +297,15 @@ const MemoEditor = ({ open, memo, bookId, onClose, onUpdate, onDelete, editMode 
           }} color="error" variant="contained" data-testid="memo-delete-confirm-button">削除</Button>
         </DialogActions>
       </Dialog>
+
+      <MemoMoveDialog
+        open={showMoveDialog}
+        memo={editingMemo}
+        currentBookId={bookId}
+        onClose={() => setShowMoveDialog(false)}
+        onMove={handleMove}
+        onSuccess={handleMoveSuccess}
+      />
     </>
   );
 };
