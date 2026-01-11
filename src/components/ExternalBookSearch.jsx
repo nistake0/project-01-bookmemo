@@ -395,8 +395,7 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
                     variant="body2" 
                     color="text.secondary"
                     sx={{ 
-                      mb: 0.5,
-                      fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                      mb: 0.5
                     }}
                   >
                     {book.author}
@@ -406,8 +405,7 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
                     variant="body2" 
                     color="text.secondary"
                     sx={{ 
-                      mb: 1,
-                      fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                      mb: 1
                     }}
                   >
                     {book.publisher}
