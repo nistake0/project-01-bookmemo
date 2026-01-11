@@ -13,6 +13,27 @@ export const appTheme = createTheme({
     secondary: {
       main: '#f50057', // ピンク系（main.jsxの設定を使用）
     },
+    // セマンティックカラー: MUIのデフォルトを明示的に定義（必要に応じてカスタマイズ可能）
+    success: {
+      main: '#2e7d32', // MUIデフォルト
+      light: '#4caf50',
+      dark: '#1b5e20',
+    },
+    warning: {
+      main: '#ed6c02', // MUIデフォルト
+      light: '#ff9800',
+      dark: '#e65100',
+    },
+    info: {
+      main: '#0288d1', // MUIデフォルト
+      light: '#03a9f4',
+      dark: '#01579b',
+    },
+    error: {
+      main: '#d32f2f', // MUIデフォルト
+      light: '#ef5350',
+      dark: '#c62828',
+    },
     text: {
       primary: '#222',
     },
