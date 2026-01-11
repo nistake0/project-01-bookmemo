@@ -58,7 +58,9 @@ describe('PWAInstallPrompt', () => {
 
     renderWithProviders(<PWAInstallPrompt />);
     
-    expect(screen.getByText('オフラインです。一部の機能が制限される場合があります')).toBeInTheDocument();
+    const offlineAlert = screen.getByTestId('pwa-offline-alert');
+    expect(offlineAlert).toBeInTheDocument();
+    expect(offlineAlert).toHaveTextContent('オフラインです。一部の機能が制限される場合があります');
   });
 
   it.skip('handles basic install button click', async () => {

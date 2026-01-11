@@ -189,7 +189,8 @@ describe('FullTextSearch', () => {
     
     renderFullTextSearch();
     
-    expect(screen.getByText('検索中...')).toBeInTheDocument();
+    const searchButton = screen.getByTestId('full-text-search-button');
+    expect(searchButton).toHaveTextContent('検索中...');
   });
 
   test('エラー時は入力フィールドにエラー表示', () => {
@@ -208,6 +209,8 @@ describe('FullTextSearch', () => {
     
     renderFullTextSearch();
     
+    // エラーメッセージはTextFieldのhelperTextとして表示される
+    // Material-UIのTextFieldのhelperTextはユーザー向けメッセージのため、getByTextで検証
     expect(screen.getByText('2文字以上入力してください')).toBeInTheDocument();
   });
 
@@ -233,7 +236,8 @@ describe('FullTextSearch', () => {
     renderFullTextSearch();
     
     expect(screen.getByTestId('full-text-search-results')).toBeInTheDocument();
-    expect(screen.getByText('2 件の結果')).toBeInTheDocument();
+    const resultCount = screen.getByTestId('full-text-search-result-count');
+    expect(resultCount).toHaveTextContent('2 件の結果');
   });
 
   test('検索結果がない場合は結果なしメッセージが表示される', () => {
@@ -259,8 +263,9 @@ describe('FullTextSearch', () => {
   test('初期状態では初期メッセージが表示される', () => {
     renderFullTextSearch();
     
-    expect(screen.getByTestId('full-text-search-initial')).toBeInTheDocument();
-    expect(screen.getByText('キーワードを入力して検索してください')).toBeInTheDocument();
+    const initialAlert = screen.getByTestId('full-text-search-initial');
+    expect(initialAlert).toBeInTheDocument();
+    expect(initialAlert).toHaveTextContent('キーワードを入力して検索してください');
   });
 
   test('キャッシュ情報が表示される', () => {

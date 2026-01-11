@@ -134,7 +134,7 @@ export default function FullTextSearch() {
       {/* 検索結果 */}
       {!loading && results && results.length > 0 && (
         <Box data-testid="full-text-search-results">
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }} data-testid="full-text-search-result-count">
             {results.length} 件の結果
           </Typography>
           <SearchResults 

@@ -254,6 +254,7 @@ const PWAInstallPrompt = () => {
             </IconButton>
           }
           sx={{ width: '100%' }}
+          data-testid="pwa-offline-alert"
         >
           <Typography variant="body2">
             オフラインです。一部の機能が制限される場合があります
