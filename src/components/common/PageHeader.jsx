@@ -15,26 +15,31 @@ const PageHeader = ({ title, subtitle, children }) => {
     <Paper
       elevation={0}
       data-testid="page-header"
-      sx={{
-        background: `
-          linear-gradient(135deg, rgba(139, 69, 19, 0.9) 0%, rgba(160, 82, 45, 0.8) 100%),
-          repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 4px,
-            rgba(139, 69, 19, 0.1) 4px,
-            rgba(139, 69, 19, 0.1) 8px
-          ),
-          linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #CD853F 100%)
-        `,
-        backgroundSize: 'cover, 16px 16px, cover',
-        backgroundRepeat: 'no-repeat, repeat, no-repeat',
-        backgroundPosition: 'center, center, center',
-        borderRadius: 0,
-        mb: 3,
-        position: 'relative',
-        overflow: 'hidden',
-        borderBottom: '3px solid rgba(139, 69, 19, 0.3)'
+      sx={(theme) => {
+        const brownDark = theme.palette.custom.pageHeader.brown.dark;
+        const brownMedium = theme.palette.custom.pageHeader.brown.medium;
+        const brownLight = theme.palette.custom.pageHeader.brown.light;
+        return {
+          background: `
+            linear-gradient(135deg, ${brownDark}E6 0%, ${brownMedium}CC 100%),
+            repeating-linear-gradient(
+              45deg,
+              transparent,
+              transparent 4px,
+              ${brownDark}1A 4px,
+              ${brownDark}1A 8px
+            ),
+            linear-gradient(135deg, ${brownDark} 0%, ${brownMedium} 50%, ${brownLight} 100%)
+          `,
+          backgroundSize: 'cover, 16px 16px, cover',
+          backgroundRepeat: 'no-repeat, repeat, no-repeat',
+          backgroundPosition: 'center, center, center',
+          borderRadius: 0,
+          mb: 3,
+          position: 'relative',
+          overflow: 'hidden',
+          borderBottom: `3px solid ${brownDark}4D`,
+        };
       }}
     >
       <Box
@@ -50,13 +55,13 @@ const PageHeader = ({ title, subtitle, children }) => {
           variant="h4"
           component="h1"
           data-testid="page-header-title"
-          sx={{
+          sx={(theme) => ({
             fontWeight: 700,
             fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
             mb: subtitle ? 1 : 0,
             textShadow: '0 2px 4px rgba(0,0,0,0.7)',
-            color: '#FFF8DC'
-          }}
+            color: theme.palette.custom.pageHeader.text.title,
+          })}
         >
           {title}
         </Typography>
@@ -64,12 +69,12 @@ const PageHeader = ({ title, subtitle, children }) => {
           <Typography
             variant="body1"
             data-testid="page-header-subtitle"
-            sx={{
+            sx={(theme) => ({
               opacity: 0.95,
               fontSize: { xs: '0.9rem', sm: '1rem' },
               textShadow: '0 1px 2px rgba(0,0,0,0.7)',
-              color: '#F5F5DC'
-            }}
+              color: theme.palette.custom.pageHeader.text.subtitle,
+            })}
           >
             {subtitle}
           </Typography>

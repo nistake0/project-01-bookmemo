@@ -1,8 +1,9 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import BookList from './BookList';
 import { useBookList } from '../hooks/useBookList';
 import userEvent from '@testing-library/user-event';
+import { renderWithProviders } from '../test-utils';
 
 // useBookListフックをモック
 jest.mock('../hooks/useBookList');
@@ -69,7 +70,7 @@ describe('BookList', () => {
       handleSearchChange: jest.fn(),
     });
 
-    render(<BookList />);
+    renderWithProviders(<BookList />);
 
     // カード表示でタグがChipとして表示されているか確認
     expect(await screen.findByText('小説')).toBeInTheDocument();
@@ -111,7 +112,7 @@ describe('BookList', () => {
       handleSearchChange: mockHandleSearchChange,
     });
 
-    render(<BookList />);
+    renderWithProviders(<BookList />);
 
     const user = userEvent.setup();
     
@@ -139,7 +140,7 @@ describe('BookList', () => {
       handleSearchChange: jest.fn(),
     });
 
-    render(<BookList />);
+    renderWithProviders(<BookList />);
 
     const tabsContainer = await screen.findByTestId('book-list-tabs-container');
     expect(tabsContainer).toBeInTheDocument();

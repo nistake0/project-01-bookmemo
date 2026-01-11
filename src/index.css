@@ -23,7 +23,9 @@ a:hover {
 }
 
 html, body, #root {
+  /* 背景色: theme.palette.background.default (#f5f7fa) */
   background: #f5f7fa !important;
+  /* テキスト色: theme.palette.text.primary (#222) */
   color: #222;
   min-height: 100vh;
   margin: 0;
@@ -91,6 +93,7 @@ button:focus-visible {
   input:focus,
   textarea:focus,
   select:focus {
+    /* フォーカス色: theme.palette.primary.main (#1976d2) */
     outline: 2px solid #1976d2;
     outline-offset: 2px;
   }

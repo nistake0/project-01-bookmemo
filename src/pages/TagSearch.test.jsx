@@ -86,11 +86,11 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import TagSearch from './TagSearch';
 import { useAuth } from '../auth/AuthProvider';
 import { useSearch } from '../hooks/useSearch';
+import { renderWithProviders } from '../test-utils';
 
 describe('TagSearch', () => {
   const mockUser = { uid: 'test-user-id' };
@@ -111,11 +111,7 @@ describe('TagSearch', () => {
   });
 
   const renderTagSearch = () => {
-    return render(
-      <BrowserRouter>
-        <TagSearch />
-      </BrowserRouter>
-    );
+    return renderWithProviders(<TagSearch />);
   };
 
   describe('基本表示', () => {

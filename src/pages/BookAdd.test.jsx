@@ -39,17 +39,8 @@ jest.mock('../auth/AuthProvider', () => ({
   useAuth: () => ({ user: { uid: 'test-user-id' } }),
 }));
 
-// テスト用のレンダリング関数
-const mockSetGlobalError = jest.fn();
-const renderWithProviders = (component) => {
-  return render(
-    <ErrorDialogContext.Provider value={{ setGlobalError: mockSetGlobalError }}>
-      <BrowserRouter>
-        {component}
-      </BrowserRouter>
-    </ErrorDialogContext.Provider>
-  );
-};
+// テスト用のレンダリング関数（test-utilsからインポート）
+import { renderWithProviders, mockSetGlobalError } from '../test-utils';
 
 describe('BookAdd', () => {
   beforeEach(() => {

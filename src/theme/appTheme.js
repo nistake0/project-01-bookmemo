@@ -16,6 +16,20 @@ export const appTheme = createTheme({
     text: {
       primary: '#222',
     },
+    // カスタムカラー: PageHeader用のブラウン系カラー
+    custom: {
+      pageHeader: {
+        brown: {
+          dark: '#8B4513', // SaddleBrown
+          medium: '#A0522D', // Sienna
+          light: '#CD853F', // Peru
+        },
+        text: {
+          title: '#FFF8DC', // Beige
+          subtitle: '#F5F5DC', // Beige (少し暗め)
+        },
+      },
+    },
   },
   typography: {
     fontFamily: 'Segoe UI, Helvetica Neue, Arial, sans-serif',
