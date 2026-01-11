@@ -2,7 +2,6 @@ import { Typography, Box, Card, CardContent, Divider, CircularProgress } from "@
 import PageHeader from '../components/common/PageHeader';
 import useStats from '../hooks/useStats';
 import { BarChart, PieChart } from '@mui/x-charts';
-import './Stats.css';
 
 export default function Stats() {
   const { loading, error, summary, tagStats, monthlyFinished, monthlyAddedBooks, monthlyMemos, topAuthors, topPublishers, statusDistribution } = useStats();
@@ -48,32 +47,83 @@ export default function Stats() {
         {/* データがある場合のみ統計を表示 */}
         {hasData && (
           <>
-             <Box className="stats-summary-grid">
-                             <Card data-testid="stats-total-books" className="stats-summary-card">
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: { xs: 1, sm: 2 },
+                width: '100%',
+                mb: 2,
+                '@media (max-width: 480px)': {
+                  gap: 0.75,
+                },
+              }}
+            >
+              <Card
+                data-testid="stats-total-books"
+                sx={{
+                  transition: 'transform 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              >
                 <CardContent>
                   <Typography variant="h6">総冊数</Typography>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{summary?.totalBooks ?? '-'}</Typography>
                 </CardContent>
               </Card>
-              <Card data-testid="stats-tsundoku-books" className="stats-summary-card">
+              <Card
+                data-testid="stats-tsundoku-books"
+                sx={{
+                  transition: 'transform 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              >
                 <CardContent>
                   <Typography variant="h6">積読冊数</Typography>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{summary?.tsundokuBooks ?? '-'}</Typography>
                 </CardContent>
               </Card>
-              <Card data-testid="stats-reading-books" className="stats-summary-card">
+              <Card
+                data-testid="stats-reading-books"
+                sx={{
+                  transition: 'transform 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              >
                 <CardContent>
                   <Typography variant="h6">読書中冊数</Typography>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{summary?.readingBooks ?? '-'}</Typography>
                 </CardContent>
               </Card>
-              <Card data-testid="stats-rereading-books" className="stats-summary-card">
+              <Card
+                data-testid="stats-rereading-books"
+                sx={{
+                  transition: 'transform 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              >
                 <CardContent>
                   <Typography variant="h6">再読中冊数</Typography>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{summary?.reReadingBooks ?? '-'}</Typography>
                 </CardContent>
               </Card>
-              <Card data-testid="stats-finished-books" className="stats-summary-card">
+              <Card
+                data-testid="stats-finished-books"
+                sx={{
+                  transition: 'transform 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              >
                 <CardContent>
                   <Typography variant="h6">読了冊数</Typography>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{summary?.finishedBooks ?? '-'}</Typography>

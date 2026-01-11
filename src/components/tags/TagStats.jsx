@@ -19,7 +19,6 @@ import TagEditDialog from './TagEditDialog';
 import BulkDeleteTagsDialog from './BulkDeleteTagsDialog';
 import BulkMergeTagsDialog from './BulkMergeTagsDialog';
 import { useAuth } from '../../auth/AuthProvider';
-import './TagStats.css';
 
 /**
  * タグ統計表示コンポーネント
