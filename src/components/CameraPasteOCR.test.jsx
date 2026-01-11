@@ -28,8 +28,9 @@ describe('CameraPasteOCR', () => {
     it('テキストペーストボタンを表示する', () => {
       renderWithProviders(<CameraPasteOCR onTextDetected={mockOnTextDetected} />);
       
-      expect(screen.getByText('テキストをペースト')).toBeInTheDocument();
-      expect(screen.getByTestId('camera-paste-ocr-button')).toBeInTheDocument();
+      const button = screen.getByTestId('camera-paste-ocr-button');
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveTextContent('テキストをペースト');
     });
 
     it('ボタンクリック時にクリップボードからテキストを読み取る', async () => {
@@ -67,7 +68,9 @@ describe('CameraPasteOCR', () => {
       fireEvent.click(button);
 
       await waitFor(() => {
-        expect(screen.getByText('クリップボードが空です')).toBeInTheDocument();
+        const errorAlert = screen.getByTestId('camera-paste-ocr-error');
+        expect(errorAlert).toBeInTheDocument();
+        expect(errorAlert).toHaveTextContent('クリップボードが空です');
       });
     });
 
@@ -82,7 +85,9 @@ describe('CameraPasteOCR', () => {
       fireEvent.click(button);
 
       await waitFor(() => {
-        expect(screen.getByText('クリップボード機能が利用できません')).toBeInTheDocument();
+        const errorAlert = screen.getByTestId('camera-paste-ocr-error');
+        expect(errorAlert).toBeInTheDocument();
+        expect(errorAlert).toHaveTextContent('クリップボード機能が利用できません');
       });
 
       // navigator.clipboardを復元
@@ -101,7 +106,9 @@ describe('CameraPasteOCR', () => {
       fireEvent.click(button);
 
       await waitFor(() => {
-        expect(screen.getByText('テキストの読み取りに失敗しました')).toBeInTheDocument();
+        const errorAlert = screen.getByTestId('camera-paste-ocr-error');
+        expect(errorAlert).toBeInTheDocument();
+        expect(errorAlert).toHaveTextContent('テキストの読み取りに失敗しました');
       });
     });
 
@@ -121,7 +128,9 @@ describe('CameraPasteOCR', () => {
       fireEvent.click(button);
 
       await waitFor(() => {
-        expect(screen.getByText('クリップボードが空です')).toBeInTheDocument();
+        const errorAlert = screen.getByTestId('camera-paste-ocr-error');
+        expect(errorAlert).toBeInTheDocument();
+        expect(errorAlert).toHaveTextContent('クリップボードが空です');
       });
 
       // エラーメッセージを閉じる

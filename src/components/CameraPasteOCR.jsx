@@ -60,7 +60,7 @@ const CameraPasteOCR = ({ onTextDetected, disabled = false }) => {
         onClose={handleCloseError}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseError} severity="error">
+        <Alert onClose={handleCloseError} severity="error" data-testid="camera-paste-ocr-error">
           {error}
         </Alert>
       </Snackbar>

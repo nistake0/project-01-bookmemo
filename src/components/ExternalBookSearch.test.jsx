@@ -87,7 +87,8 @@ describe('ExternalBookSearch', () => {
         />
       );
 
-      expect(screen.getByText('🔍 外部検索モード')).toBeInTheDocument();
+      // タイトルはdata-testidがないため、外部検索モードコンテナで確認
+      expect(screen.getByTestId('external-book-search')).toBeInTheDocument();
       expect(screen.getByTestId('search-type-title')).toBeInTheDocument();
       expect(screen.getByTestId('search-query-input')).toBeInTheDocument();
       expect(screen.getByTestId('search-button')).toBeInTheDocument();
@@ -102,10 +103,7 @@ describe('ExternalBookSearch', () => {
         />
       );
 
-      const toggleButtons = screen.getAllByRole('button');
-      const titleButton = toggleButtons.find(button => 
-        button.textContent === 'タイトル'
-      );
+      const titleButton = screen.getByTestId('search-type-title');
       expect(titleButton).toHaveAttribute('aria-pressed', 'true');
     });
   });
@@ -130,7 +128,7 @@ describe('ExternalBookSearch', () => {
       );
 
       // 著者検索に切り替え
-      fireEvent.click(screen.getByText('著者'));
+      fireEvent.click(screen.getByTestId('search-type-author'));
       
       expect(mockClearSearchResults).toHaveBeenCalled();
     });
@@ -153,7 +151,7 @@ describe('ExternalBookSearch', () => {
         />
       );
 
-      fireEvent.click(screen.getByText('出版社'));
+      fireEvent.click(screen.getByTestId('search-type-publisher'));
       expect(mockClearSearchResults).toHaveBeenCalled();
     });
   });
