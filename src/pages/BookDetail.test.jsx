@@ -9,11 +9,16 @@ import { convertToDate } from '../utils/dateUtils';
 jest.mock('../hooks/useBook');
 jest.mock('../hooks/useBookStatusHistory');
 jest.mock('../components/BookInfo', () => {
-  return function MockBookInfo({ book, onStatusChange }) {
+  return function MockBookInfo({ book, onStatusChange, onEdit }) {
     return (
       <div data-testid="book-info">
         <h1>{book.title}</h1>
         <button onClick={() => onStatusChange('reading')} data-testid="status-change">ステータス変更</button>
+        {onEdit && (
+          <button onClick={() => onEdit()} data-testid="book-edit-trigger">
+            編集
+          </button>
+        )}
       </div>
     );
   };
@@ -63,6 +68,25 @@ jest.mock('../components/StatusHistoryTimeline', () => {
   };
 });
 
+jest.mock('../components/BookEditDialog', () => {
+  return function MockBookEditDialog({ open, onSave, onClose }) {
+    if (!open) return null;
+    return (
+      <div data-testid="book-edit-dialog-mock">
+        <button
+          onClick={() => onSave({ title: '更新後タイトル', author: '編集後著者' })}
+          data-testid="book-edit-dialog-save"
+        >
+          保存
+        </button>
+        <button onClick={onClose} data-testid="book-edit-dialog-close">
+          閉じる
+        </button>
+      </div>
+    );
+  };
+});
+
 describe('BookDetail', () => {
   const mockBook = {
     id: 'book-1',
@@ -72,6 +96,7 @@ describe('BookDetail', () => {
     tags: ['test'],
   };
 
+  const mockUpdateBook = jest.fn().mockResolvedValue(true);
   const mockStatusHistory = {
     history: [],
     loading: false,
@@ -84,12 +109,14 @@ describe('BookDetail', () => {
     // 完全なモックリセット
     jest.clearAllMocks();
     resetMocks();
+    mockUpdateBook.mockClear();
     
     // useBookのデフォルトモック設定
     useBook.mockReturnValue({
       book: mockBook,
       loading: false,
       error: null,
+      updateBook: mockUpdateBook,
       updateBookStatus: jest.fn(),
       updateBookTags: jest.fn(),
     });
@@ -128,6 +155,7 @@ describe('BookDetail', () => {
       book: null,
       loading: true,
       error: null,
+      updateBook: mockUpdateBook,
       updateBookStatus: jest.fn(),
       updateBookTags: jest.fn(),
     });
@@ -141,6 +169,7 @@ describe('BookDetail', () => {
       book: null,
       loading: false,
       error: 'エラーが発生しました',
+      updateBook: mockUpdateBook,
       updateBookStatus: jest.fn(),
       updateBookTags: jest.fn(),
     });
@@ -154,6 +183,7 @@ describe('BookDetail', () => {
       book: null,
       loading: false,
       error: null,
+      updateBook: mockUpdateBook,
       updateBookStatus: jest.fn(),
       updateBookTags: jest.fn(),
     });
@@ -168,6 +198,7 @@ describe('BookDetail', () => {
       book: mockBook,
       loading: false,
       error: null,
+      updateBook: mockUpdateBook,
       updateBookStatus: mockUpdateBookStatus,
       updateBookTags: jest.fn(),
     });
@@ -186,6 +217,7 @@ describe('BookDetail', () => {
       book: mockBook,
       loading: false,
       error: null,
+      updateBook: mockUpdateBook,
       updateBookStatus: jest.fn(),
       updateBookTags: mockUpdateBookTags,
     });
@@ -196,6 +228,31 @@ describe('BookDetail', () => {
     fireEvent.click(tagsChangeButton);
     
     expect(mockUpdateBookTags).toHaveBeenCalledWith(['tag1', 'tag2']);
+  });
+
+  test('opens edit dialog and updates book information', async () => {
+    useBook.mockReturnValue({
+      book: mockBook,
+      loading: false,
+      error: null,
+      updateBook: mockUpdateBook,
+      updateBookStatus: jest.fn(),
+      updateBookTags: jest.fn(),
+    });
+
+    renderWithProviders(<BookDetail />);
+
+    fireEvent.click(screen.getByTestId('book-edit-trigger'));
+    expect(screen.getByTestId('book-edit-dialog-mock')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('book-edit-dialog-save'));
+
+    await waitFor(() => {
+      expect(mockUpdateBook).toHaveBeenCalledWith({
+        title: '更新後タイトル',
+        author: '編集後著者',
+      });
+    });
   });
 
   // 今回の修正に関連するテストケース
@@ -370,6 +427,7 @@ describe('BookDetail', () => {
         book: testBook,
         loading: false,
         error: null,
+      updateBook: mockUpdateBook,
         updateBookStatus: mockUpdateBookStatus,
         updateBookTags: jest.fn()
       });
@@ -452,6 +510,7 @@ describe('BookDetail', () => {
         book: null,
         loading: false,
         error: null,
+      updateBook: mockUpdateBook,
         updateBookStatus: mockUpdateBookStatus,
         updateBookTags: jest.fn()
       });
@@ -476,6 +535,7 @@ describe('BookDetail', () => {
         book: sameStatusBook,
         loading: false,
         error: null,
+      updateBook: mockUpdateBook,
         updateBookStatus: mockUpdateBookStatus,
         updateBookTags: jest.fn()
       });

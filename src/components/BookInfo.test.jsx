@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import BookInfo from './BookInfo';
 import { resetMocks } from '../test-utils';
 
@@ -194,6 +194,17 @@ describe('BookInfo', () => {
     
     expect(screen.getByTestId('book-acquisition-type')).toBeInTheDocument();
     expect(screen.getByText('取得方法: 購入')).toBeInTheDocument();
+  });
+
+  test('renders edit button when onEdit is provided', () => {
+    const handleEdit = jest.fn();
+    render(<BookInfo book={mockBook} onEdit={handleEdit} />);
+
+    const editButton = screen.getByTestId('book-edit-button');
+    expect(editButton).toBeInTheDocument();
+
+    fireEvent.click(editButton);
+    expect(handleEdit).toHaveBeenCalled();
   });
 
   /**

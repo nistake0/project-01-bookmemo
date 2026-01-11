@@ -1,17 +1,17 @@
 import React from 'react';
-import { Typography, Box, Chip } from '@mui/material';
+import { Typography, Box, Chip, Button, Stack } from '@mui/material';
 import BookStatusChanger from './BookStatusChanger';
 import { getAcquisitionTypeLabel, ACQUISITION_TYPE } from '../constants/bookStatus';
 
-const BookInfo = ({ book, bookId, onStatusChange }) => {
+const BookInfo = ({ book, bookId, onStatusChange, onEdit }) => {
   if (!book) return null;
 
   return (
     <Box data-testid="book-info">
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
-        <BookStatusChanger 
-          book={book} 
-          bookId={bookId} 
+        <BookStatusChanger
+          book={book}
+          bookId={bookId}
           onStatusChange={onStatusChange}
         />
       </Box>
@@ -68,6 +68,20 @@ const BookInfo = ({ book, bookId, onStatusChange }) => {
           </Box>
         )}
       </Box>
+
+      {onEdit && (
+        <Box sx={{ textAlign: 'left', mt: 2 }}>
+          <Button
+            variant="text"
+            size="small"
+            onClick={onEdit}
+            data-testid="book-edit-button"
+            sx={{ opacity: 0.7 }}
+          >
+            書籍情報を編集
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };

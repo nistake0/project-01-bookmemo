@@ -15,6 +15,7 @@ import AddIcon from '@mui/icons-material/Add';
 import MemoList from '../components/MemoList';
 import MemoAdd from '../components/MemoAdd';
 import BookInfo from '../components/BookInfo';
+import BookEditDialog from '../components/BookEditDialog';
 import BookTagEditor from '../components/BookTagEditor';
 import StatusHistoryTimeline from '../components/StatusHistoryTimeline';
 import LatestStatusHistory from '../components/LatestStatusHistory';
@@ -26,7 +27,7 @@ import { useNavigation } from '../hooks/useNavigation';
 const BookDetail = () => {
   const { id } = useParams();
   const location = useLocation();
-  const { book, loading, error, updateBookStatus, updateBookTags } = useBook(id);
+  const { book, loading, error, updateBook, updateBookStatus, updateBookTags } = useBook(id);
   const { 
     history, 
     loading: historyLoading, 
@@ -49,6 +50,7 @@ const BookDetail = () => {
   
   const [memoListKey, setMemoListKey] = useState(0); // MemoListの再レンダリング用
   const [memoAddDialogOpen, setMemoAddDialogOpen] = useState(false);
+  const [bookEditDialogOpen, setBookEditDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0); // タブ切り替え用
 
   // 書籍詳細ページのデバッグ情報を記録（削除: 開発用ログ）
@@ -77,6 +79,18 @@ const BookDetail = () => {
 
   const handleCloseDialog = () => {
     setMemoAddDialogOpen(false);
+  };
+
+  const handleOpenBookEdit = () => {
+    setBookEditDialogOpen(true);
+  };
+
+  const handleCloseBookEdit = () => {
+    setBookEditDialogOpen(false);
+  };
+
+  const handleSaveBook = async (updatedFields) => {
+    await updateBook(updatedFields);
   };
 
   const handleTabChange = (event, newValue) => {
@@ -142,7 +156,12 @@ const BookDetail = () => {
       px: { xs: 2, sm: 0 } // モバイルでは左右の余白を追加
     }} data-testid="book-detail">
       <Paper sx={{ p: { xs: 2, sm: 3 } }}>
-        <BookInfo book={book} bookId={id} onStatusChange={handleStatusChange} />
+        <BookInfo 
+          book={book} 
+          bookId={id} 
+          onStatusChange={handleStatusChange}
+          onEdit={handleOpenBookEdit}
+        />
         
         {/* 最新ステータス履歴表示 */}
         <LatestStatusHistory bookId={id} />
@@ -204,6 +223,12 @@ const BookDetail = () => {
           onClose={handleCloseDialog}
         />
       </Dialog>
+      <BookEditDialog
+        open={bookEditDialogOpen}
+        book={book}
+        onClose={handleCloseBookEdit}
+        onSave={handleSaveBook}
+      />
     </Box>
   );
 };
