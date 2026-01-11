@@ -39,7 +39,8 @@ describe('SearchResults', () => {
         />
       );
 
-      expect(screen.getByText('検索条件を設定して検索を実行してください。')).toBeInTheDocument();
+      const emptyMessage = screen.getByTestId('search-results-empty-message');
+      expect(emptyMessage).toHaveTextContent('検索条件を設定して検索を実行してください。');
     });
 
     test('デフォルト値でレンダリングされる', () => {
@@ -49,7 +50,8 @@ describe('SearchResults', () => {
         />
       );
 
-      expect(screen.getByText('検索条件を設定して検索を実行してください。')).toBeInTheDocument();
+      const emptyMessage = screen.getByTestId('search-results-empty-message');
+      expect(emptyMessage).toHaveTextContent('検索条件を設定して検索を実行してください。');
     });
   });
 
@@ -76,7 +78,8 @@ describe('SearchResults', () => {
         />
       );
 
-      expect(screen.getByText('「テスト」に一致する結果が見つかりませんでした。')).toBeInTheDocument();
+      const emptyMessage = screen.getByTestId('search-results-empty-message');
+      expect(emptyMessage).toHaveTextContent('「テスト」に一致する結果が見つかりませんでした。');
     });
 
     test('検索クエリがない場合のメッセージ', () => {
@@ -87,7 +90,8 @@ describe('SearchResults', () => {
         />
       );
 
-      expect(screen.getByText('検索条件を設定して検索を実行してください。')).toBeInTheDocument();
+      const emptyMessage = screen.getByTestId('search-results-empty-message');
+      expect(emptyMessage).toHaveTextContent('検索条件を設定して検索を実行してください。');
     });
   });
 
@@ -312,7 +316,8 @@ describe('SearchResults', () => {
         );
       }).not.toThrow();
 
-      expect(screen.getByText('検索条件を設定して検索を実行してください。')).toBeInTheDocument();
+      const emptyMessage = screen.getByTestId('search-results-empty-message');
+      expect(emptyMessage).toHaveTextContent('検索条件を設定して検索を実行してください。');
     });
   });
 

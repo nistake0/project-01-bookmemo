@@ -144,12 +144,12 @@ const MemoEditor = ({
   return (
     <>
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth data-testid="memo-detail-dialog">
-        <DialogTitle data-testid="memo-detail-title">メモ詳細</DialogTitle>
+        <DialogTitle data-testid="memo-detail-title" data-testid-title="メモ詳細">メモ詳細</DialogTitle>
         <DialogContent>
           {dialogMode === 'view' ? (
             <>
-              <Typography variant="body1" sx={{ whiteSpace: 'pre-line', mb: 2 }}>{editingMemo?.text}</Typography>
-              {editingMemo?.comment && <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{editingMemo.comment}</Typography>}
+              <Typography variant="body1" sx={{ whiteSpace: 'pre-line', mb: 2 }} data-testid="memo-detail-text">{editingMemo?.text}</Typography>
+              {editingMemo?.comment && <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }} data-testid="memo-detail-comment">{editingMemo.comment}</Typography>}
               
               {/* ランク表示 */}
               {editingMemo?.rating != null && (
@@ -162,20 +162,20 @@ const MemoEditor = ({
                       sx={{ mb: 0.5 }}
                     />
                   )}
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }} data-testid="memo-detail-rating-description">
                     {getMemoRatingDescription(editingMemo.rating || DEFAULT_MEMO_RATING)}
                   </Typography>
                 </Box>
               )}
               
-              <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
+              <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }} data-testid="memo-detail-tags">
                 {Array.isArray(editingMemo?.tags) && editingMemo.tags.map((tag, idx) => (
                   <Chip key={idx} label={tag} size="small" color="secondary" />
                 ))}
               </Stack>
-              {editingMemo?.page && <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>p. {editingMemo.page}</Typography>}
+              {editingMemo?.page && <Typography variant="caption" sx={{ display: 'block', mb: 1 }} data-testid="memo-detail-page">p. {editingMemo.page}</Typography>}
               {editingMemo?.createdAt && (
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }} data-testid="memo-detail-created-at">
                   {formatDateTime(editingMemo.createdAt)}
                 </Typography>
               )}

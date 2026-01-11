@@ -59,7 +59,7 @@ function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSear
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>検索条件</Typography>
+      <Typography variant="h6" gutterBottom data-testid="advanced-search-title">検索条件</Typography>
       
       <Paper sx={{ p: 2, mb: 2 }}>
         {/* 統合テキスト検索 */}
@@ -75,7 +75,7 @@ function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSear
         
         {/* ステータスフィルター */}
         <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle2" gutterBottom>
+          <Typography variant="subtitle2" gutterBottom data-testid="status-filter-label">
             ステータス
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>

@@ -207,17 +207,23 @@ describe('MemoEditor', () => {
     );
 
     // メモ詳細のタイトルと内容が表示されることを確認
-    expect(screen.getByText('メモ詳細')).toBeInTheDocument();
-    expect(screen.getByText('テストメモの内容')).toBeInTheDocument();
-    expect(screen.getByText('テストコメント')).toBeInTheDocument();
+    const title = screen.getByTestId('memo-detail-title');
+    expect(title).toHaveTextContent('メモ詳細');
+    const text = screen.getByTestId('memo-detail-text');
+    expect(text).toHaveTextContent('テストメモの内容');
+    const comment = screen.getByTestId('memo-detail-comment');
+    expect(comment).toHaveTextContent('テストコメント');
     
-    // タグが表示されることを確認
-    expect(screen.getByText('テスト')).toBeInTheDocument();
-    expect(screen.getByText('サンプル')).toBeInTheDocument();
+    // タグが表示されることを確認（データ内容のため、タグコンテナ内で確認）
+    const tagsContainer = screen.getByTestId('memo-detail-tags');
+    expect(tagsContainer).toHaveTextContent('テスト');
+    expect(tagsContainer).toHaveTextContent('サンプル');
     
     // ページ番号と作成日が表示されることを確認
-    expect(screen.getByText('p. 123')).toBeInTheDocument();
-    expect(screen.getByText('2024/1/1 10:00:00')).toBeInTheDocument();
+    const page = screen.getByTestId('memo-detail-page');
+    expect(page).toHaveTextContent('p. 123');
+    const createdAt = screen.getByTestId('memo-detail-created-at');
+    expect(createdAt).toHaveTextContent('2024/1/1 10:00:00');
   });
 
   /**

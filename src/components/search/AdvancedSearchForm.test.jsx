@@ -34,15 +34,19 @@ describe('AdvancedSearchForm', () => {
         />
       );
 
-      expect(screen.getByText('検索条件')).toBeInTheDocument();
+      const title = screen.getByTestId('advanced-search-title');
+      expect(title).toHaveTextContent('検索条件');
       expect(screen.getByLabelText('テキスト検索（タイトル・著者・メモ内容・タグ）')).toBeInTheDocument();
-      expect(screen.getByText('ステータス')).toBeInTheDocument();
-      expect(screen.getByText('すべて')).toBeInTheDocument();
-      expect(screen.getByText('積読')).toBeInTheDocument();
-      expect(screen.getAllByText('読書中')).toHaveLength(1);  // reading-group
-      expect(screen.getByText('中断')).toBeInTheDocument();
-      expect(screen.getByText('読了')).toBeInTheDocument();
-      expect(screen.getByText('検索実行')).toBeInTheDocument();
+      const statusLabel = screen.getByTestId('status-filter-label');
+      expect(statusLabel).toHaveTextContent('ステータス');
+      // ステータスボタンはdata-testidで確認（FILTER_LABELSは定数なので実装文字列ではないが、data-testidベースに統一）
+      expect(screen.getByTestId('status-filter-all')).toHaveTextContent('すべて');
+      expect(screen.getByTestId('status-filter-tsundoku')).toHaveTextContent('積読');
+      expect(screen.getByTestId('status-filter-reading-group')).toHaveTextContent('読書中');
+      expect(screen.getByTestId('status-filter-suspended')).toHaveTextContent('中断');
+      expect(screen.getByTestId('status-filter-finished')).toHaveTextContent('読了');
+      const searchButton = screen.getByTestId('search-button');
+      expect(searchButton).toHaveTextContent('検索実行');
     });
 
     test('デフォルト値でレンダリングされる', () => {

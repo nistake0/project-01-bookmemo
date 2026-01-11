@@ -158,7 +158,8 @@ describe('MemoAdd', () => {
     
     // ランクの説明文が表示されることを確認（THREEは「面白かった」）
     await waitFor(() => {
-      expect(screen.getByText('面白かった')).toBeInTheDocument();
+      const ratingDescription = screen.getByTestId('memo-rating-description');
+      expect(ratingDescription).toHaveTextContent('面白かった');
     });
   });
 

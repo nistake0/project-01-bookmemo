@@ -95,7 +95,7 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
   if (!results || results.length === 0) {
     return (
       <Box sx={{ p: 3 }}>
-        <Alert severity="info">
+        <Alert severity="info" data-testid="search-results-empty-message">
           {searchQuery 
             ? `「${searchQuery}」に一致する結果が見つかりませんでした。`
             : '検索条件を設定して検索を実行してください。'

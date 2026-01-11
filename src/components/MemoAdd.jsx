@@ -147,7 +147,7 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
                 sx={{ mt: 1 }}
                 data-testid="memo-rating-input"
               />
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }} data-testid="memo-rating-description">
                 {getMemoRatingDescription(rating)}
               </Typography>
             </FormControl>
@@ -241,7 +241,7 @@ const MemoAdd = ({ bookId, bookTags = [], onMemoAdded, onClose }) => {
           sx={{ mt: 1 }}
           data-testid="memo-rating-input"
         />
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }} data-testid="memo-rating-description">
           {getMemoRatingDescription(rating)}
         </Typography>
       </FormControl>
