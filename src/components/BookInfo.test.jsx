@@ -1,7 +1,21 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import BookInfo from './BookInfo';
 import { resetMocks } from '../test-utils';
+
+// navigator.clipboardのモック
+const mockClipboard = {
+  writeText: jest.fn(),
+};
+
+Object.defineProperty(navigator, 'clipboard', {
+  value: mockClipboard,
+  configurable: true,
+});
+
+// window.openのモック
+const mockWindowOpen = jest.fn();
+window.open = mockWindowOpen;
 
 /**
  * BookInfo コンポーネントのユニットテスト
@@ -32,6 +46,8 @@ describe('BookInfo', () => {
     // 完全なモックリセット
     jest.clearAllMocks();
     resetMocks();
+    mockClipboard.writeText.mockClear();
+    mockWindowOpen.mockClear();
   });
 
   afterEach(() => {
@@ -266,4 +282,4 @@ describe('BookInfo', () => {
     
     expect(screen.queryByTestId('book-isbn')).not.toBeInTheDocument();
   });
-}); 
+});

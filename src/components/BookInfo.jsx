@@ -1,13 +1,42 @@
 import React from 'react';
-import { Typography, Box, Chip, Button, Stack } from '@mui/material';
+import {
+  Typography,
+  Box,
+  Chip,
+  Button,
+  Stack,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Snackbar,
+  Alert,
+} from '@mui/material';
+import {
+  ContentCopy as ContentCopyIcon,
+  Search as SearchIcon,
+  ShoppingCart as ShoppingCartIcon,
+} from '@mui/icons-material';
 import BookStatusChanger from './BookStatusChanger';
 import { getAcquisitionTypeLabel, ACQUISITION_TYPE } from '../constants/bookStatus';
+import { useTextCopyMenu } from '../hooks/useTextCopyMenu';
 
 const BookInfo = ({ book, bookId, onStatusChange, onEdit }) => {
+  const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'success' });
+  
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
+  
+  const { handleClick, handleContextMenu, menuProps, handleCopy, handleExternalSearch } = useTextCopyMenu({
+    showSnackbar,
+  });
+  
   if (!book) return null;
 
   return (
-    <Box data-testid="book-info">
+    <>
+      <Box data-testid="book-info">
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
         <BookStatusChanger
           book={book}
@@ -35,14 +64,50 @@ const BookInfo = ({ book, bookId, onStatusChange, onEdit }) => {
       </Box>
       
       <Box sx={{ mb: 2 }} data-testid="book-details">
-        <Typography variant="h4" gutterBottom sx={{ wordBreak: 'break-word' }} data-testid="book-title">
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{
+            wordBreak: 'break-word',
+            cursor: 'pointer',
+            userSelect: 'none',
+            '&:hover': { opacity: 0.8 },
+          }}
+          onClick={(e) => handleClick(e, book.title, book)}
+          onContextMenu={(e) => handleContextMenu(e, book.title, book)}
+          data-testid="book-title"
+        >
           {book.title}
         </Typography>
-        <Typography variant="h6" color="text.secondary" gutterBottom data-testid="book-author">
+        <Typography
+          variant="h6"
+          color="text.secondary"
+          gutterBottom
+          sx={{
+            cursor: 'pointer',
+            userSelect: 'none',
+            '&:hover': { opacity: 0.8 },
+          }}
+          onClick={(e) => handleClick(e, book.author, book)}
+          onContextMenu={(e) => handleContextMenu(e, book.author, book)}
+          data-testid="book-author"
+        >
           {book.author}
         </Typography>
         {book.publisher && (
-          <Typography variant="body1" color="text.secondary" gutterBottom data-testid="book-publisher">
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            gutterBottom
+            sx={{
+              cursor: 'pointer',
+              userSelect: 'none',
+              '&:hover': { opacity: 0.8 },
+            }}
+            onClick={(e) => handleClick(e, book.publisher, book)}
+            onContextMenu={(e) => handleContextMenu(e, book.publisher, book)}
+            data-testid="book-publisher"
+          >
             出版社: {book.publisher}
           </Typography>
         )}
@@ -82,7 +147,48 @@ const BookInfo = ({ book, bookId, onStatusChange, onEdit }) => {
           </Button>
         </Box>
       )}
-    </Box>
+      </Box>
+      
+      {/* コンテキストメニュー */}
+      <Menu {...menuProps} data-testid="text-copy-menu">
+        <MenuItem onClick={handleCopy} data-testid="text-copy-menu-copy">
+          <ListItemIcon>
+            <ContentCopyIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>コピー</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleExternalSearch('google')} data-testid="text-copy-menu-google">
+          <ListItemIcon>
+            <SearchIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Google検索</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleExternalSearch('amazon')} data-testid="text-copy-menu-amazon">
+          <ListItemIcon>
+            <ShoppingCartIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Amazon検索</ListItemText>
+        </MenuItem>
+      </Menu>
+      
+      {/* Snackbar（フィードバック用） */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        data-testid="text-copy-snackbar"
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+          data-testid="text-copy-alert"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 
