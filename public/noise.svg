@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Lightweight procedural noise (SVG filter). Used as a subtle overlay for modern-looking backgrounds.
+  No external assets / licensing concerns.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <filter id="n">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+    <feColorMatrix type="matrix" values="
+      1 0 0 0 0
+      0 1 0 0 0
+      0 0 1 0 0
+      0 0 0 0.12 0"/>
+  </filter>
+  <rect width="256" height="256" filter="url(#n)"/>
+</svg>

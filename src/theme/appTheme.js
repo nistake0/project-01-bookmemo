@@ -4,8 +4,8 @@ export const appTheme = createTheme({
   palette: {
     mode: 'light',
     background: {
-      default: '#f5f7fa', // 明るいグレー
-      paper: '#fff',
+      default: '#eef2ff', // App.jsxの背景に寄せ (薄いクールトーン)
+      paper: '#ffffff',
     },
     primary: {
       main: '#1976d2', // 青系
@@ -112,6 +112,50 @@ export const appTheme = createTheme({
   },
   // コンポーネント固有のスタイル設定
   components: {
+    // 背景などの「アプリ全体の見た目」をここに集約（App.jsxからはCSS変数だけ渡す）
+    MuiCssBaseline: {
+      styleOverrides: {
+        '#app-scroll-container': {
+          position: 'relative',
+          backgroundColor: '#eef2ff',
+          backgroundImage: `
+            radial-gradient(1200px circle at 20% 10%, rgba(99, 102, 241, 0.18), transparent 60%),
+            radial-gradient(900px circle at 85% 0%, rgba(14, 165, 233, 0.16), transparent 55%),
+            radial-gradient(900px circle at 50% 100%, rgba(168, 85, 247, 0.12), transparent 55%),
+            var(--bm-noise-bg)
+          `,
+          backgroundBlendMode: 'normal, normal, normal, overlay',
+          backgroundRepeat: 'no-repeat, no-repeat, no-repeat, repeat',
+          backgroundSize: 'cover, cover, cover, 256px 256px',
+          backgroundPosition: 'center, center, center, center',
+          backgroundAttachment: 'fixed, fixed, fixed, fixed',
+          minHeight: '100vh',
+          width: '100%',
+
+          // 図書館/読書パターン（シームレス）は擬似要素で重ねる
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: 'var(--bm-library-bg)',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '320px 320px',
+            backgroundPosition: 'center var(--bg-offset, 0px)',
+            opacity: 0.62,
+            mixBlendMode: 'normal',
+            pointerEvents: 'none',
+            zIndex: 0,
+          },
+          '& > *': {
+            position: 'relative',
+            zIndex: 1,
+          },
+        },
+      },
+    },
+    // 全体共通: 角丸 + 控えめな枠線 + 影の統一（モダン寄り）
+    // NOTE: ここでは「薄いガラス感」を Paper/Card に限定して付与し、Menu/Dialogは後で不透明に戻す。
+
     // TextFieldのモバイル最適化
     MuiTextField: {
       styleOverrides: {
@@ -164,6 +208,17 @@ export const appTheme = createTheme({
           '@media (min-width:600px)': {
             marginBottom: '16px',
           },
+
+          // 見た目（モダン寄り）
+          borderRadius: 16,
+          border: '1px solid rgba(15, 23, 42, 0.08)',
+          backgroundColor: 'rgba(255, 255, 255, 0.72)', // うっすらガラス
+          backdropFilter: 'saturate(140%) blur(10px)',
+          boxShadow: '0 10px 28px rgba(15, 23, 42, 0.08)',
+          transition: 'box-shadow 160ms ease, transform 160ms ease',
+          '&:hover': {
+            boxShadow: '0 16px 36px rgba(15, 23, 42, 0.12)',
+          },
         },
       },
     },
@@ -197,6 +252,39 @@ export const appTheme = createTheme({
           '@media (min-width:600px)': {
             padding: '16px',
           },
+
+          // 見た目（モダン寄り）
+          borderRadius: 16,
+          border: '1px solid rgba(15, 23, 42, 0.08)',
+          backgroundColor: 'rgba(255, 255, 255, 0.72)', // うっすらガラス
+          backdropFilter: 'saturate(140%) blur(10px)',
+          boxShadow: '0 10px 28px rgba(15, 23, 42, 0.08)',
+        },
+      },
+    },
+
+    // Menu/Popoverは「ガラス」にすると読みづらくなるので、ほぼ不透明に戻す
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          borderRadius: 12,
+          border: '1px solid rgba(15, 23, 42, 0.12)',
+          backgroundColor: 'rgba(255, 255, 255, 0.98)',
+          backdropFilter: 'none',
+          boxShadow: '0 14px 40px rgba(15, 23, 42, 0.18)',
+          padding: 0, // MuiPaper(root)のpaddingが乗るのを避ける
+        },
+      },
+    },
+    MuiPopover: {
+      styleOverrides: {
+        paper: {
+          borderRadius: 12,
+          border: '1px solid rgba(15, 23, 42, 0.12)',
+          backgroundColor: 'rgba(255, 255, 255, 0.98)',
+          backdropFilter: 'none',
+          boxShadow: '0 14px 40px rgba(15, 23, 42, 0.18)',
+          padding: 0,
         },
       },
     },
@@ -238,6 +326,14 @@ export const appTheme = createTheme({
             width: 'calc(100% - 64px)',
             maxWidth: '600px',
           },
+
+          // 読みやすさ優先（不透明）
+          borderRadius: 16,
+          border: '1px solid rgba(15, 23, 42, 0.12)',
+          backgroundColor: '#ffffff',
+          backdropFilter: 'none',
+          boxShadow: '0 20px 60px rgba(15, 23, 42, 0.22)',
+          padding: 0, // MuiPaper(root)のpaddingが乗るのを避ける（DialogContent等に任せる）
         },
       },
     },

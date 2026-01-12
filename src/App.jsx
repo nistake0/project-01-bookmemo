@@ -28,6 +28,7 @@ import { useContext } from 'react';
 import { PATHS } from './config/paths';
 import { appTheme } from './theme/appTheme';
 import { ErrorLogger, setupGlobalErrorHandling } from './utils/errorLogger';
+import { useBackgroundParallax } from './hooks/useBackgroundParallax';
 
 // ErrorLogger / appTheme は外部モジュールへ分離
 
@@ -230,6 +231,9 @@ function AppRoutes() {
     }
   }, [location.pathname]);
 
+  // 背景の“動き”だけをフックに分離（見た目はappTheme.jsのMuiCssBaselineへ）
+  useBackgroundParallax({ factor: 0.45 });
+
   // グローバルエラーハンドラーを設定
   useEffect(() => {
     const handleError = (event) => {
@@ -320,17 +324,11 @@ function AppRoutes() {
           WebkitOverflowScrolling: 'touch',
           // 画面下部のボトムナビの重なり回避（各ページでもpbしているが二重でも実害なし）
           pb: hideBottomNav ? 0 : { xs: '64px', sm: '72px' },
-          // ページ全体の背景画像設定 - 画像本来の色で表示
-          background: `
-            url('${PATHS.PAPER_TEXTURE()}'),
-            #f5f5dc
-          `,
-          backgroundSize: '100% auto, cover',
-          backgroundRepeat: 'repeat-y, no-repeat',
-          backgroundPosition: 'center top, center',
-          backgroundAttachment: 'fixed',
-          minHeight: '100vh',
-          width: '100%'
+          // 背景の“見た目”は appTheme.js（MuiCssBaseline）へ寄せる。
+          // ここでは URL だけ CSS 変数で渡す（prodのbasePathにも追従）
+          // NOTE: url(var(--x)) は環境差が出ることがあるので、変数側を url("...") にして参照は var(...) に寄せる
+          '--bm-noise-bg': `url("${PATHS.NOISE_TEXTURE()}")`,
+          '--bm-library-bg': `url("${PATHS.LIBRARY_PATTERN()}")`,
         }}
       >
         <Routes>

@@ -35,6 +35,8 @@ export const PATHS = {
   SW_JS: () => buildPath('/sw.js'),
   VITE_SVG: () => buildPath('/vite.svg'),
   PAPER_TEXTURE: () => buildPath('/paper-texture.jpg'),
+  NOISE_TEXTURE: () => buildPath('/noise.svg'),
+  LIBRARY_PATTERN: () => buildPath('/library-pattern.svg'),
   
   // アイコン
   ICON_192: () => buildPath('/icons/icon-192x192.png'),
