@@ -212,17 +212,6 @@ describe('BookInfo', () => {
     expect(screen.getByText('取得方法: 購入')).toBeInTheDocument();
   });
 
-  test('renders edit button when onEdit is provided', () => {
-    const handleEdit = jest.fn();
-    render(<BookInfo book={mockBook} onEdit={handleEdit} />);
-
-    const editButton = screen.getByTestId('book-edit-button');
-    expect(editButton).toBeInTheDocument();
-
-    fireEvent.click(editButton);
-    expect(handleEdit).toHaveBeenCalled();
-  });
-
   /**
    * テストケース: 取得方法が不明の場合は表示しない
    * 

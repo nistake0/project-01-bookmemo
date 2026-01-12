@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Box, 
   Paper, 
   Divider, 
   Typography, 
   Fab, 
-  Dialog, 
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Stack,
   Tabs, 
   Tab,
   Alert
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import MemoList from '../components/MemoList';
 import MemoAdd from '../components/MemoAdd';
 import BookInfo from '../components/BookInfo';
@@ -27,7 +34,8 @@ import { useNavigation } from '../hooks/useNavigation';
 const BookDetail = () => {
   const { id } = useParams();
   const location = useLocation();
-  const { book, loading, error, updateBook, updateBookStatus, updateBookTags } = useBook(id);
+  const navigate = useNavigate();
+  const { book, loading, error, updateBook, updateBookStatus, updateBookTags, deleteBook } = useBook(id);
   const { 
     history, 
     loading: historyLoading, 
@@ -51,6 +59,7 @@ const BookDetail = () => {
   const [memoListKey, setMemoListKey] = useState(0); // MemoListの再レンダリング用
   const [memoAddDialogOpen, setMemoAddDialogOpen] = useState(false);
   const [bookEditDialogOpen, setBookEditDialogOpen] = useState(false);
+  const [bookDeleteDialogOpen, setBookDeleteDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0); // タブ切り替え用
 
   // 書籍詳細ページのデバッグ情報を記録（削除: 開発用ログ）
@@ -91,6 +100,27 @@ const BookDetail = () => {
 
   const handleSaveBook = async (updatedFields) => {
     await updateBook(updatedFields);
+  };
+
+  const handleOpenBookDelete = () => {
+    setBookDeleteDialogOpen(true);
+  };
+
+  const handleCloseBookDelete = () => {
+    setBookDeleteDialogOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteBook();
+      // 削除成功後、書籍一覧ページへリダイレクト
+      navigate('/');
+    } catch (error) {
+      // エラーはdeleteBook内でsetGlobalErrorで通知済み
+      console.error('書籍の削除に失敗しました:', error);
+    } finally {
+      setBookDeleteDialogOpen(false);
+    }
   };
 
   const handleTabChange = (event, newValue) => {
@@ -168,6 +198,32 @@ const BookDetail = () => {
         
         <BookTagEditor book={book} bookId={id} onTagsChange={handleTagsChange} />
         
+        {/* 編集・削除ボタン（横並び） */}
+        <Box sx={{ textAlign: 'left', mt: 2, mb: 2 }}>
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              startIcon={<EditIcon />}
+              onClick={handleOpenBookEdit}
+              data-testid="book-edit-button"
+            >
+              書籍情報を編集
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              startIcon={<DeleteIcon />}
+              onClick={handleOpenBookDelete}
+              data-testid="book-delete-button"
+            >
+              書籍を削除
+            </Button>
+          </Stack>
+        </Box>
+        
         <Divider sx={{ my: { xs: 1, sm: 2 } }} />
         
         {/* タブ切り替え */}
@@ -229,6 +285,34 @@ const BookDetail = () => {
         onClose={handleCloseBookEdit}
         onSave={handleSaveBook}
       />
+      
+      {/* 削除確認ダイアログ */}
+      <Dialog 
+        open={bookDeleteDialogOpen} 
+        onClose={handleCloseBookDelete} 
+        data-testid="book-delete-dialog"
+      >
+        <DialogTitle data-testid="book-delete-confirm-title">本当に削除しますか？</DialogTitle>
+        <DialogContent>
+          <Typography>この書籍を削除すると、元に戻すことはできません。</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            メモが含まれている書籍は削除できません。
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseBookDelete} data-testid="book-delete-cancel-button">
+            キャンセル
+          </Button>
+          <Button 
+            onClick={handleConfirmDelete} 
+            color="error" 
+            variant="contained" 
+            data-testid="book-delete-confirm-button"
+          >
+            削除
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

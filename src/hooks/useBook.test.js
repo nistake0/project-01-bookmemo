@@ -1,6 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useBook } from './useBook';
-import { getDoc, updateDoc } from 'firebase/firestore';
+import { getDoc, updateDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
 
 // 依存するモジュールをモック化
 jest.mock('firebase/firestore');
@@ -282,5 +282,124 @@ describe('useBook', () => {
       expect(result.current.loading).toBe(false);
     });
     console.log('=== useBook test: returns null when no user or bookId END ===');
+  });
+
+  test('deletes book successfully when no memos exist', async () => {
+    console.log('=== useBook test: deletes book successfully when no memos exist START ===');
+    const mockBook = {
+      id: 'book-1',
+      userId: 'test-user-id',
+      title: 'テスト書籍',
+      author: 'テスト著者',
+      status: 'reading',
+    };
+
+    getDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => mockBook,
+      id: 'book-1'
+    });
+
+    // メモが無いことを確認（空のスナップショット）
+    collection.mockReturnValue('mock-memos-collection');
+    getDocs.mockResolvedValue({ empty: true, docs: [] });
+    deleteDoc.mockResolvedValue();
+
+    const { result } = renderUseBook('book-1');
+    
+    // 初期化完了を待つ
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // 書籍削除
+    let success;
+    await act(async () => {
+      success = await result.current.deleteBook();
+    });
+
+    expect(success).toBe(true);
+    expect(deleteDoc).toHaveBeenCalled();
+    expect(result.current.book).toBe(null);
+    console.log('=== useBook test: deletes book successfully when no memos exist END ===');
+  });
+
+  test('fails to delete book when memos exist', async () => {
+    console.log('=== useBook test: fails to delete book when memos exist START ===');
+    const mockBook = {
+      id: 'book-1',
+      userId: 'test-user-id',
+      title: 'テスト書籍',
+      author: 'テスト著者',
+      status: 'reading',
+    };
+
+    getDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => mockBook,
+      id: 'book-1'
+    });
+
+    // メモが存在することを確認（空でないスナップショット）
+    collection.mockReturnValue('mock-memos-collection');
+    getDocs.mockResolvedValue({ 
+      empty: false, 
+      docs: [{ id: 'memo-1', data: () => ({ text: 'テストメモ' }) }] 
+    });
+
+    const { result } = renderUseBook('book-1');
+    
+    // 初期化完了を待つ
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // 書籍削除（メモがあるため失敗）
+    await act(async () => {
+      await expect(result.current.deleteBook()).rejects.toThrow('メモが含まれている');
+    });
+
+    expect(deleteDoc).not.toHaveBeenCalled();
+    expect(mockSetGlobalError).toHaveBeenCalledWith(
+      'この書籍にはメモが含まれているため、削除できません。先にメモを削除してください。'
+    );
+    console.log('=== useBook test: fails to delete book when memos exist END ===');
+  });
+
+  test('handles delete book error', async () => {
+    console.log('=== useBook test: handles delete book error START ===');
+    const mockBook = {
+      id: 'book-1',
+      userId: 'test-user-id',
+      title: 'テスト書籍',
+      author: 'テスト著者',
+      status: 'reading',
+    };
+
+    getDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => mockBook,
+      id: 'book-1'
+    });
+
+    // メモが無いことを確認
+    collection.mockReturnValue('mock-memos-collection');
+    getDocs.mockResolvedValue({ empty: true, docs: [] });
+    deleteDoc.mockRejectedValue(new Error('Delete failed'));
+
+    const { result } = renderUseBook('book-1');
+    
+    // 初期化完了を待つ
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // 書籍削除（エラー）
+    await act(async () => {
+      await expect(result.current.deleteBook()).rejects.toThrow('Delete failed');
+    });
+
+    expect(mockSetGlobalError).toHaveBeenCalledWith('書籍の削除に失敗しました。');
+    console.log('=== useBook test: handles delete book error END ===');
   });
 }); 

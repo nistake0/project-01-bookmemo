@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
-import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, serverTimestamp, deleteDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../auth/AuthProvider';
 import { ErrorDialogContext } from '../components/CommonErrorDialog';
@@ -75,6 +75,40 @@ export const useBook = (bookId) => {
     return await updateBook({ tags: newTags });
   }, [updateBook]);
 
+  const deleteBook = useCallback(async () => {
+    if (!user || !bookId) {
+      throw new Error("ユーザーまたは書籍IDが無効です。");
+    }
+
+    try {
+      // メモの存在確認
+      const memosRef = collection(db, 'books', bookId, 'memos');
+      const memosSnapshot = await getDocs(memosRef);
+      
+      if (!memosSnapshot.empty) {
+        const errorMessage = 'この書籍にはメモが含まれているため、削除できません。先にメモを削除してください。';
+        setGlobalError(errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      // メモが無い場合のみ削除処理を実行
+      const docRef = doc(db, 'books', bookId);
+      await deleteDoc(docRef);
+      
+      // ローカル状態をクリア
+      setBook(null);
+      
+      return true;
+    } catch (error) {
+      console.error("Error deleting book:", error);
+      // メモがある場合のエラーは既にsetGlobalErrorで通知済み
+      if (!error.message.includes('メモが含まれている')) {
+        setGlobalError("書籍の削除に失敗しました。");
+      }
+      throw error;
+    }
+  }, [bookId, user, setGlobalError]);
+
   useEffect(() => {
     fetchBook();
   }, [fetchBook]);
@@ -87,5 +121,6 @@ export const useBook = (bookId) => {
     updateBook,
     updateBookStatus,
     updateBookTags,
+    deleteBook,
   };
 }; 

@@ -133,20 +133,6 @@ const BookInfo = ({ book, bookId, onStatusChange, onEdit }) => {
           </Box>
         )}
       </Box>
-
-      {onEdit && (
-        <Box sx={{ textAlign: 'left', mt: 2 }}>
-          <Button
-            variant="text"
-            size="small"
-            onClick={onEdit}
-            data-testid="book-edit-button"
-            sx={{ opacity: 0.7 }}
-          >
-            書籍情報を編集
-          </Button>
-        </Box>
-      )}
       </Box>
       
       {/* コンテキストメニュー */}

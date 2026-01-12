@@ -5,20 +5,24 @@ import { useBook } from '../hooks/useBook';
 import { renderWithProviders, resetMocks } from '../test-utils';
 import { convertToDate } from '../utils/dateUtils';
 
+// useNavigateをモック
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate,
+  useParams: () => ({ id: 'book-1' }),
+  useLocation: () => ({ pathname: '/book/book-1' }),
+}));
+
 // useBookフックをモック
 jest.mock('../hooks/useBook');
 jest.mock('../hooks/useBookStatusHistory');
 jest.mock('../components/BookInfo', () => {
-  return function MockBookInfo({ book, onStatusChange, onEdit }) {
+  return function MockBookInfo({ book, onStatusChange }) {
     return (
       <div data-testid="book-info">
         <h1>{book.title}</h1>
         <button onClick={() => onStatusChange('reading')} data-testid="status-change">ステータス変更</button>
-        {onEdit && (
-          <button onClick={() => onEdit()} data-testid="book-edit-trigger">
-            編集
-          </button>
-        )}
       </div>
     );
   };
@@ -238,11 +242,12 @@ describe('BookDetail', () => {
       updateBook: mockUpdateBook,
       updateBookStatus: jest.fn(),
       updateBookTags: jest.fn(),
+      deleteBook: jest.fn().mockResolvedValue(true),
     });
 
     renderWithProviders(<BookDetail />);
 
-    fireEvent.click(screen.getByTestId('book-edit-trigger'));
+    fireEvent.click(screen.getByTestId('book-edit-button'));
     expect(screen.getByTestId('book-edit-dialog-mock')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('book-edit-dialog-save'));
