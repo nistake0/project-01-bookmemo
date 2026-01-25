@@ -118,31 +118,26 @@ export const appTheme = createTheme({
         '#app-scroll-container': {
           position: 'relative',
           backgroundColor: '#eef2ff',
-          backgroundImage: `
-            radial-gradient(1200px circle at 20% 10%, rgba(99, 102, 241, 0.18), transparent 60%),
-            radial-gradient(900px circle at 85% 0%, rgba(14, 165, 233, 0.16), transparent 55%),
-            radial-gradient(900px circle at 50% 100%, rgba(168, 85, 247, 0.12), transparent 55%),
-            var(--bm-noise-bg)
-          `,
-          backgroundBlendMode: 'normal, normal, normal, overlay',
-          backgroundRepeat: 'no-repeat, no-repeat, no-repeat, repeat',
-          backgroundSize: 'cover, cover, cover, 256px 256px',
-          backgroundPosition: 'center, center, center, center',
-          backgroundAttachment: 'fixed, fixed, fixed, fixed',
+          backgroundImage: 'var(--bm-library-image), var(--bm-library-bg)',
+          backgroundBlendMode: 'normal, overlay',
+          backgroundRepeat: 'no-repeat, repeat',
+          backgroundSize: 'cover, 320px 320px',
+          backgroundPosition: 'center center, 0 var(--bg-offset, 0px)',
+          backgroundAttachment: 'fixed, fixed',
           minHeight: '100vh',
           width: '100%',
 
-          // 図書館/読書パターン（シームレス）は擬似要素で重ねる
+          // 色調オーバーレイ（上部明るく・中央茶色・下部暗め）
           '&::before': {
             content: '""',
-            position: 'absolute',
+            position: 'fixed',
             inset: 0,
-            backgroundImage: 'var(--bm-library-bg)',
-            backgroundRepeat: 'repeat',
-            backgroundSize: '320px 320px',
-            backgroundPosition: 'center var(--bg-offset, 0px)',
-            opacity: 0.62,
-            mixBlendMode: 'normal',
+            background: `linear-gradient(
+              180deg,
+              rgba(245, 247, 250, 0.3) 0%,
+              rgba(139, 69, 19, 0.1) 50%,
+              rgba(15, 23, 42, 0.2) 100%
+            )`,
             pointerEvents: 'none',
             zIndex: 0,
           },
@@ -170,6 +165,8 @@ export const appTheme = createTheme({
             '@media (min-width:600px)': {
               fontSize: '1rem',
             },
+            // 背景画像が透過して見えないように不透明な背景を設定
+            backgroundColor: '#ffffff',
           },
         },
       },
@@ -356,6 +353,15 @@ export const appTheme = createTheme({
           '@media (min-width:600px)': {
             fontSize: '0.8rem',
           },
+        },
+      },
+    },
+    // Alertに半透明の白背景を追加（背景画像の上でも読みやすく）
+    MuiAlert: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(8px) saturate(140%)',
         },
       },
     },

@@ -1,17 +1,18 @@
 import React from 'react';
-import { 
-  Card, 
-  CardContent, 
+import {
+  Card,
+  CardContent,
   CardMedia,
   Typography,
   Chip,
-  Box
+  Box,
 } from '@mui/material';
-import { 
+import {
   getBookStatusLabel,
   getBookStatusColor,
-  DEFAULT_BOOK_STATUS
+  DEFAULT_BOOK_STATUS,
 } from '../constants/bookStatus';
+import DecorativeCorner from './common/DecorativeCorner';
 
 /**
  * 書籍カードコンポーネント
@@ -30,20 +31,67 @@ function BookCard({ book, onClick, testId }) {
     <Card 
       sx={{ 
         cursor: 'pointer',
-        '&:hover': { boxShadow: 3 },
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        minHeight: { xs: '140px', sm: '160px' }
+        minHeight: { xs: '140px', sm: '160px' },
+        backgroundColor: 'rgba(255, 255, 255, 0.75)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        border: '2px solid rgba(139, 69, 19, 0.2)',
+        borderRadius: 3,
+        boxShadow: `
+          0 8px 32px rgba(0, 0, 0, 0.12),
+          0 2px 8px rgba(0, 0, 0, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5)
+        `,
+        position: 'relative',
+        overflow: 'visible',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: `
+            0 12px 40px rgba(0, 0, 0, 0.16),
+            0 4px 12px rgba(0, 0, 0, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6)
+          `,
+          borderColor: 'rgba(139, 69, 19, 0.3)',
+        },
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 8,
+          left: 8,
+          right: 8,
+          bottom: 8,
+          border: '1px solid rgba(139, 69, 19, 0.1)',
+          borderRadius: 2,
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: '50%',
+          width: 1,
+          height: '100%',
+          background: 'linear-gradient(to bottom, transparent, rgba(139, 69, 19, 0.1), transparent)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
       }}
       onClick={onClick}
       data-testid={testId || `book-card-${book.id}`}
     >
+      <DecorativeCorner position="top-left" size={20} />
+      <DecorativeCorner position="top-right" size={20} />
       <CardContent sx={{ 
         flex: 1, 
         display: 'flex', 
         flexDirection: 'column',
         p: { xs: 1.5, sm: 2 },
+        position: 'relative',
+        zIndex: 1,
         '&:last-child': { pb: { xs: 1.5, sm: 2 } }
       }}>
         <Box sx={{ 

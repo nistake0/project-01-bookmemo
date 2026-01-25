@@ -27,6 +27,7 @@ import BookTagEditor from '../components/BookTagEditor';
 import StatusHistoryTimeline from '../components/StatusHistoryTimeline';
 import LatestStatusHistory from '../components/LatestStatusHistory';
 import LoadingIndicator from '../components/common/LoadingIndicator';
+import DecorativeCorner from '../components/common/DecorativeCorner';
 import { useBook } from '../hooks/useBook';
 import { useBookStatusHistory } from '../hooks/useBookStatusHistory';
 import { useBookStatusManager } from '../hooks/useBookStatusManager';
@@ -184,6 +185,43 @@ const BookDetail = () => {
     return <div data-testid="book-detail-not-found">本が見つかりません。</div>;
   }
 
+  const detailCardSx = {
+    position: 'relative',
+    overflow: 'visible',
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    backdropFilter: 'blur(20px) saturate(180%)',
+    border: '2px solid rgba(139, 69, 19, 0.2)',
+    borderRadius: 3,
+    boxShadow: `
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 2px 8px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5)
+    `,
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: 8,
+      left: 8,
+      right: 8,
+      bottom: 8,
+      border: '1px solid rgba(139, 69, 19, 0.1)',
+      borderRadius: 2,
+      pointerEvents: 'none',
+      zIndex: 0,
+    },
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: '50%',
+      width: 1,
+      height: '100%',
+      background: 'linear-gradient(to bottom, transparent, rgba(139, 69, 19, 0.1), transparent)',
+      pointerEvents: 'none',
+      zIndex: 0,
+    },
+  };
+
   return (
     <Box sx={{ 
       maxWidth: 800, 
@@ -192,68 +230,72 @@ const BookDetail = () => {
       pb: '80px',
       px: { xs: 2, sm: 0 } // モバイルでは左右の余白を追加
     }} data-testid="book-detail">
-      <Paper sx={{ p: { xs: 2, sm: 3 } }}>
-        <BookInfo 
-          book={book} 
-          bookId={id} 
-          onStatusChange={handleStatusChange}
-          onEdit={handleOpenBookEdit}
-        />
-        
-        {/* 最新ステータス履歴表示 */}
-        <LatestStatusHistory bookId={id} />
-        
-        <BookTagEditor book={book} bookId={id} onTagsChange={handleTagsChange} />
-        
-        {/* 編集・削除ボタン（横並び） */}
-        <Box sx={{ textAlign: 'left', mt: 2, mb: 2 }}>
-          <Stack direction="row" spacing={1}>
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
-              startIcon={<EditIcon />}
-              onClick={handleOpenBookEdit}
-              data-testid="book-edit-button"
+      <Paper sx={detailCardSx}>
+        <DecorativeCorner position="top-left" size={20} />
+        <DecorativeCorner position="top-right" size={20} />
+        <Box sx={{ position: 'relative', zIndex: 1, p: { xs: 2, sm: 3 } }}>
+          <BookInfo 
+            book={book} 
+            bookId={id} 
+            onStatusChange={handleStatusChange}
+            onEdit={handleOpenBookEdit}
+          />
+          
+          {/* 最新ステータス履歴表示 */}
+          <LatestStatusHistory bookId={id} />
+          
+          <BookTagEditor book={book} bookId={id} onTagsChange={handleTagsChange} />
+          
+          {/* 編集・削除ボタン（横並び） */}
+          <Box sx={{ textAlign: 'left', mt: 2, mb: 2 }}>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                startIcon={<EditIcon />}
+                onClick={handleOpenBookEdit}
+                data-testid="book-edit-button"
+              >
+                書籍情報を編集
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                size="small"
+                startIcon={<DeleteIcon />}
+                onClick={handleOpenBookDelete}
+                data-testid="book-delete-button"
+              >
+                書籍を削除
+              </Button>
+            </Stack>
+          </Box>
+          
+          <Divider sx={{ my: { xs: 1, sm: 2 } }} />
+          
+          {/* タブ切り替え */}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+            <Tabs 
+              value={activeTab} 
+              onChange={handleTabChange} 
+              aria-label="book detail tabs"
+              data-testid="book-detail-tabs"
             >
-              書籍情報を編集
-            </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              size="small"
-              startIcon={<DeleteIcon />}
-              onClick={handleOpenBookDelete}
-              data-testid="book-delete-button"
-            >
-              書籍を削除
-            </Button>
-          </Stack>
+              <Tab 
+                label="メモ一覧" 
+                data-testid="memo-list-tab"
+              />
+              <Tab 
+                label="ステータス履歴" 
+                data-testid="status-history-tab"
+              />
+            </Tabs>
+          </Box>
+          
+          {/* タブの内容 */}
+          {renderTabContent()}
         </Box>
-        
-        <Divider sx={{ my: { xs: 1, sm: 2 } }} />
-        
-        {/* タブ切り替え */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-          <Tabs 
-            value={activeTab} 
-            onChange={handleTabChange} 
-            aria-label="book detail tabs"
-            data-testid="book-detail-tabs"
-          >
-            <Tab 
-              label="メモ一覧" 
-              data-testid="memo-list-tab"
-            />
-            <Tab 
-              label="ステータス履歴" 
-              data-testid="status-history-tab"
-            />
-          </Tabs>
-        </Box>
-        
-        {/* タブの内容 */}
-        {renderTabContent()}
       </Paper>
 
       {/* FAB - メモ追加ボタン */}

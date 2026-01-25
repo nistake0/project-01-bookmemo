@@ -236,8 +236,8 @@ describe('FullTextSearch', () => {
     renderFullTextSearch();
     
     expect(screen.getByTestId('full-text-search-results')).toBeInTheDocument();
-    const resultCount = screen.getByTestId('full-text-search-result-count');
-    expect(resultCount).toHaveTextContent('2 件の結果');
+    expect(screen.getByTestId('search-results')).toBeInTheDocument();
+    expect(screen.getAllByTestId(/^result-/)).toHaveLength(2);
   });
 
   test('検索結果がない場合は結果なしメッセージが表示される', () => {

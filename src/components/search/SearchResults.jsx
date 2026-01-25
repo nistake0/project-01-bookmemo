@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Typography, Box, Card, CardContent, Chip, Alert } from "@mui/material";
+import { Typography, Box, Card, CardContent, Chip, Alert, Paper } from "@mui/material";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthProvider';
 import BookCard from '../BookCard';
@@ -269,11 +269,11 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
 
   return (
     <Box>
-      {/* 検索結果統計 */}
-      <Box sx={{ mb: 3 }}>
+      {/* 検索結果統計（背景画像対策でPaperで囲む） */}
+      <Paper sx={{ p: 2, mb: 2 }}>
         <Typography variant="h6" gutterBottom>検索結果 ({results.length}件)</Typography>
         <Typography variant="body2" color="text.secondary">📚 書籍: {books.length}件, 📝 メモ: {memos.length}件</Typography>
-      </Box>
+      </Paper>
 
       {/* 統合検索結果 */}
       <Box sx={{ 

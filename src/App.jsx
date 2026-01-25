@@ -335,6 +335,7 @@ function AppRoutes() {
           // NOTE: url(var(--x)) は環境差が出ることがあるので、変数側を url("...") にして参照は var(...) に寄せる
           '--bm-noise-bg': `url("${PATHS.NOISE_TEXTURE()}")`,
           '--bm-library-bg': `url("${PATHS.LIBRARY_PATTERN()}")`,
+          '--bm-library-image': `url("${PATHS.LIBRARY_BACKGROUND()}")`,
         }}
       >
         <Routes>

@@ -174,10 +174,12 @@ export default function TagSearch() {
 function FullTextSearchTab() {
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>全文検索</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        シンプルな検索で書籍・メモを素早く見つけられます。
-      </Typography>
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Typography variant="h5" gutterBottom>全文検索</Typography>
+        <Typography variant="body2" color="text.secondary">
+          シンプルな検索で書籍・メモを素早く見つけられます。
+        </Typography>
+      </Paper>
       
       {/* FullTextSearchコンポーネントが自己完結（メモダイアログも内部管理） */}
       <FullTextSearch />
@@ -198,10 +200,12 @@ function AdvancedSearchTab({
 }) {
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>詳細検索</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        タイトル・著者・タグ・メモ内容・日付などで詳細に絞り込みできます。
-      </Typography>
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Typography variant="h5" gutterBottom>詳細検索</Typography>
+        <Typography variant="body2" color="text.secondary">
+          タイトル・著者・タグ・メモ内容・日付などで詳細に絞り込みできます。
+        </Typography>
+      </Paper>
       
       <AdvancedSearchForm
         searchConditions={searchConditions}
@@ -230,7 +234,7 @@ function AdvancedSearchTab({
 
       {/* 検索結果がある場合のクリアボタン */}
       {results.length > 0 && !loading && (
-        <Box sx={{ mt: 2, textAlign: 'center' }}>
+        <Paper sx={{ p: 1.5, mt: 2, textAlign: 'center' }}>
           <Typography 
             variant="body2" 
             color="primary" 
@@ -239,7 +243,7 @@ function AdvancedSearchTab({
           >
             検索結果をクリア
           </Typography>
-        </Box>
+        </Paper>
       )}
     </Box>
   );
@@ -249,10 +253,12 @@ function AdvancedSearchTab({
 function TagManagementTab({ onTagClick }) {
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>タグ管理</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        統計を確認し、タグクリックで検索できます。
-      </Typography>
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Typography variant="h5" gutterBottom>タグ管理</Typography>
+        <Typography variant="body2" color="text.secondary">
+          統計を確認し、タグクリックで検索できます。
+        </Typography>
+      </Paper>
       
       <TagStats onTagClick={onTagClick} />
     </Box>

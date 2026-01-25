@@ -1,53 +1,65 @@
 import React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
+import { PATHS } from '../../config/paths';
 
 /**
  * 統一されたページヘッダーコンポーネント
- * 
- * 機能:
- * - 全ページで統一されたヘッダーデザイン
- * - モダン寄りの背景（うっすらガラス + 控えめなアクセント）
- * - レスポンシブ対応
- * - シンプルで統一感のあるデザイン
+ * デザイン改善: 紙テクスチャ・角の金具風・装飾枠（design-improvement-proposal）
  */
 const PageHeader = ({ title, subtitle, children }) => {
   return (
     <Paper
       elevation={0}
       data-testid="page-header"
-      sx={(theme) => {
-        return {
-          p: 0, // MuiPaperのデフォルトpaddingを打ち消す（中のBoxで制御）
-          borderRadius: { xs: 16, sm: 20 },
-          mb: 3,
-          position: 'relative',
-          overflow: 'hidden',
-          border: '1px solid rgba(15, 23, 42, 0.10)',
-          backgroundColor: 'rgba(255, 255, 255, 0.62)',
-          backdropFilter: 'saturate(140%) blur(12px)',
-          boxShadow: '0 18px 50px rgba(15, 23, 42, 0.12)',
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 3,
-            background: `linear-gradient(90deg, ${theme.palette.primary.main}, rgba(14,165,233,0.95), rgba(168,85,247,0.95))`,
-            opacity: 0.9,
-          },
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            inset: 0,
-            background: `
-              radial-gradient(900px circle at 20% 20%, rgba(99, 102, 241, 0.16), transparent 55%),
-              radial-gradient(700px circle at 90% 10%, rgba(14, 165, 233, 0.14), transparent 55%),
-              radial-gradient(900px circle at 60% 120%, rgba(168, 85, 247, 0.12), transparent 55%)
-            `,
-            pointerEvents: 'none',
-          },
-        };
+      sx={{
+        p: 0,
+        borderRadius: { xs: 16, sm: 20 },
+        mb: 3,
+        position: 'relative',
+        overflow: 'hidden',
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        backdropFilter: 'blur(24px) saturate(180%)',
+        border: '3px solid rgba(139, 69, 19, 0.25)',
+        backgroundImage: [
+          `url("${PATHS.PAPER_TEXTURE()}")`,
+          'linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.5))',
+        ],
+        backgroundBlendMode: 'overlay',
+        backgroundSize: '200% 200%, cover',
+        backgroundPosition: '0 0, center',
+        boxShadow: `
+          0 18px 50px rgba(15, 23, 42, 0.15),
+          0 4px 12px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6)
+        `,
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `
+            linear-gradient(135deg, rgba(184, 134, 11, 0.15) 0%, transparent 30%),
+            linear-gradient(225deg, rgba(184, 134, 11, 0.15) 0%, transparent 30%),
+            linear-gradient(45deg, transparent 0%, rgba(184, 134, 11, 0.08) 50%, transparent 100%),
+            linear-gradient(315deg, transparent 0%, rgba(184, 134, 11, 0.08) 50%, transparent 100%)
+          `,
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: '50%',
+          left: '10%',
+          right: '10%',
+          height: 2,
+          background: 'linear-gradient(90deg, transparent, rgba(139, 69, 19, 0.3), transparent)',
+          transform: 'translateY(-50%)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
       }}
     >
       <Box
@@ -56,20 +68,20 @@ const PageHeader = ({ title, subtitle, children }) => {
           textAlign: 'center',
           color: 'text.primary',
           position: 'relative',
-          zIndex: 1
+          zIndex: 1,
         }}
       >
         <Typography
           variant="h4"
           component="h1"
           data-testid="page-header-title"
-          sx={(theme) => ({
+          sx={{
             fontWeight: 700,
             fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
             mb: subtitle ? 1 : 0,
             color: 'rgba(15, 23, 42, 0.92)',
             letterSpacing: '-0.02em',
-          })}
+          }}
         >
           {title}
         </Typography>
@@ -77,11 +89,11 @@ const PageHeader = ({ title, subtitle, children }) => {
           <Typography
             variant="body1"
             data-testid="page-header-subtitle"
-            sx={(theme) => ({
+            sx={{
               opacity: 0.92,
               fontSize: { xs: '0.9rem', sm: '1rem' },
               color: 'rgba(51, 65, 85, 0.92)',
-            })}
+            }}
           >
             {subtitle}
           </Typography>

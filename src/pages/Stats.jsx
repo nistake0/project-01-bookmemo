@@ -1,4 +1,4 @@
-import { Typography, Box, Card, CardContent, Divider } from "@mui/material";
+import { Typography, Box, Card, CardContent, Divider, Paper } from "@mui/material";
 import PageHeader from '../components/common/PageHeader';
 import LoadingIndicator from '../components/common/LoadingIndicator';
 import useStats from '../hooks/useStats';
@@ -155,9 +155,9 @@ export default function Stats() {
             )}
 
             <Divider sx={{ my: 2 }} />
-            <Typography variant="h6" sx={{ mb: 1 }}>月別読了冊数（直近12ヶ月）</Typography>
             <Card sx={{ mb: 2 }} data-testid="chart-monthly-finished">
               <CardContent>
+                <Typography variant="h6" sx={{ mb: 1 }}>月別読了冊数（直近12ヶ月）</Typography>
                 <BarChart
                   xAxis={[{ scaleType: 'band', data: (monthlyFinished ?? []).map(b => b.key) }]}
                   series={[{ data: (monthlyFinished ?? []).map(b => b.count), label: '読了冊数' }]}
@@ -172,37 +172,33 @@ export default function Stats() {
               gap: 2,
               mb: 2
             }}>
-              <Box>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>月別追加冊数（直近12ヶ月）</Typography>
-                <Card data-testid="chart-monthly-added">
-                  <CardContent>
-                    <BarChart
-                      xAxis={[{ scaleType: 'band', data: (monthlyAddedBooks ?? []).map(b => b.key) }]}
-                      series={[{ data: (monthlyAddedBooks ?? []).map(b => b.count), label: '追加冊数', color: '#42a5f5' }]}
-                      height={220}
-                    />
-                  </CardContent>
-                </Card>
-              </Box>
-              <Box>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>月別メモ数（直近12ヶ月）</Typography>
-                <Card data-testid="chart-monthly-memos">
-                  <CardContent>
-                    <BarChart
-                      xAxis={[{ scaleType: 'band', data: (monthlyMemos ?? []).map(b => b.key) }]}
-                      series={[{ data: (monthlyMemos ?? []).map(b => b.count), label: 'メモ数', color: '#9c27b0' }]}
-                      height={220}
-                    />
-                  </CardContent>
-                </Card>
-              </Box>
+              <Card data-testid="chart-monthly-added">
+                <CardContent>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>月別追加冊数（直近12ヶ月）</Typography>
+                  <BarChart
+                    xAxis={[{ scaleType: 'band', data: (monthlyAddedBooks ?? []).map(b => b.key) }]}
+                    series={[{ data: (monthlyAddedBooks ?? []).map(b => b.count), label: '追加冊数', color: '#42a5f5' }]}
+                    height={220}
+                  />
+                </CardContent>
+              </Card>
+              <Card data-testid="chart-monthly-memos">
+                <CardContent>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>月別メモ数（直近12ヶ月）</Typography>
+                  <BarChart
+                    xAxis={[{ scaleType: 'band', data: (monthlyMemos ?? []).map(b => b.key) }]}
+                    series={[{ data: (monthlyMemos ?? []).map(b => b.count), label: 'メモ数', color: '#9c27b0' }]}
+                    height={220}
+                  />
+                </CardContent>
+              </Card>
             </Box>
 
             <Divider sx={{ my: 2 }} />
-            <Typography variant="h6" sx={{ mb: 1 }}>タグ使用頻度（上位）</Typography>
             {!!tagStats?.length && (
               <Card sx={{ mb: 2 }} data-testid="chart-tag-pie">
                 <CardContent>
+                  <Typography variant="h6" sx={{ mb: 1 }}>タグ使用頻度（上位）</Typography>
                   <PieChart
                     height={260}
                     series={[{
@@ -239,52 +235,55 @@ export default function Stats() {
             </Box>
 
             <Divider sx={{ my: 2 }} />
-            <Typography variant="h6" sx={{ mb: 1 }}>著者トップ</Typography>
-            <Box sx={{ 
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-              gap: 2,
-              mb: 2
-            }}>
-              {(topAuthors?.slice(0, 10) ?? []).map(row => (
-                <Box key={row.author}>
-                  <Card data-testid={`author-top-${row.author}`}>
-                    <CardContent>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{row.author}</Typography>
-                      <Typography variant="body2" color="text.secondary">冊数: {row.total}</Typography>
-                    </CardContent>
-                  </Card>
-                </Box>
-              ))}
-              {(!topAuthors || topAuthors.length === 0) && !loading && (
-                <Box>
-                  <Typography variant="body2" color="text.secondary">著者データがありません。</Typography>
-                </Box>
-              )}
-            </Box>
+            <Paper sx={{ p: 2, mb: 2 }}>
+              <Typography variant="h6" sx={{ mb: 2 }}>著者トップ</Typography>
+              <Box sx={{ 
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                gap: 2
+              }}>
+                {(topAuthors?.slice(0, 10) ?? []).map(row => (
+                  <Box key={row.author}>
+                    <Card data-testid={`author-top-${row.author}`}>
+                      <CardContent>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{row.author}</Typography>
+                        <Typography variant="body2" color="text.secondary">冊数: {row.total}</Typography>
+                      </CardContent>
+                    </Card>
+                  </Box>
+                ))}
+                {(!topAuthors || topAuthors.length === 0) && !loading && (
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">著者データがありません。</Typography>
+                  </Box>
+                )}
+              </Box>
+            </Paper>
 
-            <Typography variant="h6" sx={{ mb: 1 }}>出版社トップ</Typography>
-            <Box sx={{ 
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-              gap: 2
-            }}>
-              {(topPublishers?.slice(0, 10) ?? []).map(row => (
-                <Box key={row.publisher}>
-                  <Card data-testid={`publisher-top-${row.publisher}`}>
-                    <CardContent>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{row.publisher}</Typography>
-                      <Typography variant="body2" color="text.secondary">冊数: {row.total}</Typography>
-                    </CardContent>
-                  </Card>
-                </Box>
-              ))}
-              {(!topPublishers || topPublishers.length === 0) && !loading && (
-                <Box>
-                  <Typography variant="body2" color="text.secondary">出版社データがありません。</Typography>
-                </Box>
-              )}
-            </Box>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6" sx={{ mb: 2 }}>出版社トップ</Typography>
+              <Box sx={{ 
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                gap: 2
+              }}>
+                {(topPublishers?.slice(0, 10) ?? []).map(row => (
+                  <Box key={row.publisher}>
+                    <Card data-testid={`publisher-top-${row.publisher}`}>
+                      <CardContent>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{row.publisher}</Typography>
+                        <Typography variant="body2" color="text.secondary">冊数: {row.total}</Typography>
+                      </CardContent>
+                    </Card>
+                  </Box>
+                ))}
+                {(!topPublishers || topPublishers.length === 0) && !loading && (
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">出版社データがありません。</Typography>
+                  </Box>
+                )}
+              </Box>
+            </Paper>
           </>
         )}
       </Box>

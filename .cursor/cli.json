@@ -1,0 +1,6 @@
+{
+  "permissions": {
+    "allow": ["Shell(git)", "Shell(npm)", "Shell(npx)"],
+    "deny": []
+  }
+}

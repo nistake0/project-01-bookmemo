@@ -115,27 +115,27 @@ function TagStats({ onTagClick }) {
         </Box>
       </Paper>
 
-      {/* ソート設定 */}
-       <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+      {/* ソート設定・一括処理（背景画像対策でPaperで囲む） */}
+      <Paper sx={{ p: 2, mb: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
         <Typography variant="h6">
           タグ一覧 ({totalTags}件)
         </Typography>
-         <Chip
-           label="一括削除"
-           size="small"
-           color="error"
-           variant="outlined"
-           onClick={() => setBulkDeleteOpen(true)}
-           data-testid="open-bulk-delete"
-         />
-         <Chip
-           label="一括統合"
-           size="small"
-           color="primary"
-           variant="outlined"
-           onClick={() => setBulkMergeOpen(true)}
-           data-testid="open-bulk-merge"
-         />
+        <Chip
+          label="一括削除"
+          size="small"
+          color="error"
+          variant="outlined"
+          onClick={() => setBulkDeleteOpen(true)}
+          data-testid="open-bulk-delete"
+        />
+        <Chip
+          label="一括統合"
+          size="small"
+          color="primary"
+          variant="outlined"
+          onClick={() => setBulkMergeOpen(true)}
+          data-testid="open-bulk-merge"
+        />
         <FormControl size="small" sx={{ minWidth: 120 }}>
           <InputLabel>ソート基準</InputLabel>
           <Select
@@ -159,7 +159,7 @@ function TagStats({ onTagClick }) {
             <MenuItem value="asc">昇順</MenuItem>
           </Select>
         </FormControl>
-      </Box>
+      </Paper>
 
       {/* タグ統計一覧 */}
       <Box className="tag-stats-grid">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Box, Button, TextField, Autocomplete, Chip, Alert, CircularProgress, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { Typography, Box, Button, TextField, Autocomplete, Chip, Alert, CircularProgress, FormControl, InputLabel, Select, MenuItem, Paper } from "@mui/material";
 import { useTagHistory } from '../hooks/useTagHistory';
 import { useBookActions } from '../hooks/useBookActions';
 import { useBookSearch } from '../hooks/useBookSearch';
@@ -118,7 +118,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   };
 
   return (
-    <Box component="form" onSubmit={handleAdd} sx={{ mt: { xs: 1, sm: 2 } }} role="form" data-testid="book-form">
+    <Paper component="form" onSubmit={handleAdd} sx={{ p: 3, mt: { xs: 1, sm: 2 } }} role="form" data-testid="book-form" elevation={0}>
       {/* ISBN入力エリア */}
       <Box sx={{ 
         display: 'grid',
@@ -392,6 +392,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
       >
 {addBookLoading ? '追加中...' : duplicateBook ? '追加済みです' : '本を追加'}
       </Button>
-    </Box>
+    </Paper>
   );
 } 

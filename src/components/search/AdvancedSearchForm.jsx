@@ -59,9 +59,8 @@ function AdvancedSearchForm({ searchConditions, onSearchConditionsChange, onSear
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom data-testid="advanced-search-title">検索条件</Typography>
-      
       <Paper sx={{ p: 2, mb: 2 }}>
+        <Typography variant="h6" gutterBottom data-testid="advanced-search-title">検索条件</Typography>
         {/* 統合テキスト検索 */}
         <TextField 
           label="テキスト検索（タイトル・著者・メモ内容・タグ）" 

@@ -6,7 +6,8 @@ import {
   CircularProgress,
   Alert,
   IconButton,
-  Tooltip
+  Tooltip,
+  Paper
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -60,83 +61,83 @@ export default function FullTextSearch() {
   
   return (
     <Box data-testid="full-text-search">
-      {/* 説明文 */}
-      <Typography 
-        variant="body2" 
-        color="text.secondary" 
-        sx={{ mb: 2 }}
-        data-testid="full-text-search-description"
-      >
-        {DESCRIPTION}
-      </Typography>
-      
-      {/* 検索フォーム */}
-      <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-        <TextField
-          fullWidth
-          label="検索キーワード"
-          placeholder={PLACEHOLDER}
-          value={searchText}
-          onChange={(e) => handleSearchTextChange(e.target.value)}
-          onKeyPress={handleKeyPress}
-          error={!!error}
-          helperText={error}
-          autoFocus
-          disabled={loading}
-          data-testid="full-text-search-input"
-          InputProps={{
-            endAdornment: searchText && (
+      {/* 検索フォームエリアをPaperで囲む（背景画像対策） */}
+      <Paper sx={{ p: 3, mb: 3 }}>
+        {/* 説明文 */}
+        <Typography 
+          variant="body2" 
+          color="text.secondary" 
+          sx={{ mb: 2 }}
+          data-testid="full-text-search-description"
+        >
+          {DESCRIPTION}
+        </Typography>
+        
+        {/* 検索フォーム */}
+        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+          <TextField
+            fullWidth
+            label="検索キーワード"
+            placeholder={PLACEHOLDER}
+            value={searchText}
+            onChange={(e) => handleSearchTextChange(e.target.value)}
+            onKeyPress={handleKeyPress}
+            error={!!error}
+            helperText={error}
+            autoFocus
+            disabled={loading}
+            data-testid="full-text-search-input"
+            InputProps={{
+              endAdornment: searchText && (
+                <IconButton
+                  size="small"
+                  onClick={clearResults}
+                  data-testid="full-text-search-clear-input"
+                >
+                  <ClearIcon fontSize="small" />
+                </IconButton>
+              )
+            }}
+          />
+          
+          <Button
+            variant="contained"
+            onClick={handleSearch}
+            disabled={!canSearch}
+            startIcon={loading ? <CircularProgress size={20} /> : <SearchIcon />}
+            data-testid="full-text-search-button"
+            sx={{ minWidth: 100 }}
+          >
+            {loading ? '検索中...' : '検索'}
+          </Button>
+        </Box>
+        
+        {/* キャッシュ情報 */}
+        {cacheStats.totalItems > 0 && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography 
+              variant="caption" 
+              color="text.secondary"
+              data-testid="full-text-search-cache-info"
+            >
+              キャッシュ: {cacheStats.validItems}/{cacheStats.maxItems} 件
+            </Typography>
+            <Tooltip title="キャッシュをクリア">
               <IconButton
                 size="small"
-                onClick={clearResults}
-                data-testid="full-text-search-clear-input"
+                onClick={clearCache}
+                data-testid="full-text-search-clear-cache"
               >
-                <ClearIcon fontSize="small" />
+                <CachedIcon fontSize="small" />
               </IconButton>
-            )
-          }}
-        />
-        
-        <Button
-          variant="contained"
-          onClick={handleSearch}
-          disabled={!canSearch}
-          startIcon={loading ? <CircularProgress size={20} /> : <SearchIcon />}
-          data-testid="full-text-search-button"
-          sx={{ minWidth: 100 }}
-        >
-          {loading ? '検索中...' : '検索'}
-        </Button>
-      </Box>
+            </Tooltip>
+          </Box>
+        )}
+      </Paper>
       
-      {/* キャッシュ情報 */}
-      {cacheStats.totalItems > 0 && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <Typography 
-            variant="caption" 
-            color="text.secondary"
-            data-testid="full-text-search-cache-info"
-          >
-            キャッシュ: {cacheStats.validItems}/{cacheStats.maxItems} 件
-          </Typography>
-          <Tooltip title="キャッシュをクリア">
-            <IconButton
-              size="small"
-              onClick={clearCache}
-              data-testid="full-text-search-clear-cache"
-            >
-              <CachedIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      )}
-      
-      {/* 検索結果 */}
+      {/* 検索結果（件数は SearchResults 内で表示） */}
       {!loading && results && results.length > 0 && (
         <Box data-testid="full-text-search-results">
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }} data-testid="full-text-search-result-count">
-            {results.length} 件の結果
-          </Typography>
           <SearchResults 
             results={results}
             onResultClick={handleResultClick}
