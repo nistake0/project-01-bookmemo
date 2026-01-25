@@ -26,6 +26,7 @@ import BookEditDialog from '../components/BookEditDialog';
 import BookTagEditor from '../components/BookTagEditor';
 import StatusHistoryTimeline from '../components/StatusHistoryTimeline';
 import LatestStatusHistory from '../components/LatestStatusHistory';
+import LoadingIndicator from '../components/common/LoadingIndicator';
 import { useBook } from '../hooks/useBook';
 import { useBookStatusHistory } from '../hooks/useBookStatusHistory';
 import { useBookStatusManager } from '../hooks/useBookStatusManager';
@@ -164,7 +165,13 @@ const BookDetail = () => {
   };
 
   if (loading) {
-    return <div data-testid="book-detail-loading">Loading...</div>;
+    return (
+      <LoadingIndicator
+        variant="fullPage"
+        message="読み込み中..."
+        data-testid="book-detail-loading"
+      />
+    );
   }
   
   if (error) {

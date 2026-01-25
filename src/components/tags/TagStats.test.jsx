@@ -28,7 +28,8 @@ describe('TagStats', () => {
 
     render(<TagStats onTagClick={mockOnTagClick} />);
     
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.getByTestId('tag-stats-loading')).toBeInTheDocument();
+    expect(screen.getByText('タグ統計を読み込み中...')).toBeInTheDocument();
   });
 
   test('エラー状態を正しく表示する', () => {

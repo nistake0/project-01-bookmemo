@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -17,6 +16,7 @@ import {
 import Autocomplete from '@mui/material/Autocomplete';
 import { BOOK_STATUS_COLORS, BOOK_STATUS_LABELS } from '../constants/bookStatus';
 import { useBookLookup } from '../hooks/useBookLookup';
+import LoadingIndicator from './common/LoadingIndicator';
 
 const formatDateTime = (createdAt) => {
   if (!createdAt) return '';
@@ -202,16 +202,11 @@ const MemoMoveDialog = ({
           )}
 
           {loading ? (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                py: 4,
-              }}
-            >
-              <CircularProgress size={28} />
-            </Box>
+            <LoadingIndicator
+              variant="inline"
+              message="書籍リストを読み込み中..."
+              data-testid="memo-move-loading"
+            />
           ) : (
             <form onSubmit={handleSubmit} data-testid="memo-move-form">
               <Autocomplete

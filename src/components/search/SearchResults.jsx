@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types';
-import { Typography, Box, Card, CardContent, Chip, Alert, CircularProgress } from "@mui/material";
+import { Typography, Box, Card, CardContent, Chip, Alert } from "@mui/material";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthProvider';
 import BookCard from '../BookCard';
+import LoadingIndicator from '../common/LoadingIndicator';
 import { 
   getBookStatusLabel,
   getBookStatusColor
@@ -86,9 +87,11 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-        <CircularProgress />
-      </Box>
+      <LoadingIndicator
+        variant="inline"
+        message="検索中..."
+        data-testid="search-results-loading"
+      />
     );
   }
 

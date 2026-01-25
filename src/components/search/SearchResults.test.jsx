@@ -56,7 +56,7 @@ describe('SearchResults', () => {
   });
 
   describe('ローディング状態', () => {
-    test('ローディング中はCircularProgressが表示される', () => {
+    test('ローディング中はLoadingIndicatorが表示される', () => {
       renderWithTheme(
         <SearchResults
           loading={true}
@@ -64,7 +64,8 @@ describe('SearchResults', () => {
         />
       );
 
-      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+      expect(screen.getByTestId('search-results-loading')).toBeInTheDocument();
+      expect(screen.getByText('検索中...')).toBeInTheDocument();
     });
   });
 

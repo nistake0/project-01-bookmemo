@@ -29,6 +29,7 @@ import { PATHS } from './config/paths';
 import { appTheme } from './theme/appTheme';
 import { ErrorLogger, setupGlobalErrorHandling } from './utils/errorLogger';
 import { useBackgroundParallax } from './hooks/useBackgroundParallax';
+import LoadingIndicator from './components/common/LoadingIndicator';
 
 // ErrorLogger / appTheme は外部モジュールへ分離
 
@@ -44,8 +45,13 @@ function PrivateRoute({ children }) {
   }, [user, loading, location.pathname]);
   
   if (loading) {
-    console.log('⏳ Loading authentication state...');
-    return <div>Loading...</div>;
+    return (
+      <LoadingIndicator
+        variant="fullPage"
+        message="認証を確認しています..."
+        data-testid="auth-loading"
+      />
+    );
   }
   
   if (!user) {

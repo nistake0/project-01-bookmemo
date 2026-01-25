@@ -9,11 +9,11 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  CircularProgress,
   Alert,
   Paper
 } from '@mui/material';
 import { useTagStats } from '../../hooks/useTagStats';
+import LoadingIndicator from '../common/LoadingIndicator';
 import useTagManagement from '../../hooks/useTagManagement';
 import TagEditDialog from './TagEditDialog';
 import BulkDeleteTagsDialog from './BulkDeleteTagsDialog';
@@ -48,9 +48,11 @@ function TagStats({ onTagClick }) {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-        <CircularProgress />
-      </Box>
+      <LoadingIndicator
+        variant="inline"
+        message="タグ統計を読み込み中..."
+        data-testid="tag-stats-loading"
+      />
     );
   }
 

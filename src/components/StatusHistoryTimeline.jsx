@@ -20,6 +20,7 @@ import {
   Add
 } from '@mui/icons-material';
 import ManualHistoryAddDialog from './ManualHistoryAddDialog';
+import LoadingIndicator from './common/LoadingIndicator';
 import { 
   BOOK_STATUS, 
   getBookStatusLabel, 
@@ -148,9 +149,11 @@ const StatusHistoryTimeline = ({
 
   if (loading) {
     return (
-      <Box sx={{ p: 2 }}>
-        <Typography>履歴を読み込み中...</Typography>
-      </Box>
+      <LoadingIndicator
+        variant="inline"
+        message="履歴を読み込み中..."
+        data-testid="status-history-loading"
+      />
     );
   }
 

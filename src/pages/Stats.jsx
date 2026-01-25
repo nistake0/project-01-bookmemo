@@ -1,5 +1,6 @@
-import { Typography, Box, Card, CardContent, Divider, CircularProgress } from "@mui/material";
+import { Typography, Box, Card, CardContent, Divider } from "@mui/material";
 import PageHeader from '../components/common/PageHeader';
+import LoadingIndicator from '../components/common/LoadingIndicator';
 import useStats from '../hooks/useStats';
 import { BarChart, PieChart } from '@mui/x-charts';
 
@@ -20,10 +21,11 @@ export default function Stats() {
       {/* メインコンテンツ */}
       <Box sx={{ p: 2 }}>
         {loading && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <CircularProgress size={20} />
-            <Typography variant="body2">読み込み中...</Typography>
-          </Box>
+          <LoadingIndicator
+            variant="inline"
+            message="読み込み中..."
+            data-testid="stats-loading"
+          />
         )}
 
         {error && (

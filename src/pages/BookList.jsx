@@ -2,6 +2,7 @@ import { Typography, Box, Tabs, Tab, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import BookCard from "../components/BookCard";
 import PageHeader from "../components/common/PageHeader";
+import LoadingIndicator from "../components/common/LoadingIndicator";
 import { useBookList } from "../hooks/useBookList";
 import { FILTER_STATUSES, FILTER_LABELS } from "../constants/bookStatus";
 
@@ -21,7 +22,15 @@ export default function BookList() {
     navigate(`/book/${bookId}`);
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <LoadingIndicator
+        variant="fullPage"
+        message="読み込み中..."
+        data-testid="book-list-loading"
+      />
+    );
+  }
 
   return (
     <Box sx={{ 
