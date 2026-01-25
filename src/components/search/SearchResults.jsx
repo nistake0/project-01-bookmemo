@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthProvider';
 import BookCard from '../BookCard';
 import LoadingIndicator from '../common/LoadingIndicator';
+import DecorativeCorner from '../common/DecorativeCorner';
 import { 
   getBookStatusLabel,
   getBookStatusColor
@@ -116,18 +117,53 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
       key={memo.id} 
       sx={{ 
         cursor: 'pointer',
-        '&:hover': { boxShadow: 3 },
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        border: '2px solid',
-        borderColor: 'purple.300',
-        backgroundColor: 'purple.50'
+        backgroundColor: 'rgba(255, 255, 255, 0.78)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        border: '2px solid rgba(123, 104, 238, 0.25)',
+        borderRadius: 2,
+        boxShadow: `
+          0 6px 24px rgba(0, 0, 0, 0.1),
+          0 2px 8px rgba(123, 104, 238, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6)
+        `,
+        position: 'relative',
+        overflow: 'visible',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          transform: 'translateY(-3px)',
+          boxShadow: `
+            0 10px 32px rgba(0, 0, 0, 0.12),
+            0 4px 12px rgba(123, 104, 238, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.65)
+          `,
+          borderColor: 'rgba(123, 104, 238, 0.4)',
+        },
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 6,
+          left: 6,
+          right: 6,
+          bottom: 6,
+          border: '1px solid rgba(123, 104, 238, 0.12)',
+          borderRadius: 1.5,
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
       }}
       onClick={() => handleResultClick('memo', memo.bookId, memo.id)}
       data-testid={`memo-result-${memo.id}`}
     >
-      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <CardContent sx={{ 
+        flexGrow: 1, 
+        display: 'flex', 
+        flexDirection: 'column',
+        position: 'relative',
+        zIndex: 1,
+      }}>
         {/* メモアイコンと書籍タイトル */}
         <Box sx={{ mb: 2 }}>
           <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -203,18 +239,66 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
       key={book.id} 
       sx={{ 
         cursor: 'pointer',
-        '&:hover': { boxShadow: 3 },
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        border: '2px solid',
-        borderColor: 'blue.300',
-        backgroundColor: 'blue.50'
+        backgroundColor: 'rgba(255, 255, 255, 0.75)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        border: '2px solid rgba(139, 69, 19, 0.2)',
+        borderRadius: 3,
+        boxShadow: `
+          0 8px 32px rgba(0, 0, 0, 0.12),
+          0 2px 8px rgba(0, 0, 0, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5)
+        `,
+        position: 'relative',
+        overflow: 'visible',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: `
+            0 12px 40px rgba(0, 0, 0, 0.16),
+            0 4px 12px rgba(0, 0, 0, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6)
+          `,
+          borderColor: 'rgba(139, 69, 19, 0.3)',
+        },
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 8,
+          left: 8,
+          right: 8,
+          bottom: 8,
+          border: '1px solid rgba(139, 69, 19, 0.1)',
+          borderRadius: 2,
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: '50%',
+          width: 1,
+          height: '100%',
+          background: 'linear-gradient(to bottom, transparent, rgba(139, 69, 19, 0.1), transparent)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
       }}
       onClick={() => handleResultClick('book', book.id)}
       data-testid={`book-result-${book.id}`}
     >
-      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <DecorativeCorner position="top-left" size={20} />
+      <DecorativeCorner position="top-right" size={20} />
+      <CardContent sx={{ 
+        flexGrow: 1, 
+        display: 'flex', 
+        flexDirection: 'column',
+        position: 'relative',
+        zIndex: 1,
+      }}>
         {/* 書籍アイコンとタイトル */}
         <Box sx={{ mb: 2 }}>
           <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>

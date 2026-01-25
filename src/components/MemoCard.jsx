@@ -4,6 +4,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useSwipeable } from 'react-swipeable';
 import { getMemoRatingValue } from '../constants/memoRating';
+import DecorativeCorner from './common/DecorativeCorner';
 
 // CI環境でも安定する固定フォーマットで日付を表示（yyyy/M/d）
 const formatDateYMD = (createdAt) => {
@@ -63,17 +64,62 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
             maxWidth: '100%',
             mx: 'auto',
             cursor: onClick ? 'pointer' : 'default',
-            bgcolor: 'background.paper',
-            transition: 'transform 0.2s',
+            backgroundColor: 'rgba(255, 255, 255, 0.75)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            border: '2px solid rgba(139, 69, 19, 0.2)',
+            borderRadius: 3,
+            boxShadow: `
+              0 8px 32px rgba(0, 0, 0, 0.12),
+              0 2px 8px rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5)
+            `,
+            overflow: 'visible',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             transform: showActions ? 'translateX(-100px)' : 'none',
+            '&:hover': {
+              transform: showActions ? 'translateX(-100px)' : 'translateY(-2px)',
+              boxShadow: `
+                0 12px 40px rgba(0, 0, 0, 0.16),
+                0 4px 12px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6)
+              `,
+              borderColor: 'rgba(139, 69, 19, 0.3)',
+            },
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 8,
+              left: 8,
+              right: 8,
+              bottom: 8,
+              border: '1px solid rgba(139, 69, 19, 0.1)',
+              borderRadius: 2,
+              pointerEvents: 'none',
+              zIndex: 0,
+            },
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: '50%',
+              width: 1,
+              height: '100%',
+              background: 'linear-gradient(to bottom, transparent, rgba(139, 69, 19, 0.1), transparent)',
+              pointerEvents: 'none',
+              zIndex: 0,
+            },
           }}
           onClick={onClick ? () => onClick(memo, false) : undefined} // editMode=false
         >
+          <DecorativeCorner position="top-left" size={20} />
+          <DecorativeCorner position="top-right" size={20} />
           <CardContent sx={{ 
             pb: 0.5, // パディングを少し減らす
             minHeight: 48, 
             maxHeight: 80, // ランク表示分をさらに追加
-            overflow: 'hidden' 
+            overflow: 'hidden',
+            position: 'relative',
+            zIndex: 1,
           }}>
             <Typography
               variant="body1"
@@ -156,15 +202,61 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
         maxWidth: '100%',
         mx: 'auto',
         cursor: onClick ? 'pointer' : 'default',
-        bgcolor: 'background.paper',
+        backgroundColor: 'rgba(255, 255, 255, 0.75)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        border: '2px solid rgba(139, 69, 19, 0.2)',
+        borderRadius: 3,
+        boxShadow: `
+          0 8px 32px rgba(0, 0, 0, 0.12),
+          0 2px 8px rgba(0, 0, 0, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5)
+        `,
+        overflow: 'visible',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: `
+            0 12px 40px rgba(0, 0, 0, 0.16),
+            0 4px 12px rgba(0, 0, 0, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6)
+          `,
+          borderColor: 'rgba(139, 69, 19, 0.3)',
+        },
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 8,
+          left: 8,
+          right: 8,
+          bottom: 8,
+          border: '1px solid rgba(139, 69, 19, 0.1)',
+          borderRadius: 2,
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: '50%',
+          width: 1,
+          height: '100%',
+          background: 'linear-gradient(to bottom, transparent, rgba(139, 69, 19, 0.1), transparent)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
       }}
       onClick={onClick ? () => onClick(memo, false) : undefined} // editMode=false
     >
+      <DecorativeCorner position="top-left" size={20} />
+      <DecorativeCorner position="top-right" size={20} />
       <CardContent sx={{ 
         pb: 1, 
         minHeight: { xs: 48, sm: 64 }, 
         maxHeight: { xs: 72, sm: 88 }, // ランク表示分の高さを追加
-        overflow: 'hidden' 
+        overflow: 'hidden',
+        position: 'relative',
+        zIndex: 1,
       }}>
         <Typography
           variant="body1"
