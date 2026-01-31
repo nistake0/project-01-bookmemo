@@ -5,7 +5,26 @@
 
 ---
 
-## 1. 現状の整理
+## 実装完了状況（2025-01-31 更新）
+
+以下の項目はすべて実装済み。
+
+| 項目 | 状態 |
+|------|------|
+| パレット拡張（decorative: brown, gold, memo, neutral） | ✅ |
+| コンポーネントのパレット参照化 | ✅ |
+| プリセットごとの cardAccent, cardDecorations, glassEffect | ✅ |
+| PageHeader プリセット制御（pageHeader） | ✅ |
+| DecorativeCorner 条件表示（corners: false） | ✅ |
+| MuiCard/MuiPaper ガラス効果のプリセット連携 | ✅ |
+| SearchResults メモカード boxShadow テーマ参照 | ✅ |
+| appTheme.js 廃止、index.css 整理 | ✅ |
+
+**概要**: `doc/design-system-overview.md` を参照
+
+---
+
+## 1. 現状の整理（議論当時の問題定義）
 
 ### 1.1 すでにテーマ対応済み（Task B で実装）
 
@@ -354,5 +373,6 @@ Phase 4（任意）: ガラス風スタイルの共通化
 ---
 
 **関連ドキュメント**:
+- `doc/design-system-overview.md` - デザインシステム概要（実装完了後の参照用）
 - `doc/design-review-and-centralization-20260131.md` - 現状レビュー・一元化ロードマップ
 - `doc/theme-selectable-review-20260131.md` - テーマ選択実装の障壁分析（一部は Task B で解消済み）

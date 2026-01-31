@@ -4,6 +4,24 @@
 
 ### 🔥 最優先タスク（開発開始時必須確認）
 
+#### 🎯 デザイン要素分離・統一 実装計画（2025-01-31 最優先 TODO）
+
+**必ず確認**: `doc/design-implementation-plan.md` を開発開始時・実装前に必ず確認すること。
+
+| Phase | 内容 | 主な成果物 |
+|-------|------|------------|
+| **0** | フォールバック共通化、boxShadow テーマ化 | fallbacks.js, createThemeFromPreset 拡張 |
+| **1** | プリセット分離（bookAccent / memoAccent） | themePresets, createThemeFromPreset |
+| **2** | 書籍系スタイル統一（getBookCardSx） | cardStyles.js, 各書籍系コンポーネント |
+| **3** | メモ系分離（MemoCard → memoAccent） | MemoCard, SearchResults |
+| **4** | 説明カード（案C）・統計グラフ色 | chartColors, Stats |
+
+- **方針**: `doc/design-element-classification-and-policy.md`
+- **説明カード**: 案C（MUIデフォルト相当）
+- **テスト**: 新規実装ごとにテストを追加し、カバレッジ漏れを防ぐ
+
+---
+
 #### 🎯 プロジェクト最優先目標：ユーザー設定・テーマ・プロフィール（2025-01-31 決定）
 
 **必ず確認**: `doc/discussion-user-profile-and-theme-tasks.md` を開発開始時・実装前に必ず確認すること。
@@ -170,6 +188,10 @@
     - [x] D4: コンポーネントのパレット参照化（BookCard, MemoCard, SearchResults, PageHeader, DecorativeCorner, BookDetail）✅
     - [x] D5: 装飾の有無・ガラス効果の適用（cardDecorations, glassEffect をコンポーネントで使用）✅
   - **関連ドキュメント**:
+    - `doc/design-system-overview.md` - デザインシステム概要（参照用）
+    - `doc/design-embedding-review.md` - 全要素の埋め込み状況レビュー
+- `doc/design-element-classification-and-policy.md` - 要素分類とテーマ方針（書籍/メモ分離）
+- `doc/design-implementation-plan.md` - 実装計画・テスト戦略
     - `doc/design-centralization-and-theme-discussion.md` - 設計・結論・推奨（2025-01-31）
     - `doc/design-review-and-centralization-20260131.md` - 再レビュー・再検討（2025-01-31）
     - `doc/design-system-centralization-analysis.md` - 現状分析（2026-01-11）
@@ -182,6 +204,11 @@
     2. [x] MuiCard/MuiPaper のガラス効果をプリセット連携（glass.opacity/blur/saturate を使用）✅
     3. [x] fontSize 上書きの段階的削減（BookForm: 送信ボタン・Select・Autocomplete inputProps 等）✅
   - **今後**: デザイン一元化の設計・ドキュメント整理（ExternalBookSearch の fontSize 等は継続検討）
+
+- [x] **デザイン一元化（設計・ドキュメント整理）**（2025-01-31）✅
+  - design-centralization-and-theme-discussion.md に実装完了状況を追記
+  - doc/design-system-overview.md を新規作成（アーキテクチャ・プリセット・パレット・コンポーネント一覧）
+  - 新規テーマ追加時の参照用として整備
 
 - [ ] **TypeScript移行の検討**（長期目標）
   - PropTypesからTypeScriptへ段階的に移行
