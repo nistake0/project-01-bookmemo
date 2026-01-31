@@ -65,17 +65,49 @@ describe('createThemeFromPreset', () => {
       expect(theme.custom.cardAccent).toBeDefined();
       expect(theme.custom.cardShadow).toBeDefined();
     });
+
+    it('bookAccent, memoAccent, bookDecorations, memoDecorations を含む', () => {
+      const theme = createThemeFromPreset('library-classic', mockBuildPath);
+      expect(theme.custom).toHaveProperty('bookAccent', 'brown');
+      expect(theme.custom).toHaveProperty('memoAccent', 'memo');
+      expect(theme.custom.bookDecorations).toMatchObject({
+        corners: true,
+        innerBorder: true,
+        centerLine: true,
+      });
+      expect(theme.custom.memoDecorations).toMatchObject({
+        corners: true,
+        innerBorder: true,
+        centerLine: false,
+      });
+    });
   });
 
   describe('minimal-light の custom', () => {
+    it('bookAccent, memoAccent が neutral である', () => {
+      const theme = createThemeFromPreset('minimal-light', mockBuildPath);
+      expect(theme.custom.bookAccent).toBe('neutral');
+      expect(theme.custom.memoAccent).toBe('neutral');
+    });
+
     it('cardAccent が neutral である', () => {
       const theme = createThemeFromPreset('minimal-light', mockBuildPath);
       expect(theme.custom.cardAccent).toBe('neutral');
     });
 
-    it('cardDecorations がすべて false である', () => {
+    it('cardDecorations, bookDecorations, memoDecorations がすべて false である', () => {
       const theme = createThemeFromPreset('minimal-light', mockBuildPath);
       expect(theme.custom.cardDecorations).toMatchObject({
+        corners: false,
+        innerBorder: false,
+        centerLine: false,
+      });
+      expect(theme.custom.bookDecorations).toMatchObject({
+        corners: false,
+        innerBorder: false,
+        centerLine: false,
+      });
+      expect(theme.custom.memoDecorations).toMatchObject({
         corners: false,
         innerBorder: false,
         centerLine: false,

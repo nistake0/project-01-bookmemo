@@ -9,7 +9,7 @@ import {
   getBookStatusLabel,
   getBookStatusColor
 } from '../../constants/bookStatus';
-import { FALLBACK_BROWN, FALLBACK_MEMO } from '../../theme/fallbacks';
+import { getBookCardSx, getMemoCardSx, getBookAccent, getMemoAccent, getBookDecorations, getMemoDecorations } from '../../theme/cardStyles';
 
 /**
  * SearchResults - 検索結果表示コンポーネント
@@ -65,15 +65,20 @@ import { FALLBACK_BROWN, FALLBACK_MEMO } from '../../theme/fallbacks';
  */
 function SearchResults({ results = [], loading = false, searchQuery = '', onResultClick }) {
   const theme = useTheme();
-  const accentKey = theme.custom?.cardAccent || 'brown';
-  const bookAccent = theme.palette?.decorative?.[accentKey] || FALLBACK_BROWN;
-  const memoAccent = theme.palette?.decorative?.memo || FALLBACK_MEMO;
-  const decorations = theme.custom?.cardDecorations ?? { corners: true, innerBorder: true, centerLine: true };
-  const glass = theme.custom?.glassEffect ?? { opacity: 0.75, blur: '20px', saturate: '180%' };
-  const cardShadow = theme.custom?.cardShadow ?? '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5)';
-  const cardShadowHover = theme.custom?.cardShadowHover ?? '0 12px 40px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6)';
-
   const { user } = useAuth();
+  const bookCardSx = getBookCardSx(theme, {
+    overrides: { cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' },
+  });
+  const memoCardSx = getMemoCardSx(theme, {
+    useMemoAccentShadow: true,
+    borderRadius: 2,
+    innerBorderInset: 6,
+    hoverTransform: '-3px',
+    overrides: { cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' },
+  });
+  const { key: bookAccentKey } = getBookAccent(theme);
+  const bookDecorations = getBookDecorations(theme);
+  const memoDecorations = getMemoDecorations(theme);
   const navigate = useNavigate();
   
   // デフォルトのクリックハンドラー (Phase 3-A)
@@ -125,47 +130,7 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
   const renderMemoResult = (memo) => (
     <Card 
       key={memo.id} 
-      sx={{ 
-        cursor: 'pointer',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: `rgba(255, 255, 255, ${glass.opacity})`,
-        backdropFilter: `blur(${glass.blur}) saturate(${glass.saturate})`,
-        border: `2px solid ${memoAccent.light}`,
-        borderRadius: 2,
-        boxShadow: `
-          0 6px 24px rgba(0, 0, 0, 0.1),
-          0 2px 8px ${memoAccent.shadow || 'rgba(123, 104, 238, 0.08)'},
-          inset 0 1px 0 rgba(255, 255, 255, 0.6)
-        `,
-        position: 'relative',
-        overflow: 'visible',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        '&:hover': {
-          transform: 'translateY(-3px)',
-          boxShadow: `
-            0 10px 32px rgba(0, 0, 0, 0.12),
-            0 4px 12px ${memoAccent.shadowHover || memoAccent.shadow || 'rgba(123, 104, 238, 0.12)'},
-            inset 0 1px 0 rgba(255, 255, 255, 0.65)
-          `,
-          borderColor: memoAccent.borderHover || memoAccent.light,
-        },
-        ...(decorations.innerBorder && {
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 6,
-            left: 6,
-            right: 6,
-            bottom: 6,
-            border: `1px solid ${memoAccent.lighter}`,
-            borderRadius: 1.5,
-            pointerEvents: 'none',
-            zIndex: 0,
-          },
-        }),
-      }}
+      sx={memoCardSx}
       onClick={() => handleResultClick('memo', memo.bookId, memo.id)}
       data-testid={`memo-result-${memo.id}`}
     >
@@ -249,59 +214,14 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
   const renderBookResult = (book) => (
     <Card 
       key={book.id} 
-      sx={{ 
-        cursor: 'pointer',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: `rgba(255, 255, 255, ${glass.opacity})`,
-        backdropFilter: `blur(${glass.blur}) saturate(${glass.saturate})`,
-        border: `2px solid ${bookAccent.light}`,
-        borderRadius: 3,
-        boxShadow: cardShadow,
-        position: 'relative',
-        overflow: 'visible',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: cardShadowHover,
-          borderColor: bookAccent.borderHover || bookAccent.light,
-        },
-        ...(decorations.innerBorder && {
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 8,
-            left: 8,
-            right: 8,
-            bottom: 8,
-            border: `1px solid ${bookAccent.lighter}`,
-            borderRadius: 2,
-            pointerEvents: 'none',
-            zIndex: 0,
-          },
-        }),
-        ...(decorations.centerLine && {
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: '50%',
-            width: 1,
-            height: '100%',
-            background: `linear-gradient(to bottom, transparent, ${bookAccent.lighter}, transparent)`,
-            pointerEvents: 'none',
-            zIndex: 0,
-          },
-        }),
-      }}
+      sx={bookCardSx}
       onClick={() => handleResultClick('book', book.id)}
       data-testid={`book-result-${book.id}`}
     >
-      {decorations.corners && (
+      {bookDecorations.corners && (
         <>
-          <DecorativeCorner position="top-left" size={20} accentKey={accentKey} />
-          <DecorativeCorner position="top-right" size={20} accentKey={accentKey} />
+          <DecorativeCorner position="top-left" size={20} accentKey={bookAccentKey} />
+          <DecorativeCorner position="top-right" size={20} accentKey={bookAccentKey} />
         </>
       )}
       <CardContent sx={{ 

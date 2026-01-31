@@ -22,7 +22,8 @@ import {
   ListItemText,
   ListItemButton,
   IconButton,
-  Divider
+  Divider,
+  useTheme,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import HistoryIcon from '@mui/icons-material/History';
@@ -30,12 +31,17 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useExternalBookSearch } from '../hooks/useExternalBookSearch';
 import { useBookDuplicateCheck } from '../hooks/useBookDuplicateCheck';
+import { getBookCardSx } from '../theme/cardStyles';
 
 /**
  * 外部書籍検索コンポーネント
  * Google Books APIとOpenBD APIを使用して書籍を検索・選択
  */
 const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
+  const theme = useTheme();
+  const bookCardSx = getBookCardSx(theme, {
+    overrides: { mb: 2, cursor: 'pointer' },
+  });
   const [searchType, setSearchType] = useState('title');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('relevance');
@@ -330,13 +336,7 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
         {sortedResults.map((book) => (
           <Card 
             key={book.id} 
-            sx={{ 
-              mb: 2, 
-              cursor: 'pointer',
-              '&:hover': {
-                boxShadow: 3
-              }
-            }}
+            sx={bookCardSx}
             onClick={() => handleBookSelect(book)}
             data-testid={`search-result-${book.id}`}
           >

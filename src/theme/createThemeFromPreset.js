@@ -283,12 +283,20 @@ export function createThemeFromPreset(presetId, buildPath) {
     spacing: (factor) => `${4 * factor}px`,
   });
 
-  const cardAccent = preset.cardAccent || 'brown';
-  const cardDecorations = preset.cardDecorations ?? {
+  const bookAccent = preset.bookAccent ?? preset.cardAccent ?? 'brown';
+  const memoAccent = preset.memoAccent ?? preset.cardAccent ?? 'memo';
+  const cardAccent = preset.cardAccent ?? bookAccent;
+  const bookDecorations = preset.bookDecorations ?? preset.cardDecorations ?? {
     corners: true,
     innerBorder: true,
     centerLine: true,
   };
+  const memoDecorations = preset.memoDecorations ?? preset.cardDecorations ?? {
+    corners: true,
+    innerBorder: true,
+    centerLine: false,
+  };
+  const cardDecorations = preset.cardDecorations ?? bookDecorations;
   const glassEffect = preset.glassEffect ?? {
     opacity: 0.75,
     blur: '20px',
@@ -308,7 +316,11 @@ export function createThemeFromPreset(presetId, buildPath) {
 
   theme.custom = {
     ...theme.custom,
+    bookAccent,
+    memoAccent,
     cardAccent,
+    bookDecorations,
+    memoDecorations,
     cardDecorations,
     glassEffect,
     pageHeader,

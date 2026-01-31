@@ -11,6 +11,7 @@ import {
   ListItemText,
   Snackbar,
   Alert,
+  useTheme,
 } from '@mui/material';
 import {
   ContentCopy as ContentCopyIcon,
@@ -20,8 +21,11 @@ import {
 import BookStatusChanger from './BookStatusChanger';
 import { getAcquisitionTypeLabel, ACQUISITION_TYPE } from '../constants/bookStatus';
 import { useTextCopyMenu } from '../hooks/useTextCopyMenu';
+import { getBookAccent } from '../theme/cardStyles';
 
 const BookInfo = ({ book, bookId, onStatusChange, onEdit }) => {
+  const theme = useTheme();
+  const { palette: bookAccent } = getBookAccent(theme);
   const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'success' });
   
   const showSnackbar = (message, severity = 'success') => {
@@ -50,7 +54,7 @@ const BookInfo = ({ book, bookId, onStatusChange, onEdit }) => {
           <img src={book.coverImageUrl} alt={`${book.title}の表紙`} style={{ maxHeight: '250px', width: 'auto' }} data-testid="book-cover-image" />
         ) : (
           <Box sx={{
-            border: '1px dashed grey',
+            border: `1px dashed ${bookAccent?.border || bookAccent?.light || 'grey'}`,
             height: 250,
             width: 167,
             display: 'flex',

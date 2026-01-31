@@ -25,7 +25,11 @@ export function getThemePresets(buildPath) {
         bottom: 'rgba(15, 23, 42, 0.2)',
       },
       backgroundColor: '#eef2ff',
+      bookAccent: 'brown',
+      memoAccent: 'memo',
       cardAccent: 'brown',
+      bookDecorations: { corners: true, innerBorder: true, centerLine: true },
+      memoDecorations: { corners: true, innerBorder: true, centerLine: false },
       cardDecorations: { corners: true, innerBorder: true, centerLine: true },
       glassEffect: { opacity: 0.75, blur: '20px', saturate: '180%' },
       pageHeader: {
@@ -52,7 +56,11 @@ export function getThemePresets(buildPath) {
         bottom: 'transparent',
       },
       backgroundColor: '#f5f5f5',
+      bookAccent: 'neutral',
+      memoAccent: 'neutral',
       cardAccent: 'neutral',
+      bookDecorations: { corners: false, innerBorder: false, centerLine: false },
+      memoDecorations: { corners: false, innerBorder: false, centerLine: false },
       cardDecorations: { corners: false, innerBorder: false, centerLine: false },
       glassEffect: { opacity: 0.9, blur: '12px', saturate: '140%' },
       pageHeader: {

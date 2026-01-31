@@ -33,7 +33,7 @@ import { useBook } from '../hooks/useBook';
 import { useBookStatusHistory } from '../hooks/useBookStatusHistory';
 import { useBookStatusManager } from '../hooks/useBookStatusManager';
 import { useNavigation } from '../hooks/useNavigation';
-import { FALLBACK_BROWN } from '../theme/fallbacks';
+import { getBookCardSx, getBookAccent, getBookDecorations } from '../theme/cardStyles';
 
 const BookDetail = () => {
   const { id } = useParams();
@@ -188,48 +188,12 @@ const BookDetail = () => {
   }
 
   const theme = useTheme();
-  const accentKey = theme.custom?.cardAccent || 'brown';
-  const accent = theme.palette?.decorative?.[accentKey] || FALLBACK_BROWN;
-  const decorations = theme.custom?.cardDecorations ?? { corners: true, innerBorder: true, centerLine: true };
-  const glass = theme.custom?.glassEffect ?? { opacity: 0.75, blur: '20px', saturate: '180%' };
-  const cardShadow = theme.custom?.cardShadow ?? '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5)';
-
-  const detailCardSx = {
-    position: 'relative',
-    overflow: 'visible',
-    backgroundColor: `rgba(255, 255, 255, ${glass.opacity})`,
-    backdropFilter: `blur(${glass.blur}) saturate(${glass.saturate})`,
-    border: `2px solid ${accent.light}`,
-    borderRadius: 3,
-    boxShadow: cardShadow,
-    ...(decorations.innerBorder && {
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: 8,
-        left: 8,
-        right: 8,
-        bottom: 8,
-        border: `1px solid ${accent.lighter}`,
-        borderRadius: 2,
-        pointerEvents: 'none',
-        zIndex: 0,
-      },
-    }),
-    ...(decorations.centerLine && {
-      '&::after': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: '50%',
-        width: 1,
-        height: '100%',
-        background: `linear-gradient(to bottom, transparent, ${accent.lighter}, transparent)`,
-        pointerEvents: 'none',
-        zIndex: 0,
-      },
-    }),
-  };
+  const detailCardSx = getBookCardSx(theme, {
+    hover: false,
+    overrides: { position: 'relative', overflow: 'visible' },
+  });
+  const { key: accentKey } = getBookAccent(theme);
+  const decorations = getBookDecorations(theme);
 
   return (
     <Box sx={{ 

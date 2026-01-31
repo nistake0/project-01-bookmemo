@@ -49,8 +49,12 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 
 | キー | 内容 |
 |------|------|
-| cardAccent | 'brown' \| 'neutral' |
-| cardDecorations | { corners, innerBorder, centerLine } |
+| bookAccent | 'brown' \| 'neutral' |
+| memoAccent | 'memo' \| 'neutral' |
+| cardAccent | bookAccent のエイリアス（後方互換） |
+| bookDecorations | { corners, innerBorder, centerLine } |
+| memoDecorations | { corners, innerBorder, centerLine } |
+| cardDecorations | bookDecorations のエイリアス |
 | glassEffect | { opacity, blur, saturate } |
 | pageHeader | { backgroundImage, goldOverlay, centerLine, borderRadius, accentKey } |
 | backgroundVars | CSS 変数（--bm-library-image, --bm-library-bg） |
@@ -61,9 +65,12 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 
 | コンポーネント | 参照する theme 値 |
 |----------------|-------------------|
-| BookCard | decorative[cardAccent], cardDecorations, glassEffect |
-| MemoCard | 同上 |
-| SearchResults | bookAccent, memoAccent, decorations, glass |
+| BookCard | getBookCardSx, getBookAccent, getBookDecorations |
+| MemoCard | getMemoCardSx, getMemoAccent, getMemoDecorations |
+| SearchResults | getBookCardSx, getMemoCardSx（書籍・メモそれぞれ） |
+| BookDetail | getBookCardSx（hover: false） |
+| BookInfo | getBookAccent（書影プレースホルダー枠線） |
+| ExternalBookSearch | getBookCardSx（検索結果カード） |
 | PageHeader | pageHeader, decorative[accentKey], decorative.gold |
 | DecorativeCorner | decorative.gold, decorative[accentKey] |
 | BookDetail | 同上（Paper の detailCardSx） |
@@ -79,7 +86,16 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 
 ---
 
-## 7. 関連ドキュメント
+## 7. カードスタイル（cardStyles.js）
+
+- `getBookCardSx(theme, options)` - 書籍カード用 sx。options: hover, hoverTransform, overrides
+- `getMemoCardSx(theme, options)` - メモカード用 sx。options: hover, hoverTransform, useMemoAccentShadow, borderRadius, innerBorderInset, overrides
+- `getBookAccent(theme)`, `getMemoAccent(theme)` - accent 情報（key, palette）
+- `getBookDecorations(theme)`, `getMemoDecorations(theme)` - 装飾フラグ
+
+---
+
+## 8. 関連ドキュメント
 
 - `doc/design-element-classification-and-policy.md` - 要素分類とテーマ方針（書籍/メモ分離、統一の設計）
 - `doc/design-centralization-and-theme-discussion.md` - 設計の経緯・論点
