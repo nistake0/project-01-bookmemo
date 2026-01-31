@@ -29,9 +29,9 @@
 - 参考: `doc/theme-selectable-review-20260131.md`
 
 **タスクC の詳細**:
-- [ ] 表示名、アバターの表示・編集
-- [ ] 設定画面にプロフィールセクション追加
-- [ ] （旧 Phase 15-4 マイページをここに統合）
+- [x] 表示名、アバターの表示・編集 ✅ 2025-01-31
+- [x] 設定画面にプロフィールセクション追加 ✅
+- [x] （旧 Phase 15-4 マイページをここに統合）✅
 
 ---
 
@@ -116,6 +116,11 @@
 ### 次回開発時に検討すべき改善タスク
 
 #### 推奨タスク（優先度：中）
+- [ ] **ユニットテストカバレッジ改善**（2025-01-31 追加）
+  - 現状: 全体約54%（Stmts）、テーマ・ユーザー設定まわりは部分的
+  - 未カバー候補: ThemeProviderWithUserSettings、createThemeFromPreset、useUserSettings のエラー/update パス
+  - 優先: useUserSettings の updateProfile/updatePreferences、createThemeFromPreset のユニットテスト
+
 - [ ] **デバッグログの本番対応**
   - `useSearchCache.js`のデバッグログを環境変数で制御
   - 本番環境では不要なconsole.logを削除

@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import { appTheme } from '../theme/appTheme';
@@ -51,5 +52,39 @@ describe('Settings', () => {
     await screen.findByTestId('theme-preset-radio-group');
     expect(screen.getByTestId('theme-preset-library-classic')).toBeInTheDocument();
     expect(screen.getByTestId('theme-preset-minimal-light')).toBeInTheDocument();
+  });
+
+  test('プロフィール編集ボタンが表示される', async () => {
+    renderSettings();
+
+    await screen.findByTestId('profile-edit-button');
+    expect(screen.getByTestId('profile-edit-button')).toHaveTextContent('編集');
+  });
+
+  test('編集ボタンクリックでプロフィール編集ダイアログが開く', async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    await screen.findByTestId('profile-edit-button');
+    await user.click(screen.getByTestId('profile-edit-button'));
+
+    expect(screen.getByRole('dialog', { name: /プロフィール編集/i })).toBeInTheDocument();
+    expect(screen.getByTestId('profile-display-name-input')).toBeInTheDocument();
+    expect(screen.getByTestId('profile-avatar-url-input')).toBeInTheDocument();
+  });
+
+  test('プロフィールを編集して保存できる', async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    await screen.findByTestId('profile-edit-button');
+    await user.click(screen.getByTestId('profile-edit-button'));
+
+    await user.type(screen.getByTestId('profile-display-name-input'), 'テストユーザー');
+    await user.click(screen.getByTestId('profile-save-button'));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: /プロフィール編集/i })).not.toBeInTheDocument();
+    });
   });
 });

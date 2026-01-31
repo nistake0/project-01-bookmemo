@@ -1,4 +1,23 @@
-import { Typography, Box, Card, CardContent, Button, Divider, Radio, RadioGroup, FormControlLabel } from '@mui/material';
+import { useState } from 'react';
+import {
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Button,
+  Divider,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+} from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/common/PageHeader';
 import LoadingIndicator from '../components/common/LoadingIndicator';
@@ -11,13 +30,42 @@ import { buildPath } from '../config/paths';
  * 設定画面
  * タスクA: ユーザー設定の基盤
  * タスクB: テーマ選択UI
- * タスクC: プロフィール編集（未実装）
+ * タスクC: プロフィール編集
  */
 export default function Settings() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { settings, loading, error, updatePreferences } = useUserSettings();
+  const { settings, loading, error, updatePreferences, updateProfile } = useUserSettings();
   const themePresets = getThemePresets(buildPath);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+  const [editDisplayName, setEditDisplayName] = useState('');
+  const [editAvatarUrl, setEditAvatarUrl] = useState('');
+  const [profileSaving, setProfileSaving] = useState(false);
+
+  const handleOpenProfileDialog = () => {
+    setEditDisplayName(settings.profile?.displayName || '');
+    setEditAvatarUrl(settings.profile?.avatarUrl || '');
+    setProfileDialogOpen(true);
+  };
+
+  const handleCloseProfileDialog = () => {
+    setProfileDialogOpen(false);
+  };
+
+  const handleSaveProfile = async () => {
+    setProfileSaving(true);
+    try {
+      await updateProfile({
+        displayName: editDisplayName.trim(),
+        avatarUrl: editAvatarUrl.trim(),
+      });
+      handleCloseProfileDialog();
+    } catch (err) {
+      console.error('プロフィールの保存に失敗しました:', err);
+    } finally {
+      setProfileSaving(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -52,7 +100,7 @@ export default function Settings() {
 
         {!loading && (
           <>
-            {/* アカウント情報（タスクCで拡張） */}
+            {/* アカウント・プロフィール（タスクC） */}
             <Card sx={{ mb: 2 }} data-testid="settings-account-section">
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -61,11 +109,70 @@ export default function Settings() {
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   {user?.email || 'メールアドレス未設定'}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" display="block">
-                  プロフィールの編集は近日追加予定です
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+                  <Avatar
+                    src={settings.profile?.avatarUrl || undefined}
+                    alt={settings.profile?.displayName || 'アバター'}
+                    sx={{ width: 56, height: 56 }}
+                  >
+                    {settings.profile?.displayName ? (
+                      settings.profile.displayName.charAt(0).toUpperCase()
+                    ) : (
+                      <PersonIcon />
+                    )}
+                  </Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body1" fontWeight="medium">
+                      {settings.profile?.displayName || '表示名未設定'}
+                    </Typography>
+                    <Button
+                      size="small"
+                      startIcon={<EditIcon />}
+                      onClick={handleOpenProfileDialog}
+                      data-testid="profile-edit-button"
+                    >
+                      編集
+                    </Button>
+                  </Box>
+                </Box>
               </CardContent>
             </Card>
+
+            {/* プロフィール編集ダイアログ */}
+            <Dialog open={profileDialogOpen} onClose={handleCloseProfileDialog} maxWidth="sm" fullWidth>
+              <DialogTitle>プロフィール編集</DialogTitle>
+              <DialogContent>
+                <TextField
+                  label="表示名"
+                  fullWidth
+                  value={editDisplayName}
+                  onChange={(e) => setEditDisplayName(e.target.value)}
+                  placeholder="表示名を入力"
+                  sx={{ mt: 1, mb: 2 }}
+                  inputProps={{ 'data-testid': 'profile-display-name-input' }}
+                />
+                <TextField
+                  label="アバター画像URL"
+                  fullWidth
+                  value={editAvatarUrl}
+                  onChange={(e) => setEditAvatarUrl(e.target.value)}
+                  placeholder="https://..."
+                  helperText="画像のURLを入力するとアバターとして表示されます"
+                  inputProps={{ 'data-testid': 'profile-avatar-url-input' }}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCloseProfileDialog}>キャンセル</Button>
+                <Button
+                  variant="contained"
+                  onClick={handleSaveProfile}
+                  disabled={profileSaving}
+                  data-testid="profile-save-button"
+                >
+                  {profileSaving ? '保存中...' : '保存'}
+                </Button>
+              </DialogActions>
+            </Dialog>
 
             {/* 表示設定 - テーマ選択（タスクB） */}
             <Card sx={{ mb: 2 }} data-testid="settings-display-section">
