@@ -25,6 +25,16 @@ export function getThemePresets(buildPath) {
         bottom: 'rgba(15, 23, 42, 0.2)',
       },
       backgroundColor: '#eef2ff',
+      cardAccent: 'brown',
+      cardDecorations: { corners: true, innerBorder: true, centerLine: true },
+      glassEffect: { opacity: 0.75, blur: '20px', saturate: '180%' },
+      pageHeader: {
+        backgroundImage: 'paper',
+        goldOverlay: true,
+        centerLine: true,
+        borderRadius: { xs: 16, sm: 20 },
+        accentKey: 'brown',
+      },
     },
     'minimal-light': {
       id: 'minimal-light',
@@ -32,7 +42,7 @@ export function getThemePresets(buildPath) {
       description: 'シンプルな単色背景で読みやすさを重視',
       background: {
         image: 'none',
-        pattern: 'none', // パターンなし＝図書館クラシックと明確に差別化
+        pattern: 'none',
       },
       overlay: {
         top: 'transparent',
@@ -40,6 +50,16 @@ export function getThemePresets(buildPath) {
         bottom: 'transparent',
       },
       backgroundColor: '#f5f5f5',
+      cardAccent: 'neutral',
+      cardDecorations: { corners: false, innerBorder: false, centerLine: false },
+      glassEffect: { opacity: 0.9, blur: '12px', saturate: '140%' },
+      pageHeader: {
+        backgroundImage: 'none',
+        goldOverlay: false,
+        centerLine: false,
+        borderRadius: 0,
+        accentKey: 'neutral',
+      },
     },
   };
 }

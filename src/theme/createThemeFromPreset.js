@@ -31,6 +31,34 @@ export function createThemeFromPreset(presetId, buildPath) {
       info: { main: '#0288d1', light: '#03a9f4', dark: '#01579b' },
       error: { main: '#d32f2f', light: '#ef5350', dark: '#c62828' },
       text: { primary: '#222' },
+      decorative: {
+        brown: {
+          main: 'rgba(139, 69, 19, 1)',
+          light: 'rgba(139, 69, 19, 0.2)',
+          lighter: 'rgba(139, 69, 19, 0.1)',
+          border: 'rgba(139, 69, 19, 0.25)',
+          borderHover: 'rgba(139, 69, 19, 0.3)',
+        },
+        gold: {
+          accent: 'rgba(184, 134, 11, 0.15)',
+          subtle: 'rgba(184, 134, 11, 0.08)',
+          stroke: 'rgba(184, 134, 11, 0.4)',
+          strokeLight: 'rgba(184, 134, 11, 0.3)',
+        },
+        memo: {
+          main: 'rgba(123, 104, 238, 1)',
+          light: 'rgba(123, 104, 238, 0.25)',
+          lighter: 'rgba(123, 104, 238, 0.12)',
+          border: 'rgba(123, 104, 238, 0.25)',
+          borderHover: 'rgba(123, 104, 238, 0.4)',
+        },
+        neutral: {
+          light: 'rgba(100, 100, 100, 0.15)',
+          lighter: 'rgba(100, 100, 100, 0.08)',
+          border: 'rgba(100, 100, 100, 0.2)',
+          borderHover: 'rgba(100, 100, 100, 0.25)',
+        },
+      },
       custom: {
         pageHeader: {
           brown: { dark: '#8B4513', medium: '#A0522D', light: '#CD853F' },
@@ -252,8 +280,31 @@ export function createThemeFromPreset(presetId, buildPath) {
     spacing: (factor) => `${4 * factor}px`,
   });
 
+  const cardAccent = preset.cardAccent || 'brown';
+  const cardDecorations = preset.cardDecorations ?? {
+    corners: true,
+    innerBorder: true,
+    centerLine: true,
+  };
+  const glassEffect = preset.glassEffect ?? {
+    opacity: 0.75,
+    blur: '20px',
+    saturate: '180%',
+  };
+  const pageHeader = preset.pageHeader ?? {
+    backgroundImage: 'paper',
+    goldOverlay: true,
+    centerLine: true,
+    borderRadius: { xs: 16, sm: 20 },
+    accentKey: 'brown',
+  };
+
   theme.custom = {
     ...theme.custom,
+    cardAccent,
+    cardDecorations,
+    glassEffect,
+    pageHeader,
     backgroundVars: {
       '--bm-library-image': hasBgImage ? bgImage : 'none',
       '--bm-library-bg': hasBgPattern ? bgPattern : 'none',

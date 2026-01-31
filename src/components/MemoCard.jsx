@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardActions, Typography, IconButton, Box, Stack, Chip, useMediaQuery, Rating } from '@mui/material';
+import { Card, CardContent, CardActions, Typography, IconButton, Box, Stack, Chip, useMediaQuery, Rating, useTheme } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useSwipeable } from 'react-swipeable';
@@ -20,7 +20,72 @@ const formatDateYMD = (createdAt) => {
   }
 };
 
+const FALLBACK_ACCENT = {
+  light: 'rgba(139, 69, 19, 0.2)',
+  lighter: 'rgba(139, 69, 19, 0.1)',
+  borderHover: 'rgba(139, 69, 19, 0.3)',
+};
+
 const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
+  const theme = useTheme();
+  const accentKey = theme.custom?.cardAccent || 'brown';
+  const accent = theme.palette?.decorative?.[accentKey] || FALLBACK_ACCENT;
+  const decorations = theme.custom?.cardDecorations ?? { corners: true, innerBorder: true, centerLine: true };
+  const glass = theme.custom?.glassEffect ?? { opacity: 0.75, blur: '20px', saturate: '180%' };
+
+  const cardSx = {
+    position: 'relative',
+    maxWidth: '100%',
+    mx: 'auto',
+    cursor: onClick ? 'pointer' : 'default',
+    backgroundColor: `rgba(255, 255, 255, ${glass.opacity})`,
+    backdropFilter: `blur(${glass.blur}) saturate(${glass.saturate})`,
+    border: `2px solid ${accent.light}`,
+    borderRadius: 3,
+    boxShadow: `
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 2px 8px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5)
+    `,
+    overflow: 'visible',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    '&:hover': {
+      boxShadow: `
+        0 12px 40px rgba(0, 0, 0, 0.16),
+        0 4px 12px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6)
+      `,
+      borderColor: accent.borderHover || accent.light,
+    },
+    ...(decorations.innerBorder && {
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 8,
+        left: 8,
+        right: 8,
+        bottom: 8,
+        border: `1px solid ${accent.lighter}`,
+        borderRadius: 2,
+        pointerEvents: 'none',
+        zIndex: 0,
+      },
+    }),
+    ...(decorations.centerLine && {
+      '&::after': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: '50%',
+        width: 1,
+        height: '100%',
+        background: `linear-gradient(to bottom, transparent, ${accent.lighter}, transparent)`,
+        pointerEvents: 'none',
+        zIndex: 0,
+      },
+    }),
+  };
+
   const isMobile = useMediaQuery('(max-width:600px)');
   const [showActions, setShowActions] = useState(false);
   const maxLines = 2;
@@ -60,59 +125,21 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
         <Card
           data-testid="memo-card"
           sx={{
-            position: 'relative',
-            maxWidth: '100%',
-            mx: 'auto',
-            cursor: onClick ? 'pointer' : 'default',
-            backgroundColor: 'rgba(255, 255, 255, 0.75)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            border: '2px solid rgba(139, 69, 19, 0.2)',
-            borderRadius: 3,
-            boxShadow: `
-              0 8px 32px rgba(0, 0, 0, 0.12),
-              0 2px 8px rgba(0, 0, 0, 0.08),
-              inset 0 1px 0 rgba(255, 255, 255, 0.5)
-            `,
-            overflow: 'visible',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            ...cardSx,
             transform: showActions ? 'translateX(-100px)' : 'none',
             '&:hover': {
+              ...cardSx['&:hover'],
               transform: showActions ? 'translateX(-100px)' : 'translateY(-2px)',
-              boxShadow: `
-                0 12px 40px rgba(0, 0, 0, 0.16),
-                0 4px 12px rgba(0, 0, 0, 0.12),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6)
-              `,
-              borderColor: 'rgba(139, 69, 19, 0.3)',
-            },
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 8,
-              left: 8,
-              right: 8,
-              bottom: 8,
-              border: '1px solid rgba(139, 69, 19, 0.1)',
-              borderRadius: 2,
-              pointerEvents: 'none',
-              zIndex: 0,
-            },
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: '50%',
-              width: 1,
-              height: '100%',
-              background: 'linear-gradient(to bottom, transparent, rgba(139, 69, 19, 0.1), transparent)',
-              pointerEvents: 'none',
-              zIndex: 0,
             },
           }}
           onClick={onClick ? () => onClick(memo, false) : undefined} // editMode=false
         >
-          <DecorativeCorner position="top-left" size={20} />
-          <DecorativeCorner position="top-right" size={20} />
+          {decorations.corners && (
+            <>
+              <DecorativeCorner position="top-left" size={20} accentKey={accentKey} />
+              <DecorativeCorner position="top-right" size={20} accentKey={accentKey} />
+            </>
+          )}
           <CardContent sx={{ 
             pb: 0.5, // パディングを少し減らす
             minHeight: 48, 
@@ -198,58 +225,20 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
     <Card
       data-testid="memo-card"
       sx={{
-        position: 'relative',
-        maxWidth: '100%',
-        mx: 'auto',
-        cursor: onClick ? 'pointer' : 'default',
-        backgroundColor: 'rgba(255, 255, 255, 0.75)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        border: '2px solid rgba(139, 69, 19, 0.2)',
-        borderRadius: 3,
-        boxShadow: `
-          0 8px 32px rgba(0, 0, 0, 0.12),
-          0 2px 8px rgba(0, 0, 0, 0.08),
-          inset 0 1px 0 rgba(255, 255, 255, 0.5)
-        `,
-        overflow: 'visible',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        ...cardSx,
         '&:hover': {
+          ...cardSx['&:hover'],
           transform: 'translateY(-4px)',
-          boxShadow: `
-            0 12px 40px rgba(0, 0, 0, 0.16),
-            0 4px 12px rgba(0, 0, 0, 0.12),
-            inset 0 1px 0 rgba(255, 255, 255, 0.6)
-          `,
-          borderColor: 'rgba(139, 69, 19, 0.3)',
-        },
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 8,
-          left: 8,
-          right: 8,
-          bottom: 8,
-          border: '1px solid rgba(139, 69, 19, 0.1)',
-          borderRadius: 2,
-          pointerEvents: 'none',
-          zIndex: 0,
-        },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: '50%',
-          width: 1,
-          height: '100%',
-          background: 'linear-gradient(to bottom, transparent, rgba(139, 69, 19, 0.1), transparent)',
-          pointerEvents: 'none',
-          zIndex: 0,
         },
       }}
       onClick={onClick ? () => onClick(memo, false) : undefined} // editMode=false
     >
-      <DecorativeCorner position="top-left" size={20} />
-      <DecorativeCorner position="top-right" size={20} />
+      {decorations.corners && (
+        <>
+          <DecorativeCorner position="top-left" size={20} accentKey={accentKey} />
+          <DecorativeCorner position="top-right" size={20} accentKey={accentKey} />
+        </>
+      )}
       <CardContent sx={{ 
         pb: 1, 
         minHeight: { xs: 48, sm: 64 }, 

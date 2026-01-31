@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Typography, Box, Card, CardContent, Chip, Alert, Paper } from "@mui/material";
+import { Typography, Box, Card, CardContent, Chip, Alert, Paper, useTheme } from "@mui/material";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthProvider';
 import BookCard from '../BookCard';
@@ -62,7 +62,17 @@ import {
  *   }}
  * />
  */
+const FALLBACK_BROWN = { light: 'rgba(139, 69, 19, 0.2)', lighter: 'rgba(139, 69, 19, 0.1)', borderHover: 'rgba(139, 69, 19, 0.3)' };
+const FALLBACK_MEMO = { light: 'rgba(123, 104, 238, 0.25)', lighter: 'rgba(123, 104, 238, 0.12)', borderHover: 'rgba(123, 104, 238, 0.4)' };
+
 function SearchResults({ results = [], loading = false, searchQuery = '', onResultClick }) {
+  const theme = useTheme();
+  const accentKey = theme.custom?.cardAccent || 'brown';
+  const bookAccent = theme.palette?.decorative?.[accentKey] || FALLBACK_BROWN;
+  const memoAccent = theme.palette?.decorative?.memo || FALLBACK_MEMO;
+  const decorations = theme.custom?.cardDecorations ?? { corners: true, innerBorder: true, centerLine: true };
+  const glass = theme.custom?.glassEffect ?? { opacity: 0.75, blur: '20px', saturate: '180%' };
+
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -120,9 +130,9 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: 'rgba(255, 255, 255, 0.78)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        border: '2px solid rgba(123, 104, 238, 0.25)',
+        backgroundColor: `rgba(255, 255, 255, ${glass.opacity})`,
+        backdropFilter: `blur(${glass.blur}) saturate(${glass.saturate})`,
+        border: `2px solid ${memoAccent.light}`,
         borderRadius: 2,
         boxShadow: `
           0 6px 24px rgba(0, 0, 0, 0.1),
@@ -139,20 +149,22 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
             0 4px 12px rgba(123, 104, 238, 0.12),
             inset 0 1px 0 rgba(255, 255, 255, 0.65)
           `,
-          borderColor: 'rgba(123, 104, 238, 0.4)',
+          borderColor: memoAccent.borderHover || memoAccent.light,
         },
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 6,
-          left: 6,
-          right: 6,
-          bottom: 6,
-          border: '1px solid rgba(123, 104, 238, 0.12)',
-          borderRadius: 1.5,
-          pointerEvents: 'none',
-          zIndex: 0,
-        },
+        ...(decorations.innerBorder && {
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 6,
+            left: 6,
+            right: 6,
+            bottom: 6,
+            border: `1px solid ${memoAccent.lighter}`,
+            borderRadius: 1.5,
+            pointerEvents: 'none',
+            zIndex: 0,
+          },
+        }),
       }}
       onClick={() => handleResultClick('memo', memo.bookId, memo.id)}
       data-testid={`memo-result-${memo.id}`}
@@ -242,9 +254,9 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: 'rgba(255, 255, 255, 0.75)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        border: '2px solid rgba(139, 69, 19, 0.2)',
+        backgroundColor: `rgba(255, 255, 255, ${glass.opacity})`,
+        backdropFilter: `blur(${glass.blur}) saturate(${glass.saturate})`,
+        border: `2px solid ${bookAccent.light}`,
         borderRadius: 3,
         boxShadow: `
           0 8px 32px rgba(0, 0, 0, 0.12),
@@ -261,37 +273,45 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
             0 4px 12px rgba(0, 0, 0, 0.12),
             inset 0 1px 0 rgba(255, 255, 255, 0.6)
           `,
-          borderColor: 'rgba(139, 69, 19, 0.3)',
+          borderColor: bookAccent.borderHover || bookAccent.light,
         },
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 8,
-          left: 8,
-          right: 8,
-          bottom: 8,
-          border: '1px solid rgba(139, 69, 19, 0.1)',
-          borderRadius: 2,
-          pointerEvents: 'none',
-          zIndex: 0,
-        },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: '50%',
-          width: 1,
-          height: '100%',
-          background: 'linear-gradient(to bottom, transparent, rgba(139, 69, 19, 0.1), transparent)',
-          pointerEvents: 'none',
-          zIndex: 0,
-        },
+        ...(decorations.innerBorder && {
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 8,
+            left: 8,
+            right: 8,
+            bottom: 8,
+            border: `1px solid ${bookAccent.lighter}`,
+            borderRadius: 2,
+            pointerEvents: 'none',
+            zIndex: 0,
+          },
+        }),
+        ...(decorations.centerLine && {
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: '50%',
+            width: 1,
+            height: '100%',
+            background: `linear-gradient(to bottom, transparent, ${bookAccent.lighter}, transparent)`,
+            pointerEvents: 'none',
+            zIndex: 0,
+          },
+        }),
       }}
       onClick={() => handleResultClick('book', book.id)}
       data-testid={`book-result-${book.id}`}
     >
-      <DecorativeCorner position="top-left" size={20} />
-      <DecorativeCorner position="top-right" size={20} />
+      {decorations.corners && (
+        <>
+          <DecorativeCorner position="top-left" size={20} accentKey={accentKey} />
+          <DecorativeCorner position="top-right" size={20} accentKey={accentKey} />
+        </>
+      )}
       <CardContent sx={{ 
         flexGrow: 1, 
         display: 'flex', 

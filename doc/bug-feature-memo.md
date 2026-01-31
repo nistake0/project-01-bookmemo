@@ -116,6 +116,9 @@
 ### 次回開発時に検討すべき改善タスク
 
 #### 推奨タスク（優先度：中）
+- [x] **PageHeader のテーマ差別化**（2025-01-31）✅
+  - プリセットに `pageHeader` を追加し、全面制御可能に
+  - minimal-light: 画像なし、金系オーバーレイ・中央線なし、角丸なし、neutral アクセント
 - [ ] **ユニットテストカバレッジ改善**（2025-01-31 追加）
   - 現状: 全体約54%（Stmts）、テーマ・ユーザー設定まわりは部分的
   - 未カバー候補: ThemeProviderWithUserSettings、createThemeFromPreset、useUserSettings のエラー/update パス
@@ -157,16 +160,17 @@
   - PWAモード・ブラウザ戻る・スワイプ戻るなど各環境での挙動を確認
   - 必要ならロギングやガード処理を追加し、手動確認手順も更新
 
-- [ ] **デザインシステム一元化**（2026-01-11追加 / 2025-01-31 再検討）
-  - **目的**: フォントサイズ、ボタン・カードデザイン、色・装飾の変更を一元的に対応可能にする
-  - **再レビュー**: `doc/design-review-and-centralization-20260131.md` にアート的デザインの現状レビューと一元化の再検討を記載
-  - **実装フェーズ**:
-    - [ ] Phase 1: パレット拡張（`decorative.brown`, `decorative.memo` 等）
-    - [ ] Phase 2: BookCard, MemoCard, PageHeader, SearchResults でパレット参照に置換
-    - [ ] Phase 3: ガラス風スタイルの共通化（stylePresets または useCardStyles）
-    - [ ] Phase 4: fontSize 上書きの段階的削減
-  - **アプローチ**: デザイントークン（パレット拡張）を第一歩とし、段階的に共通スタイル化
+- [x] **デザイン一元化・テーマ化**（2025-01-31 タスク整理）✅
+  - **目的**: アート的デザインを一元管理し、テーマとして変更可能にする
+  - **設計**: `doc/design-centralization-and-theme-discussion.md` の結論・推奨に従う
+  - **タスク**:
+    - [x] D1: appTheme.js 廃止（テストを createThemeFromPreset に変更）✅
+    - [x] D2: index.css 整理（紛らわしい :root/html/body の色・背景を削除）✅
+    - [x] D3: パレット拡張（decorative）+ プリセットに cardAccent, cardDecorations, glassEffect ✅
+    - [x] D4: コンポーネントのパレット参照化（BookCard, MemoCard, SearchResults, PageHeader, DecorativeCorner, BookDetail）✅
+    - [x] D5: 装飾の有無・ガラス効果の適用（cardDecorations, glassEffect をコンポーネントで使用）✅
   - **関連ドキュメント**:
+    - `doc/design-centralization-and-theme-discussion.md` - 設計・結論・推奨（2025-01-31）
     - `doc/design-review-and-centralization-20260131.md` - 再レビュー・再検討（2025-01-31）
     - `doc/design-system-centralization-analysis.md` - 現状分析（2026-01-11）
     - `doc/theme-selectable-review-20260131.md` - ユーザー選択可能テーマ実装のための現状レビュー（目標: テーマ選択・ユーザーごと記憶）

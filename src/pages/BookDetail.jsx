@@ -14,7 +14,8 @@ import {
   Stack,
   Tabs, 
   Tab,
-  Alert
+  Alert,
+  useTheme,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -185,41 +186,54 @@ const BookDetail = () => {
     return <div data-testid="book-detail-not-found">本が見つかりません。</div>;
   }
 
+  const theme = useTheme();
+  const accentKey = theme.custom?.cardAccent || 'brown';
+  const accent = theme.palette?.decorative?.[accentKey] || {
+    light: 'rgba(139, 69, 19, 0.2)',
+    lighter: 'rgba(139, 69, 19, 0.1)',
+  };
+  const decorations = theme.custom?.cardDecorations ?? { corners: true, innerBorder: true, centerLine: true };
+  const glass = theme.custom?.glassEffect ?? { opacity: 0.75, blur: '20px', saturate: '180%' };
+
   const detailCardSx = {
     position: 'relative',
     overflow: 'visible',
-    backgroundColor: 'rgba(255, 255, 255, 0.75)',
-    backdropFilter: 'blur(20px) saturate(180%)',
-    border: '2px solid rgba(139, 69, 19, 0.2)',
+    backgroundColor: `rgba(255, 255, 255, ${glass.opacity})`,
+    backdropFilter: `blur(${glass.blur}) saturate(${glass.saturate})`,
+    border: `2px solid ${accent.light}`,
     borderRadius: 3,
     boxShadow: `
       0 8px 32px rgba(0, 0, 0, 0.12),
       0 2px 8px rgba(0, 0, 0, 0.08),
       inset 0 1px 0 rgba(255, 255, 255, 0.5)
     `,
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 8,
-      left: 8,
-      right: 8,
-      bottom: 8,
-      border: '1px solid rgba(139, 69, 19, 0.1)',
-      borderRadius: 2,
-      pointerEvents: 'none',
-      zIndex: 0,
-    },
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: '50%',
-      width: 1,
-      height: '100%',
-      background: 'linear-gradient(to bottom, transparent, rgba(139, 69, 19, 0.1), transparent)',
-      pointerEvents: 'none',
-      zIndex: 0,
-    },
+    ...(decorations.innerBorder && {
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 8,
+        left: 8,
+        right: 8,
+        bottom: 8,
+        border: `1px solid ${accent.lighter}`,
+        borderRadius: 2,
+        pointerEvents: 'none',
+        zIndex: 0,
+      },
+    }),
+    ...(decorations.centerLine && {
+      '&::after': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: '50%',
+        width: 1,
+        height: '100%',
+        background: `linear-gradient(to bottom, transparent, ${accent.lighter}, transparent)`,
+        pointerEvents: 'none',
+        zIndex: 0,
+      },
+    }),
   };
 
   return (
@@ -231,8 +245,12 @@ const BookDetail = () => {
       px: { xs: 2, sm: 0 } // モバイルでは左右の余白を追加
     }} data-testid="book-detail">
       <Paper sx={detailCardSx}>
-        <DecorativeCorner position="top-left" size={20} />
-        <DecorativeCorner position="top-right" size={20} />
+        {decorations.corners && (
+          <>
+            <DecorativeCorner position="top-left" size={20} accentKey={accentKey} />
+            <DecorativeCorner position="top-right" size={20} accentKey={accentKey} />
+          </>
+        )}
         <Box sx={{ position: 'relative', zIndex: 1, p: { xs: 2, sm: 3 } }}>
           <BookInfo 
             book={book} 
@@ -304,7 +322,7 @@ const BookDetail = () => {
         aria-label="メモを追加"
         sx={{
           position: 'fixed',
-          bottom: { xs: 72, sm: 16 }, // モバイルではフッターメニューの上に配置
+          bottom: { xs: 80, sm: 88 }, // ボトムナビ(64/72px)の上に配置
           right: { xs: 16, sm: 16 },
         }}
         onClick={handleFabClick}

@@ -3,7 +3,7 @@ import { render } from '@testing-library/react';
 import { ThemeProvider } from '@mui/material/styles';
 import { BrowserRouter } from 'react-router-dom';
 import { ErrorDialogContext } from './components/CommonErrorDialog';
-import { appTheme } from './theme/appTheme';
+import { testTheme } from './theme/testTheme';
 
 // 共通のモック関数
 export const mockSetGlobalError = jest.fn();
@@ -13,8 +13,8 @@ export const mockErrorContext = {
   setGlobalError: mockSetGlobalError,
 };
 
-// テスト用のテーマ（appThemeを使用）
-export const testTheme = appTheme;
+// テスト用のテーマ（createThemeFromPreset を使用）
+export { testTheme };
 
 /**
  * コンポーネントテスト用のレンダリング関数
@@ -22,7 +22,7 @@ export const testTheme = appTheme;
  */
 export const renderWithProviders = (component) => {
   return render(
-    <ThemeProvider theme={appTheme}>
+    <ThemeProvider theme={testTheme}>
       <ErrorDialogContext.Provider value={{ setGlobalError: mockSetGlobalError }}>
         <BrowserRouter>
           {component}

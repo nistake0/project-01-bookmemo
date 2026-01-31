@@ -6,6 +6,7 @@ import {
   Typography,
   Chip,
   Box,
+  useTheme,
 } from '@mui/material';
 import {
   getBookStatusLabel,
@@ -13,6 +14,12 @@ import {
   DEFAULT_BOOK_STATUS,
 } from '../constants/bookStatus';
 import DecorativeCorner from './common/DecorativeCorner';
+
+const FALLBACK_ACCENT = {
+  light: 'rgba(139, 69, 19, 0.2)',
+  lighter: 'rgba(139, 69, 19, 0.1)',
+  borderHover: 'rgba(139, 69, 19, 0.3)',
+};
 
 /**
  * 書籍カードコンポーネント
@@ -25,66 +32,80 @@ import DecorativeCorner from './common/DecorativeCorner';
  * @param {string} props.testId - テスト用ID
  */
 function BookCard({ book, onClick, testId }) {
-  // ステータス表示は定数定義を使用
+  const theme = useTheme();
+  const accentKey = theme.custom?.cardAccent || 'brown';
+  const accent = theme.palette?.decorative?.[accentKey] || FALLBACK_ACCENT;
+  const decorations = theme.custom?.cardDecorations ?? { corners: true, innerBorder: true, centerLine: true };
+  const glass = theme.custom?.glassEffect ?? { opacity: 0.75, blur: '20px', saturate: '180%' };
+
+  const cardSx = {
+    cursor: 'pointer',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: { xs: '140px', sm: '160px' },
+    backgroundColor: `rgba(255, 255, 255, ${glass.opacity})`,
+    backdropFilter: `blur(${glass.blur}) saturate(${glass.saturate})`,
+    border: `2px solid ${accent.light}`,
+    borderRadius: 3,
+    boxShadow: `
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 2px 8px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5)
+    `,
+    position: 'relative',
+    overflow: 'visible',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    '&:hover': {
+      transform: 'translateY(-4px)',
+      boxShadow: `
+        0 12px 40px rgba(0, 0, 0, 0.16),
+        0 4px 12px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6)
+      `,
+      borderColor: accent.borderHover || accent.light,
+    },
+    ...(decorations.innerBorder && {
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 8,
+        left: 8,
+        right: 8,
+        bottom: 8,
+        border: `1px solid ${accent.lighter}`,
+        borderRadius: 2,
+        pointerEvents: 'none',
+        zIndex: 0,
+      },
+    }),
+    ...(decorations.centerLine && {
+      '&::after': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: '50%',
+        width: 1,
+        height: '100%',
+        background: `linear-gradient(to bottom, transparent, ${accent.lighter}, transparent)`,
+        pointerEvents: 'none',
+        zIndex: 0,
+      },
+    }),
+  };
 
   return (
     <Card 
-      sx={{ 
-        cursor: 'pointer',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: { xs: '140px', sm: '160px' },
-        backgroundColor: 'rgba(255, 255, 255, 0.75)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        border: '2px solid rgba(139, 69, 19, 0.2)',
-        borderRadius: 3,
-        boxShadow: `
-          0 8px 32px rgba(0, 0, 0, 0.12),
-          0 2px 8px rgba(0, 0, 0, 0.08),
-          inset 0 1px 0 rgba(255, 255, 255, 0.5)
-        `,
-        position: 'relative',
-        overflow: 'visible',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: `
-            0 12px 40px rgba(0, 0, 0, 0.16),
-            0 4px 12px rgba(0, 0, 0, 0.12),
-            inset 0 1px 0 rgba(255, 255, 255, 0.6)
-          `,
-          borderColor: 'rgba(139, 69, 19, 0.3)',
-        },
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 8,
-          left: 8,
-          right: 8,
-          bottom: 8,
-          border: '1px solid rgba(139, 69, 19, 0.1)',
-          borderRadius: 2,
-          pointerEvents: 'none',
-          zIndex: 0,
-        },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: '50%',
-          width: 1,
-          height: '100%',
-          background: 'linear-gradient(to bottom, transparent, rgba(139, 69, 19, 0.1), transparent)',
-          pointerEvents: 'none',
-          zIndex: 0,
-        },
-      }}
+      sx={cardSx}
       onClick={onClick}
       data-testid={testId || `book-card-${book.id}`}
     >
-      <DecorativeCorner position="top-left" size={20} />
-      <DecorativeCorner position="top-right" size={20} />
+      {decorations.corners && (
+        <>
+          <DecorativeCorner position="top-left" size={20} accentKey={accentKey} />
+          <DecorativeCorner position="top-right" size={20} accentKey={accentKey} />
+        </>
+      )}
       <CardContent sx={{ 
         flex: 1, 
         display: 'flex', 

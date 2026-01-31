@@ -32,7 +32,7 @@ import { ErrorLogger, setupGlobalErrorHandling } from './utils/errorLogger';
 import { useBackgroundParallax } from './hooks/useBackgroundParallax';
 import LoadingIndicator from './components/common/LoadingIndicator';
 
-// ErrorLogger / appTheme は外部モジュールへ分離
+// ErrorLogger は外部モジュールへ分離
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -255,7 +255,7 @@ function AppRoutes() {
     }
   }, [location.pathname]);
 
-  // 背景の“動き”だけをフックに分離（見た目はappTheme.jsのMuiCssBaselineへ）
+  // 背景の“動き”だけをフックに分離（見た目はcreateThemeFromPresetのMuiCssBaselineへ）
   useBackgroundParallax({ factor: 0.45 });
 
   // グローバルエラーハンドラーを設定
@@ -348,7 +348,7 @@ function AppRoutes() {
           WebkitOverflowScrolling: 'touch',
           // 画面下部のボトムナビの重なり回避（各ページでもpbしているが二重でも実害なし）
           pb: hideBottomNav ? 0 : { xs: '64px', sm: '72px' },
-          // 背景の“見た目”は appTheme.js（MuiCssBaseline）へ寄せる。
+          // 背景の“見た目”は createThemeFromPreset（MuiCssBaseline）へ寄せる。
           // ここでは URL だけ CSS 変数で渡す（prodのbasePathにも追従）
           // NOTE: url(var(--x)) は環境差が出ることがあるので、変数側を url("...") にして参照は var(...) に寄せる
           '--bm-noise-bg': `url("${PATHS.NOISE_TEXTURE()}")`,

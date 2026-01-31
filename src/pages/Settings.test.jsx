@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
-import { appTheme } from '../theme/appTheme';
+import { testTheme } from '../theme/testTheme';
 import { ErrorDialogContext } from '../components/CommonErrorDialog';
 import { UserSettingsProvider } from '../hooks/useUserSettings';
 import Settings from './Settings';
@@ -18,7 +18,7 @@ const renderSettings = () =>
   render(
     <ErrorDialogContext.Provider value={{ setGlobalError: jest.fn() }}>
       <UserSettingsProvider>
-        <ThemeProvider theme={appTheme}>
+        <ThemeProvider theme={testTheme}>
           <MemoryRouter>
             <Settings />
           </MemoryRouter>

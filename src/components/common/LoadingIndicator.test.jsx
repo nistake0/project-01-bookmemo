@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { ThemeProvider } from '@mui/material/styles';
-import { appTheme } from '../../theme/appTheme';
+import { testTheme } from '../../theme/testTheme';
 import LoadingIndicator from './LoadingIndicator';
 
 const renderWithTheme = (ui) =>
-  render(<ThemeProvider theme={appTheme}>{ui}</ThemeProvider>);
+  render(<ThemeProvider theme={testTheme}>{ui}</ThemeProvider>);
 
 describe('LoadingIndicator', () => {
   test('default inline variant renders with data-testid', () => {
