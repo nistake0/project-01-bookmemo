@@ -15,18 +15,18 @@
 | **C. プロフィール機能** | 表示名・アバターの表示・編集、設定画面にプロフィールセクション追加 | A | 1.5〜2日 |
 
 **タスクA の詳細**:
-- [ ] Firestore users/{userId} に profile, preferences 構造を設計
-- [ ] useUserSettings フック（取得・保存・更新）
-- [ ] 設定画面の土台（マイページ or 設定モーダル）
-- [ ] ボトムナビ PersonIcon のルート接続
-- [ ] 初回は preferences.themePresetId のみ利用
+- [x] Firestore users/{userId} に profile, preferences 構造を設計 ✅ 2025-01-31
+- [x] useUserSettings フック（取得・保存・更新）✅
+- [x] 設定画面の土台（Settings.jsx）✅
+- [x] ボトムナビ PersonIcon のルート接続（/settings）✅
+- [x] 初回は preferences.themePresetId のみ利用（デフォルト: library-classic）✅
 
 **タスクB の詳細**:
-- [ ] テーマプリセット定義、テーマファクトリ
-- [ ] useUserSettings から themePresetId を読み ThemeProvider に渡す
-- [ ] テーマ選択UI を設定画面に配置
-- [ ] デザイン一元化（パレット参照）との連携
-- [ ] 参考: `doc/theme-selectable-review-20260131.md`
+- [x] テーマプリセット定義、テーマファクトリ ✅ 2025-01-31
+- [x] useUserSettings から themePresetId を読み ThemeProvider に渡す ✅
+- [x] テーマ選択UI を設定画面に配置 ✅
+- [ ] デザイン一元化（パレット参照）との連携（将来タスク）
+- 参考: `doc/theme-selectable-review-20260131.md`
 
 **タスクC の詳細**:
 - [ ] 表示名、アバターの表示・編集

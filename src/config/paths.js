@@ -49,6 +49,7 @@ export const PATHS = {
   ROOT: () => buildPath('/'),
   ADD: () => buildPath('/add'),
   SEARCH: () => buildPath('/search'),
+  SETTINGS: () => buildPath('/settings'),
   
   // 環境情報
   IS_PRODUCTION: isProduction,

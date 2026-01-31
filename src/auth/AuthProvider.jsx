@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "../firebase";
 
 const AuthContext = createContext();
@@ -16,8 +16,17 @@ export function AuthProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
+  const signOut = useCallback(async () => {
+    try {
+      await firebaseSignOut(auth);
+    } catch (err) {
+      console.error('ログアウトに失敗しました:', err);
+      throw err;
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );

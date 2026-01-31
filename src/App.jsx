@@ -16,17 +16,18 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import TagSearch from "./pages/TagSearch";
 import Stats from "./pages/Stats";
+import Settings from "./pages/Settings";
 import CommonErrorDialog, { ErrorDialogContext, ErrorDialogProvider } from "./components/CommonErrorDialog";
-import { ThemeProvider } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import CssBaseline from '@mui/material/CssBaseline';
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import { usePWA } from "./hooks/usePWA";
 import { useNavigation } from "./hooks/useNavigation";
 import { withReactContext } from "./hooks/useReactContext.jsx";
 import { useContext } from 'react';
 import { PATHS } from './config/paths';
-import { appTheme } from './theme/appTheme';
+import ThemeProviderWithUserSettings from './components/ThemeProviderWithUserSettings';
+import { UserSettingsProvider } from './hooks/useUserSettings';
 import { ErrorLogger, setupGlobalErrorHandling } from './utils/errorLogger';
 import { useBackgroundParallax } from './hooks/useBackgroundParallax';
 import LoadingIndicator from './components/common/LoadingIndicator';
@@ -72,6 +73,7 @@ function AppBottomNav() {
     if (location.pathname.startsWith('/add')) setValue(1);
     else if (location.pathname.startsWith('/tags')) setValue(2);
     else if (location.pathname.startsWith('/stats')) setValue(3);
+    else if (location.pathname.startsWith('/settings')) setValue(4);
     else setValue(0); // デフォルトは本一覧
   }, [location.pathname]);
 
@@ -84,6 +86,7 @@ function AppBottomNav() {
         if (newValue === 1) navigate('/add');
         if (newValue === 2) navigate('/tags');
         if (newValue === 3) navigate('/stats');
+        if (newValue === 4) navigate('/settings');
       }}
       showLabels
       sx={{ 
@@ -149,16 +152,31 @@ function AppBottomNav() {
           }
         }}
       />
+      <BottomNavigationAction 
+        label="設定" 
+        icon={<PersonIcon />} 
+        data-testid="bottom-nav-settings"
+        sx={{ 
+          '&.Mui-selected': {
+            color: 'primary.main'
+          }
+        }}
+      />
     </BottomNavigation>
   );
 }
 
 function AppRoutes() {
   const location = useLocation();
+  const theme = useTheme();
   const { user } = useAuth();
   const { setGlobalError } = useContext(ErrorDialogContext);
   const { isStandalone } = usePWA();
   const { handleBack, handleForward } = useNavigation();
+  const backgroundVars = theme.custom?.backgroundVars || {
+    '--bm-library-image': `url("${PATHS.LIBRARY_BACKGROUND()}")`,
+    '--bm-library-bg': `url("${PATHS.LIBRARY_PATTERN()}")`,
+  };
 
   const hideBottomNav = (
     location.pathname.startsWith('/login') ||
@@ -334,8 +352,7 @@ function AppRoutes() {
           // ここでは URL だけ CSS 変数で渡す（prodのbasePathにも追従）
           // NOTE: url(var(--x)) は環境差が出ることがあるので、変数側を url("...") にして参照は var(...) に寄せる
           '--bm-noise-bg': `url("${PATHS.NOISE_TEXTURE()}")`,
-          '--bm-library-bg': `url("${PATHS.LIBRARY_PATTERN()}")`,
-          '--bm-library-image': `url("${PATHS.LIBRARY_BACKGROUND()}")`,
+          ...backgroundVars,
         }}
       >
         <Routes>
@@ -346,6 +363,7 @@ function AppRoutes() {
           <Route path="/book/:id" element={<PrivateRoute><BookDetail /></PrivateRoute>} />
           <Route path="/tags" element={<PrivateRoute><TagSearch /></PrivateRoute>} />
           <Route path="/stats" element={<PrivateRoute><Stats /></PrivateRoute>} />
+          <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Box>
@@ -359,15 +377,15 @@ function App() {
     <AuthProvider>
       <ErrorDialogProvider>
         <HashRouter>
-          <ThemeProvider theme={appTheme}>
-            <CssBaseline />
-            <PWAProvider />
-            <AppRoutes />
-            {/* PWA機能がサポートされている場合のみPWAInstallPromptを表示（開発環境では非表示） */}
+          <UserSettingsProvider>
+            <ThemeProviderWithUserSettings>
+              <PWAProvider />
+              <AppRoutes />
             {typeof window !== 'undefined' && 'serviceWorker' in navigator && !PATHS.IS_DEVELOPMENT() && (
               <PWAInstallPrompt />
             )}
-          </ThemeProvider>
+            </ThemeProviderWithUserSettings>
+          </UserSettingsProvider>
         </HashRouter>
       </ErrorDialogProvider>
     </AuthProvider>

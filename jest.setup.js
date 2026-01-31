@@ -108,10 +108,11 @@ jest.mock('firebase/auth', () => ({
 }));
 
 // グローバルAuthProvider モック
-const mockUser = { uid: 'test-user-id' };
+const mockUser = { uid: 'test-user-id', email: 'test@example.com' };
 const mockAuthContext = {
   user: mockUser,
   loading: false,
+  signOut: jest.fn(() => Promise.resolve()),
 };
 
 // 完全に安定したuseAuthモック
