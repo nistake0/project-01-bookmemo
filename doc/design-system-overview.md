@@ -101,6 +101,7 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 
 ## 8. 関連ドキュメント
 
+- `doc/design-embedded-values-review-and-discussion.md` - 埋め込み値の再調査・一元化・テーマ化の議論（次回最優先）
 - `doc/design-element-classification-and-policy.md` - 要素分類とテーマ方針（書籍/メモ分離、統一の設計）
 - `doc/design-centralization-and-theme-discussion.md` - 設計の経緯・論点
 - `doc/theme-selectable-review-20260131.md` - テーマ選択実装の障壁分析

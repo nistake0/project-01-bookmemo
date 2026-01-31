@@ -4,21 +4,27 @@
 
 ### 🔥 最優先タスク（開発開始時必須確認）
 
-#### 🎯 デザイン要素分離・統一 実装計画（2025-01-31 最優先 TODO）
+#### 🎯 デザイン埋め込み値の一元化・テーマ化（2025-01-31 次回最優先 TODO）
 
-**必ず確認**: `doc/design-implementation-plan.md` を開発開始時・実装前に必ず確認すること。
+**必ず確認**: `doc/design-embedded-values-review-and-discussion.md` を開発開始時・実装前に必ず確認すること。
 
-| Phase | 内容 | 主な成果物 |
-|-------|------|------------|
-| **0** | フォールバック共通化、boxShadow テーマ化 | fallbacks.js, createThemeFromPreset 拡張 |
-| **1** | プリセット分離（bookAccent / memoAccent） | themePresets, createThemeFromPreset |
-| **2** | 書籍系スタイル統一（getBookCardSx） | cardStyles.js, 各書籍系コンポーネント |
-| **3** | メモ系分離（MemoCard → memoAccent） | MemoCard, SearchResults |
-| **4** | 説明カード（案C）・統計グラフ色 | chartColors, Stats |
+Phase 0〜4 完了後も、fontSize・サイズ・スペーシング・トランジション等が個別要素に多数残っている。これらをデザイントークンとして theme に集約し、テーマでコントロール可能にする。
 
-- **方針**: `doc/design-element-classification-and-policy.md`
-- **説明カード**: 案C（MUIデフォルト相当）
-- **テスト**: 新規実装ごとにテストを追加し、カバレッジ漏れを防ぐ
+- **調査結果**: fontSize 約40箇所、サイズ（width/height）多数、Stats の transition 6箇所重複 等
+- **方針**: theme.custom に sizes, typographyOverrides, motion 等を拡張。プリセットで差別化。
+- **段階**: Phase A（重複解消）→ Phase B（トークン導入）→ Phase C（完全トークン化）
+
+---
+
+#### デザイン要素分離・統一 実装計画（2025-01-31 完了）
+
+| Phase | 内容 | 状態 |
+|-------|------|------|
+| **0** | フォールバック共通化、boxShadow テーマ化 | ✅ 完了 |
+| **1** | プリセット分離（bookAccent / memoAccent） | ✅ 完了 |
+| **2** | 書籍系スタイル統一（getBookCardSx） | ✅ 完了 |
+| **3** | メモ系分離（MemoCard → memoAccent） | ✅ 完了 |
+| **4** | 説明カード（案C）・統計グラフ色 | ✅ 完了 |
 
 ---
 
