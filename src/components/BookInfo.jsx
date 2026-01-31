@@ -117,7 +117,26 @@ const BookInfo = ({ book, bookId, onStatusChange, onEdit }) => {
           </Typography>
         )}
         {book.isbn && (
-          <Typography variant="body1" color="text.secondary" gutterBottom data-testid="book-isbn">
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            gutterBottom
+            component="span"
+            sx={{
+              cursor: 'pointer',
+              userSelect: 'none',
+              textDecoration: 'underline',
+              textUnderlineOffset: 2,
+              '&:hover': { opacity: 0.8 },
+            }}
+            onClick={() => {
+              const isbnForUrl = book.isbn.replace(/[^0-9Xx]/g, '');
+              if (isbnForUrl) {
+                window.open(`https://www.amazon.co.jp/s?k=${isbnForUrl}`, '_blank', 'noopener,noreferrer');
+              }
+            }}
+            data-testid="book-isbn"
+          >
             ISBN: {book.isbn}
           </Typography>
         )}

@@ -271,4 +271,40 @@ describe('BookInfo', () => {
     
     expect(screen.queryByTestId('book-isbn')).not.toBeInTheDocument();
   });
+
+  /**
+   * テストケース: ISBNタップでAmazonの該当書籍ページを開く
+   *
+   * 目的: ISBNをタップしたとき、Amazonの該当書籍検索ページが新しいタブで開くことを確認
+   */
+  test('opens Amazon page when ISBN is clicked', () => {
+    render(<BookInfo book={mockBook} />);
+
+    const isbnElement = screen.getByTestId('book-isbn');
+    fireEvent.click(isbnElement);
+
+    expect(mockWindowOpen).toHaveBeenCalledWith(
+      'https://www.amazon.co.jp/s?k=9784873119485',
+      '_blank',
+      'noopener,noreferrer'
+    );
+  });
+
+  /**
+   * テストケース: ISBNにハイフンが含まれる場合もURLを正しく生成する
+   *
+   * 目的: ハイフン付きISBN（978-4-87311-9485）から数字のみを抽出してURLを生成することを確認
+   */
+  test('strips non-digit characters from ISBN for URL', () => {
+    const bookWithHyphenatedIsbn = { ...mockBook, isbn: '978-4-87311-9485' };
+    render(<BookInfo book={bookWithHyphenatedIsbn} />);
+
+    fireEvent.click(screen.getByTestId('book-isbn'));
+
+    expect(mockWindowOpen).toHaveBeenCalledWith(
+      'https://www.amazon.co.jp/s?k=9784873119485',
+      '_blank',
+      'noopener,noreferrer'
+    );
+  });
 });
