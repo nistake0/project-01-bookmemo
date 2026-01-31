@@ -33,6 +33,7 @@ import { useBook } from '../hooks/useBook';
 import { useBookStatusHistory } from '../hooks/useBookStatusHistory';
 import { useBookStatusManager } from '../hooks/useBookStatusManager';
 import { useNavigation } from '../hooks/useNavigation';
+import { FALLBACK_BROWN } from '../theme/fallbacks';
 
 const BookDetail = () => {
   const { id } = useParams();
@@ -188,12 +189,10 @@ const BookDetail = () => {
 
   const theme = useTheme();
   const accentKey = theme.custom?.cardAccent || 'brown';
-  const accent = theme.palette?.decorative?.[accentKey] || {
-    light: 'rgba(139, 69, 19, 0.2)',
-    lighter: 'rgba(139, 69, 19, 0.1)',
-  };
+  const accent = theme.palette?.decorative?.[accentKey] || FALLBACK_BROWN;
   const decorations = theme.custom?.cardDecorations ?? { corners: true, innerBorder: true, centerLine: true };
   const glass = theme.custom?.glassEffect ?? { opacity: 0.75, blur: '20px', saturate: '180%' };
+  const cardShadow = theme.custom?.cardShadow ?? '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5)';
 
   const detailCardSx = {
     position: 'relative',
@@ -202,11 +201,7 @@ const BookDetail = () => {
     backdropFilter: `blur(${glass.blur}) saturate(${glass.saturate})`,
     border: `2px solid ${accent.light}`,
     borderRadius: 3,
-    boxShadow: `
-      0 8px 32px rgba(0, 0, 0, 0.12),
-      0 2px 8px rgba(0, 0, 0, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.5)
-    `,
+    boxShadow: cardShadow,
     ...(decorations.innerBorder && {
       '&::before': {
         content: '""',

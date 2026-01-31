@@ -301,6 +301,10 @@ export function createThemeFromPreset(presetId, buildPath) {
     borderRadius: { xs: 16, sm: 20 },
     accentKey: 'brown',
   };
+  const defaultCardShadow = '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5)';
+  const defaultCardShadowHover = '0 12px 40px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6)';
+  const cardShadow = preset.cardShadow ?? defaultCardShadow;
+  const cardShadowHover = preset.cardShadowHover ?? defaultCardShadowHover;
 
   theme.custom = {
     ...theme.custom,
@@ -308,6 +312,8 @@ export function createThemeFromPreset(presetId, buildPath) {
     cardDecorations,
     glassEffect,
     pageHeader,
+    cardShadow,
+    cardShadowHover,
     backgroundVars: {
       '--bm-library-image': hasBgImage ? bgImage : 'none',
       '--bm-library-bg': hasBgPattern ? bgPattern : 'none',
