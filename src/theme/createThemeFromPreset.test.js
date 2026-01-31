@@ -66,6 +66,13 @@ describe('createThemeFromPreset', () => {
       expect(theme.custom.cardShadow).toBeDefined();
     });
 
+    it('chartColors を含む', () => {
+      const theme = createThemeFromPreset('library-classic', mockBuildPath);
+      expect(theme.custom).toHaveProperty('chartColors');
+      expect(theme.custom.chartColors).toHaveProperty('bar', '#42a5f5');
+      expect(theme.custom.chartColors).toHaveProperty('memo', '#9c27b0');
+    });
+
     it('bookAccent, memoAccent, bookDecorations, memoDecorations を含む', () => {
       const theme = createThemeFromPreset('library-classic', mockBuildPath);
       expect(theme.custom).toHaveProperty('bookAccent', 'brown');

@@ -1,10 +1,12 @@
-import { Typography, Box, Card, CardContent, Divider, Paper } from "@mui/material";
+import { Typography, Box, Card, CardContent, Divider, Paper, useTheme } from "@mui/material";
 import PageHeader from '../components/common/PageHeader';
 import LoadingIndicator from '../components/common/LoadingIndicator';
 import useStats from '../hooks/useStats';
 import { BarChart, PieChart } from '@mui/x-charts';
 
 export default function Stats() {
+  const theme = useTheme();
+  const chartColors = theme.custom?.chartColors ?? { bar: '#42a5f5', memo: '#9c27b0' };
   const { loading, error, summary, tagStats, monthlyFinished, monthlyAddedBooks, monthlyMemos, topAuthors, topPublishers, statusDistribution } = useStats();
 
   // データが空かどうかを判定
@@ -177,7 +179,7 @@ export default function Stats() {
                   <Typography variant="subtitle1" sx={{ mb: 1 }}>月別追加冊数（直近12ヶ月）</Typography>
                   <BarChart
                     xAxis={[{ scaleType: 'band', data: (monthlyAddedBooks ?? []).map(b => b.key) }]}
-                    series={[{ data: (monthlyAddedBooks ?? []).map(b => b.count), label: '追加冊数', color: '#42a5f5' }]}
+                    series={[{ data: (monthlyAddedBooks ?? []).map(b => b.count), label: '追加冊数', color: chartColors.bar }]}
                     height={220}
                   />
                 </CardContent>
@@ -187,7 +189,7 @@ export default function Stats() {
                   <Typography variant="subtitle1" sx={{ mb: 1 }}>月別メモ数（直近12ヶ月）</Typography>
                   <BarChart
                     xAxis={[{ scaleType: 'band', data: (monthlyMemos ?? []).map(b => b.key) }]}
-                    series={[{ data: (monthlyMemos ?? []).map(b => b.count), label: 'メモ数', color: '#9c27b0' }]}
+                    series={[{ data: (monthlyMemos ?? []).map(b => b.count), label: 'メモ数', color: chartColors.memo }]}
                     height={220}
                   />
                 </CardContent>

@@ -313,6 +313,7 @@ export function createThemeFromPreset(presetId, buildPath) {
   const defaultCardShadowHover = '0 12px 40px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6)';
   const cardShadow = preset.cardShadow ?? defaultCardShadow;
   const cardShadowHover = preset.cardShadowHover ?? defaultCardShadowHover;
+  const chartColors = preset.chartColors ?? { bar: '#42a5f5', memo: '#9c27b0' };
 
   theme.custom = {
     ...theme.custom,
@@ -326,6 +327,7 @@ export function createThemeFromPreset(presetId, buildPath) {
     pageHeader,
     cardShadow,
     cardShadowHover,
+    chartColors,
     backgroundVars: {
       '--bm-library-image': hasBgImage ? bgImage : 'none',
       '--bm-library-bg': hasBgPattern ? bgPattern : 'none',

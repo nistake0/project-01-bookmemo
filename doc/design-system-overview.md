@@ -56,6 +56,9 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 | memoDecorations | { corners, innerBorder, centerLine } |
 | cardDecorations | bookDecorations のエイリアス |
 | glassEffect | { opacity, blur, saturate } |
+| cardShadow | カードの影 |
+| cardShadowHover | ホバー時の影 |
+| chartColors | { bar, memo } グラフ用色 |
 | pageHeader | { backgroundImage, goldOverlay, centerLine, borderRadius, accentKey } |
 | backgroundVars | CSS 変数（--bm-library-image, --bm-library-bg） |
 
@@ -71,6 +74,7 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 | BookDetail | getBookCardSx（hover: false） |
 | BookInfo | getBookAccent（書影プレースホルダー枠線） |
 | ExternalBookSearch | getBookCardSx（検索結果カード） |
+| Stats | chartColors（BarChart の色） |
 | PageHeader | pageHeader, decorative[accentKey], decorative.gold |
 | DecorativeCorner | decorative.gold, decorative[accentKey] |
 | BookDetail | 同上（Paper の detailCardSx） |

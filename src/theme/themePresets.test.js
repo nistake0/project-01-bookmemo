@@ -43,6 +43,14 @@ describe('themePresets', () => {
       expect(classic.memoDecorations.centerLine).toBe(false);
     });
 
+    it('chartColors を含む', () => {
+      const presets = getThemePresets(mockBuildPath);
+      const classic = presets['library-classic'];
+      expect(classic.chartColors).toBeDefined();
+      expect(classic.chartColors.bar).toBe('#42a5f5');
+      expect(classic.chartColors.memo).toBe('#9c27b0');
+    });
+
     it('buildPath を使って背景画像の URL を構築する', () => {
       const presets = getThemePresets(mockBuildPath);
       const classic = presets['library-classic'];
