@@ -63,7 +63,7 @@ import {
  * />
  */
 const FALLBACK_BROWN = { light: 'rgba(139, 69, 19, 0.2)', lighter: 'rgba(139, 69, 19, 0.1)', borderHover: 'rgba(139, 69, 19, 0.3)' };
-const FALLBACK_MEMO = { light: 'rgba(123, 104, 238, 0.25)', lighter: 'rgba(123, 104, 238, 0.12)', borderHover: 'rgba(123, 104, 238, 0.4)' };
+const FALLBACK_MEMO = { light: 'rgba(123, 104, 238, 0.25)', lighter: 'rgba(123, 104, 238, 0.12)', borderHover: 'rgba(123, 104, 238, 0.4)', shadow: 'rgba(123, 104, 238, 0.08)', shadowHover: 'rgba(123, 104, 238, 0.12)' };
 
 function SearchResults({ results = [], loading = false, searchQuery = '', onResultClick }) {
   const theme = useTheme();
@@ -136,7 +136,7 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
         borderRadius: 2,
         boxShadow: `
           0 6px 24px rgba(0, 0, 0, 0.1),
-          0 2px 8px rgba(123, 104, 238, 0.08),
+          0 2px 8px ${memoAccent.shadow || 'rgba(123, 104, 238, 0.08)'},
           inset 0 1px 0 rgba(255, 255, 255, 0.6)
         `,
         position: 'relative',
@@ -146,7 +146,7 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
           transform: 'translateY(-3px)',
           boxShadow: `
             0 10px 32px rgba(0, 0, 0, 0.12),
-            0 4px 12px rgba(123, 104, 238, 0.12),
+            0 4px 12px ${memoAccent.shadowHover || memoAccent.shadow || 'rgba(123, 104, 238, 0.12)'},
             inset 0 1px 0 rgba(255, 255, 255, 0.65)
           `,
           borderColor: memoAccent.borderHover || memoAccent.light,

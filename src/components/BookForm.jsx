@@ -285,7 +285,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
               inputProps={{ 
                 ...params.inputProps,
                 'data-testid': 'book-tags-input',
-                style: { fontSize: '0.9rem' }
               }} 
             />
           )}
@@ -308,11 +307,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             label="ステータス"
             onChange={(e) => setStatus(e.target.value)}
             data-testid="book-status-select"
-            sx={{
-              '& .MuiSelect-select': {
-                fontSize: { xs: '0.9rem', sm: '1rem' }
-              }
-            }}
           >
             {ALL_BOOK_STATUSES.map((statusValue) => (
               <MenuItem key={statusValue} value={statusValue}>
@@ -333,11 +327,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             label="取得方法"
             onChange={(e) => setAcquisitionType(e.target.value)}
             data-testid="book-acquisition-type-select"
-            sx={{
-              '& .MuiSelect-select': {
-                fontSize: { xs: '0.9rem', sm: '1rem' }
-              }
-            }}
           >
             {ALL_ACQUISITION_TYPES.map((typeValue) => (
               <MenuItem key={typeValue} value={typeValue}>
@@ -385,7 +374,6 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
           mt: { xs: 2, sm: 3 }, 
           mb: { xs: "72px", sm: 2 }, // モバイルではフッターメニューの上に余白を追加
           width: { xs: '100%', sm: 'auto' }, // モバイルでは全幅
-          fontSize: { xs: '0.9rem', sm: '1rem' },
           py: { xs: 1.5, sm: 2 }
         }} 
         data-testid="book-add-submit"

@@ -175,6 +175,14 @@
     - `doc/design-system-centralization-analysis.md` - 現状分析（2026-01-11）
     - `doc/theme-selectable-review-20260131.md` - ユーザー選択可能テーマ実装のための現状レビュー（目標: テーマ選択・ユーザーごと記憶）
 
+- [x] **アートデザイン残タスク3件**（2025-01-31）✅
+  - **方針**: 3タスク完了後にデザイン一元化（設計・方針の棚卸し）を進める
+  - **タスク**:
+    1. [x] SearchResults メモカード boxShadow のテーマ参照化（decorative.memo.shadow/shadowHover 追加）✅
+    2. [x] MuiCard/MuiPaper のガラス効果をプリセット連携（glass.opacity/blur/saturate を使用）✅
+    3. [x] fontSize 上書きの段階的削減（BookForm: 送信ボタン・Select・Autocomplete inputProps 等）✅
+  - **今後**: デザイン一元化の設計・ドキュメント整理（ExternalBookSearch の fontSize 等は継続検討）
+
 - [ ] **TypeScript移行の検討**（長期目標）
   - PropTypesからTypeScriptへ段階的に移行
   - コンパイル時の型チェック強化

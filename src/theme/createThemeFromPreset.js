@@ -16,6 +16,7 @@ export function createThemeFromPreset(presetId, buildPath) {
   const bgPattern = preset.background.pattern === 'none' ? 'none' : preset.background.pattern;
   const hasBgImage = bgImage !== 'none';
   const hasBgPattern = bgPattern !== 'none';
+  const glass = preset.glassEffect ?? { opacity: 0.75, blur: '20px', saturate: '180%' };
 
   const theme = createTheme({
     palette: {
@@ -51,6 +52,8 @@ export function createThemeFromPreset(presetId, buildPath) {
           lighter: 'rgba(123, 104, 238, 0.12)',
           border: 'rgba(123, 104, 238, 0.25)',
           borderHover: 'rgba(123, 104, 238, 0.4)',
+          shadow: 'rgba(123, 104, 238, 0.08)',
+          shadowHover: 'rgba(123, 104, 238, 0.12)',
         },
         neutral: {
           light: 'rgba(100, 100, 100, 0.15)',
@@ -152,8 +155,8 @@ export function createThemeFromPreset(presetId, buildPath) {
             '@media (min-width:600px)': { marginBottom: '16px' },
             borderRadius: 16,
             border: '1px solid rgba(15, 23, 42, 0.08)',
-            backgroundColor: 'rgba(255, 255, 255, 0.72)',
-            backdropFilter: 'saturate(140%) blur(10px)',
+            backgroundColor: `rgba(255, 255, 255, ${glass.opacity})`,
+            backdropFilter: `saturate(${glass.saturate}) blur(${glass.blur})`,
             boxShadow: '0 10px 28px rgba(15, 23, 42, 0.08)',
             transition: 'box-shadow 160ms ease, transform 160ms ease',
             '&:hover': { boxShadow: '0 16px 36px rgba(15, 23, 42, 0.12)' },
@@ -182,8 +185,8 @@ export function createThemeFromPreset(presetId, buildPath) {
             '@media (min-width:600px)': { padding: '16px' },
             borderRadius: 16,
             border: '1px solid rgba(15, 23, 42, 0.08)',
-            backgroundColor: 'rgba(255, 255, 255, 0.72)',
-            backdropFilter: 'saturate(140%) blur(10px)',
+            backgroundColor: `rgba(255, 255, 255, ${glass.opacity})`,
+            backdropFilter: `saturate(${glass.saturate}) blur(${glass.blur})`,
             boxShadow: '0 10px 28px rgba(15, 23, 42, 0.08)',
           },
         },
