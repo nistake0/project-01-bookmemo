@@ -4,18 +4,9 @@
 
 ### 🔥 最優先タスク（開発開始時必須確認）
 
-#### 🎯 デザイン埋め込み値の一元化・テーマ化（2025-01-31 次回最優先 TODO）
+#### デザイン埋め込み値の一元化・テーマ化（2025-01-31 完了）
 
-**必ず確認**: `doc/design-embedded-values-review-and-discussion.md` を開発開始時・実装前に必ず確認すること。
-
-Phase 0〜4 完了後も、fontSize・サイズ・スペーシング・トランジション等が個別要素に多数残っている。これらをデザイントークンとして theme に集約し、テーマでコントロール可能にする。
-
-- **調査結果**: fontSize 約40箇所、サイズ（width/height）多数、Stats の motion 5箇所重複 等
-- **方針**: theme.custom に sizes, typographyOverrides, motion 等を拡張。プリセットで差別化。
-- **段階**: Phase A✅ Phase B✅ Phase C（完全トークン化）✅
-- **必要タスク**（`doc/design-embedded-values-review-and-discussion.md` 6.7 参照）:
-  - [x] Stats の motion: 5 数値カードのホバーアニメーションを theme.custom.motion に集約 ✅
-  - [x] ExternalBookSearch fontSize 統合: 種類を減らす（variant に寄せて 2〜3 種）→ ユーザー確認待ち ✅
+Phase A/B/C 完了。詳細は `doc/design-embedded-values-review-and-discussion.md` 参照。
 
 ---
 
@@ -62,21 +53,11 @@ Phase 0〜4 完了後も、fontSize・サイズ・スペーシング・トラン
 
 ---
 
-#### メモテキスト改善タスク（2026-01-17追加）
-1. **URLをハイパーリンクにする**
-   - [ ] Phase 1: URLリンク化機能の実装
-     - [ ] `src/utils/textUtils.js`の作成（URL検出・リンク化）
-     - [ ] `src/components/LinkifiedText.jsx`の作成（リンク化テキストコンポーネント）
-     - [ ] `MemoEditor.jsx`への適用
-     - [ ] `SearchResults.jsx`への適用
-     - [ ] XSS対策の実装（`dangerouslySetInnerHTML`不使用、`rel="noopener noreferrer"`設定）
-     - [ ] ユニットテストの作成
-2. **テキストの選択・コピーを可能にする**
-   - [ ] Phase 2: テキスト選択・コピー機能の実装
-     - [ ] `MemoCard.jsx`の修正（`userSelect: 'text'`設定 + クリック・スワイプとの競合回避）
-     - [ ] `MemoEditor.jsx`の修正（テキスト選択の明示的有効化）
-     - [ ] `SearchResults.jsx`の修正
-     - [ ] 動作確認（PC・モバイル）
+#### メモテキスト改善タスク（2026-01-17追加）✅ 完了
+1. **URLをハイパーリンクにする** ✅
+   - [x] Phase 1: textUtils.js, LinkifiedText.jsx, MemoEditor, SearchResults へ適用
+2. **テキストの選択・コピーを可能にする** ✅
+   - [x] Phase 2: MemoCard, MemoEditor(LinkifiedText), SearchResults に userSelect: 'text' + クリック競合回避
 - **実装方針**: `doc/memo-text-improvement-design.md`を参照
 - **所要時間**: Phase 1: 2-3時間、Phase 2: 2-3時間（合計4-6時間）
 - **優先度**: 最優先

@@ -23,6 +23,7 @@ import {
   DEFAULT_MEMO_RATING
 } from '../constants/memoRating';
 import MemoMoveDialog from './MemoMoveDialog';
+import LinkifiedText from './LinkifiedText';
 
 // CI環境でも安定する固定フォーマットで日時を表示（yyyy/M/d H:mm:ss）
 const formatDateTime = (createdAt) => {
@@ -148,8 +149,16 @@ const MemoEditor = ({
         <DialogContent>
           {dialogMode === 'view' ? (
             <>
-              <Typography variant="body1" sx={{ whiteSpace: 'pre-line', mb: 2 }} data-testid="memo-detail-text">{editingMemo?.text}</Typography>
-              {editingMemo?.comment && <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }} data-testid="memo-detail-comment">{editingMemo.comment}</Typography>}
+              <LinkifiedText text={editingMemo?.text} variant="body1" sx={{ mb: 2 }} data-testid="memo-detail-text" />
+              {editingMemo?.comment && (
+                <LinkifiedText
+                  text={editingMemo.comment}
+                  variant="body2"
+                  sx={{ mb: 1 }}
+                  color="text.secondary"
+                  data-testid="memo-detail-comment"
+                />
+              )}
               
               {/* ランク表示 */}
               {editingMemo?.rating != null && (

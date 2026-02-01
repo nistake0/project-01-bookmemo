@@ -84,7 +84,10 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
               transform: showActions ? 'translateX(-100px)' : 'translateY(-2px)',
             },
           }}
-          onClick={onClick ? () => onClick(memo, false) : undefined} // editMode=false
+          onClick={onClick ? (e) => {
+            if (window.getSelection?.()?.toString()) return; // テキスト選択中はカードクリックを無効化
+            onClick(memo, false);
+          } : undefined} // editMode=false
         >
           {decorations.corners && (
             <>
@@ -105,7 +108,11 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                lineHeight: 1.2, // 行間を調整
+                lineHeight: 1.2,
+                userSelect: 'text',
+                WebkitUserSelect: 'text',
+                MozUserSelect: 'text',
+                msUserSelect: 'text',
               }}
             >
               {shortText}
@@ -118,8 +125,12 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  lineHeight: 1.2, // 行間を調整
-                  mt: 0.25, // 上マージンを最小限に
+                  lineHeight: 1.2,
+                  mt: 0.25,
+                  userSelect: 'text',
+                  WebkitUserSelect: 'text',
+                  MozUserSelect: 'text',
+                  msUserSelect: 'text',
                 }}
               >
                 {memo.comment}
@@ -182,7 +193,10 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
           transform: 'translateY(-4px)',
         },
       }}
-      onClick={onClick ? () => onClick(memo, false) : undefined} // editMode=false
+      onClick={onClick ? (e) => {
+        if (window.getSelection?.()?.toString()) return; // テキスト選択中はカードクリックを無効化
+        onClick(memo, false);
+      } : undefined} // editMode=false
     >
       {decorations.corners && (
         <>

@@ -10,6 +10,7 @@ import {
   getBookStatusColor
 } from '../../constants/bookStatus';
 import { getBookCardSx, getMemoCardSx, getBookAccent, getMemoAccent, getBookDecorations, getMemoDecorations } from '../../theme/cardStyles';
+import LinkifiedText from '../LinkifiedText';
 
 /**
  * SearchResults - 検索結果表示コンポーネント
@@ -134,7 +135,10 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
     <Card 
       key={memo.id} 
       sx={memoCardSx}
-      onClick={() => handleResultClick('memo', memo.bookId, memo.id)}
+      onClick={() => {
+        if (window.getSelection?.()?.toString()) return; // テキスト選択中はクリックを無効化
+        handleResultClick('memo', memo.bookId, memo.id);
+      }}
       data-testid={`memo-result-${memo.id}`}
     >
       <CardContent sx={{ 
@@ -155,31 +159,35 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
         {/* メモ内容 */}
         {memo.text && (
           <Box sx={{ mb: 2, flexGrow: 1 }}>
-            <Typography variant="body2" sx={{ 
-              backgroundColor: 'grey.50', 
-              p: 1, 
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'grey.200',
-              fontStyle: 'italic'
-            }}>
-              {memo.text.length > 120 ? `${memo.text.substring(0, 120)}...` : memo.text}
-            </Typography>
+            <LinkifiedText
+              text={memo.text.length > 120 ? `${memo.text.substring(0, 120)}...` : memo.text}
+              variant="body2"
+              sx={{
+                backgroundColor: 'grey.50',
+                p: 1,
+                borderRadius: 1,
+                border: '1px solid',
+                borderColor: 'grey.200',
+                fontStyle: 'italic',
+              }}
+            />
           </Box>
         )}
 
         {/* コメント */}
         {memo.comment && (
           <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" sx={{ 
-              backgroundColor: 'primary.50', 
-              p: 1, 
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'primary.200'
-            }}>
-              💭 {memo.comment.length > 100 ? `${memo.comment.substring(0, 100)}...` : memo.comment}
-            </Typography>
+            <LinkifiedText
+              text={`💭 ${memo.comment.length > 100 ? `${memo.comment.substring(0, 100)}...` : memo.comment}`}
+              variant="body2"
+              sx={{
+                backgroundColor: 'primary.50',
+                p: 1,
+                borderRadius: 1,
+                border: '1px solid',
+                borderColor: 'primary.200',
+              }}
+            />
           </Box>
         )}
 
