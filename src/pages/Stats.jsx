@@ -7,6 +7,7 @@ import { BarChart, PieChart } from '@mui/x-charts';
 export default function Stats() {
   const theme = useTheme();
   const chartColors = theme.custom?.chartColors ?? { bar: '#42a5f5', memo: '#9c27b0' };
+  const infoCardHover = theme.custom?.motion?.infoCardHover ?? { transition: 'transform 0.2s ease-in-out', hoverTransform: 'translateY(-2px)' };
   const { loading, error, summary, tagStats, monthlyFinished, monthlyAddedBooks, monthlyMemos, topAuthors, topPublishers, statusDistribution } = useStats();
 
   // データが空かどうかを判定
@@ -66,10 +67,8 @@ export default function Stats() {
               <Card
                 data-testid="stats-total-books"
                 sx={{
-                  transition: 'transform 0.2s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                  },
+                  transition: infoCardHover.transition,
+                  '&:hover': { transform: infoCardHover.hoverTransform },
                 }}
               >
                 <CardContent>
@@ -80,10 +79,8 @@ export default function Stats() {
               <Card
                 data-testid="stats-tsundoku-books"
                 sx={{
-                  transition: 'transform 0.2s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                  },
+                  transition: infoCardHover.transition,
+                  '&:hover': { transform: infoCardHover.hoverTransform },
                 }}
               >
                 <CardContent>
@@ -94,10 +91,8 @@ export default function Stats() {
               <Card
                 data-testid="stats-reading-books"
                 sx={{
-                  transition: 'transform 0.2s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                  },
+                  transition: infoCardHover.transition,
+                  '&:hover': { transform: infoCardHover.hoverTransform },
                 }}
               >
                 <CardContent>
@@ -108,10 +103,8 @@ export default function Stats() {
               <Card
                 data-testid="stats-rereading-books"
                 sx={{
-                  transition: 'transform 0.2s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                  },
+                  transition: infoCardHover.transition,
+                  '&:hover': { transform: infoCardHover.hoverTransform },
                 }}
               >
                 <CardContent>
@@ -122,10 +115,8 @@ export default function Stats() {
               <Card
                 data-testid="stats-finished-books"
                 sx={{
-                  transition: 'transform 0.2s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                  },
+                  transition: infoCardHover.transition,
+                  '&:hover': { transform: infoCardHover.hoverTransform },
                 }}
               >
                 <CardContent>

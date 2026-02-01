@@ -225,11 +225,10 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
     if (loading) {
       return (
         <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle2" sx={{ 
+          <Typography variant="body1" sx={{ 
             mb: 2, 
             color: 'primary.main',
             fontWeight: 'bold',
-            fontSize: { xs: '0.9rem', sm: '1rem' }
           }}>
             {loadingStep || '検索中...'}
           </Typography>
@@ -314,9 +313,7 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
           flexDirection: { xs: 'column', sm: 'row' },
           gap: { xs: 1, sm: 0 }
         }}>
-          <Typography variant="subtitle2" sx={{ 
-            fontSize: { xs: '0.9rem', sm: '1rem' }
-          }}>
+          <Typography variant="body1">
             検索結果 ({searchResults.length}件)
           </Typography>
           <FormControl size="small" sx={{ minWidth: 120 }}>
@@ -378,14 +375,13 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
                 {/* 書籍情報 */}
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography 
-                    variant="subtitle1" 
+                    variant="body1" 
                     sx={{ 
                       fontWeight: 'bold',
                       mb: 0.5,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
-                      fontSize: { xs: '0.9rem', sm: '1rem' }
                     }}
                   >
                     {book.title}
@@ -424,14 +420,12 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
                       size="small" 
                       color={book.source === 'google' ? 'primary' : 'secondary'}
                       variant="outlined"
-                      sx={{ fontSize: { xs: '0.7rem', sm: '0.8rem' } }}
                     />
                     {book.isbn && (
                       <Chip 
                         label={`ISBN: ${book.isbn}`} 
                         size="small" 
                         variant="outlined"
-                        sx={{ fontSize: { xs: '0.7rem', sm: '0.8rem' } }}
                       />
                     )}
                   </Box>
@@ -450,7 +444,6 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
                       disabled
                       data-testid={`duplicate-book-${book.id}`}
                       sx={{ 
-                        fontSize: { xs: '0.75rem', sm: '0.85rem' },
                         minWidth: { xs: '100%', sm: 'auto' },
                         color: 'text.secondary',
                         borderColor: 'text.secondary'
@@ -467,10 +460,7 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
                         handleBookSelect(book);
                       }}
                       data-testid={`select-book-${book.id}`}
-                      sx={{ 
-                        fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                        minWidth: { xs: '100%', sm: 'auto' }
-                      }}
+                      sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
                     >
                       選択
                     </Button>
@@ -522,7 +512,6 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
             onChange={(e) => updateFilters({ author: e.target.value })}
             size="small"
             placeholder="著者名で絞り込み"
-            sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' } }}
           />
           <TextField
             label="出版社"
@@ -530,7 +519,6 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
             onChange={(e) => updateFilters({ publisher: e.target.value })}
             size="small"
             placeholder="出版社で絞り込み"
-            sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' } }}
           />
           <TextField
             label="出版年（開始）"
@@ -539,7 +527,6 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
             onChange={(e) => updateFilters({ yearFrom: e.target.value })}
             size="small"
             placeholder="例: 2020"
-            sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' } }}
           />
           <TextField
             label="出版年（終了）"
@@ -548,7 +535,6 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
             onChange={(e) => updateFilters({ yearTo: e.target.value })}
             size="small"
             placeholder="例: 2024"
-            sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' } }}
           />
         </Box>
         
@@ -639,10 +625,7 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
       maxWidth: '100%',
       overflow: 'hidden'
     }} data-testid="external-book-search">
-      <Typography variant="h6" sx={{ 
-        mb: { xs: 1.5, sm: 2 }, 
-        fontSize: { xs: '1rem', sm: '1.25rem' } 
-      }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: { xs: 1.5, sm: 2 } }}>
         🔍 外部検索モード
       </Typography>
       
@@ -691,10 +674,7 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
           disabled={!searchQuery.trim() || loading}
           startIcon={loading ? <CircularProgress size={16} /> : <SearchIcon />}
           data-testid="search-button"
-          sx={{ 
-            fontSize: { xs: '0.8rem', sm: '0.9rem' },
-            minWidth: { xs: '100%', sm: 'auto' }
-          }}
+          sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
         >
           {loading ? '検索中...' : '検索'}
         </Button>
@@ -717,9 +697,6 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
         <Button 
           onClick={handleCancel}
           data-testid="cancel-button"
-          sx={{ 
-            fontSize: { xs: '0.8rem', sm: '0.9rem' }
-          }}
         >
           ← ISBN検索に戻る
         </Button>

@@ -73,6 +73,16 @@ describe('createThemeFromPreset', () => {
       expect(theme.custom.chartColors).toHaveProperty('memo', '#9c27b0');
     });
 
+    it('motion.infoCardHover を含む', () => {
+      const theme = createThemeFromPreset('library-classic', mockBuildPath);
+      expect(theme.custom).toHaveProperty('motion');
+      expect(theme.custom.motion).toHaveProperty('infoCardHover');
+      expect(theme.custom.motion.infoCardHover).toMatchObject({
+        transition: 'transform 0.2s ease-in-out',
+        hoverTransform: 'translateY(-2px)',
+      });
+    });
+
     it('bookAccent, memoAccent, bookDecorations, memoDecorations を含む', () => {
       const theme = createThemeFromPreset('library-classic', mockBuildPath);
       expect(theme.custom).toHaveProperty('bookAccent', 'brown');

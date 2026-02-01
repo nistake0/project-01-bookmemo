@@ -314,6 +314,10 @@ export function createThemeFromPreset(presetId, buildPath) {
   const cardShadow = preset.cardShadow ?? defaultCardShadow;
   const cardShadowHover = preset.cardShadowHover ?? defaultCardShadowHover;
   const chartColors = preset.chartColors ?? { bar: '#42a5f5', memo: '#9c27b0' };
+  const defaultInfoCardHover = { transition: 'transform 0.2s ease-in-out', hoverTransform: 'translateY(-2px)' };
+  const motion = {
+    infoCardHover: preset.motion?.infoCardHover ?? defaultInfoCardHover,
+  };
 
   theme.custom = {
     ...theme.custom,
@@ -328,6 +332,7 @@ export function createThemeFromPreset(presetId, buildPath) {
     cardShadow,
     cardShadowHover,
     chartColors,
+    motion,
     backgroundVars: {
       '--bm-library-image': hasBgImage ? bgImage : 'none',
       '--bm-library-bg': hasBgPattern ? bgPattern : 'none',

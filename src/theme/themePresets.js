@@ -42,6 +42,9 @@ export function getThemePresets(buildPath) {
       cardShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5)',
       cardShadowHover: '0 12px 40px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
       chartColors: { bar: '#42a5f5', memo: '#9c27b0' },
+      motion: {
+        infoCardHover: { transition: 'transform 0.2s ease-in-out', hoverTransform: 'translateY(-2px)' },
+      },
     },
     'minimal-light': {
       id: 'minimal-light',
@@ -74,6 +77,9 @@ export function getThemePresets(buildPath) {
       cardShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5)',
       cardShadowHover: '0 12px 40px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
       chartColors: { bar: '#42a5f5', memo: '#9c27b0' },
+      motion: {
+        infoCardHover: { transition: 'transform 0.2s ease-in-out', hoverTransform: 'translateY(-2px)' },
+      },
     },
   };
 }

@@ -82,7 +82,7 @@ MUI の spacing(1) = 4px はテーマで定義済み。しかし「カード内�
 
 | 箇所 | 値 | 用途 |
 |------|-----|------|
-| **Stats** | transition 0.2s, translateY(-2px) | 6 カードで重複 |
+| **Stats** | transition 0.2s, translateY(-2px) | 5 カードで重複（下記「Stats の motion」参照） |
 | **cardStyles.js** | transition 0.3s cubic-bezier, translateY(-4px/-3px) | 書籍・メモカード |
 | **MemoCard** | translateX(-100px), translateY(-2px/-4px) | スワイプ、ホバー |
 | **BookInfo** | opacity 0.8（hover） | 4 箇所 |
@@ -90,6 +90,8 @@ MUI の spacing(1) = 4px はテーマで定義済み。しかし「カード内�
 | **DecorativeCorner** | opacity 0.4 | 角装飾 |
 | **PageHeader** | opacity 0.92 | テキスト |
 | **BookList** | opacity 0.3 | 空状態アイコン |
+
+**Stats の motion の詳細**: 統計ページ（`Stats.jsx`）上部の 5 つの数値カード（総冊数・積読冊数・読書中冊数・再読中冊数・読了冊数）に、ホバー時の浮き上がりアニメーションが同一コードで 5 回重複している。`transition: 'transform 0.2s ease-in-out'` と `'&:hover': { transform: 'translateY(-2px)' }`。グラフ・著者・出版社トップ等のカードには未適用。
 
 ---
 
@@ -266,7 +268,112 @@ theme.custom の拡張案:
 
 ---
 
-## 6. 関連ドキュメント
+## 6. 修正方針・計画の議論
+
+調査結果とレビューに基づき、修正の方針や計画について検討すべき論点を整理する。
+
+### 6.1 対象範囲の境界
+
+**論点**: すべての埋め込み値をテーマ化するのか、一部を「レイアウト定数」として残すのか。
+
+| 区分 | 候補 | 理由 |
+|------|------|------|
+| **テーマ化する** | 書籍・メモカードの fontSize、サイズ、余白、motion | プリセット差別化の効果が大きい。ユーザーが「雰囲気」を選ぶ対象 |
+| **テーマ化する** | Stats の motion、説明カード系のトーン | 一貫性と重複解消 |
+| **テーマ化を保留** | textAlign | 多くは center。プリセットで変える必要性が低い。レイアウトのセマンティクス |
+| **テーマ化を保留** | スキャナ系（CameraOCR, BookScanner, BarcodeScanner）の border | アプリの核機能外。色（#ccc, #000）は divider や grey への置換で十分な場合も |
+| **共有定数で十分** | コンテナ maxWidth（600, 800, 1200） | レイアウト用途。プリセット差は不要と判断するなら theme 外の定数でよい |
+
+**案**: まず「書籍・メモ・PageHeader・Stats」に集中し、スキャナ・PWA・Camera 系は後回し。textAlign はトークン化の優先度を下げる。
+
+---
+
+### 6.2 優先順位の考え方
+
+**重複解消 vs テーマ差別化**
+
+- **重複解消**: 同じ値が複数箇所にある → 1箇所に集約すれば修正コスト削減。テーマ化しなくてもメリットあり
+- **テーマ差別化**: プリセットごとに値を変えたい → theme に載せる必要あり
+
+| 種別 | 重複 | テーマ差別化の価値 | 推奨 |
+|------|------|-------------------|------|
+| Stats の motion | 6箇所 | 中（落ち着いた vs 控えめ） | まず重複解消。motion トークンで集約し、プリセット値は後付け可 |
+| fontSize | 40箇所以上 | 中〜高 | 重複解消と typography 拡張を並行。差別化は Phase B 以降 |
+| 書籍カバーサイズ | 数箇所 | 中 | sizes トークン化。library-classic はやや大、minimal はコンパクト等 |
+| border | 散在 | 低〜中 | カード系は cardStyles 済み。スキャナ系は divider 等への置換で十分か |
+| textAlign | 多数 | 低 | 現状維持 or 共有定数。テーマ化は見送り候補 |
+
+---
+
+### 6.3 Phase の順序と依存
+
+**現行案**: Phase A（motion, fontSize）→ Phase B（sizes, spacing, chip）→ Phase C（完全トークン化）
+
+**依存関係**:
+- Phase B の sizes は、BookCard / BookInfo / ExternalBookSearch をまとめて触る必要がある
+- fontSize は typography 拡張とコンポーネント修正がセット。BookCard から着手するのが影響範囲を抑えやすい
+
+**リスク**:
+- ExternalBookSearch は fontSize 箇所が 20+ と多い。一度に触るとテスト・レビュー負荷が大きい
+- **軽減**: BookCard → SearchResults → BookForm → ExternalBookSearch の順で段階的に置換
+
+---
+
+### 6.4 border・textAlign の扱い
+
+**border**:
+- cardStyles / BookInfo はテーマ参照済み
+- PageHeader の `3px solid` は pageHeader プリセットに含められる（現状は色のみ、線スタイル未定義）
+- スキャナ系の `#ccc`, `#000`, `gray` は `palette.divider` や `grey.500` への置換で一貫性向上。トークン化は必須ではない
+
+**textAlign**:
+- 多くは「中央揃えブロック」「左揃えブロック」という文脈依存
+- プリセットで「minimal は左揃え多め」等に変える設計にはなるが、UX 上の効果は限定的
+- **案**: layout.contentBlockAlign は「将来用」としてトークン設計に含めるが、実装優先度は低くする
+
+---
+
+### 6.5 プリセット差別化の粒度
+
+**問い**: library-classic と minimal-light で、どこまで見た目を変えるか。
+
+| 粒度 | 例 | 工数 | 効果 |
+|------|-----|------|------|
+| 色・装飾のみ（現状） | 背景、アクセント、角・中央線の有無 | 済 | テーマの区別は可能 |
+| サイズ・余白 | カード内 p、表紙サイズ、fontSize | 中 | 「ゆったり」vs「コンパクト」の印象 |
+| motion | トランジション時間、hover の浮き上がり量 | 小 | 細かいが雰囲気に効く |
+| border・textAlign | 線の太さ、揃え | 小 | 差は分かりにくい |
+
+**案**: Phase A では「重複解消」を主目的にし、プリセット差は Phase B で sizes / spacing を差し分けたときにまとめて効かせる。
+
+---
+
+### 6.6 判断が必要な点（要決定）
+
+1. **textAlign のトークン化**  
+   実装するか、見送るか。見送る場合、layout トークンからは外す。
+
+2. **スキャナ・PWA 系のスコープ**  
+   今回の対象に含めるか、別タスクとするか。
+
+3. **ExternalBookSearch の着手タイミング**  
+   使用頻度は高くなく、デザインも雑に作った状態。fontSize の種類が多いのは意図的ではなく、まず fontSize の数を減らしてユーザー確認してから対応する方法を採用。→ **必要タスク**: ExternalBookSearch の fontSize 統合（下記 6.7 参照）
+
+4. **テスト方針**  
+   トークン変更時にスナップショットで見た目を検証するか、現状どおりロジック・構造のテストに留めるか。
+
+---
+
+### 6.7 必要タスク（決定済み）
+
+| タスク | 内容 | 状態 |
+|--------|------|------|
+| **Stats の motion** | 5 つの数値カードのホバーアニメーション（transition, translateY）を theme.custom.motion 等に集約 | ✅ 完了（themePresets, createThemeFromPreset, Stats.jsx） |
+| **ExternalBookSearch fontSize 統合** | fontSize の種類を減らす（例: body2, caption 等の variant に寄せて 2〜3 種に）。ユーザー確認後、必要ならトークン化 | ✅ 完了（variant に寄せて fontSize 上書きを削除）。ユーザー確認待ち |
+
+---
+
+## 7. 関連ドキュメント
 
 - `doc/design-embedding-review.md` - 初回レビュー（Phase 0 以前の状態も含む）
 - `doc/design-implementation-plan.md` - Phase 0〜4 の実装計画

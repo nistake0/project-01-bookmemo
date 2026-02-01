@@ -51,6 +51,15 @@ describe('themePresets', () => {
       expect(classic.chartColors.memo).toBe('#9c27b0');
     });
 
+    it('motion.infoCardHover を含む', () => {
+      const presets = getThemePresets(mockBuildPath);
+      const classic = presets['library-classic'];
+      expect(classic.motion).toBeDefined();
+      expect(classic.motion.infoCardHover).toBeDefined();
+      expect(classic.motion.infoCardHover.transition).toBe('transform 0.2s ease-in-out');
+      expect(classic.motion.infoCardHover.hoverTransform).toBe('translateY(-2px)');
+    });
+
     it('buildPath を使って背景画像の URL を構築する', () => {
       const presets = getThemePresets(mockBuildPath);
       const classic = presets['library-classic'];
