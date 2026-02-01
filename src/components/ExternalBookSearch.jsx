@@ -39,6 +39,7 @@ import { getBookCardSx } from '../theme/cardStyles';
  */
 const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
   const theme = useTheme();
+  const coverSize = theme.custom?.sizes?.bookCoverCard ?? { width: 60, height: 80 };
   const bookCardSx = getBookCardSx(theme, {
     overrides: { mb: 2, cursor: 'pointer' },
   });
@@ -347,8 +348,8 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
                       image={book.coverImageUrl}
                       alt={book.title}
                       sx={{
-                        width: 60,
-                        height: 80,
+                        width: coverSize.width,
+                        height: coverSize.height,
                         objectFit: 'cover',
                         borderRadius: 1
                       }}
@@ -356,8 +357,8 @@ const ExternalBookSearch = ({ onBookSelect, onCancel }) => {
                   ) : (
                     <Box
                       sx={{
-                        width: 60,
-                        height: 80,
+                        width: coverSize.width,
+                        height: coverSize.height,
                         bgcolor: 'grey.200',
                         display: 'flex',
                         alignItems: 'center',

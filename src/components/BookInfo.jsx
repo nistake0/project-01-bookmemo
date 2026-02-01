@@ -23,9 +23,12 @@ import { getAcquisitionTypeLabel, ACQUISITION_TYPE } from '../constants/bookStat
 import { useTextCopyMenu } from '../hooks/useTextCopyMenu';
 import { getBookAccent } from '../theme/cardStyles';
 
+const defaultCoverDetail = { maxHeight: 250, width: 167 };
+
 const BookInfo = ({ book, bookId, onStatusChange, onEdit }) => {
   const theme = useTheme();
   const { palette: bookAccent } = getBookAccent(theme);
+  const coverDetail = theme.custom?.sizes?.bookCoverDetail ?? defaultCoverDetail;
   const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'success' });
   
   const showSnackbar = (message, severity = 'success') => {
@@ -51,12 +54,12 @@ const BookInfo = ({ book, bookId, onStatusChange, onEdit }) => {
 
       <Box sx={{ textAlign: 'left', mb: 2 }} data-testid="book-cover-section">
         {book.coverImageUrl ? (
-          <img src={book.coverImageUrl} alt={`${book.title}の表紙`} style={{ maxHeight: '250px', width: 'auto' }} data-testid="book-cover-image" />
+          <img src={book.coverImageUrl} alt={`${book.title}の表紙`} style={{ maxHeight: coverDetail.maxHeight, width: 'auto' }} data-testid="book-cover-image" />
         ) : (
           <Box sx={{
             border: `1px dashed ${bookAccent?.border || bookAccent?.light || 'grey'}`,
-            height: 250,
-            width: 167,
+            height: coverDetail.maxHeight,
+            width: coverDetail.width,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

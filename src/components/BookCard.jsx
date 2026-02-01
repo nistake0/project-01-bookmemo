@@ -26,8 +26,18 @@ import { getBookCardSx, getBookAccent, getBookDecorations } from '../theme/cardS
  * @param {Function} props.onClick - クリック時のコールバック
  * @param {string} props.testId - テスト用ID
  */
+const defaultTypo = {
+  cardTitle: { fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' } },
+  cardSubtext: { fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.9rem' } },
+  cardCaption: { fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' } },
+  chipLabel: { fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' }, height: { xs: 18, sm: 20, md: 22 } },
+};
+
 function BookCard({ book, onClick, testId }) {
   const theme = useTheme();
+  const typo = theme.custom?.typographyOverrides ?? defaultTypo;
+  const coverSize = theme.custom?.sizes?.bookCoverCard ?? { width: { xs: 50, sm: 60 }, height: { xs: 70, sm: 80 } };
+  const cardPadding = theme.custom?.spacing?.cardPadding ?? { xs: 1.5, sm: 2 };
   const cardSx = getBookCardSx(theme, {
     overrides: {
       cursor: 'pointer',
@@ -56,10 +66,10 @@ function BookCard({ book, onClick, testId }) {
         flex: 1, 
         display: 'flex', 
         flexDirection: 'column',
-        p: { xs: 1.5, sm: 2 },
+        p: cardPadding,
         position: 'relative',
         zIndex: 1,
-        '&:last-child': { pb: { xs: 1.5, sm: 2 } }
+        '&:last-child': { pb: cardPadding }
       }}>
         <Box sx={{ 
           display: 'flex', 
@@ -71,8 +81,8 @@ function BookCard({ book, onClick, testId }) {
             <CardMedia
               component="img"
               sx={{ 
-                width: { xs: 50, sm: 60 }, 
-                height: { xs: 70, sm: 80 }, 
+                width: coverSize.width, 
+                height: coverSize.height, 
                 objectFit: 'cover',
                 flexShrink: 0,
                 borderRadius: 1
@@ -93,7 +103,7 @@ function BookCard({ book, onClick, testId }) {
               component="h3" 
               gutterBottom
               sx={{ 
-                fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
+                ...typo.cardTitle,
                 lineHeight: 1.2,
                 fontWeight: 600,
                 mb: 0.5,
@@ -110,7 +120,7 @@ function BookCard({ book, onClick, testId }) {
               variant="body2" 
               color="text.secondary" 
               sx={{ 
-                fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.9rem' },
+                ...typo.cardSubtext,
                 mb: 0.5,
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -127,8 +137,8 @@ function BookCard({ book, onClick, testId }) {
                 color={getBookStatusColor(book.status || DEFAULT_BOOK_STATUS)}
                 size="small"
                 sx={{ 
-                  fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' },
-                  height: { xs: '18px', sm: '20px', md: '22px' },
+                  fontSize: typo.chipLabel.fontSize,
+                  height: typo.chipLabel.height,
                   '& .MuiChip-label': {
                     px: { xs: 0.5, sm: 0.75 }
                   }
@@ -141,7 +151,7 @@ function BookCard({ book, onClick, testId }) {
                 variant="body2" 
                 color="text.secondary" 
                 sx={{ 
-                  fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
+                  ...typo.cardCaption,
                   mb: 1,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -168,8 +178,8 @@ function BookCard({ book, onClick, testId }) {
                     size="small"
                     variant="outlined"
                     sx={{ 
-                      fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' },
-                      height: { xs: '18px', sm: '20px', md: '22px' },
+                      fontSize: typo.chipLabel.fontSize,
+                      height: typo.chipLabel.height,
                       '& .MuiChip-label': {
                         px: { xs: 0.5, sm: 0.75 }
                       }
@@ -181,7 +191,7 @@ function BookCard({ book, onClick, testId }) {
                   variant="caption" 
                   color="text.secondary"
                   sx={{ 
-                    fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' },
+                    ...typo.chipLabel,
                     alignSelf: 'center'
                   }}
                 >
@@ -196,7 +206,7 @@ function BookCard({ book, onClick, testId }) {
               color="text.secondary" 
               sx={{ 
                 mt: 'auto',
-                fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' },
+                ...typo.chipLabel,
                 fontWeight: 500
               }}
             >

@@ -63,8 +63,11 @@ import { getBookCardSx, getMemoCardSx, getBookAccent, getMemoAccent, getBookDeco
  *   }}
  * />
  */
+const defaultChipSmall = { fontSize: '0.75rem' };
+
 function SearchResults({ results = [], loading = false, searchQuery = '', onResultClick }) {
   const theme = useTheme();
+  const chipSmall = theme.custom?.typographyOverrides?.chipSmall ?? defaultChipSmall;
   const { user } = useAuth();
   const bookCardSx = getBookCardSx(theme, {
     overrides: { cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' },
@@ -190,7 +193,7 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
                   label={tag} 
                   size="small" 
                   variant="outlined"
-                  sx={{ fontSize: '0.75rem' }}
+                  sx={chipSmall}
                 />
               ))}
             </Box>
@@ -248,7 +251,7 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
             label={getBookStatusLabel(book.status)}
             size="small"
             color={getBookStatusColor(book.status)}
-            sx={{ fontSize: '0.75rem' }}
+            sx={chipSmall}
           />
         </Box>
 
@@ -262,7 +265,7 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
                   label={tag} 
                   size="small" 
                   variant="outlined"
-                  sx={{ fontSize: '0.75rem' }}
+                  sx={chipSmall}
                 />
               ))}
             </Box>

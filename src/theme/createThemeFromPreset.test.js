@@ -83,6 +83,20 @@ describe('createThemeFromPreset', () => {
       });
     });
 
+    it('typographyOverrides, sizes, spacing を含む', () => {
+      const theme = createThemeFromPreset('library-classic', mockBuildPath);
+      expect(theme.custom).toHaveProperty('typographyOverrides');
+      expect(theme.custom.typographyOverrides).toHaveProperty('cardTitle');
+      expect(theme.custom.typographyOverrides.cardTitle.fontSize).toBeDefined();
+      expect(theme.custom).toHaveProperty('sizes');
+      expect(theme.custom.sizes.bookCoverCard).toMatchObject({
+        width: { xs: 50, sm: 60 },
+        height: { xs: 70, sm: 80 },
+      });
+      expect(theme.custom).toHaveProperty('spacing');
+      expect(theme.custom.spacing.cardPadding).toEqual({ xs: 1.5, sm: 2 });
+    });
+
     it('bookAccent, memoAccent, bookDecorations, memoDecorations を含む', () => {
       const theme = createThemeFromPreset('library-classic', mockBuildPath);
       expect(theme.custom).toHaveProperty('bookAccent', 'brown');

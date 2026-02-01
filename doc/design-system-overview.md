@@ -59,6 +59,10 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 | cardShadow | カードの影 |
 | cardShadowHover | ホバー時の影 |
 | chartColors | { bar, memo } グラフ用色 |
+| motion | { infoCardHover: { transition, hoverTransform } } Stats 等 |
+| typographyOverrides | cardTitle, cardSubtext, cardCaption, chipLabel, formText, chipSmall, formChip |
+| sizes | bookCoverCard, bookCoverDetail |
+| spacing | cardPadding |
 | pageHeader | { backgroundImage, goldOverlay, centerLine, borderRadius, accentKey } |
 | backgroundVars | CSS 変数（--bm-library-image, --bm-library-bg） |
 

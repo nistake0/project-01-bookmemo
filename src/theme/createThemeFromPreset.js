@@ -318,6 +318,25 @@ export function createThemeFromPreset(presetId, buildPath) {
   const motion = {
     infoCardHover: preset.motion?.infoCardHover ?? defaultInfoCardHover,
   };
+  const defaultTypographyOverrides = {
+    cardTitle: { fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' } },
+    cardSubtext: { fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.9rem' } },
+    cardCaption: { fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' } },
+    chipLabel: { fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' }, height: { xs: 18, sm: 20, md: 22 } },
+    formText: { fontSize: { xs: '0.8rem', sm: '0.9rem' } },
+    chipSmall: { fontSize: '0.75rem' },
+    formChip: { fontSize: { xs: '0.75rem', sm: '0.8rem' }, height: { xs: 24, sm: 28 } },
+  };
+  const defaultSizes = {
+    bookCoverCard: { width: { xs: 50, sm: 60 }, height: { xs: 70, sm: 80 } },
+    bookCoverDetail: { maxHeight: 250, width: 167 },
+  };
+  const defaultSpacing = {
+    cardPadding: { xs: 1.5, sm: 2 },
+  };
+  const typographyOverrides = preset.typographyOverrides ?? defaultTypographyOverrides;
+  const sizes = preset.sizes ?? defaultSizes;
+  const spacing = preset.spacing ?? defaultSpacing;
 
   theme.custom = {
     ...theme.custom,
@@ -333,6 +352,9 @@ export function createThemeFromPreset(presetId, buildPath) {
     cardShadowHover,
     chartColors,
     motion,
+    typographyOverrides,
+    sizes,
+    spacing,
     backgroundVars: {
       '--bm-library-image': hasBgImage ? bgImage : 'none',
       '--bm-library-bg': hasBgPattern ? bgPattern : 'none',

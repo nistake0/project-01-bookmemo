@@ -51,6 +51,20 @@ describe('themePresets', () => {
       expect(classic.chartColors.memo).toBe('#9c27b0');
     });
 
+    it('typographyOverrides, sizes, spacing を含む', () => {
+      const presets = getThemePresets(mockBuildPath);
+      const classic = presets['library-classic'];
+      expect(classic.typographyOverrides).toBeDefined();
+      expect(classic.typographyOverrides.cardTitle).toBeDefined();
+      expect(classic.sizes).toBeDefined();
+      expect(classic.sizes.bookCoverCard).toMatchObject({
+        width: { xs: 50, sm: 60 },
+        height: { xs: 70, sm: 80 },
+      });
+      expect(classic.spacing).toBeDefined();
+      expect(classic.spacing.cardPadding).toEqual({ xs: 1.5, sm: 2 });
+    });
+
     it('motion.infoCardHover を含む', () => {
       const presets = getThemePresets(mockBuildPath);
       const classic = presets['library-classic'];

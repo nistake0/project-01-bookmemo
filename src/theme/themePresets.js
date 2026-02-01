@@ -45,6 +45,22 @@ export function getThemePresets(buildPath) {
       motion: {
         infoCardHover: { transition: 'transform 0.2s ease-in-out', hoverTransform: 'translateY(-2px)' },
       },
+      typographyOverrides: {
+        cardTitle: { fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' } },
+        cardSubtext: { fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.9rem' } },
+        cardCaption: { fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' } },
+        chipLabel: { fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' }, height: { xs: 18, sm: 20, md: 22 } },
+        formText: { fontSize: { xs: '0.8rem', sm: '0.9rem' } },
+        chipSmall: { fontSize: '0.75rem' },
+        formChip: { fontSize: { xs: '0.75rem', sm: '0.8rem' }, height: { xs: 24, sm: 28 } },
+      },
+      sizes: {
+        bookCoverCard: { width: { xs: 50, sm: 60 }, height: { xs: 70, sm: 80 } },
+        bookCoverDetail: { maxHeight: 250, width: 167 },
+      },
+      spacing: {
+        cardPadding: { xs: 1.5, sm: 2 },
+      },
     },
     'minimal-light': {
       id: 'minimal-light',
@@ -79,6 +95,22 @@ export function getThemePresets(buildPath) {
       chartColors: { bar: '#42a5f5', memo: '#9c27b0' },
       motion: {
         infoCardHover: { transition: 'transform 0.2s ease-in-out', hoverTransform: 'translateY(-2px)' },
+      },
+      typographyOverrides: {
+        cardTitle: { fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' } },
+        cardSubtext: { fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.9rem' } },
+        cardCaption: { fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' } },
+        chipLabel: { fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' }, height: { xs: 18, sm: 20, md: 22 } },
+        formText: { fontSize: { xs: '0.8rem', sm: '0.9rem' } },
+        chipSmall: { fontSize: '0.75rem' },
+        formChip: { fontSize: { xs: '0.75rem', sm: '0.8rem' }, height: { xs: 24, sm: 28 } },
+      },
+      sizes: {
+        bookCoverCard: { width: { xs: 50, sm: 60 }, height: { xs: 70, sm: 80 } },
+        bookCoverDetail: { maxHeight: 250, width: 167 },
+      },
+      spacing: {
+        cardPadding: { xs: 1.5, sm: 2 },
       },
     },
   };

@@ -12,7 +12,7 @@ Phase 0〜4 完了後も、fontSize・サイズ・スペーシング・トラン
 
 - **調査結果**: fontSize 約40箇所、サイズ（width/height）多数、Stats の motion 5箇所重複 等
 - **方針**: theme.custom に sizes, typographyOverrides, motion 等を拡張。プリセットで差別化。
-- **段階**: Phase A（重複解消）→ Phase B（トークン導入）→ Phase C（完全トークン化）
+- **段階**: Phase A（重複解消）✅ Phase B（トークン導入）✅ → Phase C（完全トークン化）
 - **必要タスク**（`doc/design-embedded-values-review-and-discussion.md` 6.7 参照）:
   - [x] Stats の motion: 5 数値カードのホバーアニメーションを theme.custom.motion に集約 ✅
   - [x] ExternalBookSearch fontSize 統合: 種類を減らす（variant に寄せて 2〜3 種）→ ユーザー確認待ち ✅

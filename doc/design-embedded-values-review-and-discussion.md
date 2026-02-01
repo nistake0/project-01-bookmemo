@@ -203,13 +203,13 @@ theme.custom の拡張案:
 ### 4.2 段階的アプローチ
 
 **Phase A（短期）**: 重複の大きいものから  
-1. Stats の transition/hover（6 箇所）→ `theme.custom.motion.infoCardHover` 等  
-2. fontSize の頻出パターン（0.75rem, 0.8rem, 0.9rem）→ typography 拡張またはトークン  
+1. Stats の transition/hover → `theme.custom.motion.infoCardHover` ✅  
+2. fontSize の頻出パターン → typographyOverrides トークン ✅  
 
 **Phase B（中期）**: セマンティックトークン  
-3. 書籍カバーサイズ → `theme.custom.sizes.bookCoverCard`  
-4. カード内余白 → `theme.custom.spacing.card`  
-5. Chip の高さ・フォント → `theme.custom.sizes.chip`  
+3. 書籍カバーサイズ → `theme.custom.sizes.bookCoverCard` ✅  
+4. カード内余白 → `theme.custom.spacing.card` ✅  
+5. Chip の高さ・フォント → typographyOverrides.chipLabel, formChip ✅  
 
 **Phase C（長期）**: 完全トークン化  
 6. 全 fontSize 上書きを variant またはトークン参照に置換  

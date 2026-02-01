@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Box, Button, TextField, Autocomplete, Chip, Alert, CircularProgress, FormControl, InputLabel, Select, MenuItem, Paper } from "@mui/material";
+import { Typography, Box, Button, TextField, Autocomplete, Chip, Alert, CircularProgress, FormControl, InputLabel, Select, MenuItem, Paper, useTheme } from "@mui/material";
 import { useTagHistory } from '../hooks/useTagHistory';
 import { useBookActions } from '../hooks/useBookActions';
 import { useBookSearch } from '../hooks/useBookSearch';
@@ -8,7 +8,14 @@ import { useAuth } from '../auth/AuthProvider';
 import { BOOK_STATUS, ALL_BOOK_STATUSES, getBookStatusLabel, ACQUISITION_TYPE, ALL_ACQUISITION_TYPES, getAcquisitionTypeLabel } from '../constants/bookStatus';
 import ExternalBookSearch from './ExternalBookSearch';
 
+const defaultFormTypo = {
+  formText: { fontSize: { xs: '0.8rem', sm: '0.9rem' } },
+  formChip: { fontSize: { xs: '0.75rem', sm: '0.8rem' }, height: { xs: 24, sm: 28 } },
+};
+
 export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
+  const theme = useTheme();
+  const typo = theme.custom?.typographyOverrides ?? defaultFormTypo;
   const [isbn, setIsbn] = useState(isbnProp);
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -144,7 +151,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             sx={{ 
               mt: { xs: 1, sm: 0 },
               height: { xs: '40px', sm: '56px' },
-              fontSize: { xs: '0.8rem', sm: '0.9rem' }
+              ...typo.formText,
             }}
             fullWidth
             data-testid="book-fetch-button"
@@ -162,7 +169,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
           startIcon={<span>🔍</span>}
           data-testid="external-search-button"
           sx={{ 
-            fontSize: { xs: '0.8rem', sm: '0.9rem' },
+            ...typo.formText,
             px: 3,
             py: 1
           }}
@@ -290,8 +297,8 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
           )}
           sx={{
             '& .MuiChip-root': {
-              fontSize: { xs: '0.75rem', sm: '0.8rem' },
-              height: { xs: '24px', sm: '28px' }
+              fontSize: typo.formChip.fontSize,
+              height: typo.formChip.height,
             }
           }}
         />
@@ -343,7 +350,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
           severity="info" 
           sx={{ 
             mt: { xs: 1.5, sm: 2 },
-            fontSize: { xs: '0.8rem', sm: '0.9rem' }
+            ...typo.formText,
           }}
           data-testid="duplicate-book-alert"
         >
@@ -357,7 +364,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
           color="error" 
           sx={{ 
             mt: { xs: 1.5, sm: 2 },
-            fontSize: { xs: '0.8rem', sm: '0.9rem' }
+            ...typo.formText,
           }} 
           data-testid="book-form-error"
         >
