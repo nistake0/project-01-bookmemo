@@ -201,6 +201,60 @@ describe('MemoCard', () => {
   });
 
   /**
+   * テストケース: テキスト選択中のクリックでは onClick が呼ばれない
+   *
+   * 目的: ユーザーがテキストを選択してコピーする際、カードクリックで
+   * ダイアログが開かないようにする
+   */
+  it('does not call onClick when text is selected', () => {
+    const { useMediaQuery } = require('@mui/material');
+    useMediaQuery.mockReturnValue(false); // デスクトップ表示
+
+    const mockOnClick = jest.fn();
+    const originalGetSelection = window.getSelection;
+    window.getSelection = jest.fn(() => ({ toString: () => '選択したテキスト' }));
+
+    renderWithProviders(
+      <MemoCard
+        memo={mockMemo}
+        onEdit={mockOnEdit}
+        onDelete={mockOnDelete}
+        onClick={mockOnClick}
+      />
+    );
+    const card = screen.getByTestId('memo-card');
+    fireEvent.click(card);
+
+    expect(mockOnClick).not.toHaveBeenCalled();
+    window.getSelection = originalGetSelection;
+  });
+
+  /**
+   * テストケース: 改行を含むテキストは最初の2行が表示される
+   *
+   * 目的: maxLines=2 の仕様どおり、改行で分割した最初の2行が表示されることを確認
+   */
+  it('displays first 2 lines when text contains newlines', () => {
+    const multilineMemo = {
+      id: 'memo-multiline',
+      text: '一行目\n二行目\n三行目',
+      createdAt: { toDate: () => new Date('2024-01-01') },
+    };
+
+    renderWithProviders(
+      <MemoCard
+        memo={multilineMemo}
+        onEdit={mockOnEdit}
+        onDelete={mockOnDelete}
+      />
+    );
+
+    expect(screen.getByText(/一行目/)).toBeInTheDocument();
+    expect(screen.getByText(/二行目/)).toBeInTheDocument();
+    expect(screen.queryByText(/三行目/)).not.toBeInTheDocument();
+  });
+
+  /**
    * テストケース: 作成日がnullの場合の処理
    * 
    * 目的: createdAtがnullの場合でもエラーが発生せず、適切に処理されることを確認
@@ -594,6 +648,58 @@ describe('MemoCard', () => {
 
     // タグが表示されることを確認
     expect(screen.getByText('タグA')).toBeInTheDocument();
+  });
+
+  describe('showActions=false（検索コンテキスト）', () => {
+    it('編集・削除ボタンが表示されない', () => {
+      const { useMediaQuery } = require('@mui/material');
+      useMediaQuery.mockReturnValue(false);
+
+      renderWithProviders(
+        <MemoCard
+          memo={mockMemo}
+          onEdit={mockOnEdit}
+          onDelete={mockOnDelete}
+          showActions={false}
+        />
+      );
+
+      expect(screen.queryByTestId('memo-edit-button')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('memo-delete-button')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('bookTitle（検索コンテキスト）', () => {
+    it('bookTitle があるときヘッダーに書籍名とページが表示される', () => {
+      const { useMediaQuery } = require('@mui/material');
+      useMediaQuery.mockReturnValue(false);
+
+      renderWithProviders(
+        <MemoCard
+          memo={{ ...mockMemo, page: 99 }}
+          onEdit={mockOnEdit}
+          onDelete={mockOnDelete}
+          bookTitle="サンプル書籍"
+        />
+      );
+
+      expect(screen.getByText(/サンプル書籍 - ページ99/)).toBeInTheDocument();
+    });
+
+    it('bookTitle がないときヘッダーは表示されない', () => {
+      const { useMediaQuery } = require('@mui/material');
+      useMediaQuery.mockReturnValue(false);
+
+      renderWithProviders(
+        <MemoCard
+          memo={mockMemo}
+          onEdit={mockOnEdit}
+          onDelete={mockOnDelete}
+        />
+      );
+
+      expect(screen.queryByText(/ - ページ/)).not.toBeInTheDocument();
+    });
   });
 
   test('最小限の情報でもレイアウトが崩れない', () => {

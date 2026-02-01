@@ -29,7 +29,14 @@ export function getThemePresets(buildPath) {
       memoAccent: 'memo',
       cardAccent: 'brown',
       bookDecorations: { corners: true, innerBorder: true, centerLine: true },
-      memoDecorations: { corners: true, innerBorder: true, centerLine: false },
+      memoDecorations: {
+        corners: false,
+        innerBorder: false,
+        centerLine: false,
+        borderRadius: 0,
+        foldedCorner: true,
+        foldedCornerPosition: 'top-right',
+      },
       cardDecorations: { corners: true, innerBorder: true, centerLine: true },
       glassEffect: { opacity: 0.75, blur: '20px', saturate: '180%' },
       pageHeader: {

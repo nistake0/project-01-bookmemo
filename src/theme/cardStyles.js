@@ -92,12 +92,57 @@ export function getBookCardSx(theme, options = {}) {
  * @param {Object} [options.overrides={}] - マージする追加 sx
  * @returns {Object} sx オブジェクト
  */
+const FOLDED_CORNER_SIZE = 20;
+const FOLDED_CORNER_COLOR = 'rgba(0, 0, 0, 0.08)';
+
+function getFoldedCornerPseudo(position, accent) {
+  const foldColor = accent?.lighter || FOLDED_CORNER_COLOR;
+  const w = FOLDED_CORNER_SIZE;
+  const positions = {
+    'top-right': {
+      top: 0,
+      right: 0,
+      borderWidth: `0 ${w}px ${w}px 0`,
+      borderColor: `transparent ${foldColor} transparent transparent`,
+    },
+    'top-left': {
+      top: 0,
+      left: 0,
+      borderWidth: `${w}px ${w}px 0 0`,
+      borderColor: `${foldColor} transparent transparent transparent`,
+    },
+    'bottom-right': {
+      bottom: 0,
+      right: 0,
+      borderWidth: `0 0 ${w}px ${w}px`,
+      borderColor: `transparent transparent ${foldColor} transparent`,
+    },
+    'bottom-left': {
+      bottom: 0,
+      left: 0,
+      borderWidth: `${w}px 0 0 ${w}px`,
+      borderColor: `transparent transparent transparent ${foldColor}`,
+    },
+  };
+  const pos = positions[position] || positions['top-right'];
+  return {
+    content: '""',
+    position: 'absolute',
+    ...pos,
+    width: 0,
+    height: 0,
+    borderStyle: 'solid',
+    pointerEvents: 'none',
+    zIndex: 1,
+  };
+}
+
 export function getMemoCardSx(theme, options = {}) {
   const {
     hover = true,
     hoverTransform = false,
     useMemoAccentShadow = false,
-    borderRadius = 3,
+    borderRadius: optionsBorderRadius,
     innerBorderInset = 8,
     overrides = {},
   } = options;
@@ -107,7 +152,9 @@ export function getMemoCardSx(theme, options = {}) {
   const decorations = theme.custom?.memoDecorations ?? theme.custom?.cardDecorations ?? {
     corners: true, innerBorder: true, centerLine: true,
   };
+  const borderRadius = optionsBorderRadius ?? decorations.borderRadius ?? 3;
   const glass = theme.custom?.glassEffect ?? { opacity: 0.75, blur: '20px', saturate: '180%' };
+  const memoBg = accent.bgTint ?? `rgba(255, 255, 255, ${glass.opacity})`;
 
   let cardShadow = theme.custom?.cardShadow ?? DEFAULT_CARD_SHADOW;
   let cardShadowHover = theme.custom?.cardShadowHover ?? DEFAULT_CARD_SHADOW_HOVER;
@@ -118,8 +165,24 @@ export function getMemoCardSx(theme, options = {}) {
     cardShadowHover = `0 10px 32px rgba(0, 0, 0, 0.12), 0 4px 12px ${shadowHoverFallback}, inset 0 1px 0 rgba(255, 255, 255, 0.65)`;
   }
 
+  const pseudoAfter = decorations.foldedCorner
+    ? getFoldedCornerPseudo(decorations.foldedCornerPosition || 'top-right', accent)
+    : decorations.centerLine
+      ? {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: '50%',
+          width: 1,
+          height: '100%',
+          background: `linear-gradient(to bottom, transparent, ${accent.lighter}, transparent)`,
+          pointerEvents: 'none',
+          zIndex: 0,
+        }
+      : null;
+
   const base = {
-    backgroundColor: `rgba(255, 255, 255, ${glass.opacity})`,
+    backgroundColor: memoBg,
     backdropFilter: `blur(${glass.blur}) saturate(${glass.saturate})`,
     border: `2px solid ${accent.light}`,
     borderRadius,
@@ -141,19 +204,7 @@ export function getMemoCardSx(theme, options = {}) {
         zIndex: 0,
       },
     }),
-    ...(decorations.centerLine && {
-      '&::after': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: '50%',
-        width: 1,
-        height: '100%',
-        background: `linear-gradient(to bottom, transparent, ${accent.lighter}, transparent)`,
-        pointerEvents: 'none',
-        zIndex: 0,
-      },
-    }),
+    ...(pseudoAfter && { '&::after': pseudoAfter }),
   };
 
   if (hover) {

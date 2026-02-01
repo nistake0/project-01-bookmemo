@@ -10,9 +10,11 @@ import {
   Stack, 
   Chip,
   Box,
+  Paper,
   Rating,
   FormControl,
-  FormLabel
+  FormLabel,
+  useTheme
 } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ErrorDialogContext } from './CommonErrorDialog';
@@ -24,6 +26,7 @@ import {
 } from '../constants/memoRating';
 import MemoMoveDialog from './MemoMoveDialog';
 import LinkifiedText from './LinkifiedText';
+import { getMemoCardSx } from '../theme/cardStyles';
 
 // CI環境でも安定する固定フォーマットで日時を表示（yyyy/M/d H:mm:ss）
 const formatDateTime = (createdAt) => {
@@ -142,13 +145,26 @@ const MemoEditor = ({
 
   if (!memo) return null;
 
+  const theme = useTheme();
+  const memoDetailCardSx = getMemoCardSx(theme, { hover: false });
+
   return (
     <>
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth data-testid="memo-detail-dialog">
         <DialogTitle data-testid="memo-detail-title" data-testid-title="メモ詳細">メモ詳細</DialogTitle>
         <DialogContent>
           {dialogMode === 'view' ? (
-            <>
+            <Paper
+              component={Box}
+              sx={{
+                ...memoDetailCardSx,
+                p: 2,
+                mt: 1,
+                position: 'relative',
+                zIndex: 1,
+              }}
+              elevation={0}
+            >
               <LinkifiedText text={editingMemo?.text} variant="body1" sx={{ mb: 2 }} data-testid="memo-detail-text" />
               {editingMemo?.comment && (
                 <LinkifiedText
@@ -188,7 +204,7 @@ const MemoEditor = ({
                   {formatDateTime(editingMemo.createdAt)}
                 </Typography>
               )}
-            </>
+            </Paper>
           ) : (
             <Box component="form" onSubmit={handleUpdate} sx={{ mt: 1 }}>
               <TextField

@@ -5,12 +5,12 @@ import { useAuth } from '../../auth/AuthProvider';
 import BookCard from '../BookCard';
 import LoadingIndicator from '../common/LoadingIndicator';
 import DecorativeCorner from '../common/DecorativeCorner';
+import MemoCard from '../MemoCard';
 import { 
   getBookStatusLabel,
   getBookStatusColor
 } from '../../constants/bookStatus';
-import { getBookCardSx, getMemoCardSx, getBookAccent, getMemoAccent, getBookDecorations, getMemoDecorations } from '../../theme/cardStyles';
-import LinkifiedText from '../LinkifiedText';
+import { getBookCardSx, getBookAccent, getBookDecorations } from '../../theme/cardStyles';
 
 /**
  * SearchResults - 検索結果表示コンポーネント
@@ -73,16 +73,8 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
   const bookCardSx = getBookCardSx(theme, {
     overrides: { cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' },
   });
-  const memoCardSx = getMemoCardSx(theme, {
-    useMemoAccentShadow: true,
-    borderRadius: 2,
-    innerBorderInset: 6,
-    hoverTransform: '-3px',
-    overrides: { cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' },
-  });
   const { key: bookAccentKey } = getBookAccent(theme);
   const bookDecorations = getBookDecorations(theme);
-  const memoDecorations = getMemoDecorations(theme);
   const navigate = useNavigate();
   
   // デフォルトのクリックハンドラー (Phase 3-A)
@@ -132,94 +124,16 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
   const memos = results.filter(result => result.type === 'memo');
 
   const renderMemoResult = (memo) => (
-    <Card 
-      key={memo.id} 
-      sx={memoCardSx}
-      onClick={() => {
-        if (window.getSelection?.()?.toString()) return; // テキスト選択中はクリックを無効化
-        handleResultClick('memo', memo.bookId, memo.id);
-      }}
+    <MemoCard
+      key={memo.id}
+      memo={memo}
+      bookTitle={memo.bookTitle || 'メモ'}
+      showActions={false}
+      onClick={() => handleResultClick('memo', memo.bookId, memo.id)}
+      onEdit={() => {}}
+      onDelete={() => {}}
       data-testid={`memo-result-${memo.id}`}
-    >
-      <CardContent sx={{ 
-        flexGrow: 1, 
-        display: 'flex', 
-        flexDirection: 'column',
-        position: 'relative',
-        zIndex: 1,
-      }}>
-        {/* メモアイコンと書籍タイトル */}
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <span>📝</span>
-            <span>{memo.bookTitle || 'メモ'} - ページ{memo.page || '未設定'}</span>
-          </Typography>
-        </Box>
-
-        {/* メモ内容 */}
-        {memo.text && (
-          <Box sx={{ mb: 2, flexGrow: 1 }}>
-            <LinkifiedText
-              text={memo.text.length > 120 ? `${memo.text.substring(0, 120)}...` : memo.text}
-              variant="body2"
-              sx={{
-                backgroundColor: 'grey.50',
-                p: 1,
-                borderRadius: 1,
-                border: '1px solid',
-                borderColor: 'grey.200',
-                fontStyle: 'italic',
-              }}
-            />
-          </Box>
-        )}
-
-        {/* コメント */}
-        {memo.comment && (
-          <Box sx={{ mb: 2 }}>
-            <LinkifiedText
-              text={`💭 ${memo.comment.length > 100 ? `${memo.comment.substring(0, 100)}...` : memo.comment}`}
-              variant="body2"
-              sx={{
-                backgroundColor: 'primary.50',
-                p: 1,
-                borderRadius: 1,
-                border: '1px solid',
-                borderColor: 'primary.200',
-              }}
-            />
-          </Box>
-        )}
-
-        {/* タグ */}
-        {memo.tags && memo.tags.length > 0 && (
-          <Box sx={{ mb: 2 }}>
-            <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-              {memo.tags.map((tag, index) => (
-                <Chip 
-                  key={index} 
-                  label={tag} 
-                  size="small" 
-                  variant="outlined"
-                  sx={chipSmall}
-                />
-              ))}
-            </Box>
-          </Box>
-        )}
-
-        {/* 作成日時 */}
-        <Box sx={{ mt: 'auto' }}>
-          <Typography variant="caption" color="text.secondary">
-            作成日: {memo.createdAt 
-              ? (typeof memo.createdAt.toDate === 'function' 
-                  ? new Date(memo.createdAt.toDate()).toLocaleDateString('ja-JP')
-                  : new Date(memo.createdAt).toLocaleDateString('ja-JP'))
-              : '不明'}
-          </Typography>
-        </Box>
-      </CardContent>
-    </Card>
+    />
   );
 
   const renderBookResult = (book) => (

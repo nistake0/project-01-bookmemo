@@ -119,5 +119,32 @@ describe('cardStyles', () => {
       const dec = getMemoDecorations(themeWithCustom);
       expect(dec.centerLine).toBe(false);
     });
+
+    it('library-classic では foldedCorner が true、borderRadius が 0', () => {
+      const dec = getMemoDecorations(themeWithCustom);
+      expect(dec.foldedCorner).toBe(true);
+      expect(dec.borderRadius).toBe(0);
+    });
+
+    it('minimal-light では foldedCorner がない', () => {
+      const dec = getMemoDecorations(themeMinimal);
+      expect(dec.foldedCorner).toBeFalsy();
+    });
+  });
+
+  describe('getMemoCardSx foldedCorner', () => {
+    it('library-classic では borderRadius 0 と折り目用 ::after を含む', () => {
+      const sx = getMemoCardSx(themeWithCustom);
+      expect(sx.borderRadius).toBe(0);
+      expect(sx['&::after']).toBeDefined();
+      expect(sx['&::after'].borderStyle).toBe('solid');
+      expect(sx['&::after'].borderWidth).toContain('20px');
+    });
+
+    it('minimal-light では borderRadius 3（デフォルト）で折り目なし', () => {
+      const sx = getMemoCardSx(themeMinimal);
+      expect(sx.borderRadius).toBe(3);
+      expect(sx['&::after']).toBeUndefined();
+    });
   });
 });

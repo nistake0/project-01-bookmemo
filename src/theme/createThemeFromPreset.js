@@ -54,6 +54,7 @@ export function createThemeFromPreset(presetId, buildPath) {
           borderHover: 'rgba(123, 104, 238, 0.4)',
           shadow: 'rgba(123, 104, 238, 0.08)',
           shadowHover: 'rgba(123, 104, 238, 0.12)',
+          bgTint: 'rgba(250, 248, 255, 0.95)',
         },
         neutral: {
           light: 'rgba(100, 100, 100, 0.15)',

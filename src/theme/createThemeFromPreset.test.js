@@ -117,9 +117,12 @@ describe('createThemeFromPreset', () => {
         centerLine: true,
       });
       expect(theme.custom.memoDecorations).toMatchObject({
-        corners: true,
-        innerBorder: true,
+        corners: false,
+        innerBorder: false,
         centerLine: false,
+        borderRadius: 0,
+        foldedCorner: true,
+        foldedCornerPosition: 'top-right',
       });
     });
   });

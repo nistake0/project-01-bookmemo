@@ -178,8 +178,8 @@ describe('SearchResults', () => {
         />
       );
 
-      expect(screen.getByText('テスト本1 - ページ123')).toBeInTheDocument();
-      expect(screen.getByText('テスト本2 - ページ456')).toBeInTheDocument();
+      expect(screen.getByText(/テスト本1 - ページ123/)).toBeInTheDocument();
+      expect(screen.getByText(/テスト本2 - ページ456/)).toBeInTheDocument();
       expect(screen.getByText('テストメモ内容1')).toBeInTheDocument();
       expect(screen.getByText('テストメモ内容2')).toBeInTheDocument();
     });
@@ -196,7 +196,7 @@ describe('SearchResults', () => {
       expect(screen.getByText('検索結果 (2件)')).toBeInTheDocument();
       expect(screen.getByText('📚 書籍: 1件, 📝 メモ: 1件')).toBeInTheDocument();
       expect(screen.getByText('テスト本1')).toBeInTheDocument();
-      expect(screen.getByText('テスト本1 - ページ123')).toBeInTheDocument();
+      expect(screen.getByText(/テスト本1 - ページ123/)).toBeInTheDocument();
     });
   });
 
@@ -281,9 +281,9 @@ describe('SearchResults', () => {
         />
       );
 
-      // 書籍アイコンとメモアイコンの確認
+      // 書籍アイコンとメモアイコンの確認（📚は書籍カード、📝はメモカードまたは統計に含まれる）
       expect(screen.getByText('📚')).toBeInTheDocument();
-      expect(screen.getByText('📝')).toBeInTheDocument();
+      expect(screen.getAllByText(/📝/).length).toBeGreaterThanOrEqual(1);
     });
   });
 

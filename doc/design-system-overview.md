@@ -53,7 +53,7 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 | memoAccent | 'memo' \| 'neutral' |
 | cardAccent | bookAccent のエイリアス（後方互換） |
 | bookDecorations | { corners, innerBorder, centerLine } |
-| memoDecorations | { corners, innerBorder, centerLine } |
+| memoDecorations | { corners, innerBorder, centerLine, borderRadius?, foldedCorner?, foldedCornerPosition? } |
 | cardDecorations | bookDecorations のエイリアス |
 | glassEffect | { opacity, blur, saturate } |
 | cardShadow | カードの影 |
@@ -74,7 +74,7 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 |----------------|-------------------|
 | BookCard | getBookCardSx, getBookAccent, getBookDecorations |
 | MemoCard | getMemoCardSx, getMemoAccent, getMemoDecorations |
-| SearchResults | getBookCardSx, getMemoCardSx（書籍・メモそれぞれ） |
+| SearchResults | getBookCardSx（書籍）、MemoCard（メモは MemoCard を直接使用） |
 | BookDetail | getBookCardSx（hover: false） |
 | BookInfo | getBookAccent（書影プレースホルダー枠線） |
 | ExternalBookSearch | getBookCardSx（検索結果カード） |
@@ -97,7 +97,7 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 ## 7. カードスタイル（cardStyles.js）
 
 - `getBookCardSx(theme, options)` - 書籍カード用 sx。options: hover, hoverTransform, overrides
-- `getMemoCardSx(theme, options)` - メモカード用 sx。options: hover, hoverTransform, useMemoAccentShadow, borderRadius, innerBorderInset, overrides
+- `getMemoCardSx(theme, options)` - メモカード用 sx。options: hover, hoverTransform, useMemoAccentShadow, borderRadius, innerBorderInset, overrides。borderRadius は theme.custom.memoDecorations からも取得。foldedCorner が true のとき右上（または foldedCornerPosition）に折り目風の三角形を表示
 - `getBookAccent(theme)`, `getMemoAccent(theme)` - accent 情報（key, palette）
 - `getBookDecorations(theme)`, `getMemoDecorations(theme)` - 装飾フラグ
 

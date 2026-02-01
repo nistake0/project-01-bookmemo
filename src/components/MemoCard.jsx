@@ -21,7 +21,7 @@ const formatDateYMD = (createdAt) => {
   }
 };
 
-const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
+const MemoCard = ({ memo, onEdit, onDelete, onClick, showActions = true, bookTitle, 'data-testid': dataTestId }) => {
   const theme = useTheme();
   const memoCardSize = theme.custom?.sizes?.memoCard ?? {
     textArea: { minHeight: 48, maxHeight: 80 },
@@ -39,7 +39,7 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
   const decorations = getMemoDecorations(theme);
 
   const isMobile = useMediaQuery('(max-width:600px)');
-  const [showActions, setShowActions] = useState(false);
+  const [swipeRevealed, setSwipeRevealed] = useState(false);
   const maxLines = 2;
   const lines = memo.text ? memo.text.split('\n') : [];
   const shortText = lines.slice(0, maxLines).join('\n');
@@ -47,26 +47,26 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
 
   const handleEdit = (e) => {
     if (e) e.stopPropagation();
-    setShowActions(false);
+    setSwipeRevealed(false);
     if (typeof onEdit === 'function') onEdit(memo, true); // editMode=true
   };
 
   const handleDelete = (e) => {
     if (e) e.stopPropagation();
-    setShowActions(false);
-    onDelete(memo.id);
+    setSwipeRevealed(false);
+    if (typeof onDelete === 'function') onDelete(memo.id);
   };
 
-  // スワイプ検知
+  // スワイプ検知（showActions 時のみ）
   const handlers = useSwipeable({
-    onSwipedLeft: () => setShowActions(true),
-    onSwipedRight: () => setShowActions(false),
+    onSwipedLeft: () => setSwipeRevealed(true),
+    onSwipedRight: () => setSwipeRevealed(false),
     preventDefaultTouchmoveEvent: true,
     trackMouse: true,
   });
 
-  // モバイルのみスワイプUI、PCは従来通り
-  if (isMobile) {
+  // モバイル＋編集可能時のみスワイプUI
+  if (isMobile && showActions) {
     return (
       <Box 
         position="relative" 
@@ -75,13 +75,13 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
         sx={{ mb: 2 }}
       >
         <Card
-          data-testid="memo-card"
+          data-testid={dataTestId ?? 'memo-card'}
           sx={{
             ...cardSx,
-            transform: showActions ? 'translateX(-100px)' : 'none',
+            transform: swipeRevealed ? 'translateX(-100px)' : 'none',
             '&:hover': {
               ...cardSx['&:hover'],
-              transform: showActions ? 'translateX(-100px)' : 'translateY(-2px)',
+              transform: swipeRevealed ? 'translateX(-100px)' : 'translateY(-2px)',
             },
           }}
           onClick={onClick ? (e) => {
@@ -95,13 +95,18 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
               <DecorativeCorner position="top-right" size={20} accentKey={accentKey} />
             </>
           )}
-          <CardContent sx={{ 
-            pb: 0.5, // パディングを少し減らす
+          <CardContent sx={{
+            pb: 0.5,
             ...memoCardSize.textArea,
             overflow: 'hidden',
             position: 'relative',
             zIndex: 1,
           }}>
+            {bookTitle != null && bookTitle !== '' && (
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, fontWeight: 600 }}>
+                📝 {bookTitle} - ページ{memo.page ?? '未設定'}
+              </Typography>
+            )}
             <Typography
               variant="body1"
               sx={{
@@ -158,7 +163,7 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
           </CardActions>
         </Card>
         {/* スライドインする編集・削除ボタン */}
-        {showActions && (
+        {swipeRevealed && (
           <Box
             position="absolute"
             top={0}
@@ -182,10 +187,10 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
     );
   }
 
-  // PC用（従来通り）
+  // PC用、または showActions=false のモバイル（スワイプなし）
   return (
     <Card
-      data-testid="memo-card"
+      data-testid={dataTestId ?? 'memo-card'}
       sx={{
         ...cardSx,
         '&:hover': {
@@ -204,13 +209,18 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
           <DecorativeCorner position="top-right" size={20} accentKey={accentKey} />
         </>
       )}
-      <CardContent sx={{ 
-        pb: 1, 
+      <CardContent sx={{
+        pb: 1,
         ...memoCardSize.actionArea,
         overflow: 'hidden',
         position: 'relative',
         zIndex: 1,
       }}>
+        {bookTitle != null && bookTitle !== '' && (
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, fontWeight: 600 }}>
+            📝 {bookTitle} - ページ{memo.page ?? '未設定'}
+          </Typography>
+        )}
         <Typography
           variant="body1"
           sx={{
@@ -253,7 +263,8 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
             <Chip key={idx} label={tag} size="small" color="secondary" />
           ))}
         </Stack>
-        {/* デスクトップ用のボタン（モバイルでは非表示） */}
+        {/* デスクトップ用のボタン（showActions 時のみ、モバイルでは非表示） */}
+        {showActions && (
         <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
           <IconButton
             aria-label="edit"
@@ -272,6 +283,7 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Box>
+        )}
       </CardActions>
     </Card>
   );

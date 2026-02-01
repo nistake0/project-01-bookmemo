@@ -17,6 +17,7 @@ export const FALLBACK_MEMO = {
   borderHover: 'rgba(123, 104, 238, 0.4)',
   shadow: 'rgba(123, 104, 238, 0.08)',
   shadowHover: 'rgba(123, 104, 238, 0.12)',
+  bgTint: 'rgba(250, 248, 255, 0.95)',
 };
 
 /** FALLBACK_BROWN のエイリアス（既存の FALLBACK_ACCENT 互換） */

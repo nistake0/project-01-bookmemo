@@ -4,6 +4,23 @@
 
 ### 🔥 最優先タスク（開発開始時必須確認）
 
+#### メモカード統一（2025-01-31 完了）
+
+- 検索結果と書籍詳細で MemoCard を共通化
+- MemoCard に showActions, bookTitle, data-testid props を追加
+- SearchResults の renderMemoResult を廃止し MemoCard を直接使用
+- 詳細: `doc/design-memo-card-unification-discussion.md`
+
+---
+
+#### メモカード紙片デザイン（図書館テーマ）（2025-01-31 完了）
+
+- 図書館プリセットでメモカードを「丸角なし・一角折れた紙片風」に変更
+- themePresets memoDecorations に borderRadius, foldedCorner, foldedCornerPosition を追加
+- 詳細: `doc/design-memo-card-paper-style-review.md`
+
+---
+
 #### デザイン埋め込み値の一元化・テーマ化（2025-01-31 完了）
 
 Phase A/B/C 完了。詳細は `doc/design-embedded-values-review-and-discussion.md` 参照。
