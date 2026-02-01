@@ -4,10 +4,20 @@ const mockBuildPath = (path) => `https://example.com${path}`;
 
 describe('themePresets', () => {
   describe('getThemePresets', () => {
-    it('library-classic と minimal-light を返す', () => {
+    it('library-classic, minimal-light, slim-compact を返す', () => {
       const presets = getThemePresets(mockBuildPath);
       expect(presets['library-classic']).toBeDefined();
       expect(presets['minimal-light']).toBeDefined();
+      expect(presets['slim-compact']).toBeDefined();
+    });
+
+    it('slim-compact に typographyScale, 縮小された sizes を含む', () => {
+      const presets = getThemePresets(mockBuildPath);
+      const slim = presets['slim-compact'];
+      expect(slim.typographyScale).toBe(0.88);
+      expect(slim.sizes.bookCoverCard.width.xs).toBe(44);
+      expect(slim.sizes.bookCard.minHeight.xs).toBe(120);
+      expect(slim.spacing.cardPadding.xs).toBe(1);
     });
 
     it('library-classic に bookAccent, memoAccent を含む', () => {
@@ -86,9 +96,10 @@ describe('themePresets', () => {
   });
 
   describe('THEME_PRESET_IDS', () => {
-    it('library-classic と minimal-light を含む', () => {
+    it('library-classic, minimal-light, slim-compact を含む', () => {
       expect(THEME_PRESET_IDS).toContain('library-classic');
       expect(THEME_PRESET_IDS).toContain('minimal-light');
+      expect(THEME_PRESET_IDS).toContain('slim-compact');
     });
   });
 });

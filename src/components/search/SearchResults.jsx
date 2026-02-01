@@ -219,8 +219,8 @@ function SearchResults({ results = [], loading = false, searchQuery = '', onResu
       {/* 統合検索結果 */}
       <Box sx={{ 
         display: 'grid',
-        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' },
-        gap: 2
+        gridTemplateColumns: theme.custom?.layout?.searchResultsGrid?.gridTemplateColumns ?? { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' },
+        gap: theme.custom?.layout?.searchResultsGrid?.gap ?? 2,
       }}>
         {results.map((result) => (
           <Box key={`${result.type}-${result.id}`}>

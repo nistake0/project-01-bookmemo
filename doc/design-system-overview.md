@@ -21,7 +21,7 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 
 ## 2. プリセット構成（themePresets.js）
 
-| プロパティ | 説明 | library-classic | minimal-light |
+| プロパティ | 説明 | library-classic | minimal-light | slim-compact |
 |------------|------|-----------------|---------------|
 | background.image | 背景画像 | library-background.jpg | none |
 | background.pattern | 背景パターン | library-pattern.svg | none |

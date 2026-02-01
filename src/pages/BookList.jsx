@@ -1,4 +1,4 @@
-import { Typography, Box, Tabs, Tab, TextField } from "@mui/material";
+import { Typography, Box, Tabs, Tab, TextField, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import BookCard from "../components/BookCard";
 import PageHeader from "../components/common/PageHeader";
@@ -7,6 +7,8 @@ import { useBookList } from "../hooks/useBookList";
 import { FILTER_STATUSES, FILTER_LABELS } from "../constants/bookStatus";
 
 export default function BookList() {
+  const theme = useTheme();
+  const layout = theme.custom?.layout?.bookListGrid;
   const navigate = useNavigate();
   const {
     filteredBooks,
@@ -124,14 +126,8 @@ export default function BookList() {
           <Box 
             sx={{
               display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: 'repeat(2, 1fr)',
-                md: 'repeat(3, 1fr)',
-                lg: 'repeat(4, 1fr)'
-              },
-              gap: { xs: 1.5, sm: 2 },
-              dataTestid: 'book-list-grid'
+              gridTemplateColumns: layout?.gridTemplateColumns ?? { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+              gap: layout?.gap ?? { xs: 1.5, sm: 2 },
             }}
             data-testid="book-list-grid"
           >

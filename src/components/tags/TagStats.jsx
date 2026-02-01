@@ -10,7 +10,8 @@ import {
   Select,
   MenuItem,
   Alert,
-  Paper
+  Paper,
+  useTheme,
 } from '@mui/material';
 import { useTagStats } from '../../hooks/useTagStats';
 import LoadingIndicator from '../common/LoadingIndicator';
@@ -26,7 +27,13 @@ import { useAuth } from '../../auth/AuthProvider';
  * @param {Object} props
  * @param {Function} props.onTagClick - タグクリック時のコールバック
  */
+const defaultSummaryGrid = { gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 };
+const defaultStatsGrid = { gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 };
+
 function TagStats({ onTagClick }) {
+  const theme = useTheme();
+  const summaryGrid = theme.custom?.layout?.tagStatsSummaryGrid ?? defaultSummaryGrid;
+  const statsGrid = theme.custom?.layout?.tagStatsGrid ?? defaultStatsGrid;
   const { user } = useAuth();
   const { tagStats, loading, error, getSortedTagStats, fetchTagStats } = useTagStats(user);
   const { loading: managing, renameTag, deleteTag, deleteTags, mergeTags } = useTagManagement();
@@ -85,8 +92,8 @@ function TagStats({ onTagClick }) {
         </Typography>
         <Box sx={{ 
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 2
+          gridTemplateColumns: summaryGrid.gridTemplateColumns,
+          gap: summaryGrid.gap
         }}>
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h4" color="primary">
@@ -162,7 +169,14 @@ function TagStats({ onTagClick }) {
       </Paper>
 
       {/* タグ統計一覧 */}
-      <Box className="tag-stats-grid">
+      <Box
+        className="tag-stats-grid"
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: statsGrid.gridTemplateColumns,
+          gap: statsGrid.gap,
+        }}
+      >
         {sortedStats.map((stat) => (
           <Card key={stat.tag} data-testid={`tag-stat-card-${stat.tag}`} onClick={() => onTagClick?.(stat.tag)} className="tag-stat-card">
               <CardContent>

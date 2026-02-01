@@ -52,6 +52,7 @@ describe('Settings', () => {
     await screen.findByTestId('theme-preset-radio-group');
     expect(screen.getByTestId('theme-preset-library-classic')).toBeInTheDocument();
     expect(screen.getByTestId('theme-preset-minimal-light')).toBeInTheDocument();
+    expect(screen.getByTestId('theme-preset-slim-compact')).toBeInTheDocument();
   });
 
   test('プロフィール編集ボタンが表示される', async () => {

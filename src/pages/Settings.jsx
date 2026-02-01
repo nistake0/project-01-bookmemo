@@ -6,15 +6,14 @@ import {
   CardContent,
   Button,
   Divider,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
   Avatar,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import EditIcon from '@mui/icons-material/Edit';
@@ -183,27 +182,33 @@ export default function Settings() {
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   アプリの見た目を選択できます
                 </Typography>
-                <RadioGroup
+                <ToggleButtonGroup
                   value={settings.preferences?.themePresetId || 'library-classic'}
-                  onChange={(e) => updatePreferences({ themePresetId: e.target.value })}
+                  exclusive
+                  onChange={(e, value) => value != null && updatePreferences({ themePresetId: value })}
+                  fullWidth
+                  size="small"
+                  sx={{ flexWrap: 'wrap', gap: 0.5 }}
                   data-testid="theme-preset-radio-group"
                 >
                   {Object.values(themePresets).map((preset) => (
-                    <FormControlLabel
+                    <ToggleButton
                       key={preset.id}
                       value={preset.id}
-                      control={<Radio data-testid={`theme-preset-${preset.id}`} />}
-                      label={
-                        <Box>
-                          <Typography variant="body1">{preset.name}</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {preset.description}
-                          </Typography>
-                        </Box>
-                      }
-                    />
+                      sx={{ flex: '1 1 auto', minWidth: 120 }}
+                      data-testid={`theme-preset-${preset.id}`}
+                    >
+                      <Box sx={{ textAlign: 'center', py: 0.5 }}>
+                        <Typography variant="body2" component="span" sx={{ display: 'block' }}>
+                          {preset.name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                          {preset.description}
+                        </Typography>
+                      </Box>
+                    </ToggleButton>
                   ))}
-                </RadioGroup>
+                </ToggleButtonGroup>
               </CardContent>
             </Card>
 

@@ -4,10 +4,17 @@ import LoadingIndicator from '../components/common/LoadingIndicator';
 import useStats from '../hooks/useStats';
 import { BarChart, PieChart } from '@mui/x-charts';
 
+const defaultSummaryGrid = { gridTemplateColumns: 'repeat(3, 1fr)', gap: { xs: 1, sm: 2 } };
+const defaultChartGrid = { gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 };
+const defaultTagGrid = { gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 };
+
 export default function Stats() {
   const theme = useTheme();
   const chartColors = theme.custom?.chartColors ?? { bar: '#42a5f5', memo: '#9c27b0' };
   const infoCardHover = theme.custom?.motion?.infoCardHover ?? { transition: 'transform 0.2s ease-in-out', hoverTransform: 'translateY(-2px)' };
+  const summaryGrid = theme.custom?.layout?.statsSummaryGrid ?? defaultSummaryGrid;
+  const chartGrid = theme.custom?.layout?.statsChartGrid ?? defaultChartGrid;
+  const tagGrid = theme.custom?.layout?.statsTagGrid ?? defaultTagGrid;
   const { loading, error, summary, tagStats, monthlyFinished, monthlyAddedBooks, monthlyMemos, topAuthors, topPublishers, statusDistribution } = useStats();
 
   // データが空かどうかを判定
@@ -55,13 +62,10 @@ export default function Stats() {
             <Box
               sx={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: { xs: 1, sm: 2 },
+                gridTemplateColumns: summaryGrid.gridTemplateColumns,
+                gap: summaryGrid.gap,
                 width: '100%',
                 mb: 2,
-                '@media (max-width: 480px)': {
-                  gap: 0.75,
-                },
               }}
             >
               <Card
@@ -161,8 +165,8 @@ export default function Stats() {
 
             <Box sx={{ 
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-              gap: 2,
+              gridTemplateColumns: chartGrid.gridTemplateColumns,
+              gap: chartGrid.gap,
               mb: 2
             }}>
               <Card data-testid="chart-monthly-added">
@@ -205,8 +209,8 @@ export default function Stats() {
             )}
             <Box sx={{ 
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-              gap: 2
+              gridTemplateColumns: tagGrid.gridTemplateColumns,
+              gap: tagGrid.gap
             }}>
               {(tagStats?.slice(0, 10) ?? []).map(row => (
                 <Box key={row.tag}>
@@ -232,8 +236,8 @@ export default function Stats() {
               <Typography variant="h6" sx={{ mb: 2 }}>著者トップ</Typography>
               <Box sx={{ 
                 display: 'grid',
-                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-                gap: 2
+                gridTemplateColumns: tagGrid.gridTemplateColumns,
+                gap: tagGrid.gap
               }}>
                 {(topAuthors?.slice(0, 10) ?? []).map(row => (
                   <Box key={row.author}>
@@ -257,8 +261,8 @@ export default function Stats() {
               <Typography variant="h6" sx={{ mb: 2 }}>出版社トップ</Typography>
               <Box sx={{ 
                 display: 'grid',
-                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-                gap: 2
+                gridTemplateColumns: tagGrid.gridTemplateColumns,
+                gap: tagGrid.gap
               }}>
                 {(topPublishers?.slice(0, 10) ?? []).map(row => (
                   <Box key={row.publisher}>

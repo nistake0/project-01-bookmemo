@@ -16,6 +16,24 @@ describe('createThemeFromPreset', () => {
     expect(theme.custom).toBeDefined();
   });
 
+  it('slim-compact で theme を生成し typography が縮小される', () => {
+    const theme = createThemeFromPreset('slim-compact', mockBuildPath);
+    expect(theme).toBeDefined();
+    expect(theme.custom).toBeDefined();
+    expect(theme.typography.h1.fontSize).toBe('1.58rem');
+    expect(theme.typography.body1.fontSize).toBe('0.79rem');
+  });
+
+  it('slim-compact で layout が theme.custom に含まれる', () => {
+    const theme = createThemeFromPreset('slim-compact', mockBuildPath);
+    expect(theme.custom.layout).toBeDefined();
+    expect(theme.custom.layout.bookListGrid).toMatchObject({
+      gridTemplateColumns: expect.any(Object),
+      gap: expect.any(Object),
+    });
+    expect(theme.custom.layout.searchResultsGrid?.gridTemplateColumns).toBeDefined();
+  });
+
   describe('theme.custom', () => {
     it('cardAccent を含む', () => {
       const theme = createThemeFromPreset('library-classic', mockBuildPath);
@@ -81,6 +99,11 @@ describe('createThemeFromPreset', () => {
         transition: 'transform 0.2s ease-in-out',
         hoverTransform: 'translateY(-2px)',
       });
+    });
+
+    it('layout は library-classic では undefined', () => {
+      const theme = createThemeFromPreset('library-classic', mockBuildPath);
+      expect(theme.custom.layout).toBeUndefined();
     });
 
     it('typographyOverrides, sizes, spacing を含む', () => {

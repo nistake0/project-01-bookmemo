@@ -4,6 +4,24 @@
 
 ### 🔥 最優先タスク（開発開始時必須確認）
 
+#### スリムテーマ Phase 3（2025-02-01 完了）
+
+- Settings: テーマ選択を ToggleButtonGroup 化
+- MemoContentSearchField: Checkbox → Switch 化
+
+#### スリムテーマ Phase 2（2025-02-01 完了）
+
+- theme.custom.layout によるグリッド列数・gap のテーマ化
+- BookList, SearchResults, Stats, TagStats, DateRangeSelector を layout 参照に変更
+- 詳細: `doc/design-slim-theme-implementation-plan.md`
+
+#### スリムテーマ Phase 1（2025-01-31 完了）
+
+- スリム（コンパクト）プリセットを追加
+- typographyScale 0.88 でフォント・余白を縮小
+
+---
+
 #### メモカード統一（2025-01-31 完了）
 
 - 検索結果と書籍詳細で MemoCard を共通化

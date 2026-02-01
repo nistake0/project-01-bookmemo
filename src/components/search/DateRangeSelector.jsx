@@ -7,8 +7,11 @@ import {
   Select, 
   MenuItem,
   TextField,
-  Paper
+  Paper,
+  useTheme,
 } from '@mui/material';
+
+const defaultDateRangeGrid = { gridTemplateColumns: '1fr 1fr', gap: 2 };
 
 /**
  * 日時範囲選択コンポーネント
@@ -18,6 +21,8 @@ import {
  * @param {Function} props.onChange - 日時範囲変更時のコールバック
  */
 function DateRangeSelector({ value, onChange }) {
+  const theme = useTheme();
+  const dateRangeGrid = theme.custom?.layout?.dateRangeGrid ?? defaultDateRangeGrid;
   const [dateRangeType, setDateRangeType] = useState(value?.type || 'none');
   const [year, setYear] = useState(value?.year || new Date().getFullYear());
   const [month, setMonth] = useState(value?.month || 1);
@@ -164,8 +169,8 @@ function DateRangeSelector({ value, onChange }) {
         {dateRangeType === 'custom' && (
           <Box sx={{ 
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: 2,
+            gridTemplateColumns: dateRangeGrid.gridTemplateColumns,
+            gap: dateRangeGrid.gap,
             mt: 1
           }} data-testid="custom-date-range-grid">
             <Box data-testid="start-date-grid-item">

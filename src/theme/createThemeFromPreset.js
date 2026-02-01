@@ -3,6 +3,36 @@ import { getThemePresets } from './themePresets';
 import { DEFAULT_THEME_PRESET_ID } from '../constants/userSettings';
 
 /**
+ * fontSize 文字列に scale を適用（'1.8rem' → '1.58rem' 等）
+ * @param {string} value - '1.8rem' 等
+ * @param {number} scale - 乗数（0.88 等）
+ * @returns {string}
+ */
+function scaleFontSize(value, scale) {
+  if (typeof value !== 'string' || scale === 1) return value;
+  const m = value.match(/^([\d.]+)(rem|px|em)$/);
+  return m ? `${(parseFloat(m[1]) * scale).toFixed(2)}${m[2]}` : value;
+}
+
+/**
+ * オブジェクト内の fontSize を再帰的に scale 適用
+ */
+function scaleTypographyObj(obj, scale) {
+  if (!obj || scale === 1) return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (k === 'fontSize' && typeof v === 'string') {
+      out[k] = scaleFontSize(v, scale);
+    } else if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
+      out[k] = scaleTypographyObj(v, scale);
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+/**
  * テーマプリセットIDからMUIテーマを生成
  *
  * @param {string} presetId - プリセットID
@@ -12,11 +42,26 @@ import { DEFAULT_THEME_PRESET_ID } from '../constants/userSettings';
 export function createThemeFromPreset(presetId, buildPath) {
   const presets = getThemePresets(buildPath);
   const preset = presets[presetId] || presets[DEFAULT_THEME_PRESET_ID];
+  const typographyScale = preset.typographyScale ?? 1;
   const bgImage = preset.background.image === 'none' ? 'none' : preset.background.image;
   const bgPattern = preset.background.pattern === 'none' ? 'none' : preset.background.pattern;
   const hasBgImage = bgImage !== 'none';
   const hasBgPattern = bgPattern !== 'none';
   const glass = preset.glassEffect ?? { opacity: 0.75, blur: '20px', saturate: '180%' };
+
+  const baseTypography = {
+    fontFamily: 'Segoe UI, Helvetica Neue, Arial, sans-serif',
+    h1: { fontSize: '1.8rem', '@media (min-width:600px)': { fontSize: '2.5rem' } },
+    h2: { fontSize: '1.5rem', '@media (min-width:600px)': { fontSize: '2rem' } },
+    h3: { fontSize: '1.3rem', '@media (min-width:600px)': { fontSize: '1.6rem' } },
+    h4: { fontSize: '1.1rem', '@media (min-width:600px)': { fontSize: '1.4rem' } },
+    h5: { fontSize: '1rem', '@media (min-width:600px)': { fontSize: '1.2rem' } },
+    h6: { fontSize: '0.9rem', '@media (min-width:600px)': { fontSize: '1.1rem' } },
+    body1: { fontSize: '0.9rem', '@media (min-width:600px)': { fontSize: '1rem' } },
+    body2: { fontSize: '0.8rem', '@media (min-width:600px)': { fontSize: '0.9rem' } },
+    caption: { fontSize: '0.7rem', '@media (min-width:600px)': { fontSize: '0.8rem' } },
+  };
+  const typography = scaleTypographyObj(baseTypography, typographyScale);
 
   const theme = createTheme({
     palette: {
@@ -70,18 +115,7 @@ export function createThemeFromPreset(presetId, buildPath) {
         },
       },
     },
-    typography: {
-      fontFamily: 'Segoe UI, Helvetica Neue, Arial, sans-serif',
-      h1: { fontSize: '1.8rem', '@media (min-width:600px)': { fontSize: '2.5rem' } },
-      h2: { fontSize: '1.5rem', '@media (min-width:600px)': { fontSize: '2rem' } },
-      h3: { fontSize: '1.3rem', '@media (min-width:600px)': { fontSize: '1.6rem' } },
-      h4: { fontSize: '1.1rem', '@media (min-width:600px)': { fontSize: '1.4rem' } },
-      h5: { fontSize: '1rem', '@media (min-width:600px)': { fontSize: '1.2rem' } },
-      h6: { fontSize: '0.9rem', '@media (min-width:600px)': { fontSize: '1.1rem' } },
-      body1: { fontSize: '0.9rem', '@media (min-width:600px)': { fontSize: '1rem' } },
-      body2: { fontSize: '0.8rem', '@media (min-width:600px)': { fontSize: '0.9rem' } },
-      caption: { fontSize: '0.7rem', '@media (min-width:600px)': { fontSize: '0.8rem' } },
-    },
+    typography,
     components: {
       MuiCssBaseline: {
         styleOverrides: {
@@ -125,11 +159,11 @@ export function createThemeFromPreset(presetId, buildPath) {
       MuiTextField: {
         styleOverrides: {
           root: {
-            marginBottom: '8px',
-            '@media (min-width:600px)': { marginBottom: '16px' },
+            marginBottom: scaleFontSize('8px', typographyScale),
+            '@media (min-width:600px)': { marginBottom: scaleFontSize('16px', typographyScale) },
             '& .MuiInputBase-root': {
-              fontSize: '0.9rem',
-              '@media (min-width:600px)': { fontSize: '1rem' },
+              fontSize: scaleFontSize('0.9rem', typographyScale),
+              '@media (min-width:600px)': { fontSize: scaleFontSize('1rem', typographyScale) },
               backgroundColor: '#ffffff',
             },
           },
@@ -139,9 +173,12 @@ export function createThemeFromPreset(presetId, buildPath) {
       MuiButton: {
         styleOverrides: {
           root: {
-            fontSize: '0.9rem',
-            padding: '8px 16px',
-            '@media (min-width:600px)': { fontSize: '1rem', padding: '10px 20px' },
+            fontSize: scaleFontSize('0.9rem', typographyScale),
+            padding: `${8 * typographyScale}px ${16 * typographyScale}px`,
+            '@media (min-width:600px)': {
+              fontSize: scaleFontSize('1rem', typographyScale),
+              padding: `${10 * typographyScale}px ${20 * typographyScale}px`,
+            },
           },
         },
         defaultProps: { size: 'medium' },
@@ -170,11 +207,11 @@ export function createThemeFromPreset(presetId, buildPath) {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            padding: '12px',
-            '@media (min-width:600px)': { padding: '16px' },
+            padding: `${12 * typographyScale}px`,
+            '@media (min-width:600px)': { padding: `${16 * typographyScale}px` },
             '&:last-child': {
-              paddingBottom: '12px',
-              '@media (min-width:600px)': { paddingBottom: '16px' },
+              paddingBottom: `${12 * typographyScale}px`,
+              '@media (min-width:600px)': { paddingBottom: `${16 * typographyScale}px` },
             },
           },
         },
@@ -182,8 +219,8 @@ export function createThemeFromPreset(presetId, buildPath) {
       MuiPaper: {
         styleOverrides: {
           root: {
-            padding: '12px',
-            '@media (min-width:600px)': { padding: '16px' },
+            padding: `${12 * typographyScale}px`,
+            '@media (min-width:600px)': { padding: `${16 * typographyScale}px` },
             borderRadius: 16,
             border: '1px solid rgba(15, 23, 42, 0.08)',
             backgroundColor: `rgba(255, 255, 255, ${glass.opacity})`,
@@ -227,9 +264,12 @@ export function createThemeFromPreset(presetId, buildPath) {
       MuiChip: {
         styleOverrides: {
           root: {
-            fontSize: '0.8rem',
-            height: '24px',
-            '@media (min-width:600px)': { fontSize: '0.9rem', height: '32px' },
+            fontSize: scaleFontSize('0.8rem', typographyScale),
+            height: `${24 * typographyScale}px`,
+            '@media (min-width:600px)': {
+              fontSize: scaleFontSize('0.9rem', typographyScale),
+              height: `${32 * typographyScale}px`,
+            },
           },
         },
       },
@@ -264,8 +304,8 @@ export function createThemeFromPreset(presetId, buildPath) {
       MuiBottomNavigationAction: {
         styleOverrides: {
           root: {
-            fontSize: '0.7rem',
-            '@media (min-width:600px)': { fontSize: '0.8rem' },
+            fontSize: scaleFontSize('0.7rem', typographyScale),
+            '@media (min-width:600px)': { fontSize: scaleFontSize('0.8rem', typographyScale) },
           },
         },
       },
@@ -349,9 +389,11 @@ export function createThemeFromPreset(presetId, buildPath) {
   const typographyOverrides = preset.typographyOverrides ?? defaultTypographyOverrides;
   const sizes = { ...defaultSizes, ...preset.sizes };
   const spacing = preset.spacing ?? defaultSpacing;
+  const layout = preset.layout;
 
   theme.custom = {
     ...theme.custom,
+    layout,
     bookAccent,
     memoAccent,
     cardAccent,

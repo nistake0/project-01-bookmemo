@@ -4,7 +4,7 @@ import {
   Typography, 
   Paper,
   FormControlLabel,
-  Checkbox
+  Switch,
 } from '@mui/material';
 
 /**
@@ -40,10 +40,11 @@ function MemoContentSearchField({
         {/* メモ内容検索の有効/無効切り替え */}
         <FormControlLabel
           control={
-            <Checkbox
+            <Switch
               checked={includeMemoContent}
               onChange={handleIncludeMemoContentChange}
-              data-testid="include-memo-content-checkbox"
+              size="small"
+              data-testid="include-memo-content-switch"
             />
           }
           label="メモ内容も検索対象に含める"
@@ -68,7 +69,7 @@ function MemoContentSearchField({
         {/* 説明テキスト */}
         {!includeMemoContent && (
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            チェックボックスをオンにすると、メモの内容も検索対象に含めることができます
+            スイッチをオンにすると、メモの内容も検索対象に含めることができます
           </Typography>
         )}
       </Paper>

@@ -36,7 +36,7 @@ describe('MemoContentSearchField', () => {
       );
 
       expect(screen.getByText('メモ内容検索')).toBeInTheDocument();
-      expect(screen.getByTestId('include-memo-content-checkbox')).toBeInTheDocument();
+      expect(screen.getByTestId('include-memo-content-switch')).toBeInTheDocument();
       expect(screen.getByText('メモ内容も検索対象に含める')).toBeInTheDocument();
     });
 
@@ -49,7 +49,7 @@ describe('MemoContentSearchField', () => {
       );
 
       expect(screen.getByText('メモ内容検索')).toBeInTheDocument();
-      expect(screen.getByTestId('include-memo-content-checkbox')).toBeInTheDocument();
+      expect(screen.getByTestId('include-memo-content-switch')).toBeInTheDocument();
     });
   });
 
@@ -63,7 +63,7 @@ describe('MemoContentSearchField', () => {
         />
       );
 
-      const checkbox = screen.getByTestId('include-memo-content-checkbox');
+      const checkbox = screen.getByTestId('include-memo-content-switch');
       expect(checkbox).not.toBeChecked();
     });
 
@@ -76,7 +76,7 @@ describe('MemoContentSearchField', () => {
         />
       );
 
-      const checkbox = screen.getByTestId('include-memo-content-checkbox');
+      const checkbox = screen.getByTestId('include-memo-content-switch');
       expect(checkbox).toBeInTheDocument();
     });
 
@@ -89,7 +89,7 @@ describe('MemoContentSearchField', () => {
         />
       );
 
-      const checkbox = screen.getByTestId('include-memo-content-checkbox');
+      const checkbox = screen.getByTestId('include-memo-content-switch');
       fireEvent.click(checkbox);
 
       expect(mockOnIncludeMemoContentChange).toHaveBeenCalledWith(true);
@@ -162,7 +162,7 @@ describe('MemoContentSearchField', () => {
         />
       );
 
-      expect(screen.getByText('チェックボックスをオンにすると、メモの内容も検索対象に含めることができます')).toBeInTheDocument();
+      expect(screen.getByText('スイッチをオンにすると、メモの内容も検索対象に含めることができます')).toBeInTheDocument();
     });
 
     test('includeMemoContentがtrueの場合、説明テキストが表示されない', () => {
@@ -174,7 +174,7 @@ describe('MemoContentSearchField', () => {
         />
       );
 
-      expect(screen.queryByText('チェックボックスをオンにすると、メモの内容も検索対象に含めることができます')).not.toBeInTheDocument();
+      expect(screen.queryByText('スイッチをオンにすると、メモの内容も検索対象に含めることができます')).not.toBeInTheDocument();
     });
   });
 
@@ -225,7 +225,7 @@ describe('MemoContentSearchField', () => {
         );
       }).not.toThrow();
 
-      expect(screen.getByTestId('include-memo-content-checkbox')).toBeInTheDocument();
+      expect(screen.getByTestId('include-memo-content-switch')).toBeInTheDocument();
     });
   });
 }); 
