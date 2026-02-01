@@ -38,13 +38,14 @@ function BookCard({ book, onClick, testId }) {
   const typo = theme.custom?.typographyOverrides ?? defaultTypo;
   const coverSize = theme.custom?.sizes?.bookCoverCard ?? { width: { xs: 50, sm: 60 }, height: { xs: 70, sm: 80 } };
   const cardPadding = theme.custom?.spacing?.cardPadding ?? { xs: 1.5, sm: 2 };
+  const bookCardSize = theme.custom?.sizes?.bookCard ?? { minHeight: { xs: 140, sm: 160 }, tagAreaMinHeight: { xs: 32, sm: 36 } };
   const cardSx = getBookCardSx(theme, {
     overrides: {
       cursor: 'pointer',
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      minHeight: { xs: '140px', sm: '160px' },
+      minHeight: bookCardSize.minHeight,
     },
   });
   const { key: accentKey } = getBookAccent(theme);
@@ -164,7 +165,7 @@ function BookCard({ book, onClick, testId }) {
             
             {/* タグエリア - 固定高さで統一 */}
             <Box sx={{ 
-              minHeight: { xs: '32px', sm: '36px' },
+              minHeight: bookCardSize.tagAreaMinHeight,
               mb: 1,
               display: 'flex',
               flexWrap: 'wrap',

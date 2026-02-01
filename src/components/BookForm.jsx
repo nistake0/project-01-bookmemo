@@ -16,6 +16,8 @@ const defaultFormTypo = {
 export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   const theme = useTheme();
   const typo = theme.custom?.typographyOverrides ?? defaultFormTypo;
+  const formButtonHeight = theme.custom?.sizes?.formButton?.height ?? { xs: 40, sm: 56 };
+  const coverFormPreview = theme.custom?.sizes?.bookCoverFormPreview ?? { maxHeight: 120 };
   const [isbn, setIsbn] = useState(isbnProp);
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -150,7 +152,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             disabled={searchLoading}
             sx={{ 
               mt: { xs: 1, sm: 0 },
-              height: { xs: '40px', sm: '56px' },
+              height: formButtonHeight,
               ...typo.formText,
             }}
             fullWidth
@@ -201,7 +203,7 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
             src={coverImageUrl} 
             alt="表紙" 
             style={{ 
-              maxHeight: '120px', 
+              maxHeight: coverFormPreview.maxHeight, 
               maxWidth: '100%',
               width: 'auto',
               borderRadius: '4px'

@@ -10,6 +10,7 @@ import {
   Box,
   Alert,
   Typography,
+  useTheme,
 } from '@mui/material';
 
 const sanitizeIsbn = (isbn) => {
@@ -19,6 +20,8 @@ const sanitizeIsbn = (isbn) => {
 };
 
 const BookEditDialog = ({ open, book, onClose, onSave }) => {
+  const theme = useTheme();
+  const coverDialogPreview = theme.custom?.sizes?.bookCoverDialogPreview ?? { maxHeight: 180 };
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [publisher, setPublisher] = useState('');
@@ -195,7 +198,7 @@ const BookEditDialog = ({ open, book, onClose, onSave }) => {
                 <img
                   src={coverImageUrl}
                   alt="編集後の書影プレビュー"
-                  style={{ maxHeight: 180, borderRadius: 4 }}
+                  style={{ maxHeight: coverDialogPreview.maxHeight, borderRadius: 4 }}
                   data-testid="book-edit-cover-preview"
                 />
               </Box>

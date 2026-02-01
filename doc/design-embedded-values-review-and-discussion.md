@@ -211,9 +211,9 @@ theme.custom の拡張案:
 4. カード内余白 → `theme.custom.spacing.card` ✅  
 5. Chip の高さ・フォント → typographyOverrides.chipLabel, formChip ✅  
 
-**Phase C（長期）**: 完全トークン化  
-6. 全 fontSize 上書きを variant またはトークン参照に置換  
-7. 全 width/height を sizes トークンまたはレイアウト定数に集約  
+**Phase C（長期）**: 完全トークン化 ✅  
+6. 全 fontSize 上書きを variant またはトークン参照に置換（PageHeader 含む）  
+7. 全 width/height を sizes トークンまたはレイアウト定数に集約（BookCard, MemoCard, BookForm, BookEditDialog）  
 
 ### 4.3 実装方法の候補
 

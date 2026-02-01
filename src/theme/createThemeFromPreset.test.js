@@ -93,8 +93,18 @@ describe('createThemeFromPreset', () => {
         width: { xs: 50, sm: 60 },
         height: { xs: 70, sm: 80 },
       });
+      expect(theme.custom.sizes.bookCard).toHaveProperty('minHeight');
+      expect(theme.custom.sizes.memoCard).toHaveProperty('textArea');
+      expect(theme.custom.sizes.memoCard).toHaveProperty('actionArea');
       expect(theme.custom).toHaveProperty('spacing');
       expect(theme.custom.spacing.cardPadding).toEqual({ xs: 1.5, sm: 2 });
+    });
+
+    it('pageHeader に titleFontSize, subtitleFontSize を含む', () => {
+      const theme = createThemeFromPreset('library-classic', mockBuildPath);
+      expect(theme.custom.pageHeader).toHaveProperty('titleFontSize');
+      expect(theme.custom.pageHeader).toHaveProperty('subtitleFontSize');
+      expect(theme.custom.pageHeader.titleFontSize).toMatchObject({ xs: '1.5rem', sm: '2rem', md: '2.5rem' });
     });
 
     it('bookAccent, memoAccent, bookDecorations, memoDecorations を含む', () => {

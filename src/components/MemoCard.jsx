@@ -23,6 +23,10 @@ const formatDateYMD = (createdAt) => {
 
 const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
   const theme = useTheme();
+  const memoCardSize = theme.custom?.sizes?.memoCard ?? {
+    textArea: { minHeight: 48, maxHeight: 80 },
+    actionArea: { minHeight: { xs: 48, sm: 64 }, maxHeight: { xs: 72, sm: 88 } },
+  };
   const cardSx = getMemoCardSx(theme, {
     overrides: {
       position: 'relative',
@@ -90,8 +94,7 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
           )}
           <CardContent sx={{ 
             pb: 0.5, // パディングを少し減らす
-            minHeight: 48, 
-            maxHeight: 80, // ランク表示分をさらに追加
+            ...memoCardSize.textArea,
             overflow: 'hidden',
             position: 'relative',
             zIndex: 1,
@@ -189,8 +192,7 @@ const MemoCard = ({ memo, onEdit, onDelete, onClick }) => {
       )}
       <CardContent sx={{ 
         pb: 1, 
-        minHeight: { xs: 48, sm: 64 }, 
-        maxHeight: { xs: 72, sm: 88 }, // ランク表示分の高さを追加
+        ...memoCardSize.actionArea,
         overflow: 'hidden',
         position: 'relative',
         zIndex: 1,

@@ -61,9 +61,9 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 | chartColors | { bar, memo } グラフ用色 |
 | motion | { infoCardHover: { transition, hoverTransform } } Stats 等 |
 | typographyOverrides | cardTitle, cardSubtext, cardCaption, chipLabel, formText, chipSmall, formChip |
-| sizes | bookCoverCard, bookCoverDetail |
+| sizes | bookCoverCard, bookCoverDetail, bookCoverFormPreview, bookCoverDialogPreview, bookCard, memoCard, formButton |
 | spacing | cardPadding |
-| pageHeader | { backgroundImage, goldOverlay, centerLine, borderRadius, accentKey } |
+| pageHeader | { backgroundImage, goldOverlay, centerLine, borderRadius, accentKey, titleFontSize, subtitleFontSize } |
 | backgroundVars | CSS 変数（--bm-library-image, --bm-library-bg） |
 
 ---

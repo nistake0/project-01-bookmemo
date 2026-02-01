@@ -61,6 +61,9 @@ describe('themePresets', () => {
         width: { xs: 50, sm: 60 },
         height: { xs: 70, sm: 80 },
       });
+      expect(classic.sizes.bookCard).toHaveProperty('minHeight');
+      expect(classic.sizes.memoCard).toHaveProperty('textArea');
+      expect(classic.pageHeader).toHaveProperty('titleFontSize');
       expect(classic.spacing).toBeDefined();
       expect(classic.spacing.cardPadding).toEqual({ xs: 1.5, sm: 2 });
     });

@@ -302,13 +302,16 @@ export function createThemeFromPreset(presetId, buildPath) {
     blur: '20px',
     saturate: '180%',
   };
-  const pageHeader = preset.pageHeader ?? {
+  const defaultPageHeader = {
     backgroundImage: 'paper',
     goldOverlay: true,
     centerLine: true,
     borderRadius: { xs: 16, sm: 20 },
     accentKey: 'brown',
+    titleFontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
+    subtitleFontSize: { xs: '0.9rem', sm: '1rem' },
   };
+  const pageHeader = { ...defaultPageHeader, ...preset.pageHeader };
   const defaultCardShadow = '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5)';
   const defaultCardShadowHover = '0 12px 40px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6)';
   const cardShadow = preset.cardShadow ?? defaultCardShadow;
@@ -330,12 +333,20 @@ export function createThemeFromPreset(presetId, buildPath) {
   const defaultSizes = {
     bookCoverCard: { width: { xs: 50, sm: 60 }, height: { xs: 70, sm: 80 } },
     bookCoverDetail: { maxHeight: 250, width: 167 },
+    bookCoverFormPreview: { maxHeight: 120 },
+    bookCoverDialogPreview: { maxHeight: 180 },
+    bookCard: { minHeight: { xs: 140, sm: 160 }, tagAreaMinHeight: { xs: 32, sm: 36 } },
+    memoCard: {
+      textArea: { minHeight: 48, maxHeight: 80 },
+      actionArea: { minHeight: { xs: 48, sm: 64 }, maxHeight: { xs: 72, sm: 88 } },
+    },
+    formButton: { height: { xs: 40, sm: 56 } },
   };
   const defaultSpacing = {
     cardPadding: { xs: 1.5, sm: 2 },
   };
   const typographyOverrides = preset.typographyOverrides ?? defaultTypographyOverrides;
-  const sizes = preset.sizes ?? defaultSizes;
+  const sizes = { ...defaultSizes, ...preset.sizes };
   const spacing = preset.spacing ?? defaultSpacing;
 
   theme.custom = {

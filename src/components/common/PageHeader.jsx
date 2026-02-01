@@ -105,7 +105,7 @@ const PageHeader = ({ title, subtitle, children }) => {
           data-testid="page-header-title"
           sx={{
             fontWeight: 700,
-            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
+            fontSize: ph.titleFontSize ?? { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
             mb: subtitle ? 1 : 0,
             color: 'rgba(15, 23, 42, 0.92)',
             letterSpacing: '-0.02em',
@@ -119,7 +119,7 @@ const PageHeader = ({ title, subtitle, children }) => {
             data-testid="page-header-subtitle"
             sx={{
               opacity: 0.92,
-              fontSize: { xs: '0.9rem', sm: '1rem' },
+              fontSize: ph.subtitleFontSize ?? { xs: '0.9rem', sm: '1rem' },
               color: 'rgba(51, 65, 85, 0.92)',
             }}
           >
