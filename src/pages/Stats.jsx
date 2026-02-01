@@ -20,6 +20,16 @@ export default function Stats() {
   // データが空かどうかを判定
   const hasData = summary && (summary.totalBooks > 0 || summary.finishedBooks > 0 || summary.readingBooks > 0 || summary.tsundokuBooks > 0 || summary.reReadingBooks > 0);
 
+  if (loading) {
+    return (
+      <LoadingIndicator
+        variant="fullPage"
+        message="読み込み中..."
+        data-testid="stats-loading"
+      />
+    );
+  }
+
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', mb: 10 }}>
       {/* 統一されたヘッダー */}
@@ -30,14 +40,6 @@ export default function Stats() {
 
       {/* メインコンテンツ */}
       <Box sx={{ p: 2 }}>
-        {loading && (
-          <LoadingIndicator
-            variant="inline"
-            message="読み込み中..."
-            data-testid="stats-loading"
-          />
-        )}
-
         {error && (
           <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>
         )}

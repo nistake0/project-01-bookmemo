@@ -390,10 +390,26 @@ export function createThemeFromPreset(presetId, buildPath) {
   const sizes = { ...defaultSizes, ...preset.sizes };
   const spacing = preset.spacing ?? defaultSpacing;
   const layout = preset.layout;
+  const defaultLoadingIndicator = {
+    accentKey: 'neutral',
+    container: {
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      backdropFilter: 'blur(8px)',
+      borderRadius: 2,
+      boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+      border: '1px solid rgba(0, 0, 0, 0.06)',
+    },
+  };
+  const loadingIndicator = {
+    ...defaultLoadingIndicator,
+    ...preset.loadingIndicator,
+    container: { ...defaultLoadingIndicator.container, ...(preset.loadingIndicator?.container ?? {}) },
+  };
 
   theme.custom = {
     ...theme.custom,
     layout,
+    loadingIndicator,
     bookAccent,
     memoAccent,
     cardAccent,

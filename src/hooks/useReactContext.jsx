@@ -1,4 +1,6 @@
 import React from 'react';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import LoadingIndicator from '../components/common/LoadingIndicator';
 
 /**
  * Reactコンテキストが正しく初期化されているかをチェックする関数
@@ -63,18 +65,16 @@ export const withReactContext = (Component) => {
     }, [retryCount]);
 
     if (!isContextReady) {
-      // コンテキストが準備できるまでローディング表示
+      // コンテキストが準備できるまでローディング表示（ThemeProvider 外のため最小限のテーマでラップ）
+      const fallbackTheme = createTheme();
       return (
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '100vh',
-          fontSize: '1rem',
-          color: '#666'
-        }}>
-          読み込み中...
-        </div>
+        <ThemeProvider theme={fallbackTheme}>
+          <LoadingIndicator
+            variant="fullPage"
+            message="読み込み中..."
+            data-testid="react-context-loading"
+          />
+        </ThemeProvider>
       );
     }
 

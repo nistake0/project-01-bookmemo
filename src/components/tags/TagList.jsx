@@ -6,9 +6,9 @@ import {
   ListItem, 
   ListItemText, 
   Chip,
-  CircularProgress,
   Alert
 } from '@mui/material';
+import LoadingIndicator from '../common/LoadingIndicator';
 import { useAuth } from '../../auth/AuthProvider';
 import { useTagHistory } from '../../hooks/useTagHistory';
 
@@ -31,9 +31,12 @@ function TagList({ onTagClick, type = 'book' }) {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-        <CircularProgress />
-      </Box>
+      <LoadingIndicator
+        variant="inline"
+        message="タグを読み込み中..."
+        size="small"
+        data-testid="tag-list-loading"
+      />
     );
   }
 

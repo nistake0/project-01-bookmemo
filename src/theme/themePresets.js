@@ -78,6 +78,17 @@ export function getThemePresets(buildPath) {
       spacing: {
         cardPadding: { xs: 1.5, sm: 2 },
       },
+      loadingIndicator: {
+        accentKey: 'brown',
+        container: {
+          backgroundColor: 'rgba(255, 248, 240, 0.95)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: 3,
+          boxShadow: '0 4px 20px rgba(139, 69, 19, 0.12)',
+          border: '1px solid rgba(139, 69, 19, 0.15)',
+        },
+        dotShadow: '0 2px 12px rgba(139, 69, 19, 0.35)',
+      },
     },
     'minimal-light': {
       id: 'minimal-light',
@@ -138,6 +149,16 @@ export function getThemePresets(buildPath) {
       },
       spacing: {
         cardPadding: { xs: 1.5, sm: 2 },
+      },
+      loadingIndicator: {
+        accentKey: 'neutral',
+        container: {
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(8px)',
+          borderRadius: 2,
+          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
+          border: '1px solid rgba(0, 0, 0, 0.08)',
+        },
       },
     },
     'slim-compact': {
@@ -233,6 +254,24 @@ export function getThemePresets(buildPath) {
         dateRangeGrid: {
           gridTemplateColumns: '1fr 1fr',
           gap: 1.5,
+        },
+      },
+      loadingIndicator: {
+        accentKey: 'neutral',
+        container: {
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(8px)',
+          borderRadius: 2,
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.06)',
+          border: '1px solid rgba(0, 0, 0, 0.06)',
+        },
+        sizes: {
+          dotFullPage: 12,
+          dotInline: 10,
+          dotSmall: 8,
+          gapFullPage: 10,
+          gapInline: 8,
+          gapSmall: 6,
         },
       },
     },

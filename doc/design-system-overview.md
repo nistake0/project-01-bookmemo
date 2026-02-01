@@ -31,6 +31,7 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 | cardDecorations | 角・内枠・中央縦線の有無 | すべて true | すべて false |
 | glassEffect | 透明度・blur・saturate | 0.75, 20px, 180% | 0.9, 12px, 140% |
 | pageHeader | ページタイトル用 | 紙テクスチャ・金系・角丸 | なし・淡色・角丸0 |
+| loadingIndicator | 読み込み中表示 | accentKey brown, 暖色コンテナ | accentKey neutral, 白系コンテナ |
 
 ---
 
@@ -64,6 +65,7 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 | sizes | bookCoverCard, bookCoverDetail, bookCoverFormPreview, bookCoverDialogPreview, bookCard, memoCard, formButton |
 | spacing | cardPadding |
 | pageHeader | { backgroundImage, goldOverlay, centerLine, borderRadius, accentKey, titleFontSize, subtitleFontSize } |
+| loadingIndicator | { accentKey, container, dotShadow?, sizes? } 各テーマの色・配置 |
 | backgroundVars | CSS 変数（--bm-library-image, --bm-library-bg） |
 
 ---
@@ -82,6 +84,7 @@ ThemeProviderWithUserSettings  → ユーザー設定から presetId を取得�
 | PageHeader | pageHeader, decorative[accentKey], decorative.gold |
 | DecorativeCorner | decorative.gold, decorative[accentKey] |
 | BookDetail | 同上（Paper の detailCardSx） |
+| LoadingIndicator | loadingIndicator（accentKey, container, dotShadow, sizes）, decorative |
 
 ---
 

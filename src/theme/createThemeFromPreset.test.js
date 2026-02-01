@@ -101,6 +101,18 @@ describe('createThemeFromPreset', () => {
       });
     });
 
+    it('loadingIndicator を含む', () => {
+      const theme = createThemeFromPreset('library-classic', mockBuildPath);
+      expect(theme.custom.loadingIndicator).toBeDefined();
+      expect(theme.custom.loadingIndicator.accentKey).toBe('brown');
+      expect(theme.custom.loadingIndicator.container.backgroundColor).toContain('255, 248, 240');
+    });
+
+    it('minimal-light の loadingIndicator は accentKey neutral', () => {
+      const theme = createThemeFromPreset('minimal-light', mockBuildPath);
+      expect(theme.custom.loadingIndicator.accentKey).toBe('neutral');
+    });
+
     it('layout は library-classic では undefined', () => {
       const theme = createThemeFromPreset('library-classic', mockBuildPath);
       expect(theme.custom.layout).toBeUndefined();

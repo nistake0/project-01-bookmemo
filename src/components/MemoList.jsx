@@ -4,6 +4,7 @@ import { ErrorDialogContext } from './CommonErrorDialog';
 import { useMemo } from '../hooks/useMemo';
 import MemoCard from './MemoCard';
 import MemoEditor from './MemoEditor';
+import LoadingIndicator from './common/LoadingIndicator';
 
 const MemoList = ({ bookId, onMemoUpdated }) => {
   const { setGlobalError } = useContext(ErrorDialogContext);
@@ -59,7 +60,13 @@ const MemoList = ({ bookId, onMemoUpdated }) => {
   };
 
   if (loading) {
-    return <Typography>メモを読み込み中...</Typography>;
+    return (
+      <LoadingIndicator
+        variant="inline"
+        message="メモを読み込み中..."
+        data-testid="memo-list-loading"
+      />
+    );
   }
   
   if (memos.length === 0) {
