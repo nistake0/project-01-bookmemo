@@ -345,6 +345,7 @@ function AppRoutes() {
         sx={{
           height: '100vh',
           overflowY: 'auto',
+          overflowX: 'hidden',
           WebkitOverflowScrolling: 'touch',
           // 画面下部のボトムナビの重なり回避（各ページでもpbしているが二重でも実害なし）
           pb: hideBottomNav ? 0 : { xs: '64px', sm: '72px' },
