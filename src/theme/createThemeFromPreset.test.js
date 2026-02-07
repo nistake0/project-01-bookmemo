@@ -118,6 +118,19 @@ describe('createThemeFromPreset', () => {
       expect(theme.custom.layout).toBeUndefined();
     });
 
+    it('mode: dark で palette.mode が dark になり custom.isDark が true', () => {
+      const theme = createThemeFromPreset('library-classic', mockBuildPath, 'dark');
+      expect(theme.palette.mode).toBe('dark');
+      expect(theme.custom.isDark).toBe(true);
+      expect(theme.palette.text.primary).toBe('#ffffff');
+    });
+
+    it('mode: dark で effectivePreset の dark 値が適用される', () => {
+      const theme = createThemeFromPreset('library-classic', mockBuildPath, 'dark');
+      expect(theme.palette.background.default).toBe('#1a1a24');
+      expect(theme.custom.cardShadow).toContain('inset 0 1px 0 rgba(255, 255, 255, 0.06)');
+    });
+
     it('typographyOverrides, sizes, spacing を含む', () => {
       const theme = createThemeFromPreset('library-classic', mockBuildPath);
       expect(theme.custom).toHaveProperty('typographyOverrides');

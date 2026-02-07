@@ -28,9 +28,10 @@ export function getBookCardSx(theme, options = {}) {
   const glass = theme.custom?.glassEffect ?? { opacity: 0.75, blur: '20px', saturate: '180%' };
   const cardShadow = theme.custom?.cardShadow ?? DEFAULT_CARD_SHADOW;
   const cardShadowHover = theme.custom?.cardShadowHover ?? DEFAULT_CARD_SHADOW_HOVER;
+  const glassBg = theme.custom?.glassBackgroundColor ?? `rgba(255, 255, 255, ${glass.opacity})`;
 
   const base = {
-    backgroundColor: `rgba(255, 255, 255, ${glass.opacity})`,
+    backgroundColor: glassBg,
     backdropFilter: `blur(${glass.blur}) saturate(${glass.saturate})`,
     border: `2px solid ${accent.light}`,
     borderRadius: 3,
@@ -154,15 +155,18 @@ export function getMemoCardSx(theme, options = {}) {
   };
   const borderRadius = optionsBorderRadius ?? decorations.borderRadius ?? 3;
   const glass = theme.custom?.glassEffect ?? { opacity: 0.75, blur: '20px', saturate: '180%' };
-  const memoBg = accent.bgTint ?? `rgba(255, 255, 255, ${glass.opacity})`;
+  const glassBg = theme.custom?.glassBackgroundColor ?? `rgba(255, 255, 255, ${glass.opacity})`;
+  const memoBg = accent.bgTint ?? glassBg;
+  const insetHighlight = theme.custom?.cardInsetHighlight ?? 'rgba(255, 255, 255, 0.6)';
+  const insetHighlightHover = theme.custom?.cardInsetHighlightHover ?? 'rgba(255, 255, 255, 0.65)';
 
   let cardShadow = theme.custom?.cardShadow ?? DEFAULT_CARD_SHADOW;
   let cardShadowHover = theme.custom?.cardShadowHover ?? DEFAULT_CARD_SHADOW_HOVER;
   if (useMemoAccentShadow) {
     const shadowFallback = accent.shadow || 'rgba(123, 104, 238, 0.08)';
     const shadowHoverFallback = accent.shadowHover || accent.shadow || 'rgba(123, 104, 238, 0.12)';
-    cardShadow = `0 6px 24px rgba(0, 0, 0, 0.1), 0 2px 8px ${shadowFallback}, inset 0 1px 0 rgba(255, 255, 255, 0.6)`;
-    cardShadowHover = `0 10px 32px rgba(0, 0, 0, 0.12), 0 4px 12px ${shadowHoverFallback}, inset 0 1px 0 rgba(255, 255, 255, 0.65)`;
+    cardShadow = `0 6px 24px rgba(0, 0, 0, 0.1), 0 2px 8px ${shadowFallback}, inset 0 1px 0 ${insetHighlight}`;
+    cardShadowHover = `0 10px 32px rgba(0, 0, 0, 0.12), 0 4px 12px ${shadowHoverFallback}, inset 0 1px 0 ${insetHighlightHover}`;
   }
 
   const pseudoAfter = decorations.foldedCorner

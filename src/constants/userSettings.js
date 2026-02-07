@@ -6,6 +6,11 @@
 /** デフォルトのテーマプリセットID（タスクBで使用） */
 export const DEFAULT_THEME_PRESET_ID = 'library-classic';
 
+/** テーマモード: 'normal' = 明るい背景, 'dark' = 暗い背景 */
+export const THEME_MODES = ['normal', 'dark'];
+
+/** デフォルトのテーマモード */
+export const DEFAULT_THEME_MODE = 'normal';
 
 /** ユーザー設定のデフォルト値 */
 export const DEFAULT_USER_SETTINGS = {
@@ -15,5 +20,6 @@ export const DEFAULT_USER_SETTINGS = {
   },
   preferences: {
     themePresetId: DEFAULT_THEME_PRESET_ID,
+    themeMode: DEFAULT_THEME_MODE,
   },
 };

@@ -55,6 +55,14 @@ describe('Settings', () => {
     expect(screen.getByTestId('theme-preset-slim-compact')).toBeInTheDocument();
   });
 
+  test('モード（ノーマル/ダーク）の切り替えが表示される', async () => {
+    renderSettings();
+
+    await screen.findByTestId('theme-mode-radio-group');
+    expect(screen.getByTestId('theme-mode-normal')).toBeInTheDocument();
+    expect(screen.getByTestId('theme-mode-dark')).toBeInTheDocument();
+  });
+
   test('プロフィール編集ボタンが表示される', async () => {
     renderSettings();
 

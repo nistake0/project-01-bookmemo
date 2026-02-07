@@ -53,6 +53,7 @@ function UserSettingsProviderInner({ children }) {
           },
           preferences: {
             themePresetId: data.preferences?.themePresetId ?? DEFAULT_USER_SETTINGS.preferences.themePresetId,
+            themeMode: data.preferences?.themeMode ?? DEFAULT_USER_SETTINGS.preferences.themeMode,
           },
         });
       } else {

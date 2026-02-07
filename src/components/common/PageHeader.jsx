@@ -26,6 +26,7 @@ const PageHeader = ({ title, subtitle, children }) => {
 
   const borderRadius = ph.borderRadius ?? { xs: 16, sm: 20 };
   const hasPaperTexture = ph.backgroundImage === 'paper';
+  const surface = theme.custom?.pageHeaderSurface ?? {};
 
   const paperSx = {
     p: 0,
@@ -33,19 +34,18 @@ const PageHeader = ({ title, subtitle, children }) => {
     position: 'relative',
     overflow: 'hidden',
     borderRadius,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: surface.backgroundColor ?? 'rgba(255, 255, 255, 0.7)',
     backdropFilter: 'blur(24px) saturate(180%)',
     border: `3px solid ${accent.border || accent.light}`,
-    backgroundImage: hasPaperTexture
-      ? [
-          `url("${PATHS.PAPER_TEXTURE()}")`,
-          'linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.5))',
-        ]
-      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.7))',
+    backgroundImage: hasPaperTexture && surface.backgroundImage
+      ? [`url("${PATHS.PAPER_TEXTURE()}")`, surface.backgroundImage]
+      : hasPaperTexture
+        ? [`url("${PATHS.PAPER_TEXTURE()}")`, 'linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.5))']
+        : (surface.backgroundImage ?? 'linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.7))'),
     backgroundBlendMode: hasPaperTexture ? 'overlay' : 'normal',
     backgroundSize: hasPaperTexture ? '200% 200%, cover' : 'cover',
     backgroundPosition: hasPaperTexture ? '0 0, center' : 'center',
-    boxShadow: `
+    boxShadow: surface.boxShadow ?? `
       0 18px 50px rgba(15, 23, 42, 0.15),
       0 4px 12px rgba(0, 0, 0, 0.1),
       inset 0 1px 0 rgba(255, 255, 255, 0.6)
@@ -107,7 +107,7 @@ const PageHeader = ({ title, subtitle, children }) => {
             fontWeight: 700,
             fontSize: ph.titleFontSize ?? { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
             mb: subtitle ? 1 : 0,
-            color: 'rgba(15, 23, 42, 0.92)',
+            color: surface.titleColor ?? 'rgba(15, 23, 42, 0.92)',
             letterSpacing: '-0.02em',
           }}
         >
@@ -120,7 +120,7 @@ const PageHeader = ({ title, subtitle, children }) => {
             sx={{
               opacity: 0.92,
               fontSize: ph.subtitleFontSize ?? { xs: '0.9rem', sm: '1rem' },
-              color: 'rgba(51, 65, 85, 0.92)',
+              color: surface.subtitleColor ?? 'rgba(51, 65, 85, 0.92)',
             }}
           >
             {subtitle}

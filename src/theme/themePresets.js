@@ -89,6 +89,24 @@ export function getThemePresets(buildPath) {
         },
         dotShadow: '0 2px 12px rgba(139, 69, 19, 0.35)',
       },
+      dark: {
+        backgroundColor: '#1a1a24',
+        overlay: {
+          top: 'rgba(20, 20, 35, 0.7)',
+          mid: 'rgba(45, 40, 35, 0.5)',
+          bottom: 'rgba(10, 10, 18, 0.8)',
+        },
+        cardShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+        cardShadowHover: '0 12px 40px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+        loadingIndicator: {
+          container: {
+            backgroundColor: 'rgba(35, 32, 40, 0.95)',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+          },
+        },
+        chartColors: { bar: '#64b5f6', memo: '#ba68c8' },
+      },
     },
     'minimal-light': {
       id: 'minimal-light',
@@ -159,6 +177,24 @@ export function getThemePresets(buildPath) {
           boxShadow: '0 2px 12px rgba(0, 0, 0, 0.06)',
           border: '1px solid rgba(0, 0, 0, 0.08)',
         },
+      },
+      dark: {
+        backgroundColor: '#121212',
+        overlay: {
+          top: 'transparent',
+          mid: 'transparent',
+          bottom: 'transparent',
+        },
+        cardShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+        cardShadowHover: '0 12px 40px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+        loadingIndicator: {
+          container: {
+            backgroundColor: 'rgba(30, 30, 30, 0.95)',
+            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.4)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+          },
+        },
+        chartColors: { bar: '#64b5f6', memo: '#ba68c8' },
       },
     },
     'slim-compact': {
@@ -273,6 +309,24 @@ export function getThemePresets(buildPath) {
           gapInline: 8,
           gapSmall: 6,
         },
+      },
+      dark: {
+        backgroundColor: '#121212',
+        overlay: {
+          top: 'transparent',
+          mid: 'transparent',
+          bottom: 'transparent',
+        },
+        cardShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+        cardShadowHover: '0 12px 40px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+        loadingIndicator: {
+          container: {
+            backgroundColor: 'rgba(30, 30, 30, 0.95)',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.4)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+          },
+        },
+        chartColors: { bar: '#64b5f6', memo: '#ba68c8' },
       },
     },
   };
