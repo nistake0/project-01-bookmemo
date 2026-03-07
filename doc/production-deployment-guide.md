@@ -115,6 +115,26 @@ mainブランチへのマージ時に自動ビルド・デプロイします。
 - 認証済みユーザーのみアクセス可能に設定
 - データの読み書き権限を最小限に設定
 
+### APIキー露出時の対応手順
+ドキュメントやGit履歴にAPIキーが含まれていた場合：
+
+1. **即時対応**
+   - 該当ドキュメントからAPIキーを削除してコミット
+   - Google Cloud Console で該当APIキーを無効化または削除
+
+2. **新規APIキー作成**
+   - [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials
+   - 新しいAPIキーを作成
+   - HTTP referrers制限を設定（本番: `https://*.github.io/*`、開発: `http://localhost:*`）
+   - API制限: Google Books API のみに限定
+
+3. **GitHub Secretsの更新**
+   - `VITE_GOOGLE_BOOKS_API_KEY` を新キーで更新
+   - ローカル `.env.local` も更新
+
+4. **確認**
+   - 再デプロイ後に外部検索機能の動作確認
+
 ## デプロイ確認手順
 
 ### 1. 本番環境での動作確認

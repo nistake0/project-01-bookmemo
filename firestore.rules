@@ -49,9 +49,8 @@ service cloud.firestore {
       
       // ステータス履歴のサブコレクション
       match /statusHistory/{historyId} {
-        // 書籍の所有者のみがアクセス可能
-        allow read, write: if request.auth != null && request.auth.uid == get(/databases/$(database)/documents/books/$(bookId)).data.userId;
-        allow create: if request.auth != null && request.auth.uid == get(/databases/$(database)/documents/books/$(bookId)).data.userId;
+        // 書籍の所有者のみがアクセス可能（read, write で create を含む）
+        allow read, write: if isAuthenticated() && request.auth.uid == get(/databases/$(database)/documents/books/$(bookId)).data.userId;
       }
     }
     

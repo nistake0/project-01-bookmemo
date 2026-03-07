@@ -53,9 +53,11 @@ export const setupGlobalErrorHandling = () => {
   });
 
   window.addEventListener('beforeunload', () => {
-    const errors = ErrorLogger.getErrors();
-    if (errors.length > 0) {
-      console.log('📋 Error logs available in localStorage: bookmemo_error_logs');
+    if (PATHS.IS_DEVELOPMENT()) {
+      const errors = ErrorLogger.getErrors();
+      if (errors.length > 0) {
+        console.log('📋 Error logs available in localStorage: bookmemo_error_logs');
+      }
     }
   });
 };
@@ -136,9 +138,9 @@ export const showDebugInfo = () => {
     if (errors.length > 0) {
       console.log('📋 Previous Error Logs:', errors);
     }
+    // 本番環境ではデバッグコマンドを登録しない（localStorage など機密情報の露出防止）
+    registerDebugCommands();
   }
-
-  registerDebugCommands();
 };
 
 export default ErrorLogger;

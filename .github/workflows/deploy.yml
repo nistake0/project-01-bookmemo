@@ -73,10 +73,7 @@ jobs:
     
     - name: Create production env file
       run: |
-        echo "=== Debug: Checking all secrets ==="
-        echo "VITE_FIREBASE_API_KEY: $([ -n "${{ secrets.VITE_FIREBASE_API_KEY }}" ] && echo "SET (${#VITE_FIREBASE_API_KEY} chars)" || echo "NOT SET")"
-        echo "VITE_GOOGLE_BOOKS_API_KEY: $([ -n "${{ secrets.VITE_GOOGLE_BOOKS_API_KEY }}" ] && echo "SET (${#VITE_GOOGLE_BOOKS_API_KEY} chars)" || echo "NOT SET")"
-        echo "=== Creating .env.production ==="
+        # 機密情報をログに出力しない（セキュリティ対応）
         cat > .env.production << EOF
         VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }}
         VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
@@ -86,26 +83,9 @@ jobs:
         VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }}
         VITE_GOOGLE_BOOKS_API_KEY=${{ secrets.VITE_GOOGLE_BOOKS_API_KEY }}
         EOF
-        echo "=== .env.production file created ==="
-        echo "File contents (first 200 chars):"
-        head -c 200 .env.production
-        echo ""
-        echo "VITE_GOOGLE_BOOKS_API_KEY line:"
-        grep VITE_GOOGLE_BOOKS_API_KEY .env.production
     
     - name: Build
-      run: |
-        echo "=== Build step started ==="
-        echo "Checking .env.production file before build:"
-        if [ -f .env.production ]; then
-          echo "File exists"
-          echo "VITE_GOOGLE_BOOKS_API_KEY line:"
-          grep VITE_GOOGLE_BOOKS_API_KEY .env.production || echo "Line not found"
-        else
-          echo "File does not exist"
-        fi
-        npm run build
-        echo "=== Build completed ==="
+      run: npm run build
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
