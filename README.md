@@ -127,6 +127,19 @@ npm run preview
 
 You can preview the built app locally.
 
+### Icon Generation
+
+Generates PWA icons (favicon, apple-touch-icon, and manifest PNGs).
+
+```bash
+npm run generate-icons
+```
+
+**Two modes**:
+
+- **Image-based**: If `public/icons/icon-source.png` exists, the script resizes it to generate all required sizes (192×192, 512×512, 180×180). To change the icon, replace this image and run the command.
+- **SVG-based**: If `icon-source.png` is missing, PNGs are generated from `icon-192x192.svg` and `icon-512x512.svg`.
+
 ## Testing
 
 This project uses Jest and Cypress for testing.

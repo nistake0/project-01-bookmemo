@@ -127,6 +127,19 @@ npm run preview
 
 ビルドされたアプリをローカルでプレビューできます。
 
+### アイコンの生成
+
+PWA用アイコン（favicon・apple-touch-icon・manifest用PNG）を生成します。
+
+```bash
+npm run generate-icons
+```
+
+**2通りの運用**:
+
+- **画像ベース**: `public/icons/icon-source.png` を配置すると、それをリサイズして各サイズ（192×192, 512×512, 180×180）を生成します。アイコンを差し替える際はこの画像を置き換えてから実行してください。
+- **SVGベース**: `icon-source.png` が無い場合、`icon-192x192.svg` と `icon-512x512.svg` からPNGを生成します。
+
 ## テスト
 
 このプロジェクトではJestとCypressを使用してテストを実行します。
