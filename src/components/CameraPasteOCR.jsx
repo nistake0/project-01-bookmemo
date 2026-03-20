@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Snackbar, Alert } from '@mui/material';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+import { devLog } from '../utils/logger';
 
 const CameraPasteOCR = ({ onTextDetected, disabled = false }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,7 +16,7 @@ const CameraPasteOCR = ({ onTextDetected, disabled = false }) => {
       if (navigator.clipboard && navigator.clipboard.readText) {
         const text = await navigator.clipboard.readText();
         if (text && text.trim()) {
-          console.log('[CameraPasteOCR] ペーストされたテキスト:', text);
+          devLog('[CameraPasteOCR] ペーストされたテキスト:', text);
           onTextDetected(text.trim());
         } else {
           setError('クリップボードが空です');

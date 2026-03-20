@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { devLog } from '../utils/logger';
 
 // 環境変数アクセス関数（テストでモック可能）
 export const getGoogleBooksApiKey = () => {
@@ -206,7 +207,7 @@ export const useExternalBookSearch = () => {
       }
       
       // デバッグ情報を出力
-      console.log('Google Books API Key check:', {
+      devLog('Google Books API Key check:', {
         hasApiKey: !!apiKey,
         apiKeyLength: apiKey ? apiKey.length : 0,
         isJestEnvironment: typeof jest !== 'undefined',
@@ -315,12 +316,12 @@ export const useExternalBookSearch = () => {
       // Google Books APIで検索
       try {
         setLoadingStep('Google Booksで検索中...');
-        console.log('Trying Google Books API for query:', query);
+        devLog('Trying Google Books API for query:', query);
         const googleResults = await searchGoogleBooks(query, searchType);
-        console.log('Google Books raw results:', googleResults);
+        devLog('Google Books raw results:', googleResults);
         if (googleResults && googleResults.length > 0) {
           const normalizedGoogleResults = normalizeSearchResults(googleResults, 'google');
-          console.log('Google Books normalized results:', normalizedGoogleResults);
+          devLog('Google Books normalized results:', normalizedGoogleResults);
           results.push(...normalizedGoogleResults);
         }
       } catch (googleError) {
@@ -333,8 +334,8 @@ export const useExternalBookSearch = () => {
       setLoadingStep('結果を整理中...');
 
       // デバッグ用ログ
-      console.log('Search results:', results);
-      console.log('Results length:', results.length);
+      devLog('Search results:', results);
+      devLog('Results length:', results.length);
 
       // 結果を信頼度順にソート
       const sortedResults = results.sort((a, b) => b.confidence - a.confidence);

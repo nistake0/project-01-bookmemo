@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button, Box, Typography, CircularProgress } from '@mui/material';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import Tesseract from 'tesseract.js';
+import { devLog } from '../utils/logger';
 
 const CameraOCR = ({ onTextDetected, disabled = false }) => {
   const [isCapturing, setIsCapturing] = useState(false);
@@ -67,7 +68,7 @@ const CameraOCR = ({ onTextDetected, disabled = false }) => {
       // キャンバスから画像データを取得
       const imageData = canvas.toDataURL('image/jpeg', 0.8);
       
-      console.log('[CameraOCR] OCR処理開始');
+      devLog('[CameraOCR] OCR処理開始');
       
       // Tesseract.jsでOCR処理
       const result = await Tesseract.recognize(
@@ -76,14 +77,14 @@ const CameraOCR = ({ onTextDetected, disabled = false }) => {
         {
           logger: m => {
             if (m.status === 'recognizing text') {
-              console.log(`[CameraOCR] 進捗: ${Math.round(m.progress * 100)}%`);
+              devLog(`[CameraOCR] 進捗: ${Math.round(m.progress * 100)}%`);
             }
           }
         }
       );
       
       const detectedText = result.data.text.trim();
-      console.log('[CameraOCR] 検出されたテキスト:', detectedText);
+      devLog('[CameraOCR] 検出されたテキスト:', detectedText);
       
       if (detectedText) {
         onTextDetected(detectedText);

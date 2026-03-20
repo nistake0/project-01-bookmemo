@@ -4,13 +4,14 @@ import { Box, Typography } from "@mui/material";
 import PageHeader from "../components/common/PageHeader";
 import BookForm from "../components/BookForm";
 import BookScanner from "../components/BookScanner";
+import { devLog } from "../utils/logger";
 
 export default function BookAdd() {
   const [isbn, setIsbn] = useState(""); // 追加
   const navigate = useNavigate();
 
   const handleScanDetected = (code) => {
-    console.log("[BookAdd] handleScanDetected スキャン結果:", code);
+    devLog("[BookAdd] handleScanDetected スキャン結果:", code);
     setIsbn(code); // スキャン結果を状態にセット
   };
 

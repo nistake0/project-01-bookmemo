@@ -2,6 +2,8 @@
  * 検索結果のsessionStorage管理ユーティリティ
  */
 
+import { devLog } from './logger';
+
 const SESSION_STORAGE_KEY = 'lastSearchResults';
 const SESSION_STORAGE_TIMESTAMP_KEY = 'lastSearchTimestamp';
 const STORAGE_TTL = 30 * 60 * 1000; // 30分
@@ -14,7 +16,7 @@ export const saveSearchResults = (results) => {
   try {
     sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(results));
     sessionStorage.setItem(SESSION_STORAGE_TIMESTAMP_KEY, Date.now().toString());
-    console.log('[searchStorage] Saved search results to sessionStorage:', results.length);
+    devLog('[searchStorage] Saved search results to sessionStorage:', results.length);
   } catch (error) {
     console.warn('[searchStorage] Failed to save search results to sessionStorage:', error);
   }
@@ -40,12 +42,12 @@ export const restoreSearchResults = () => {
     if (elapsed >= STORAGE_TTL) {
       // 古いデータは削除してnullを返す
       clearSearchResults();
-      console.log('[searchStorage] Expired search results removed');
+      devLog('[searchStorage] Expired search results removed');
       return null;
     }
     
     const parsedResults = JSON.parse(savedResults);
-    console.log('[searchStorage] Restored search results from sessionStorage:', parsedResults.length);
+    devLog('[searchStorage] Restored search results from sessionStorage:', parsedResults.length);
     return parsedResults;
   } catch (error) {
     console.warn('[searchStorage] Failed to restore search results from sessionStorage:', error);

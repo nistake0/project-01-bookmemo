@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { devLog } from '../utils/logger';
 
 /**
  * 外部検索URLを生成する
@@ -41,7 +42,7 @@ export function useTextCopyMenu(options = {}) {
   const handleClick = (event, text, book = null) => {
     event.preventDefault();
     event.stopPropagation();
-    console.log('[useTextCopyMenu] handleClick called', { text, currentTarget: event.currentTarget });
+    devLog('[useTextCopyMenu] handleClick called', { text, currentTarget: event.currentTarget });
     setAnchorEl(event.currentTarget);
     setSelectedText(text);
     setSelectedBook(book);
@@ -53,7 +54,7 @@ export function useTextCopyMenu(options = {}) {
   const handleContextMenu = (event, text, book = null) => {
     event.preventDefault();
     event.stopPropagation();
-    console.log('[useTextCopyMenu] handleContextMenu called', { text, currentTarget: event.currentTarget });
+    devLog('[useTextCopyMenu] handleContextMenu called', { text, currentTarget: event.currentTarget });
     setAnchorEl(event.currentTarget);
     setSelectedText(text);
     setSelectedBook(book);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { PATHS } from '../config/paths';
+import { devLog } from '../utils/logger';
 
 /**
  * PWA機能を管理するカスタムフック
@@ -155,7 +156,7 @@ export const usePWA = () => {
   const registerServiceWorker = useCallback(async () => {
     // 開発環境でのHTTPSエラーを防ぐため、開発環境ではService Workerを登録しない
     if (PATHS.IS_DEVELOPMENT()) {
-      console.log('Service Worker registration skipped in development environment');
+      devLog('Service Worker registration skipped in development environment');
       return null;
     }
 
@@ -163,7 +164,7 @@ export const usePWA = () => {
       const swPath = PATHS.SW_JS();
       const registration = await navigator.serviceWorker.register(swPath);
       setSwRegistration(registration);
-      console.log('Service Worker registered:', registration);
+      devLog('Service Worker registered:', registration);
 
       // 更新の確認
       registration.addEventListener('updatefound', () => {
@@ -172,7 +173,7 @@ export const usePWA = () => {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               // 新しいService Workerが利用可能
-              console.log('New Service Worker available');
+              devLog('New Service Worker available');
             }
           });
         }
@@ -201,7 +202,7 @@ export const usePWA = () => {
       setIsInstalled(true);
       setIsInstallable(false);
       setDeferredPrompt(null);
-      console.log('PWA was installed');
+      devLog('PWA was installed');
       
       // インストール完了を記録
       localStorage.setItem('bookmemo_installed', 'true');
@@ -231,9 +232,9 @@ export const usePWA = () => {
       const { outcome } = await deferredPrompt.userChoice;
       
       if (outcome === 'accepted') {
-        console.log('User accepted the install prompt');
+        devLog('User accepted the install prompt');
       } else {
-        console.log('User dismissed the install prompt');
+        devLog('User dismissed the install prompt');
       }
       
       setDeferredPrompt(null);

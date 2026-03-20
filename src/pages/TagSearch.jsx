@@ -18,6 +18,7 @@ import SearchResults from '../components/search/SearchResults';
 import FullTextSearch from '../components/search/FullTextSearch';
 import { useSearch } from '../hooks/useSearch';
 import { useSearchResultHandler } from '../hooks/useSearchResultHandler.jsx';
+import { devLog } from '../utils/logger';
 
 export default function TagSearch() {
   const { user } = useAuth();
@@ -43,7 +44,7 @@ export default function TagSearch() {
   useEffect(() => {
     const restoreSearchState = location.state?.restoreSearch;
     if (restoreSearchState?.results) {
-      console.log('[TagSearch] Restoring search state:', restoreSearchState);
+      devLog('[TagSearch] Restoring search state:', restoreSearchState);
       // 検索結果を復元
       setResults(restoreSearchState.results);
     }
@@ -58,7 +59,7 @@ export default function TagSearch() {
   };
 
   const handleSearch = (conditions) => {
-    console.log('検索実行:', conditions);
+    devLog('検索実行:', conditions);
     executeSearch(conditions);
   };
 
@@ -76,7 +77,7 @@ export default function TagSearch() {
 
   // タグクリック時の処理
   const handleTagClick = (tag) => {
-    console.log('タグがクリックされました:', tag);
+    devLog('タグがクリックされました:', tag);
     
     // 検索条件を更新（選択されたタグを設定）
     const newSearchConditions = {

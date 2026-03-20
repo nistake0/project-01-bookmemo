@@ -1,11 +1,10 @@
 /**
  * 統一ログ管理システム
- * 
- * 機能:
- * - 環境別ログレベル制御
- * - 統一フォーマット
- * - パフォーマンス最適化
- * - カテゴリ別ログ管理
+ *
+ * - Vite ビルド: import.meta.env.DEV / PROD で本番のデバッグ出力を抑制
+ * - Jest / Node: process.env.NODE_ENV が production のとき本番扱い
+ * - VITE_LOG_LEVEL: ERROR | WARN | INFO | DEBUG（省略時は本番 WARN、開発 DEBUG）
+ * - VITE_DEBUG_LOGS=true: 本番ビルドでも devLog / DEBUG レベルを有効化（暫定調査用）
  */
 
 // ログレベル定義
@@ -13,48 +12,70 @@ export const LOG_LEVELS = {
   ERROR: 0,
   WARN: 1,
   INFO: 2,
-  DEBUG: 3
+  DEBUG: 3,
 };
 
-// 現在のログレベル（環境変数から取得、デフォルトはINFO）
-const getCurrentLogLevel = () => {
-  // 環境変数の取得
-  let envLevel;
-  let isProd = false;
-  
-  // ブラウザ環境での環境変数取得（Viteの環境変数）
-  try {
-    // ブラウザ環境では window.__VITE_ENV__ やその他の方法で環境変数を取得
-    if (typeof window !== 'undefined') {
-      // Viteの環境変数はビルド時に置換されるため、直接参照
-      const viteEnv = window.__VITE_ENV__ || {};
-      envLevel = viteEnv.VITE_LOG_LEVEL;
-      isProd = viteEnv.PROD;
-    }
-  } catch (e) {
-    // 環境変数取得に失敗した場合はスキップ
+/**
+ * アプリ実行環境（Vite の define で埋め込んだ process.env.* と Jest の NODE_ENV を共用）
+ *
+ * 重要: ブラウザには `process` が無い。`vite.config.js` の define が
+ * `process.env.NODE_ENV` などをビルド時に文字列リテラルへ置換するため、
+ * 「process.env オブジェクトから拾う」書き方（pe.NODE_ENV）だけだと置換されず、
+ * 常に development 扱いになり devLog が本番でも出続ける。
+ *
+ * ※ import.meta は使わない（Jest 実行時にパースエラーになるため）
+ * @returns {{ DEV: boolean, PROD: boolean, MODE: string, VITE_LOG_LEVEL?: string, VITE_DEBUG_LOGS?: string }}
+ */
+export function getAppEnv() {
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  const isProd = nodeEnv === 'production';
+  const logLevelRaw = process.env.VITE_LOG_LEVEL;
+  const debugLogsRaw = process.env.VITE_DEBUG_LOGS;
+  return {
+    DEV: !isProd,
+    PROD: isProd,
+    MODE: nodeEnv,
+    VITE_LOG_LEVEL:
+      logLevelRaw !== undefined && logLevelRaw !== null && String(logLevelRaw).length > 0
+        ? String(logLevelRaw)
+        : undefined,
+    VITE_DEBUG_LOGS:
+      debugLogsRaw !== undefined && debugLogsRaw !== null && String(debugLogsRaw).length > 0
+        ? String(debugLogsRaw)
+        : undefined,
+  };
+}
+
+/** 本番ビルドでも console デバッグを出すか（一時調査用。通常は未設定） */
+export function isForcedDebugLogging() {
+  return getAppEnv().VITE_DEBUG_LOGS === 'true';
+}
+
+/**
+ * 開発用の console.log 相当。本番ビルドでは無出力（VITE_DEBUG_LOGS=true のときのみ出力）
+ * @param {...unknown} args - console.log にそのまま渡す
+ */
+export function devLog(...args) {
+  const env = getAppEnv();
+  if (env.PROD && !isForcedDebugLogging()) {
+    return;
   }
-  
-  // Node.js環境でのprocess.envの使用（テスト環境等）
-  if (typeof process !== 'undefined' && process.env) {
-    if (!envLevel) {
-      envLevel = process.env.VITE_LOG_LEVEL;
-    }
-    if (!isProd) {
-      isProd = process.env.NODE_ENV === 'production';
-    }
+  console.log(...args);
+}
+
+const resolveMaxLogLevel = () => {
+  const env = getAppEnv();
+  const levelStr = env.VITE_LOG_LEVEL;
+  if (levelStr && LOG_LEVELS[String(levelStr).toUpperCase()] !== undefined) {
+    return LOG_LEVELS[String(levelStr).toUpperCase()];
   }
-  
-  if (envLevel && LOG_LEVELS[envLevel.toUpperCase()] !== undefined) {
-    return LOG_LEVELS[envLevel.toUpperCase()];
+  if (env.PROD && !isForcedDebugLogging()) {
+    return LOG_LEVELS.WARN;
   }
-  
-  // デフォルト: 開発環境ではDEBUG、本番環境ではWARN
-  // ブラウザ環境では開発モードと仮定
-  return isProd ? LOG_LEVELS.WARN : LOG_LEVELS.DEBUG;
+  return LOG_LEVELS.DEBUG;
 };
 
-const currentLogLevel = getCurrentLogLevel();
+const currentLogLevel = resolveMaxLogLevel();
 
 // ログカテゴリ定義
 export const LOG_CATEGORIES = {
@@ -67,12 +88,12 @@ export const LOG_CATEGORIES = {
   OCR: '📷 OCR',
   FIREBASE: '🔥 FIREBASE',
   ERROR: '❌ ERROR',
-  DEBUG: '🐛 DEBUG'
+  DEBUG: '🐛 DEBUG',
 };
 
 /**
  * ログフォーマッター
- * @param {string} level - ログレベル
+ * @param {number} level - ログレベル
  * @param {string} category - ログカテゴリ
  * @param {string} message - メッセージ
  * @param {any} data - 追加データ
@@ -80,19 +101,20 @@ export const LOG_CATEGORIES = {
  */
 const formatLog = (level, category, message, data = null) => {
   const timestamp = new Date().toISOString();
-  const levelSymbol = {
-    [LOG_LEVELS.ERROR]: '❌',
-    [LOG_LEVELS.WARN]: '⚠️',
-    [LOG_LEVELS.INFO]: 'ℹ️',
-    [LOG_LEVELS.DEBUG]: '🐛'
-  }[level] || '📝';
+  const levelSymbol =
+    {
+      [LOG_LEVELS.ERROR]: '❌',
+      [LOG_LEVELS.WARN]: '⚠️',
+      [LOG_LEVELS.INFO]: 'ℹ️',
+      [LOG_LEVELS.DEBUG]: '🐛',
+    }[level] || '📝';
 
   let logMessage = `${levelSymbol} ${category} [${timestamp}] ${message}`;
-  
+
   if (data !== null && data !== undefined) {
     logMessage += `\n  Data: ${JSON.stringify(data, null, 2)}`;
   }
-  
+
   return logMessage;
 };
 
@@ -104,14 +126,12 @@ const formatLog = (level, category, message, data = null) => {
  * @param {any} data - 追加データ
  */
 const log = (level, category, message, data = null) => {
-  // ログレベルチェック
   if (level > currentLogLevel) {
     return;
   }
 
   const formattedMessage = formatLog(level, category, message, data);
-  
-  // レベル別出力先選択
+
   switch (level) {
     case LOG_LEVELS.ERROR:
       console.error(formattedMessage);
@@ -134,53 +154,45 @@ const log = (level, category, message, data = null) => {
  * 統一ログAPI
  */
 export const logger = {
-  // エラーログ
   error: (category, message, data) => log(LOG_LEVELS.ERROR, category, message, data),
-  
-  // 警告ログ
   warn: (category, message, data) => log(LOG_LEVELS.WARN, category, message, data),
-  
-  // 情報ログ
   info: (category, message, data) => log(LOG_LEVELS.INFO, category, message, data),
-  
-  // デバッグログ
   debug: (category, message, data) => log(LOG_LEVELS.DEBUG, category, message, data),
-  
-  // カテゴリ別ヘルパー関数
+
   auth: {
     error: (message, data) => logger.error(LOG_CATEGORIES.AUTH, message, data),
     warn: (message, data) => logger.warn(LOG_CATEGORIES.AUTH, message, data),
     info: (message, data) => logger.info(LOG_CATEGORIES.AUTH, message, data),
-    debug: (message, data) => logger.debug(LOG_CATEGORIES.AUTH, message, data)
+    debug: (message, data) => logger.debug(LOG_CATEGORIES.AUTH, message, data),
   },
-  
+
   book: {
     error: (message, data) => logger.error(LOG_CATEGORIES.BOOK, message, data),
     warn: (message, data) => logger.warn(LOG_CATEGORIES.BOOK, message, data),
     info: (message, data) => logger.info(LOG_CATEGORIES.BOOK, message, data),
-    debug: (message, data) => logger.debug(LOG_CATEGORIES.BOOK, message, data)
+    debug: (message, data) => logger.debug(LOG_CATEGORIES.BOOK, message, data),
   },
-  
+
   memo: {
     error: (message, data) => logger.error(LOG_CATEGORIES.MEMO, message, data),
     warn: (message, data) => logger.warn(LOG_CATEGORIES.MEMO, message, data),
     info: (message, data) => logger.info(LOG_CATEGORIES.MEMO, message, data),
-    debug: (message, data) => logger.debug(LOG_CATEGORIES.MEMO, message, data)
+    debug: (message, data) => logger.debug(LOG_CATEGORIES.MEMO, message, data),
   },
-  
+
   status: {
     error: (message, data) => logger.error(LOG_CATEGORIES.STATUS, message, data),
     warn: (message, data) => logger.warn(LOG_CATEGORIES.STATUS, message, data),
     info: (message, data) => logger.info(LOG_CATEGORIES.STATUS, message, data),
-    debug: (message, data) => logger.debug(LOG_CATEGORIES.STATUS, message, data)
+    debug: (message, data) => logger.debug(LOG_CATEGORIES.STATUS, message, data),
   },
-  
+
   firebase: {
     error: (message, data) => logger.error(LOG_CATEGORIES.FIREBASE, message, data),
     warn: (message, data) => logger.warn(LOG_CATEGORIES.FIREBASE, message, data),
     info: (message, data) => logger.info(LOG_CATEGORIES.FIREBASE, message, data),
-    debug: (message, data) => logger.debug(LOG_CATEGORIES.FIREBASE, message, data)
-  }
+    debug: (message, data) => logger.debug(LOG_CATEGORIES.FIREBASE, message, data),
+  },
 };
 
 export default logger;

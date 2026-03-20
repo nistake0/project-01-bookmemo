@@ -1,4 +1,4 @@
-import { logger, LOG_LEVELS, LOG_CATEGORIES } from './logger';
+import { logger, LOG_LEVELS, LOG_CATEGORIES, devLog, getAppEnv } from './logger';
 
 /**
  * ログ管理システムのユニットテスト
@@ -22,6 +22,26 @@ beforeAll(() => {
 
 afterAll(() => {
   global.console = originalConsole;
+});
+
+describe('devLog / getAppEnv', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('getAppEnv がオブジェクトを返す', () => {
+    const env = getAppEnv();
+    expect(env).toMatchObject({
+      DEV: expect.any(Boolean),
+      PROD: expect.any(Boolean),
+      MODE: expect.any(String),
+    });
+  });
+
+  it('テスト環境では devLog が console.log を呼ぶ', () => {
+    devLog('hello', { x: 1 });
+    expect(mockConsole.log).toHaveBeenCalledWith('hello', { x: 1 });
+  });
 });
 
 describe('logger', () => {

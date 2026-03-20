@@ -100,7 +100,7 @@ Phase A/B/C 完了。詳細は `doc/design-embedded-values-review-and-discussion
 #### 📋 コードレビュー優先事項（2026-01-17追加）
 - [ ] **コードレビュー報告書の確認**: `doc/code-review-20260117.md` を必ず確認
 - [ ] **優先度: 高の改善項目**:
-  - [ ] デバッグログの本番対応（`console.log`が279箇所に存在）
+  - [x] デバッグログの本番対応（`devLog` ＋ 本番では抑制。`console.error` / `console.warn` は必要箇所で継続）
 - [ ] **優先度: 中の改善項目**:
   - [ ] MemoAdd.jsxの状態管理改善（8つの状態変数の整理）
   - [ ] 戻る操作の不具合調査と修正
@@ -167,10 +167,11 @@ Phase A/B/C 完了。詳細は `doc/design-embedded-values-review-and-discussion
   - 未カバー候補: ThemeProviderWithUserSettings、createThemeFromPreset、useUserSettings のエラー/update パス
   - 優先: useUserSettings の updateProfile/updatePreferences、createThemeFromPreset のユニットテスト
 
-- [ ] **デバッグログの本番対応**
-  - `useSearchCache.js`のデバッグログを環境変数で制御
-  - 本番環境では不要なconsole.logを削除
-  - または開発環境でのみ有効化
+- [x] **デバッグログの本番対応**（2026-03-20）
+  - `src/utils/logger.js` の `devLog()` と `getAppEnv()` で開発／本番を判定（`process.env.NODE_ENV`、Vite `define` で埋め込み）
+  - 本番ビルドでは `devLog` は無出力。緊急調査時のみ `.env.production` に `VITE_DEBUG_LOGS=true`
+  - 任意: `VITE_LOG_LEVEL=ERROR|WARN|INFO|DEBUG` で `logger.*` API のしきい値を変更
+  - 主要アプリコードの `console.log` を `devLog` に置換（テストファイル内のログは従来どおり）
 
 - [x] **UIデザイン改善プロジェクト** ✅ **完了** (2026-01-11)
   - **目的**: UIデザインを改善し、デザイン変更が容易な設計・コーディングにリファクタリング
@@ -1275,6 +1276,12 @@ Phase A/B/C 完了。詳細は `doc/design-embedded-values-review-and-discussion
   - [x] UI: 書籍追加時に選択可能
   - [x] 書籍詳細ページでの取得方法表示（Chipコンポーネント）
   - [x] テストカバレッジ: 417/417テスト成功
+
+- [ ] **書籍登録後も取得方法（acquisitionType）を変更できるようにする**
+  - [ ] 書籍編集UI（例: 書籍編集ダイアログ）に取得方法の編集項目を追加
+  - [ ] 更新処理（Firestore更新）に `acquisitionType` を含める
+  - [ ] 書籍詳細表示（Chip）が更新後に即時反映されることを確認
+  - [ ] ユニットテスト追加/更新（書籍編集→保存→表示反映）
 
 #### 優先度4（新機能）
 - [x] **外部検索機能の実装** ✅ **2025-09-23完了**

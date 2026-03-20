@@ -1,5 +1,6 @@
 // エラーログの永続化とグローバルエラーハンドリング、デバッグ支援
 import { PATHS } from '../config/paths';
+import { devLog } from './logger';
 
 export const ErrorLogger = {
   saveError: (error, context = '') => {
@@ -56,7 +57,7 @@ export const setupGlobalErrorHandling = () => {
     if (PATHS.IS_DEVELOPMENT()) {
       const errors = ErrorLogger.getErrors();
       if (errors.length > 0) {
-        console.log('📋 Error logs available in localStorage: bookmemo_error_logs');
+        devLog('📋 Error logs available in localStorage: bookmemo_error_logs');
       }
     }
   });
@@ -73,14 +74,14 @@ const registerDebugCommands = () => {
     },
     clearErrors: () => {
       ErrorLogger.clearErrors();
-      console.log('✅ Error logs cleared');
+      devLog('✅ Error logs cleared');
     },
     showDebugInfo: () => {
-      console.log('🔧 Current Debug Info:');
-      console.log('- Environment:', PATHS.IS_PRODUCTION() ? 'Production' : 'Development');
-      console.log('- Base Path:', PATHS.IS_PRODUCTION() ? '/project-01-bookmemo' : '');
-      console.log('- Current URL:', window.location.href);
-      console.log('- User Agent:', navigator.userAgent);
+      devLog('🔧 Current Debug Info:');
+      devLog('- Environment:', PATHS.IS_PRODUCTION() ? 'Production' : 'Development');
+      devLog('- Base Path:', PATHS.IS_PRODUCTION() ? '/project-01-bookmemo' : '');
+      devLog('- Current URL:', window.location.href);
+      devLog('- User Agent:', navigator.userAgent);
     },
     getCurrentRoute: () => {
       const info = {
@@ -91,7 +92,7 @@ const registerDebugCommands = () => {
         userAgent: navigator.userAgent,
         timestamp: new Date().toISOString()
       };
-      console.log('📍 Current Route Info:', info);
+      devLog('📍 Current Route Info:', info);
       return info;
     },
     getLocalStorage: () => {
@@ -106,37 +107,37 @@ const registerDebugCommands = () => {
           }
         }
       }
-      console.log('💾 LocalStorage Data:', data);
+      devLog('💾 LocalStorage Data:', data);
       return data;
     },
     testErrorLogging: () => {
-      console.log('🧪 Testing error logging...');
+      devLog('🧪 Testing error logging...');
       ErrorLogger.saveError(new Error('Test error from debug command'), 'Debug Test');
-      console.log('✅ Test error logged');
+      devLog('✅ Test error logged');
     }
   };
 
-  console.log('🔧 Debug commands available:');
-  console.log('- bookmemoDebug.getErrors() - Show error logs');
-  console.log('- bookmemoDebug.clearErrors() - Clear error logs');
-  console.log('- bookmemoDebug.showDebugInfo() - Show debug info');
-  console.log('- bookmemoDebug.getCurrentRoute() - Show current route info');
-  console.log('- bookmemoDebug.getLocalStorage() - Show localStorage data');
-  console.log('- bookmemoDebug.testErrorLogging() - Test error logging');
+  devLog('🔧 Debug commands available:');
+  devLog('- bookmemoDebug.getErrors() - Show error logs');
+  devLog('- bookmemoDebug.clearErrors() - Clear error logs');
+  devLog('- bookmemoDebug.showDebugInfo() - Show debug info');
+  devLog('- bookmemoDebug.getCurrentRoute() - Show current route info');
+  devLog('- bookmemoDebug.getLocalStorage() - Show localStorage data');
+  devLog('- bookmemoDebug.testErrorLogging() - Test error logging');
 };
 
 export const showDebugInfo = () => {
   if (typeof window === 'undefined') return;
   if (PATHS.IS_DEVELOPMENT()) {
-    console.log('🔧 Debug Info:');
-    console.log('- Environment:', PATHS.IS_PRODUCTION() ? 'Production' : 'Development');
-    console.log('- Base Path:', PATHS.IS_PRODUCTION() ? '/project-01-bookmemo' : '');
-    console.log('- Current URL:', window.location.href);
-    console.log('- User Agent:', navigator.userAgent);
+    devLog('🔧 Debug Info:');
+    devLog('- Environment:', PATHS.IS_PRODUCTION() ? 'Production' : 'Development');
+    devLog('- Base Path:', PATHS.IS_PRODUCTION() ? '/project-01-bookmemo' : '');
+    devLog('- Current URL:', window.location.href);
+    devLog('- User Agent:', navigator.userAgent);
 
     const errors = ErrorLogger.getErrors();
     if (errors.length > 0) {
-      console.log('📋 Previous Error Logs:', errors);
+      devLog('📋 Previous Error Logs:', errors);
     }
     // 本番環境ではデバッグコマンドを登録しない（localStorage など機密情報の露出防止）
     registerDebugCommands();

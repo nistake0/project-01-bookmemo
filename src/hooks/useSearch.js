@@ -15,6 +15,7 @@ import { buildSearchQueries } from './useSearchQuery';
 import { executeSearchQueries } from './useSearchExecution';
 import { processSearchResults } from './useSearchResults';
 import { saveSearchResults, restoreSearchResults, clearSearchResults as clearSearchStorage } from '../utils/searchStorage';
+import { devLog } from '../utils/logger';
 
 /**
  * 検索機能のカスタムフック
@@ -100,12 +101,12 @@ export function useSearch(options = {}) {
     setError(null);
 
     try {
-      console.log('検索条件:', conditions);
+      devLog('検索条件:', conditions);
       const queries = buildQueries(conditions);
       const allResults = await executeSearchQueries({ db, user, queries, resultLimit });
 
-      console.log('全クエリ実行完了, 総結果数:', allResults.length);
-      console.log('結果の内訳:', {
+      devLog('全クエリ実行完了, 総結果数:', allResults.length);
+      devLog('結果の内訳:', {
         books: allResults.filter(r => r.type === 'book').length,
         memos: allResults.filter(r => r.type === 'memo').length
       });

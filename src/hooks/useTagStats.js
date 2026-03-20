@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { collection, query, getDocs, where, collectionGroup } from 'firebase/firestore';
 import { db } from '../firebase';
+import { devLog } from '../utils/logger';
 
 /**
  * タグ統計データを取得するためのカスタムフック
@@ -30,7 +31,7 @@ export const useTagStats = (user) => {
       setLoading(true);
       setError(null);
 
-      console.log('useTagStats: タグ統計取得開始, userId:', user.uid);
+      devLog('useTagStats: タグ統計取得開始, userId:', user.uid);
 
       // 本とメモのデータを並行して取得
       const [booksSnapshot, memosSnapshot] = await Promise.all([
@@ -38,7 +39,7 @@ export const useTagStats = (user) => {
         getDocs(query(collectionGroup(db, 'memos'), where('userId', '==', user.uid)))
       ]);
 
-      console.log('useTagStats: データ取得完了, 本:', booksSnapshot.size, 'メモ:', memosSnapshot.size);
+      devLog('useTagStats: データ取得完了, 本:', booksSnapshot.size, 'メモ:', memosSnapshot.size);
 
       // タグ統計を初期化
       const stats = {};
@@ -46,7 +47,7 @@ export const useTagStats = (user) => {
       // 本のタグを集計
       booksSnapshot.forEach((doc) => {
         const data = doc.data();
-        console.log('useTagStats: 本データ:', { id: doc.id, title: data.title, tags: data.tags });
+        devLog('useTagStats: 本データ:', { id: doc.id, title: data.title, tags: data.tags });
         
         if (data.tags && Array.isArray(data.tags)) {
           data.tags.forEach(tag => {
@@ -64,12 +65,12 @@ export const useTagStats = (user) => {
         }
       });
 
-      console.log('useTagStats: 本のタグ集計完了');
+      devLog('useTagStats: 本のタグ集計完了');
 
       // メモのタグを集計
       memosSnapshot.forEach((doc) => {
         const data = doc.data();
-        console.log('useTagStats: メモデータ:', { 
+        devLog('useTagStats: メモデータ:', { 
           id: doc.id, 
           bookId: doc.ref.parent.parent?.id,
           tags: data.tags,
@@ -92,10 +93,10 @@ export const useTagStats = (user) => {
         }
       });
 
-      console.log('useTagStats: メモのタグ集計完了, 最終統計:', stats);
+      devLog('useTagStats: メモのタグ集計完了, 最終統計:', stats);
 
       setTagStats(stats);
-      console.log('useTagStats: タグ統計設定完了');
+      devLog('useTagStats: タグ統計設定完了');
     } catch (err) {
       console.error('タグ統計の取得に失敗しました:', err);
       setError(err);

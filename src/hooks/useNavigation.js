@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCallback } from 'react';
+import { devLog } from '../utils/logger';
 
 /**
  * 全画面共通のナビゲーション機能を提供するフック
@@ -33,7 +34,7 @@ export const useNavigation = () => {
   const restoreSearchState = useCallback((searchState) => {
     // 検索状態を復元する処理
     // 実装は各画面で実装
-    console.log('Restoring search state:', searchState);
+    devLog('Restoring search state:', searchState);
   }, []);
 
   return {

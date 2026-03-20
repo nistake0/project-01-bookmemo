@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
 import { Box } from '@mui/material';
+import { devLog } from '../utils/logger';
 
 const BarcodeScanner = ({ onDetected, onError }) => {
   const videoRef = useRef(null);
@@ -53,7 +54,7 @@ const BarcodeScanner = ({ onDetected, onError }) => {
 
         } catch (error) {
           const msg = `カメラの起動に失敗しました。ブラウザや端末のカメラ権限設定を確認し、許可されているかご確認ください。\n詳細: ${error && error.message ? error.message : ''}`;
-          console.log('[BarcodeScanner] onError呼び出し', msg);
+          devLog('[BarcodeScanner] onError呼び出し', msg);
           onError(msg);
         }
       }

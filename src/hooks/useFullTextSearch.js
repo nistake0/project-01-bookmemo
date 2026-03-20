@@ -3,6 +3,7 @@ import { FULL_TEXT_SEARCH_CONFIG } from '../config/fullTextSearchConfig';
 import { useSearchCache } from './useSearchCache';
 import { useSearchRateLimit } from './useSearchRateLimit';
 import { useSearch } from './useSearch';
+import { devLog } from '../utils/logger';
 
 /**
  * 全文検索のメインロジックフック
@@ -69,7 +70,7 @@ export function useFullTextSearch() {
     // 2. キャッシュチェック（レート制限より先に確認）
     const cachedResults = getCached(searchText);
     if (cachedResults) {
-      console.log('🎯 キャッシュヒット:', searchText);
+      devLog('🎯 キャッシュヒット:', searchText);
       setLocalResults(cachedResults);
       return;
     }
@@ -83,7 +84,7 @@ export function useFullTextSearch() {
     
     try {
       // 4. Firebase検索実行
-      console.log('🔍 Firebase検索実行:', searchText);
+      devLog('🔍 Firebase検索実行:', searchText);
       isFirebaseSearchRef.current = true;
       lastSearchTextRef.current = searchText;
       setLocalResults(null); // キャッシュ結果をクリア
@@ -152,7 +153,7 @@ export function useFullTextSearch() {
   useEffect(() => {
     if (isFirebaseSearchRef.current && results && results.length >= 0 && !loading) {
       const searchTextToCache = lastSearchTextRef.current;
-      console.log('📦 Firebase検索完了、キャッシュに保存:', searchTextToCache, 'resultsCount:', results.length);
+      devLog('📦 Firebase検索完了、キャッシュに保存:', searchTextToCache, 'resultsCount:', results.length);
       
       // キャッシュに保存
       setCached(searchTextToCache, results);

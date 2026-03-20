@@ -7,6 +7,7 @@ import { useBookDuplicateCheck } from '../hooks/useBookDuplicateCheck';
 import { useAuth } from '../auth/AuthProvider';
 import { BOOK_STATUS, ALL_BOOK_STATUSES, getBookStatusLabel, ACQUISITION_TYPE, ALL_ACQUISITION_TYPES, getAcquisitionTypeLabel } from '../constants/bookStatus';
 import ExternalBookSearch from './ExternalBookSearch';
+import { devLog } from '../utils/logger';
 
 const defaultFormTypo = {
   formText: { fontSize: { xs: '0.8rem', sm: '0.9rem' } },
@@ -44,11 +45,11 @@ export default function BookForm({ isbn: isbnProp = "", onBookAdded }) {
   // propsのisbnが変わったら反映＆自動取得
   useEffect(() => {
     if (isbnProp && isbnProp !== isbn) {
-      console.log("[BookForm] useEffect: propsのisbnが変化:", isbnProp);
+      devLog("[BookForm] useEffect: propsのisbnが変化:", isbnProp);
       setIsbn(isbnProp);
       // 自動で書籍情報取得
       if (isbnProp.trim() !== "") {
-        console.log("[BookForm] useEffect: 自動で書籍情報取得を実行", isbnProp);
+        devLog("[BookForm] useEffect: 自動で書籍情報取得を実行", isbnProp);
         handleFetchBookInfo(isbnProp);
       }
     }

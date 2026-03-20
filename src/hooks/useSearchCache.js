@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { FULL_TEXT_SEARCH_CONFIG } from '../config/fullTextSearchConfig';
+import { devLog } from '../utils/logger';
 
 /**
  * 検索結果のキャッシュ管理フック
@@ -47,11 +48,11 @@ export function useSearchCache() {
    */
   const getCached = useCallback((searchText) => {
     const key = normalizeKey(searchText);
-    console.log('🔍 キャッシュ検索:', { searchText, key, cacheKeys: Object.keys(cache) });
+    devLog('🔍 キャッシュ検索:', { searchText, key, cacheKeys: Object.keys(cache) });
     const cachedResult = cache[key];
     
     if (!cachedResult) {
-      console.log('❌ キャッシュミス:', key);
+      devLog('❌ キャッシュミス:', key);
       return null;
     }
     
@@ -59,11 +60,11 @@ export function useSearchCache() {
     const now = Date.now();
     if (now - cachedResult.timestamp > CACHE_EXPIRY_MS) {
       // 期限切れ
-      console.log('⏰ キャッシュ期限切れ:', key);
+      devLog('⏰ キャッシュ期限切れ:', key);
       return null;
     }
     
-    console.log('✅ キャッシュヒット:', key);
+    devLog('✅ キャッシュヒット:', key);
     return cachedResult.data;
   }, [cache, normalizeKey, CACHE_EXPIRY_MS]);
 
@@ -76,7 +77,7 @@ export function useSearchCache() {
     const key = normalizeKey(searchText);
     const now = Date.now();
     
-    console.log('💾 キャッシュ保存:', { searchText, key, resultsCount: results?.length || 0 });
+    devLog('💾 キャッシュ保存:', { searchText, key, resultsCount: results?.length || 0 });
     
     let newCache = { ...cache };
     
@@ -85,7 +86,7 @@ export function useSearchCache() {
       const oldestKey = Object.keys(newCache).sort((a, b) => 
         newCache[a].timestamp - newCache[b].timestamp
       )[0];
-      console.log('🗑️ 古いキャッシュを削除:', oldestKey);
+      devLog('🗑️ 古いキャッシュを削除:', oldestKey);
       delete newCache[oldestKey];
     }
     
@@ -99,7 +100,7 @@ export function useSearchCache() {
     setCache(newCache);
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify(newCache));
-      console.log('✅ キャッシュ保存成功:', { key, cacheSize: Object.keys(newCache).length });
+      devLog('✅ キャッシュ保存成功:', { key, cacheSize: Object.keys(newCache).length });
     } catch (error) {
       console.error('キャッシュの保存に失敗しました:', error);
     }
