@@ -7,21 +7,21 @@
 - 全文検索で過去のメモや書籍情報を横断的に検索（現状はクライアントサイド検索で実装）
 - ユーザー認証（個人利用・複数ユーザー対応）
 
-## 2. 技術スタック
-- フロントエンド：React（Vite推奨）、React Router、Material-UI等
-- データベース：Firebase Firestore
-- 画像保存：Firebase Storage（※今後の拡張）
-- 認証：Firebase Authentication（メール＋パスワード）
-- OCR：Tesseract.js（クライアントサイド）
-- バーコードスキャン：zxing-js/library
-- デプロイ：GitHub Pages または Firebase Hosting
-- PWA化・Algolia等は今後の拡張で検討
+## 2. 技術スタック（`package.json` に即した現状）
+- **フロントエンド**: React 19、Vite 6、`react-router-dom` 7（ルータは `HashRouter`）
+- **UI**: MUI（`@mui/material` 7 系、`@mui/x-charts`、`@mui/x-date-pickers`）、Emotion
+- **データ・認証**: Firebase 11（Firestore、Authentication／メール＋パスワード）
+- **その他**: axios、date-fns、**Tesseract.js**（OCR）、**@zxing/library**（ISBN スキャン）
+- **デプロイ**: **GitHub Pages**（リポジトリパス配下：`base: '/project-01-bookmemo/'`）。Firebase Hosting は運用上の選択肢として README に記載あり
+- **PWA**: **実装済み**（Service Worker、Web App Manifest、オフライン時の静的キャッシュ。詳細は §3.2）
+- **全文検索**: **Algolia 等は未使用**。Firestore からの取得結果をクライアント側で検索し、LocalStorage キャッシュとレート制限で負荷を抑制（§3.3）
+- **画像・ファイル**: Firebase Storage は**未接続**（無料枠・プラン制約により画像添付は拡張候補）
 
 ### 2.1. 開発環境・テスト
-- ビルドツール：Vite
-- テストフレームワーク：Jest + React Testing Library
-- 環境変数：Vite（`import.meta.env`）とJest（`process.env`）の互換性問題あり
-- 外部API：Google Books API、OpenBD API
+- ビルド：Vite（`npm run dev` / `npm run build`）
+- テスト：Jest + React Testing Library（`npm run test:unit`）、Cypress（`npm run test:e2e`、事前に dev サーバー起動）
+- 環境変数：オプションでは Vite（`import.meta.env`）。**`src/utils/logger.js` は Jest 互換のため `process.env` 経由**で本番判定（`vite.config.js` の `define` で埋め込み）
+- 外部 API：Google Books API、OpenBD API（キーは環境変数／Secrets で管理）
 
 ## 3. 主な機能一覧
 - 書籍・資料管理（ISBNバーコードスキャン or 手入力、書誌情報自動取得、ステータス管理）
@@ -36,6 +36,63 @@
 - 認証・ユーザー管理（Firebase Authentication、データ分離）
 - PWA対応（オフライン対応、インストール機能）
 - タグ履歴・サジェスト（詳細はAppendix参照）
+
+### 3.1 設定・テーマ・プロフィール（実装の外観）
+
+| 観点 | 実装の所在・要点 |
+|------|------------------|
+| **ルーティング** | `HashRouter`。`/settings` はボトムナビの PersonIcon から遷移（`App.jsx`） |
+| **状態・永続化** | `UserSettingsProvider` / `useUserSettings`（`src/hooks/useUserSettings.jsx`）。ドキュメント `doc(users/{uid})` に読み書き |
+| **データ形状** | `profile`（例: `displayName`, `avatarUrl`）、`preferences`（例: `themePresetId`, `themeMode`）。既定値は `src/constants/userSettings.js` の `DEFAULT_USER_SETTINGS` |
+| **テーマ適用** | `ThemeProviderWithUserSettings` が Firestore のプリセット ID とモードを反映し、`createThemeFromPreset` で MUI テーマを生成（`src/theme/createThemeFromPreset.js`） |
+| **プリセット** | `src/theme/themePresets.js`（例: `library-classic`, `slim-compact` など）。スリム系は `theme.custom.layout` で一覧・検索・統計グリッドの列数・`gap` をテーマ化（`BookList`, `SearchResults`, `Stats`, `TagStats`, `DateRangeSelector` が参照） |
+| **カードの見た目** | `src/theme/cardStyles.js`（`getBookCardSx` / `getMemoCardSx`）。書籍／メモで `bookAccent` / `memoAccent` と装飾トークン（`palette.decorative`、`theme.custom` の sizes / motion 等）を参照 |
+| **ダークモード** | `preferences.themeMode`（`'normal'` \| `'dark'`）で明／暗の切り替え（プリセット＋モードの組み合わせで `createThemeFromPreset` が生成） |
+
+新テーマやトークン追加の一覧は `doc/design-system-overview.md` も参照。
+
+### 3.2 PWA（実装済み）
+
+- **`usePWA.js`**: Service Worker の登録・更新検知、インストール可能時の制御
+- **`PWAInstallPrompt.jsx`**: インストール UI。**起動時の自動表示はオフ**（手動導線はバックログで検討）
+- **マニフェスト**: `public/manifest.webmanifest`（アイコン、`theme_color` 等）
+- **キャッシュ**: precaching / ランタイムキャッシュの方針は Phase 8 以降の実装に準拠（静的リソース優先、API はネットワーク寄り）
+
+### 3.3 全文検索（クライアントサイド・Firebase 直）
+
+- **UI**: `src/components/search/FullTextSearch.jsx`（`TagSearch` ページの「全文検索」タブ）
+- **フック**: `useFullTextSearch.js` — Firestore からユーザーの本／メモを取得し、クライアントでヒット判定
+- **キャッシュ**: `useSearchCache.js` + LocalStorage（キー生成・TTL・サイズ上限は `src/config/fullTextSearchConfig.js` 周辺で調整）
+- **レート制限**: `useSearchRateLimit.js`（連打・短時間の再検索を抑制）
+- **方針**: ボタン実行型の検索（入力のたびに走らせない）。Algolia 等への移行は別要件。
+
+### 3.4 詳細検索・タグ検索・結果の保持
+
+- **詳細検索**: `useSearchQuery` / `useSearchExecution` / `useSearchResults`（`src/hooks/useSearch*.js`）に分割。条件はタグ・著者・日付・メモ本文など
+- **結果のセッション保持**: `src/utils/searchStorage.js`（sessionStorage、TTL）。`useNavigation.js` と組み合わせ、書籍詳細から戻ったときに検索結果を復元可能
+
+### 3.5 ナビゲーション・ジェスチャ
+
+- **`useNavigation.js`**: 戻る動作、検索状態の保存／復元、ルート履歴に応じた制御
+- **`App.jsx`**: PWA 時などグローバルなスワイプで戻る処理（タッチ開始位置の判定でリスト内スワイプと競合回避）。メモ一覧では `MemoCard` の `data-allow-local-swipe` 等で局所ジェスチャを許可
+
+### 3.6 ロギング・エラー
+
+- **`src/utils/logger.js`**: `devLog`（本番ビルドでは原則無出力）、`logger`（レベル・カテゴリ付き）。`VITE_LOG_LEVEL` / `VITE_DEBUG_LOGS` で調整可能
+- **`src/utils/errorLogger.js`**: グローバルエラーハンドラ、ローカルストレージへのエラーログ、ブラウザコンソール用デバッグコマンド（`bookmemoDebug.*`）
+
+### 3.7 `src/` ディレクトリ責務（新規機能を置く際の目安）
+
+| パス | 内容 |
+|------|------|
+| `auth/` | `AuthProvider`, Login, Signup |
+| `pages/` | 画面単位（BookList, BookDetail, TagSearch, Stats, Settings, …） |
+| `components/` | 再利用 UI。`search/`, `tags/`, `common/` にサブ分類 |
+| `hooks/` | Firestore・検索・PWA・設定などのロジック |
+| `theme/` | `themePresets.js`, `createThemeFromPreset.js`, `cardStyles.js`, `fallbacks.js` |
+| `config/` | `paths.js`（本番ベースパス等）、`fullTextSearchConfig.js` |
+| `utils/` | 汎用処理・ストレージ・テキスト・ログ |
+| `constants/` | `bookStatus.js`, `userSettings.js`, `memoRating.js` 等 |
 
 ## 4. データ構造・設計方針
 
@@ -74,10 +131,13 @@
   "comment": "感想",
   "page": 123,
   "tags": ["名言", "感想"],
+  "rating": 0,
   "createdAt": "...",
   "updatedAt": "..."
 }
 ```
+
+- `rating`: ★評価（未設定や旧データは `DEFAULT_MEMO_RATING` で補完。`src/constants/memoRating.js`）
 
 ### ステータス履歴（books/{bookId}/statusHistoryサブコレクション）
 - 書籍のステータス変更履歴を管理
@@ -107,23 +167,29 @@
 - 詳細設計・運用TipsはAppendix参照
 
 ### ユーザー・履歴系（usersコレクション）
-- 各ユーザーの設定や履歴情報は `users/{userId}` ドキュメントおよびサブコレクションで管理
-- タグ履歴（bookTagHistory, memoTagHistory）、個人設定、検索履歴などを用途ごとに分離
-- サブコレクションの詳細はAppendix参照
+
+- **ルート文書** `users/{userId}`: アプリが `setDoc`/`getDoc` で読み書きする **profile / preferences** を格納（認証 UID ＝ ドキュメント ID）。タグ履歴サブコレクションと同じドキュメントツリー上に共存しうる
+- **サブコレクション**: `bookTagHistory`, `memoTagHistory`（タグサジェスト用。Appendix 参照）
+
+実装上の主フィールド（未定義時は `DEFAULT_USER_SETTINGS` で補完）:
 
 ```json
-// usersコレクション
+// users/{uid} （アプリが管理する主要フィールドの例）
 {
-  "id": "ユーザーUID",
-  "email": "testuser@example.com",
-  "displayName": "テストユーザー",
-  "createdAt": "...",
-  "settings": {
-    "theme": "dark",
-    "notification": true
-  }
+  "profile": {
+    "displayName": "",
+    "avatarUrl": ""
+  },
+  "preferences": {
+    "themePresetId": "library-classic",
+    "themeMode": "normal"
+  },
+  "updatedAt": "Firestore Timestamp"
 }
 ```
+
+- メール・UID といった **認証素性**は Firebase Authentication 側が主。Firestore には必須ではない
+- 旧ドキュメントで例示していた `settings.theme` 単体形式は**廃止**（上記 profile / preferences へ移行済み）
 
 ## 5. 画面・UI構成と画面遷移
 
@@ -134,7 +200,7 @@
 - メモ追加画面（OCR→感想・ページ番号入力）
 - メモ詳細画面（引用・感想・編集・削除）
 - 検索・タグ画面（3タブ構成：全文検索・詳細検索・タグ管理）
-- 設定画面（アカウント情報・ログアウト・データエクスポート等）
+- 設定画面（`/settings`：プロフィール編集、テーマプリセット／明・暗モード選択、ログアウト、アカウント表示、その他設定）
 - タグ管理・検索ページ（詳細仕様はAppendix参照）
 
 ### 画面遷移図
@@ -246,20 +312,18 @@ graph TD
 - 他のシェル（bash等）を使う場合は、適宜コマンドの書き換えが必要
 
 ## 9. 制約事項・今後の拡張
-- Firebase Storageの無料枠では新規バケット作成不可のため、画像添付・アップロード機能は現時点で未実装
-- Blazeプラン移行や他サービス利用時に画像添付機能を拡張予定
-- Algolia等の全文検索サービス、PWA化、タグ分析機能なども今後の拡張候補
 
-### 優先度変更（2025-08-14）
-- **PWA化を優先**
-  - App Shell戦略を採用し、Service Workerで静的アセットを事前キャッシュ
-  - `manifest.webmanifest` を追加（`start_url`, `scope`, `display: standalone`, `icons`, `theme_color`, `background_color`）
-  - キャッシュ戦略:
-    - 静的アセット: Cache First
-    - API（Firestore/Storage関連）: Network First/ Stale-While-Revalidate（オンライン優先）
-  - オフラインフォールバック（簡易オフラインページ or App Shell）
-  - SW更新通知（登録後の更新検知→スナックバーで再読み込み促し）
-- **タグ関連の残課題は優先度を下げる**（正規化高度化、一括操作専用画面、UI分割など）
+### 現状の制約
+- **Firebase Storage**: 無料枠・プラン都合でバケット未利用。**メモへの画像添付**は未実装。Blaze 移行等で拡張候補
+- **全文検索**: Firestore 全件取得＋クライアントフィルタ。**データ量増大時**はページング・Cloud Functions・Algolia 等の別案が必要になる可能性あり（現状のキャッシュ・レート制限は `§3.3`）
+- **Jest と Vite**: `import.meta` をテストから直接参照するコードは避ける。外部 API のユニットテストは簡略化／スキップ／E2E 代替が実務上の方針（`§13`）
+
+### 拡張候補（未実装・バックログは `doc/bug-feature-memo.md`）
+- 画像添付（Storage）、プッシュ通知、より高度なタグ一括 UI、バンドルサイズ最適化、アクセシビリティ強化、Pull to Refresh 等
+
+### 履歴メモ（2025-08-14）
+- **PWA 化**はその後 **実装済み**（§3.2）。当時の「優先」の記録として残す
+- **タグ関連の高度化**は一定フェーズ以降、優先度を下げる方針で運用
 
 ## 10. 補足・詳細仕様・FAQ（Appendix）
 
@@ -322,84 +386,16 @@ graph TD
 - 設計ドキュメントは常に最新化し、開発再開時の指針とする
 - 詳細仕様や運用ノウハウはAppendixに集約し、他章からは参照のみとする
 
-## 11. 今後の開発課題・TODO（2025-08-12更新）
+## 11. バックログ・継続タスク
 
-### ローカルテスト実行の方針
-- **目的**: すべてのテストをローカル環境で実行し、課金リスクを排除
-- **実行方法**:
-  - ユニットテスト: `npm run test:unit` または `npm test`
-  - E2Eテスト: `npm run test:e2e` または `npm run e2e`
-  - 全テスト実行: `npm run test:all`
-  - E2Eテスト（GUI）: `npm run test:e2e:open`
-  - テスト用ユーザー設定: `npm run test:setup`
-- **ローカル実行の利点**:
-  - 課金リスクの完全排除
-  - 開発環境での直接的なデバッグ
-  - テスト実行時間の短縮
-  - ネットワーク依存の排除
-- **注意事項**:
-  - ローカル環境でのFirebase設定が必要
-  - `serviceAccountKey.json`の適切な管理
-  - **E2Eテスト実行前には必ず開発サーバー（`npm run dev`）を起動**
-  - テスト実行前の環境確認
+チェックリスト・優先度・完了／未完了の一次ソースは **`doc/bug-feature-memo.md`**。新要件やリファクタ前には同ファイルと **`doc/code-review-20260117.md`** を確認すること。
 
-### 技術的課題・TODOリスト
-- [x] BookForm: ISBN取得ボタンのevent混入防止・テストの型問題修正（[object Object]解消）、ユニットテスト安定化
-- [x] MemoCard.test.jsxの修正（スワイプアクション対応）✅ **完了**
-- [x] MemoList.test.jsxの再作成（FAB・クリック機能対応）✅ **完了**
-- [x] E2Eテストの安定性向上・追加（memo_swipe_actions.cy.js等）✅ **完了**
-- [ ] ユニットテストのカバレッジ向上
-- [x] 共通フック（useBook, useMemo）の作成・適用 ✅ **Phase 7完了**
-- [ ] アクセシビリティ改善（ARIA属性、キーボードナビ等）
-- [ ] Pull to Refreshの実装
-- [ ] アニメーション効果の追加
-- [x] レスポンシブデザインの改善 ✅ **Phase 8完了**
-- [x] コンポーネントの最適化 ✅ **Phase 8完了**
-- [ ] バンドルサイズの削減
-- [ ] BarcodeScannerテストの安定化（現在スキップ中）
-- [x] React act()警告の解消 ✅ **完了**
-- [x] MUI Grid警告の解消 ✅ **完了**
+### ローカルテスト（要点）
 
-### 機能拡張・改善案
-- [x] **メモOCR機能の実装（基本版）** ✅ **Phase 9完了**
-  - iPhoneカメラOCR + ペースト機能の実装
-  - CameraPasteOCRコンポーネントの作成
-  - メモ追加フォームへの統合
-  - 技術的制限の回避（iOS Safariの制限対応）
-- [ ] **本番デプロイ環境の構築** 🔄 **Phase 10基盤完了**
-  - 本番Firebaseプロジェクト作成（project-01-bookmemo-prod）
-  - GitHub Actionsワークフロー作成
-  - 本番デプロイガイド作成
-  - 残り作業: Firestore Database作成、環境変数設定、GitHub Secrets設定
-- [x] **セキュリティ問題の修正** ✅ **Phase 11完了**
-  - `.env`ファイルのGitコミット問題を発見・修正
-  - Git履歴から機密情報を完全に除去
-  - セキュリティ警告と管理手順をドキュメントに追加
-- [ ] **UI/UX改善の優先タスク（2025-09-28追加）** 🔥 **最優先**
-  - [ ] 書籍ステータスに「中断」を追加（2-3時間）
-  - [ ] トップページで「読書中」「再読中」をまとめる（1-2時間）
-  - [ ] 検索・タグページに「全文検索」タブを追加（2-3時間）
-  - 詳細: `doc/bug-feature-memo.md` 参照
-- [ ] 統計・ダッシュボード機能の設計・技術調査
-- [ ] 全文検索機能の実装
-- [ ] 画像添付機能（Firebase Storage Blazeプラン移行後）
-- [ ] PWA化（オフライン対応・プッシュ通知）
-- [ ] 他サービス連携（CSV/Excel出力、他読書管理サービスとの連携）
-- [ ] **将来タスク: OCR機能の拡張** 🔄 **サスペンド中**
-  - Tesseract.jsベースのOCR機能（非iPhone Safari対応）
-  - E2Eテストの追加
-  - リアルタイムOCR機能（カメラストリームからの直接認識）
-  - 多言語OCR対応（日本語以外の言語）
-  - OCR精度向上機能（画像前処理、後処理）
-
-### E2Eテスト安定化の工夫（2025-08-12追記）
-- UI/UXの大きな変更時は、E2Eテスト修正工数も見積もりに含める。
-- テスト前にFirestore等のテストデータをリセットし、毎回同じ状態からテストを開始する。
-- 重要なボタンや入力欄にはdata-testidを付与し、セレクタの堅牢性を高める。
-- Cypressのactionabilityエラー（要素がhidden/覆われている等）は、`{force: true}`や`should('be.visible')`等で適切に回避。
-- 1ファイル1シナリオの分割運用により、各テストの独立性・安定性を確保する。
-- テスト設計方針（分割・独立性重視）はチームで共有し、迷ったら本ドキュメントを参照する。
-- カスタムコマンドやテストヘルパー（スワイプ・タップ操作の共通化）を活用し、テストの保守性・安定性を向上。 
+- ユニット: `npm run test:unit` または `npm test`
+- E2E: **`npm run dev` 起動後**に `npm run test:e2e`（または `npm run test:all`）
+- テストユーザー準備: `npm run test:setup`（スクリプトは README 参照）
+- CI の E2E は GitHub Variables でオプション有効化（`§6.2`）
 
 ## 12. セキュリティ重要事項（2025-08-12追加）
 
@@ -437,9 +433,9 @@ git log --all --full-history -- "*.env"
 - **結果**: 機密情報の漏洩リスクを完全に排除
 - **再発防止**: `.gitignore`に環境変数ファイルを追加、セキュリティ警告をドキュメントに追加
 
-## 8. 技術的課題と解決策
+## 13. ViteとJestの環境変数互換性（技術的補足）
 
-### 8.1. ViteとJestの環境変数互換性問題
+### 13.1 ViteとJestの環境変数互換性問題
 
 #### 問題の概要
 - **発生時期**: 2025-09-27

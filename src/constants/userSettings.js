@@ -1,6 +1,6 @@
 /**
  * ユーザー設定の定数定義
- * doc/discussion-user-profile-and-theme-tasks.md のデータ構造に準拠
+ * Firestore users/{uid} の profile / preferences と一致（詳細は ARCHITECTURE.md）
  */
 
 /** デフォルトのテーマプリセットID（タスクBで使用） */
