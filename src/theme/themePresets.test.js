@@ -20,6 +20,19 @@ describe('themePresets', () => {
       expect(slim.spacing.cardPadding.xs).toBe(1);
     });
 
+    it('library-classic に backgroundDisplay, defaultBackgroundPresetId を含む', () => {
+      const presets = getThemePresets(mockBuildPath);
+      const classic = presets['library-classic'];
+      expect(classic.backgroundDisplay).toBe('full');
+      expect(classic.defaultBackgroundPresetId).toBe('library-patterned');
+    });
+
+    it('minimal-light に backgroundDisplay solid-only を含む', () => {
+      const presets = getThemePresets(mockBuildPath);
+      const minimal = presets['minimal-light'];
+      expect(minimal.backgroundDisplay).toBe('solid-only');
+    });
+
     it('library-classic に bookAccent, memoAccent を含む', () => {
       const presets = getThemePresets(mockBuildPath);
       const classic = presets['library-classic'];
@@ -91,7 +104,7 @@ describe('themePresets', () => {
       const presets = getThemePresets(mockBuildPath);
       const classic = presets['library-classic'];
       expect(classic.background.image).toContain('https://example.com');
-      expect(classic.background.image).toContain('library-background.jpg');
+      expect(classic.background.image).toContain('backgrounds/library.jpg');
     });
   });
 

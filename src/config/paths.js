@@ -36,8 +36,8 @@ export const PATHS = {
   VITE_SVG: () => buildPath('/vite.svg'),
   PAPER_TEXTURE: () => buildPath('/paper-texture.jpg'),
   NOISE_TEXTURE: () => buildPath('/noise.svg'),
-  LIBRARY_PATTERN: () => buildPath('/library-pattern.svg'),
-  LIBRARY_BACKGROUND: () => buildPath('/library-background.jpg'),
+  LIBRARY_PATTERN: () => buildPath('/backgrounds/library-pattern.svg'),
+  LIBRARY_BACKGROUND: () => buildPath('/backgrounds/library.jpg'),
   
   // アイコン
   ICON_192: () => buildPath('/icons/icon-192x192.png'),

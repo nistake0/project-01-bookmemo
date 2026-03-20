@@ -17,14 +17,16 @@ import {
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import EditIcon from '@mui/icons-material/Edit';
+import FormatPaintIcon from '@mui/icons-material/FormatPaint';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/common/PageHeader';
 import LoadingIndicator from '../components/common/LoadingIndicator';
 import { useUserSettings } from '../hooks/useUserSettings';
 import { useAuth } from '../auth/AuthProvider';
 import { getThemePresets } from '../theme/themePresets';
+import { getBackgroundPresets } from '../theme/backgroundPresets';
 import { buildPath } from '../config/paths';
-import { DEFAULT_THEME_MODE } from '../constants/userSettings';
+import { DEFAULT_THEME_MODE, DEFAULT_BACKGROUND_PRESET_ID } from '../constants/userSettings';
 
 /**
  * 設定画面
@@ -37,6 +39,15 @@ export default function Settings() {
   const { user, signOut } = useAuth();
   const { settings, loading, error, updatePreferences, updateProfile } = useUserSettings();
   const themePresets = getThemePresets(buildPath);
+  const backgroundPresets = getBackgroundPresets(buildPath);
+  const currentThemePresetId = settings.preferences?.themePresetId || 'library-classic';
+  const currentThemePreset = themePresets[currentThemePresetId] || themePresets['library-classic'];
+  const showBackgroundImageSettings = currentThemePreset?.backgroundDisplay !== 'solid-only';
+  const showBackgroundColorPicker =
+    showBackgroundImageSettings
+      ? (settings.preferences?.backgroundPresetId ?? currentThemePreset?.defaultBackgroundPresetId ?? DEFAULT_BACKGROUND_PRESET_ID) === 'none'
+      : true;
+  const currentBgPresetId = settings.preferences?.backgroundPresetId ?? currentThemePreset?.defaultBackgroundPresetId ?? DEFAULT_BACKGROUND_PRESET_ID;
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [editDisplayName, setEditDisplayName] = useState('');
   const [editAvatarUrl, setEditAvatarUrl] = useState('');
@@ -215,7 +226,7 @@ export default function Settings() {
                     ))}
                   </ToggleButtonGroup>
                 </Box>
-                <Box>
+                <Box sx={{ mb: 2 }}>
                   <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                     モード
                   </Typography>
@@ -234,6 +245,81 @@ export default function Settings() {
                       ダーク
                     </ToggleButton>
                   </ToggleButtonGroup>
+                </Box>
+
+                <Box data-testid="settings-background-section">
+                  {(showBackgroundImageSettings || showBackgroundColorPicker) && (
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                      背景
+                    </Typography>
+                  )}
+                  {showBackgroundImageSettings && (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                      {Object.values(backgroundPresets).map((bp) => (
+                        <Box
+                          key={bp.id}
+                          onClick={() => updatePreferences({ backgroundPresetId: bp.id })}
+                          sx={{
+                            flex: '1 1 80px',
+                            minWidth: 80,
+                            p: 1,
+                            borderRadius: 1,
+                            border: 2,
+                            borderColor: currentBgPresetId === bp.id ? 'primary.main' : 'divider',
+                            cursor: 'pointer',
+                            '&:hover': { borderColor: 'primary.light', bgcolor: 'action.hover' },
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                          }}
+                          data-testid={`background-preset-${bp.id}`}
+                        >
+                          {bp.thumbnail ? (
+                            <Box
+                              sx={{
+                                width: 48,
+                                height: 36,
+                                borderRadius: 0.5,
+                                backgroundImage: bp.thumbnail,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                mb: 0.5,
+                              }}
+                            />
+                          ) : (
+                            <FormatPaintIcon sx={{ fontSize: 32, color: 'text.secondary', mb: 0.5 }} />
+                          )}
+                          <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.2 }}>
+                            {bp.name}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                  {showBackgroundColorPicker && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }} data-testid="background-color-picker">
+                      <Typography variant="body2" color="text.secondary">
+                        背景色
+                      </Typography>
+                      <input
+                        type="color"
+                        value={settings.preferences?.backgroundColor || (settings.preferences?.themeMode === 'dark'
+                          ? (currentThemePreset.dark?.backgroundColor ?? currentThemePreset.backgroundColor ?? '#121212')
+                          : (currentThemePreset.backgroundColor ?? '#f5f5f5'))}
+                        onChange={(e) => updatePreferences({ backgroundColor: e.target.value })}
+                        style={{
+                          width: 40,
+                          height: 32,
+                          padding: 2,
+                          border: '1px solid',
+                          borderColor: 'rgba(0,0,0,0.23)',
+                          borderRadius: 4,
+                          cursor: 'pointer',
+                        }}
+                        data-testid="background-color-input"
+                      />
+                    </Box>
+                  )}
                 </Box>
               </CardContent>
             </Card>

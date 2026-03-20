@@ -43,7 +43,7 @@
 |------|------------------|
 | **ルーティング** | `HashRouter`。`/settings` はボトムナビの PersonIcon から遷移（`App.jsx`） |
 | **状態・永続化** | `UserSettingsProvider` / `useUserSettings`（`src/hooks/useUserSettings.jsx`）。ドキュメント `doc(users/{uid})` に読み書き |
-| **データ形状** | `profile`（例: `displayName`, `avatarUrl`）、`preferences`（例: `themePresetId`, `themeMode`）。既定値は `src/constants/userSettings.js` の `DEFAULT_USER_SETTINGS` |
+| **データ形状** | `profile`（例: `displayName`, `avatarUrl`）、`preferences`（例: `themePresetId`, `themeMode`, `backgroundPresetId`, `backgroundColor`）。既定値は `src/constants/userSettings.js` の `DEFAULT_USER_SETTINGS`。背景選択は `doc/design-background-customization-20250320.md` 参照 |
 | **テーマ適用** | `ThemeProviderWithUserSettings` が Firestore のプリセット ID とモードを反映し、`createThemeFromPreset` で MUI テーマを生成（`src/theme/createThemeFromPreset.js`） |
 | **プリセット** | `src/theme/themePresets.js`（例: `library-classic`, `slim-compact` など）。スリム系は `theme.custom.layout` で一覧・検索・統計グリッドの列数・`gap` をテーマ化（`BookList`, `SearchResults`, `Stats`, `TagStats`, `DateRangeSelector` が参照） |
 | **カードの見た目** | `src/theme/cardStyles.js`（`getBookCardSx` / `getMemoCardSx`）。書籍／メモで `bookAccent` / `memoAccent` と装飾トークン（`palette.decorative`、`theme.custom` の sizes / motion 等）を参照 |

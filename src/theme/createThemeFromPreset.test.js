@@ -131,6 +131,28 @@ describe('createThemeFromPreset', () => {
       expect(theme.custom.cardShadow).toContain('inset 0 1px 0 rgba(255, 255, 255, 0.06)');
     });
 
+    it('backgroundPresetId none と backgroundColor でベタ色が適用される', () => {
+      const theme = createThemeFromPreset('library-classic', mockBuildPath, 'normal', {
+        backgroundPresetId: 'none',
+        backgroundColor: '#ff0000',
+      });
+      expect(theme.palette.background.default).toBe('#ff0000');
+    });
+
+    it('minimal-light (solid-only) では backgroundPresetId に関係なく単色のみ', () => {
+      const theme = createThemeFromPreset('minimal-light', mockBuildPath, 'normal', {
+        backgroundPresetId: 'library-patterned',
+      });
+      expect(theme.palette.background.default).toBe('#f5f5f5');
+    });
+
+    it('backgroundPresetId library で画像が設定される', () => {
+      const theme = createThemeFromPreset('library-classic', mockBuildPath, 'normal', {
+        backgroundPresetId: 'library',
+      });
+      expect(theme.custom.backgroundVars['--bm-library-image']).toContain('backgrounds/library.jpg');
+    });
+
     it('typographyOverrides, sizes, spacing を含む', () => {
       const theme = createThemeFromPreset('library-classic', mockBuildPath);
       expect(theme.custom).toHaveProperty('typographyOverrides');

@@ -54,6 +54,8 @@ function UserSettingsProviderInner({ children }) {
           preferences: {
             themePresetId: data.preferences?.themePresetId ?? DEFAULT_USER_SETTINGS.preferences.themePresetId,
             themeMode: data.preferences?.themeMode ?? DEFAULT_USER_SETTINGS.preferences.themeMode,
+            backgroundPresetId: data.preferences?.backgroundPresetId ?? DEFAULT_USER_SETTINGS.preferences.backgroundPresetId,
+            backgroundColor: data.preferences?.backgroundColor ?? DEFAULT_USER_SETTINGS.preferences.backgroundColor,
           },
         });
       } else {

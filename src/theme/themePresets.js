@@ -15,9 +15,11 @@ export function getThemePresets(buildPath) {
       id: 'library-classic',
       name: '図書館（クラシック）',
       description: '図書館をイメージした背景と茶系の落ち着いたデザイン',
+      backgroundDisplay: 'full',
+      defaultBackgroundPresetId: 'library-patterned',
       background: {
-        image: bp('/library-background.jpg'),
-        pattern: bp('/library-pattern.svg'),
+        image: bp('/backgrounds/library.jpg'),
+        pattern: bp('/backgrounds/library-pattern.svg'),
       },
       overlay: {
         top: 'rgba(245, 247, 250, 0.3)',
@@ -112,6 +114,8 @@ export function getThemePresets(buildPath) {
       id: 'minimal-light',
       name: 'ミニマル（ライト）',
       description: 'シンプルな単色背景で読みやすさを重視',
+      backgroundDisplay: 'solid-only',
+      defaultBackgroundPresetId: 'none',
       background: {
         image: 'none',
         pattern: 'none',
@@ -201,6 +205,8 @@ export function getThemePresets(buildPath) {
       id: 'slim-compact',
       name: 'スリム（コンパクト）',
       description: 'フォント・余白を抑え、一覧性を重視。多くの情報を画面に表示',
+      backgroundDisplay: 'full',
+      defaultBackgroundPresetId: 'none',
       typographyScale: 0.88,
       background: {
         image: 'none',

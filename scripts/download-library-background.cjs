@@ -8,15 +8,19 @@ const fs = require('fs');
 const path = require('path');
 
 const URL = 'https://unsplash.com/photos/GWCvnsMtiBg/download?force=true&w=1920';
-const out = path.join(__dirname, '..', 'public', 'library-background.jpg');
+const outDir = path.join(__dirname, '..', 'public', 'backgrounds');
+const out = path.join(outDir, 'library.jpg');
 
-fetch(URL, { redirect: 'follow' })
+fs.promises.mkdir(outDir, { recursive: true })
+  .then(() => fetch(URL, { redirect: 'follow' }))
   .then((r) => {
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.buffer();
   })
   .then((buf) => fs.promises.writeFile(out, buf))
-  .then(() => console.log('Saved:', out))
+  .then(() => {
+    console.log('Saved:', out);
+  })
   .catch((e) => {
     console.error('Download failed:', e.message);
     process.exit(1);

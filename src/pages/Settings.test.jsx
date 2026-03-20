@@ -96,4 +96,43 @@ describe('Settings', () => {
       expect(screen.queryByRole('dialog', { name: /プロフィール編集/i })).not.toBeInTheDocument();
     });
   });
+
+  test('library-classic 選択時に背景セクションが表示される', async () => {
+    renderSettings();
+
+    await screen.findByTestId('theme-preset-radio-group');
+    expect(screen.getByTestId('settings-background-section')).toBeInTheDocument();
+    expect(screen.getByTestId('background-preset-none')).toBeInTheDocument();
+    expect(screen.getByTestId('background-preset-library')).toBeInTheDocument();
+    expect(screen.getByTestId('background-preset-library-patterned')).toBeInTheDocument();
+    expect(screen.getByTestId('background-preset-bookshelf')).toBeInTheDocument();
+  });
+
+  test('ミニマル（ライト）選択時は画像選択は非表示だが背景色変更は表示される', async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    await screen.findByTestId('theme-preset-minimal-light');
+    await user.click(screen.getByTestId('theme-preset-minimal-light'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('settings-background-section')).toBeInTheDocument();
+      expect(screen.queryByTestId('background-preset-library')).not.toBeInTheDocument();
+      expect(screen.getByTestId('background-color-picker')).toBeInTheDocument();
+      expect(screen.getByTestId('background-color-input')).toBeInTheDocument();
+    });
+  });
+
+  test('背景「なし」選択時に色選択が表示される', async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    await screen.findByTestId('background-preset-none');
+    await user.click(screen.getByTestId('background-preset-none'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('background-color-picker')).toBeInTheDocument();
+      expect(screen.getByTestId('background-color-input')).toBeInTheDocument();
+    });
+  });
 });

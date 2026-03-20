@@ -1,6 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 import { getThemePresets } from './themePresets';
-import { DEFAULT_THEME_PRESET_ID } from '../constants/userSettings';
+import { getBackgroundPresets } from './backgroundPresets';
+import { DEFAULT_THEME_PRESET_ID, DEFAULT_BACKGROUND_PRESET_ID } from '../constants/userSettings';
 
 /** ダークモード用 decorative パレット（暗背景で見やすい色） */
 const DECORATIVE_DARK = {
@@ -87,14 +88,20 @@ const DEFAULT_DARK = {
 
 /**
  * テーマプリセットIDからMUIテーマを生成
+ * doc/design-background-customization-20250320.md に基づく
  *
  * @param {string} presetId - プリセットID
  * @param {Function} buildPath - パス構築関数 (path) => string
  * @param {string} [mode='normal'] - 'normal' | 'dark'
+ * @param {Object} [options] - 背景オプション
+ * @param {string} [options.backgroundPresetId] - 背景プリセットID
+ * @param {string} [options.backgroundColor] - ベタ色モード時の色（#hex）
  * @returns {Object} MUI theme object
  */
-export function createThemeFromPreset(presetId, buildPath, mode = 'normal') {
+export function createThemeFromPreset(presetId, buildPath, mode = 'normal', options = {}) {
+  const { backgroundPresetId: userBgPresetId, backgroundColor: userBgColor } = options;
   const presets = getThemePresets(buildPath);
+  const bgPresets = getBackgroundPresets(buildPath);
   const preset = presets[presetId] || presets[DEFAULT_THEME_PRESET_ID];
   const isDark = mode === 'dark';
   const darkOverrides = preset.dark ?? DEFAULT_DARK;
@@ -117,8 +124,23 @@ export function createThemeFromPreset(presetId, buildPath, mode = 'normal') {
     : preset;
 
   const typographyScale = preset.typographyScale ?? 1;
-  const bgImage = preset.background.image === 'none' ? 'none' : preset.background.image;
-  const bgPattern = preset.background.pattern === 'none' ? 'none' : preset.background.pattern;
+  const backgroundDisplay = preset.backgroundDisplay ?? 'full';
+  const effectiveBgPresetId = userBgPresetId ?? preset.defaultBackgroundPresetId ?? DEFAULT_BACKGROUND_PRESET_ID;
+  const bgPreset = bgPresets[effectiveBgPresetId];
+
+  let bgImage = 'none';
+  let bgPattern = 'none';
+  let effectiveBgColor = effectivePreset.backgroundColor;
+
+  if (backgroundDisplay === 'solid-only') {
+    effectiveBgColor = userBgColor ?? effectivePreset.backgroundColor;
+  } else if (effectiveBgPresetId === 'none' || !bgPreset || bgPreset.type === 'solid') {
+    effectiveBgColor = userBgColor ?? effectivePreset.backgroundColor;
+  } else {
+    bgImage = bgPreset.image ?? 'none';
+    bgPattern = bgPreset.pattern ?? 'none';
+  }
+
   const hasBgImage = bgImage !== 'none';
   const hasBgPattern = bgPattern !== 'none';
   const glass = preset.glassEffect ?? { opacity: 0.75, blur: '20px', saturate: '180%' };
@@ -154,7 +176,7 @@ export function createThemeFromPreset(presetId, buildPath, mode = 'normal') {
     palette: {
       mode: isDark ? 'dark' : 'light',
       background: {
-        default: effectivePreset.backgroundColor,
+        default: effectiveBgColor,
         paper: isDark ? '#1e1e1e' : '#ffffff',
       },
       primary: { main: '#1976d2' },
@@ -208,7 +230,7 @@ export function createThemeFromPreset(presetId, buildPath, mode = 'normal') {
         styleOverrides: {
           '#app-scroll-container': {
             position: 'relative',
-            backgroundColor: effectivePreset.backgroundColor,
+            backgroundColor: effectiveBgColor,
             backgroundImage: !hasBgImage && !hasBgPattern
               ? 'none'
               : hasBgImage && hasBgPattern
