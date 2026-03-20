@@ -21,7 +21,10 @@
     "test:setup": "npm run setup-test-user",
     "generate-icons": "node scripts/convert-icons.cjs",
     "download-library-bg": "node scripts/download-library-background.cjs",
-    "download-backgrounds": "node scripts/download-backgrounds.cjs"
+    "download-backgrounds": "node scripts/download-backgrounds.cjs",
+    "import:preview": "node scripts/import-reading-card/preview.mjs",
+    "import:apply": "node scripts/import-reading-card/apply.mjs",
+    "import:enrich-stubs": "node scripts/import-reading-card/enrichStubBooks.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -63,6 +66,7 @@
     "jest": "^30.0.2",
     "jest-environment-jsdom": "^30.0.2",
     "node-fetch": "^2.7.0",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "xlsx": "^0.18.5"
   }
 }

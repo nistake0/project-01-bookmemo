@@ -38,3 +38,9 @@ cypress/videos/
 
 # テストカバレッジレポート
 coverage/
+
+# 読書カードインポート生成物（バンドルにユーザーデータが含まれる）
+import-output/
+
+# Google Books API ローカルキャッシュ（TODO: 実装予定・個人用途・コミット禁止）
+.google-books-api-cache.json
