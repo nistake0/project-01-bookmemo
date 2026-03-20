@@ -1,35 +1,36 @@
 <svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- 背景円 -->
-  <circle cx="96" cy="96" r="88" fill="#1976d2"/>
+  <!-- 背景: 温かみのあるグラデーション（茶系・図書館感） -->
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6B4423"/>
+      <stop offset="100%" stop-color="#8B5E3C"/>
+    </linearGradient>
+    <linearGradient id="bookLight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F5E6D3"/>
+      <stop offset="50%" stop-color="#FFFBF5"/>
+      <stop offset="100%" stop-color="#F5E6D3"/>
+    </linearGradient>
+    <linearGradient id="memo" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E8D5B7"/>
+      <stop offset="100%" stop-color="#D4B896"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.2"/>
+    </filter>
+  </defs>
   
-  <!-- 本のベース -->
-  <rect x="48" y="64" width="80" height="64" rx="4" fill="#ffffff" stroke="#1976d2" stroke-width="2"/>
+  <!-- 角丸背景 -->
+  <rect width="192" height="192" rx="36" fill="url(#bg)"/>
   
-  <!-- 本のページ（複数枚重ねた表現） -->
-  <rect x="52" y="68" width="72" height="56" rx="2" fill="#f5f5f5"/>
-  <rect x="56" y="72" width="64" height="48" rx="2" fill="#ffffff"/>
+  <!-- 開いた本 -->
+  <g filter="url(#shadow)">
+    <path d="M 52 68 Q 96 58 140 68 L 140 124 Q 96 134 52 124 Z" fill="url(#bookLight)" stroke="#8B6F47" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M 96 62 L 96 130" stroke="#8B6F47" stroke-width="2" stroke-linecap="round"/>
+  </g>
   
-  <!-- 本のタイトルライン -->
-  <rect x="64" y="84" width="48" height="2" fill="#1976d2"/>
-  <rect x="64" y="90" width="32" height="2" fill="#1976d2"/>
-  <rect x="64" y="96" width="40" height="2" fill="#1976d2"/>
-  
-  <!-- メモ用の付箋 -->
-  <rect x="100" y="80" width="32" height="40" fill="#ffeb3b" stroke="#f57f17" stroke-width="1"/>
-  <polygon points="100,80 108,72 132,72 132,120 100,120" fill="#ffeb3b"/>
-  
-  <!-- メモのテキストライン -->
-  <rect x="104" y="88" width="24" height="1.5" fill="#333333"/>
-  <rect x="104" y="92" width="20" height="1.5" fill="#333333"/>
-  <rect x="104" y="96" width="22" height="1.5" fill="#333333"/>
-  <rect x="104" y="100" width="18" height="1.5" fill="#333333"/>
-  <rect x="104" y="104" width="24" height="1.5" fill="#333333"/>
-  
-  <!-- ペン -->
-  <rect x="110" y="110" width="2" height="8" fill="#333333"/>
-  <polygon points="110,110 112,108 114,110 112,112" fill="#333333"/>
-  
-  <!-- 装飾的な要素 -->
-  <circle cx="140" cy="60" r="6" fill="#ff9800" opacity="0.8"/>
-  <circle cx="52" cy="140" r="4" fill="#4caf50" opacity="0.8"/>
+  <!-- 付箋（折り目付き） -->
+  <g transform="translate(112, 76)">
+    <path d="M 0 0 L 34 0 L 34 38 L 0 38 Z" fill="url(#memo)" stroke="#A68968" stroke-width="1"/>
+    <path d="M 0 0 L 9 0 L 0 9 Z" fill="#C4A574" stroke="#A68968" stroke-width="0.5"/>
+  </g>
 </svg>
