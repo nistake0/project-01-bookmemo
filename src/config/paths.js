@@ -37,7 +37,7 @@ export const PATHS = {
   PAPER_TEXTURE: () => buildPath('/paper-texture.jpg'),
   NOISE_TEXTURE: () => buildPath('/noise.svg'),
   LIBRARY_PATTERN: () => buildPath('/backgrounds/library-pattern.svg'),
-  LIBRARY_BACKGROUND: () => buildPath('/backgrounds/library.jpg'),
+  LIBRARY_BACKGROUND: () => buildPath('/backgrounds/bg-04.jpg'),
   
   // アイコン
   ICON_192: () => buildPath('/icons/icon-192x192.png'),

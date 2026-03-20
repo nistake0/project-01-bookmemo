@@ -141,16 +141,16 @@ describe('createThemeFromPreset', () => {
 
     it('minimal-light (solid-only) では backgroundPresetId に関係なく単色のみ', () => {
       const theme = createThemeFromPreset('minimal-light', mockBuildPath, 'normal', {
-        backgroundPresetId: 'library-patterned',
+        backgroundPresetId: 'bg-04',
       });
       expect(theme.palette.background.default).toBe('#f5f5f5');
     });
 
-    it('backgroundPresetId library で画像が設定される', () => {
+    it('backgroundPresetId bg-04 で画像が設定される', () => {
       const theme = createThemeFromPreset('library-classic', mockBuildPath, 'normal', {
-        backgroundPresetId: 'library',
+        backgroundPresetId: 'bg-04',
       });
-      expect(theme.custom.backgroundVars['--bm-library-image']).toContain('backgrounds/library.jpg');
+      expect(theme.custom.backgroundVars['--bm-library-image']).toContain('backgrounds/bg-04.jpg');
     });
 
     it('typographyOverrides, sizes, spacing を含む', () => {

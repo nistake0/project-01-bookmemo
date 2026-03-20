@@ -24,7 +24,7 @@ describe('themePresets', () => {
       const presets = getThemePresets(mockBuildPath);
       const classic = presets['library-classic'];
       expect(classic.backgroundDisplay).toBe('full');
-      expect(classic.defaultBackgroundPresetId).toBe('library-patterned');
+      expect(classic.defaultBackgroundPresetId).toBe('bg-04');
     });
 
     it('minimal-light に backgroundDisplay solid-only を含む', () => {
@@ -104,7 +104,7 @@ describe('themePresets', () => {
       const presets = getThemePresets(mockBuildPath);
       const classic = presets['library-classic'];
       expect(classic.background.image).toContain('https://example.com');
-      expect(classic.background.image).toContain('backgrounds/library.jpg');
+      expect(classic.background.image).toContain('backgrounds/bg-04.jpg');
     });
   });
 

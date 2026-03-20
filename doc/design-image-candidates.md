@@ -2,7 +2,7 @@
 
 `doc/design-improvement-proposal.md` の背景画像として、**そのまま使える具体的な候補**をまとめています。いずれも商用利用可・クレジット不要です。
 
-**採用中**: 背景には **#4（ウェルズ大聖堂図書館）** を使用。`npm run download-library-bg` で `public/backgrounds/library.jpg` に取得可能。
+**採用中**: 候補 **#1-#10** をすべて使用。`npm run download-backgrounds` で `public/backgrounds/bg-01.jpg`〜`bg-10.jpg` に取得可能。デフォルトは **#4（ウェルズ大聖堂図書館）** = `bg-04.jpg`。
 
 ---
 

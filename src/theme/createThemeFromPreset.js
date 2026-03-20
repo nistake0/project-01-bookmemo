@@ -125,8 +125,13 @@ export function createThemeFromPreset(presetId, buildPath, mode = 'normal', opti
 
   const typographyScale = preset.typographyScale ?? 1;
   const backgroundDisplay = preset.backgroundDisplay ?? 'full';
-  const effectiveBgPresetId = userBgPresetId ?? preset.defaultBackgroundPresetId ?? DEFAULT_BACKGROUND_PRESET_ID;
-  const bgPreset = bgPresets[effectiveBgPresetId];
+  let effectiveBgPresetId = userBgPresetId ?? preset.defaultBackgroundPresetId ?? DEFAULT_BACKGROUND_PRESET_ID;
+  let bgPreset = bgPresets[effectiveBgPresetId];
+  // 旧プリセットID（library-patterned, bookshelf等）の移行: 未定義ならデフォルトを使用
+  if (!bgPreset && effectiveBgPresetId !== 'none') {
+    effectiveBgPresetId = DEFAULT_BACKGROUND_PRESET_ID;
+    bgPreset = bgPresets[effectiveBgPresetId];
+  }
 
   let bgImage = 'none';
   let bgPattern = 'none';

@@ -4,11 +4,12 @@ const mockBuildPath = (path) => `https://example.com${path}`;
 
 describe('backgroundPresets', () => {
   describe('BACKGROUND_PRESET_IDS', () => {
-    it('none, library, library-patterned, bookshelf を含む', () => {
+    it('none と bg-01〜bg-10 を含む', () => {
       expect(BACKGROUND_PRESET_IDS).toContain('none');
-      expect(BACKGROUND_PRESET_IDS).toContain('library');
-      expect(BACKGROUND_PRESET_IDS).toContain('library-patterned');
-      expect(BACKGROUND_PRESET_IDS).toContain('bookshelf');
+      expect(BACKGROUND_PRESET_IDS).toContain('bg-01');
+      expect(BACKGROUND_PRESET_IDS).toContain('bg-04');
+      expect(BACKGROUND_PRESET_IDS).toContain('bg-10');
+      expect(BACKGROUND_PRESET_IDS).toHaveLength(11);
     });
   });
 
@@ -16,8 +17,9 @@ describe('backgroundPresets', () => {
     it('すべてのプリセットを返す', () => {
       const presets = getBackgroundPresets(mockBuildPath);
       expect(presets.none).toBeDefined();
-      expect(presets.library).toBeDefined();
-      expect(presets['library-patterned']).toBeDefined();
+      expect(presets['bg-01']).toBeDefined();
+      expect(presets['bg-04']).toBeDefined();
+      expect(presets['bg-10']).toBeDefined();
     });
 
     it('none は type solid で image/pattern が null', () => {
@@ -30,30 +32,21 @@ describe('backgroundPresets', () => {
       expect(none.thumbnail).toBeNull();
     });
 
-    it('library は type image で image を持つ', () => {
+    it('bg-04 は type image で image を持つ', () => {
       const presets = getBackgroundPresets(mockBuildPath);
-      const library = presets.library;
-      expect(library.id).toBe('library');
-      expect(library.type).toBe('image');
-      expect(library.image).toContain('backgrounds/library.jpg');
-      expect(library.image).toContain('https://example.com');
-      expect(library.pattern).toBeNull();
+      const bg04 = presets['bg-04'];
+      expect(bg04.id).toBe('bg-04');
+      expect(bg04.type).toBe('image');
+      expect(bg04.image).toContain('backgrounds/bg-04.jpg');
+      expect(bg04.image).toContain('https://example.com');
+      expect(bg04.pattern).toBeNull();
     });
 
-    it('library-patterned は image と pattern を持つ', () => {
+    it('bg-01 プリセットを含む', () => {
       const presets = getBackgroundPresets(mockBuildPath);
-      const lp = presets['library-patterned'];
-      expect(lp.id).toBe('library-patterned');
-      expect(lp.type).toBe('image');
-      expect(lp.image).toContain('backgrounds/library.jpg');
-      expect(lp.pattern).toContain('backgrounds/library-pattern.svg');
-    });
-
-    it('bookshelf プリセットを含む', () => {
-      const presets = getBackgroundPresets(mockBuildPath);
-      expect(presets.bookshelf).toBeDefined();
-      expect(presets.bookshelf.id).toBe('bookshelf');
-      expect(presets.bookshelf.image).toContain('backgrounds/bookshelf.jpg');
+      expect(presets['bg-01']).toBeDefined();
+      expect(presets['bg-01'].id).toBe('bg-01');
+      expect(presets['bg-01'].image).toContain('backgrounds/bg-01.jpg');
     });
   });
 });

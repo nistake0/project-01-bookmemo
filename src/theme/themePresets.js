@@ -16,9 +16,9 @@ export function getThemePresets(buildPath) {
       name: '図書館（クラシック）',
       description: '図書館をイメージした背景と茶系の落ち着いたデザイン',
       backgroundDisplay: 'full',
-      defaultBackgroundPresetId: 'library-patterned',
+      defaultBackgroundPresetId: 'bg-04',
       background: {
-        image: bp('/backgrounds/library.jpg'),
+        image: bp('/backgrounds/bg-04.jpg'),
         pattern: bp('/backgrounds/library-pattern.svg'),
       },
       overlay: {

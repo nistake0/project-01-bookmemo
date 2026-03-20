@@ -13,7 +13,7 @@ export const THEME_MODES = ['normal', 'dark'];
 export const DEFAULT_THEME_MODE = 'normal';
 
 /** デフォルトの背景プリセットID（doc/design-background-customization-20250320.md） */
-export const DEFAULT_BACKGROUND_PRESET_ID = 'library-patterned';
+export const DEFAULT_BACKGROUND_PRESET_ID = 'bg-04';
 
 /** ユーザー設定のデフォルト値 */
 export const DEFAULT_USER_SETTINGS = {

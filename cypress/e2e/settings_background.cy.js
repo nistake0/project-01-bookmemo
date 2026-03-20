@@ -18,11 +18,10 @@ describe('設定画面の背景選択', () => {
     cy.get('[data-testid="theme-preset-library-classic"]').click();
     cy.get('[data-testid="settings-background-section"]').should('be.visible');
     cy.get('[data-testid="background-preset-none"]').should('be.visible');
-    cy.get('[data-testid="background-preset-library"]').should('be.visible');
-    cy.get('[data-testid="background-preset-library-patterned"]').should('be.visible');
+    cy.get('[data-testid="background-preset-bg-04"]').should('be.visible');
 
-    cy.get('[data-testid="background-preset-library"]').click();
-    cy.get('[data-testid="background-preset-library"]').should('exist');
+    cy.get('[data-testid="background-preset-bg-04"]').click();
+    cy.get('[data-testid="background-preset-bg-04"]').should('exist');
 
     cy.get('[data-testid="background-preset-none"]').click();
     cy.get('[data-testid="background-color-picker"]').should('be.visible');

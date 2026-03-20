@@ -20,7 +20,8 @@
     "test:e2e:open": "cypress open",
     "test:setup": "npm run setup-test-user",
     "generate-icons": "node scripts/convert-icons.cjs",
-    "download-library-bg": "node scripts/download-library-background.cjs"
+    "download-library-bg": "node scripts/download-library-background.cjs",
+    "download-backgrounds": "node scripts/download-backgrounds.cjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

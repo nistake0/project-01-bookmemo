@@ -103,9 +103,9 @@ describe('Settings', () => {
     await screen.findByTestId('theme-preset-radio-group');
     expect(screen.getByTestId('settings-background-section')).toBeInTheDocument();
     expect(screen.getByTestId('background-preset-none')).toBeInTheDocument();
-    expect(screen.getByTestId('background-preset-library')).toBeInTheDocument();
-    expect(screen.getByTestId('background-preset-library-patterned')).toBeInTheDocument();
-    expect(screen.getByTestId('background-preset-bookshelf')).toBeInTheDocument();
+    expect(screen.getByTestId('background-preset-bg-01')).toBeInTheDocument();
+    expect(screen.getByTestId('background-preset-bg-04')).toBeInTheDocument();
+    expect(screen.getByTestId('background-preset-bg-10')).toBeInTheDocument();
   });
 
   test('ミニマル（ライト）選択時は画像選択は非表示だが背景色変更は表示される', async () => {
@@ -117,7 +117,7 @@ describe('Settings', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('settings-background-section')).toBeInTheDocument();
-      expect(screen.queryByTestId('background-preset-library')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('background-preset-bg-01')).not.toBeInTheDocument();
       expect(screen.getByTestId('background-color-picker')).toBeInTheDocument();
       expect(screen.getByTestId('background-color-input')).toBeInTheDocument();
     });
